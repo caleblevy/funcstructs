@@ -67,7 +67,7 @@ def partition_forests(partition):
     for forest in product(*seeds):
         yield tuple(unpack(forest))
         
-def forests(n):
+def forests_complex(n):
     for partition in partitions(n):
         for forest in partition_forests(partition):
             yield forest
@@ -94,7 +94,9 @@ def trim(tree):
 def forests_simple(N):
     for tree in rooted_trees(N+1):
         yield trim(tree)
-    
+
+forests = forests_simple
+
 if __name__ == '__main__':
     N = sum([4,4,4,3,3])
     for N in range(8):
