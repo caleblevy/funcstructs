@@ -11,7 +11,7 @@ repository or,  if used for an  academic paper, some contribution  in the paper.
 For commercial use, please contact me at caleb.levy@berkeley.edu.
 """
 from eppstein.IntegerPartitions import partitions
-from itertools import combinations_with_replacement, product
+from itertools import combinations_with_replacement, product, groupby
 
 def successor(L):
     N = len(L)
@@ -24,9 +24,8 @@ def successor(L):
     for I in range(p,N):
         L[I] = L[I-(p-q)]
 
-def rooted_trees(N,max_tree=None):
+def rooted_trees(N):
     if N == 0:
-        yield 0
         return
     elif N == 1:
         yield (1,)
@@ -36,13 +35,9 @@ def rooted_trees(N,max_tree=None):
         return
     L = [I+1 for I in range(N)]
     yield tuple(L)
-    if max_tree == tuple(L):
-        return
     while L[1] != L[2]:
         successor(L)
         yield tuple(L)
-        if max_tree == tuple(L):
-            return
             
 def split_set(partition):
     # splits a multiset into elements and multiplicities
@@ -76,32 +71,41 @@ def forests(n):
     for partition in partitions(n):
         for forest in partition_forests(partition):
             yield forest
-    
-a = [1,1,1,1,2,1,4,3,3,2]
-y, d = split_set(a)
-aa = unsplit_set(y,d)
 
-def forests4(N):
-    for I in rooted_trees(N):
-        for J in rooted_trees(N,max_tree=I):
-            for K in rooted_trees(N,max_tree=J):
-                # for L in rooted_trees(N,max_tree=K):
-                    yield tuple([I,J,K])#,L]
-                    
-def forests2(p4):
-    for I in rooted_trees(p4[0]):
-        for J in rooted_trees(p4[1],max_tree=I):
-            for K in rooted_trees(p4[2],max_tree=J):
-                for L in rooted_trees(p4[3],max_tree=K):
-                    print [I,J,K,L]
-                    
-def forests3(p4):
-    if len(p4) != 1:
-        f = [forests3(p4[:-1])].append()
-        
+def trim(tree):
+    if not tree:
+        return
+    tree = tree[1:]
+    tree = [t-1 for t in tree]
+    forest = []
+    subtree = []
+    for ind, node in enumerate(tree[:-1]):
+        subtree.append(node)
+        if tree[ind+1] == 1:
+            forest.append(tuple(subtree))
+            subtree = []
+    if tree[-1] != 1:
+        subtree.append(tree[-1])
+    else:
+        subtree = [tree[-1]]
+    forest.append(tuple(subtree))
+    return tuple(forest)
+
+def forests_simple(N):
+    for tree in rooted_trees(N+1):
+        yield trim(tree)
+    
 if __name__ == '__main__':
     N = sum([4,4,4,3,3])
     for N in range(8):
         print str(N)+':', len(list(rooted_trees(N))), len(list(forests(N)))
+    t1 = set(forests(4))
+    t2 = set(forests_simple(4))
+    print t1
+    print t2
+    print len(t1)
+    print len(t2)
+    for I in rooted_trees(1):
+        print I
                     
     
