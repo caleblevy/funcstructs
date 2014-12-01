@@ -12,6 +12,7 @@ For commercial use, please contact me at caleb.levy@berkeley.edu.
 """
 from eppstein.IntegerPartitions import partitions
 from itertools import combinations_with_replacement, product, groupby
+from collections import Counter
 
 def successor(L):
     N = len(L)
@@ -73,8 +74,9 @@ def forests_complex(n):
             yield forest
 
 def trim(tree):
-    if not tree:
-        return
+
+    if len(tree) == 1:
+        return ((1,),)
     tree = tree[1:]
     tree = [t-1 for t in tree]
     forest = []
@@ -92,6 +94,7 @@ def trim(tree):
     return tuple(forest)
 
 def forests_simple(N):
+    if N == 0: return
     for tree in rooted_trees(N+1):
         yield trim(tree)
 
@@ -101,8 +104,10 @@ if __name__ == '__main__':
     N = sum([4,4,4,3,3])
     for N in range(8):
         print str(N)+':', len(list(rooted_trees(N))), len(list(forests(N)))
+    # t1 = set(forests(4))
+    # t2 = set(forests_complex(4))
     t1 = set(forests(4))
-    t2 = set(forests_simple(4))
+    t2 = set(forests_complex(4))
     print t1
     print t2
     print len(t1)
