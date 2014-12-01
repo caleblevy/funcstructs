@@ -35,6 +35,7 @@
 modules.builtin
 Module.symvers
 *.dwo
+*.pyc
 
 #
 # Top-level generic files
