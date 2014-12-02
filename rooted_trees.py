@@ -13,6 +13,11 @@ For commercial use, please contact me at caleb.levy@berkeley.edu.
 from eppstein.IntegerPartitions import partitions
 from itertools import combinations_with_replacement, product, groupby
 from collections import Counter
+from math import factorial
+from operator import mul
+
+
+prod = lambda iterable: reduce(mul, iterable, 1)
 
 def successor(L):
     N = len(L)
@@ -73,10 +78,9 @@ def forests_complex(n):
         for forest in partition_forests(partition):
             yield forest
 
-def trim(tree):
-
-    if len(tree) == 1:
-        return ((1,),)
+def chop(tree):
+    if not tree or len(tree) == 1:
+        return
     tree = tree[1:]
     tree = [t-1 for t in tree]
     forest = []
@@ -96,9 +100,23 @@ def trim(tree):
 def forests_simple(N):
     if N == 0: return
     for tree in rooted_trees(N+1):
-        yield trim(tree)
+        yield chop(tree)
 
 forests = forests_simple
+
+def forest_deg(tree):
+    mul = 1
+    forest = chop(tree)
+    y, d = split_set(forest)
+    return prod(factorial(I) for I in d)
+    
+def deg(tree):
+    if not chop(tree):
+        return 1
+    mul = 1
+    for subtree in chop(tree):
+        mul *= deg(subtree)
+    return mul*forest_deg(tree)
 
 if __name__ == '__main__':
     N = sum([4,4,4,3,3])
@@ -114,5 +132,15 @@ if __name__ == '__main__':
     print len(t2)
     for I in rooted_trees(1):
         print I
+    for I in rooted_trees(10):
+        print forest_deg(I), I
+        print deg(I)
+    print deg([1,2,3,4,4,3,4,4,2,3,4,4,3,4,3,4,3,3,3])
+    print 2*2*2*2*2*6
+    print deg([1,2,3,3,3,2,3,3,3,2,3,3,3])
+    print 6**4
+    print deg([])
+    print set(forests(1))
+    print set(forests(2))
                     
     

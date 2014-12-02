@@ -4,11 +4,9 @@ A set of functions for building necklaces of various partitions.
 """
 
 import fractions
-from operator import mul
-from rooted_trees import split_set
+from rooted_trees import prod, split_set
 import unittest
 
-prod = lambda iterable: reduce(mul, iterable, 1)
 
 def prime_factorization(n):
     primfac = []
