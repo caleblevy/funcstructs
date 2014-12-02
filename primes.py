@@ -45,24 +45,20 @@ def divisorGen(n):
             if i >= nfactors:
                 return
 
-divisors = lambda n: list(divisorGen(n))
+divisors = lambda n: list(divisorGen(n)) if n > 1 else [1]
 
 def phi_product(n):
-    return n*prod((1 - fractions.Fraction(1,p) for p in prime_divisors(n)))
+    return int(n*prod((1 - fractions.Fraction(1,p) for p in prime_divisors(n))))
     
-
 def phi_sum(n):
     phi = 0
     for k in range(1, n + 1):
         if fractions.gcd(n, k) == 1:
             phi += 1
-    return phi
+    return int(phi)
     
 totient = phi_sum
     
-
-    
-
 if __name__ == '__main__':
     print prod(range(1,5))
     print prime_factorization(12)
@@ -73,3 +69,4 @@ if __name__ == '__main__':
     print divisors(12)
     print factorGenerator(24)
     print divisors(24)
+    print divisors(1)
