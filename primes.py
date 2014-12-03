@@ -7,7 +7,6 @@ import fractions
 from rooted_trees import prod, split_set
 import unittest
 
-
 def prime_factorization(n):
     primfac = []
     d = 2
@@ -58,6 +57,11 @@ def phi_sum(n):
     return int(phi)
     
 totient = phi_sum
+
+# If run standalone, perform unit tests
+class PrimeTest(unittest.TestCase):
+    def divisor_count(self):
+        
     
 if __name__ == '__main__':
     print prod(range(1,5))

@@ -11,11 +11,11 @@ repository or,  if used for an  academic paper, some contribution  in the paper.
 For commercial use, please contact me at caleb.levy@berkeley.edu.
 """
 from eppstein.IntegerPartitions import partitions
-from itertools import combinations_with_replacement, product, groupby
+from itertools import combinations_with_replacement, product
 from collections import Counter
 from math import factorial
 from operator import mul
-
+import unittest
 
 prod = lambda iterable: reduce(mul, iterable, 1)
 
@@ -74,6 +74,8 @@ def partition_forests(partition):
         yield tuple(unpack(forest))
         
 def forests_complex(n):
+    if n == 0:
+        return
     for partition in partitions(n):
         for forest in partition_forests(partition):
             yield forest
@@ -118,29 +120,31 @@ def deg(tree):
         mul *= deg(subtree)
     return mul*forest_deg(tree)
 
+# If run standalone, perform unit tests
+class TreeTest(unittest.TestCase):
+    # OEIS A000055
+    counts = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286]
+    def testTrees(self):
+        """check rooted trees has the right number of outputs"""
+        for n in range(len(self.counts)):
+            self.assertEqual(self.counts[n],len(list(rooted_trees(n))))
+    
+    def testForests(self):
+        """Check each forest has the right number of outputs"""
+        self.assertEqual(0,len(list(forests_simple(0))))
+        self.assertEqual(0,len(list(forests_complex(0))))
+        for n in range(1,len(self.counts)-1):
+            self.assertEqual(self.counts[n+1],len(list(forests_simple(n))))
+            self.assertEqual(self.counts[n+1],len(list(forests_complex(n))))
+    
+    def testDegeneracy(self):
+        """Make sure our degeneracies add up to n^(n-1) trees"""
+        self.assertEqual(1,deg(tuple()))
+        for n in range(1,len(self.counts)):
+            self.assertEqual(n**(n-1),sum([factorial(n)/deg(tree) for tree in rooted_trees(n)]))
+
 if __name__ == '__main__':
-    N = sum([4,4,4,3,3])
-    for N in range(8):
-        print str(N)+':', len(list(rooted_trees(N))), len(list(forests(N)))
-    # t1 = set(forests(4))
-    # t2 = set(forests_complex(4))
-    t1 = set(forests(4))
-    t2 = set(forests_complex(4))
-    print t1
-    print t2
-    print len(t1)
-    print len(t2)
-    for I in rooted_trees(1):
-        print I
-    for I in rooted_trees(10):
-        print forest_deg(I), I
-        print deg(I)
-    print deg([1,2,3,4,4,3,4,4,2,3,4,4,3,4,3,4,3,3,3])
-    print 2*2*2*2*2*6
-    print deg([1,2,3,3,3,2,3,3,3,2,3,3,3])
-    print 6**4
-    print deg([])
-    print set(forests(1))
-    print set(forests(2))
+    unittest.main()
+    
                     
     
