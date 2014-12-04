@@ -4,7 +4,7 @@ A set of functions for building necklaces of various partitions.
 """
 
 from fractions import gcd, Fraction
-from rooted_trees import prod
+from rooted_trees import prod, split_set, forests
 from primes import divisors, totient
 from math import factorial
 
@@ -83,6 +83,13 @@ def _necklace_simple_enumerate(a, partition, t, p, k, equality=False):
                     for z in _necklace_simple_enumerate(a[:],partition,t+1,t,k,equality=equality):
                         yield z
                 partition[j] += 1
+
+def necklaces(items):
+    items = sorted(items)
+    y, d = split_set(items)
+    for necklace in necklace_simple_enumerate(d):
+        yield tuple([y[I] for I in necklace])
+    
                 
 
             
@@ -99,4 +106,9 @@ if __name__ == '__main__':
     for I in necklace_simple_enumerate([3,3,2]):
         print I
     print list(necklace_simple_enumerate([3,3]))
+    for forest in forests(10):
+        if len(list(necklaces(forest))) > 1:
+            print '-'*80
+            for necklace in necklaces(forest):
+                print necklace
         
