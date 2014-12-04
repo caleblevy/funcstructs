@@ -21,15 +21,14 @@ def mset_functions(mset):
         yield function_structure
 
 def endofunction_structures(n):
+    """An enumeration of endofunction structures on n elements. Equalivalent to all conjugacy classes in End(S)"""
     for forest in forests(n):
         for mset in multiset_partitions(forest):
-            for function in mset_functions(mset):
-                yield function
-            
-            
-
+            for function_structure in mset_functions(mset):
+                yield function_structure
+        
 if __name__ == '__main__':
     for I in endofunction_structures(5):
         print I
-    for I in range(3,14):
+    for I in range(0,16):
         print str(I)+':',len(list(endofunction_structures(I)))
