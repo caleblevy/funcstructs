@@ -85,8 +85,5 @@ class PrimeTest(unittest.TestCase):
             self.assertEqual(values[I-1], phi_product(I))
             self.assertEqual(values[I-1], phi_sum(I))
         
-        
-        
-    
 if __name__ == '__main__':
     unittest.main()
