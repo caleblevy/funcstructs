@@ -7,6 +7,7 @@ from fractions import gcd, Fraction
 from rooted_trees import prod, split_set, forests
 from primes import divisors, totient
 from math import factorial
+from collections import deque
 
 def nCk(n,k): 
     return int( prod(Fraction(n-i, i+1) for i in range(k)) )
@@ -90,10 +91,17 @@ def necklaces(items):
     for necklace in necklace_simple_enumerate(d):
         yield tuple([y[I] for I in necklace])
     
-                
+def periodicity(cycle):
+    orig = deque(cycle)
+    cycle = deque(cycle)
+    for period in divisors(len(cycle)):
+        cycle.rotate(period)
+        if orig == cycle:
+            return period
+        cycle.rotate(-1*period)
 
-            
-        
+def cycle_degeneracy(cycle):
+    return len(cycle)/periodicity(cycle)
 
 if __name__ == '__main__':
     # print necklace_totient([4,4,4,3,3,2,1,1])
@@ -111,4 +119,6 @@ if __name__ == '__main__':
             print '-'*80
             for necklace in necklaces(forest):
                 print necklace
+    print periodicity([1,1,1,2,3,1,1,1,2,3])
+    
         

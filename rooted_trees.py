@@ -18,6 +18,7 @@ from operator import mul
 import unittest
 
 prod = lambda iterable: reduce(mul, iterable, 1)
+factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 
 def successor(L):
     N = len(L)
@@ -50,6 +51,10 @@ def split_set(partition):
     y = list(set(partition))
     d = [partition.count(y[I]) for I in range(len(y))]
     return y,d
+
+def mset_degeneracy(mset):
+    y, d = split_set(mset)
+    return factorial_prod(d)
     
 def unpack(tree):
     # Takes a list of lists and outputs a list whose elements are those of the sublists.
@@ -105,20 +110,14 @@ def forests_simple(N):
         yield chop(tree)
 
 forests = forests_simple
-
-def forest_deg(tree):
-    mul = 1
-    forest = chop(tree)
-    y, d = split_set(forest)
-    return prod(factorial(I) for I in d)
     
-def deg(tree):
+def tree_degeneracy(tree):
     if not chop(tree):
         return 1
     mul = 1
     for subtree in chop(tree):
-        mul *= deg(subtree)
-    return mul*forest_deg(tree)
+        mul *= tree_degeneracy(subtree)
+    return mul*mset_degeneracy(chop(tree))
 
 # If run standalone, perform unit tests
 class TreeTest(unittest.TestCase):
@@ -139,9 +138,9 @@ class TreeTest(unittest.TestCase):
     
     def testDegeneracy(self):
         """Make sure our degeneracies add up to n^(n-1) trees"""
-        self.assertEqual(1,deg(tuple()))
+        self.assertEqual(1,tree_degeneracy(tuple()))
         for n in range(1,len(self.counts)):
-            self.assertEqual(n**(n-1),sum([factorial(n)/deg(tree) for tree in rooted_trees(n)]))
+            self.assertEqual(n**(n-1),sum([factorial(n)/tree_degeneracy(tree) for tree in rooted_trees(n)]))
 
 if __name__ == '__main__':
     unittest.main()
