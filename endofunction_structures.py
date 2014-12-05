@@ -40,7 +40,7 @@ def structure_multiplicity(function_structure):
     
 class EndofunctionTest(unittest.TestCase):
     # OEIS A001372
-    counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903, 163898, 466199]
+    counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]#, 163898, 466199]
     def testStructures(self):
         """check rooted trees has the right number of outputs"""
         for n in range(len(self.counts)):
