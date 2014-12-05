@@ -41,10 +41,10 @@ def rooted_trees(N):
         yield (1,2)
         return
     L = [I+1 for I in range(N)]
-    yield tuple(L)
+    yield L
     while L[1] != L[2]:
         successor(L)
-        yield tuple(L)
+        yield L
             
 def split_set(partition):
     # splits a multiset into elements and multiplicities
@@ -76,7 +76,7 @@ def partition_forests(partition):
     seeds = [combinations_with_replacement(trees[I],d[I]) for I in range(l)]
     seeds = [list(seed) for seed in seeds]
     for forest in product(*seeds):
-        yield tuple(unpack(forest))
+        yield unpack(forest)
         
 def forests_complex(n):
     if n == 0:

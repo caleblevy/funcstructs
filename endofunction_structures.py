@@ -6,7 +6,7 @@ from math import factorial
 import unittest
         
 def mset_functions(mset):
-    mset = [tuple(sorted(m)) for m in mset]
+    mset = [tuple(m) for m in mset]
     elems, multiplicities = split_set(mset)
     necklace_lists = []
     for ind, el in enumerate(elems):
@@ -38,7 +38,6 @@ def structure_multiplicity(function_structure):
         degeneracy *= tree_degeneracy(tree)
     return factorial(n)/degeneracy
     
-    
 class EndofunctionTest(unittest.TestCase):
     # OEIS A001372
     counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903, 163898, 466199]
@@ -53,5 +52,15 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual(n**n, sum([structure_multiplicity(func) for func in endofunction_structures(n)]))
             
 if __name__ == '__main__':
+    from primes import divisors
+    d =[]
+    for I in endofunction_structures(10):
+        m = structure_multiplicity(I)
+        print m
+        d.append(m)
+    print sorted(list(set(d)))
+    print len(list(set(d)))
+    print divisors(factorial(10))
+    print len(divisors(factorial(10)))
     unittest.main()
 
