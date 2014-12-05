@@ -1,8 +1,15 @@
 #! /usr/bin/env python
+"""polynomials.py
+
+Enumerate and produce polynomials of various kinds.
+
+Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
+"""
 from numpy import ndarray
 from rooted_trees import split_set
 from sympy import Symbol
 
+# Not sure how to check this one, as there aren't many algorithms to compare against.
 def monomial_symmetric_polynomial(x, power_partition):
     """
     Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed from the partition of powers
@@ -25,7 +32,8 @@ def monomial_symmetric_polynomial(x, power_partition):
     T[tuple(V)] = 1
     
     shape = tuple([I-1 for I in shape])
-
+    
+    # The powers use up sum(multiplcities) of the original x.
     for K in range(n-sum(d)+1):
         # Begin the forward march
         go = True
@@ -38,7 +46,7 @@ def monomial_symmetric_polynomial(x, power_partition):
                 ind_last = tuple(ind_last)
                 T[ind] += x[(K-1)+(sum(V)-l)]**y[J]*T[ind_last]
             
-            # Counting voodoo
+            # Counting voodoo. Could be replaced with itertools.product, but then we would have type conversions.
             V[0] = V[0] + 1
             if V[0] > shape[0]:
                 V[0] = 1
@@ -58,9 +66,5 @@ def symbol_vector(n):
     return x
         
 if __name__ == '__main__':
-    x = symbol_vector(5)
-    y = range(5)
-    d = [4,4,3,3]
-    print monomial_symmetric_polynomial(x,d).expand()
-    print monomial_symmetric_polynomial(y,d)
+    pass
     
