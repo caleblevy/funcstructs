@@ -38,39 +38,55 @@ def structure_multiplicity(function_structure):
         degeneracy *= tree_degeneracy(tree)
     return factorial(n)/degeneracy
 
-def tree_to_func(tree):
+def tree_to_func(tree, permutation=None):
     n = len(tree)
+    if not permutation:
+        permutation = range(n)
     height = max(tree)
     func = range(n)
+    func[0] = permutation[0]
     height_prev = 1
     grafting_point = [None]*height
     grafting_point[0] = 0
     for node, height in enumerate(tree[1:]):
         if height > height_prev:
-            func[node+1] = grafting_point[height_prev-1]
+            func[node+1] = permutation[grafting_point[height_prev-1]]
             height_prev += 1
         else:
-            func[node+1] = grafting_point[height-2]
+            func[node+1] = permutation[grafting_point[height-2]]
             height_prev = height
         grafting_point[height-1] = node+1
     return func
     
+def inv(perm):
+    """Invert a permutation of integers I=1...n. """
+    inverse = [0] * len(perm)
+    for i, p in enumerate(perm):
+        inverse[p] = i
+    return inverse
+    
 def canonical_form(function_structure):
     """Convert function structure to canonical form by filling in numbers from 0 to n-1 on the cycles and trees."""
     n = len(unpack(unpack(function_structure)))
-    f = range(n)
+    func = range(n)
     cycle_start = 0
-    unassigned_els = range(n)
+    # unassigned_els = range(n)
     for cycle in function_structure:
         node_ind = node_next = 0
         cycle_len = len(unpack(cycle))
         for tree in cycle:
             node_next += len(tree)
-            f[cycle_start + node_ind] = cycle_start + node_next%cycle_len
-            unassigned_els.remove(cycle_start + node_ind)
+            func[cycle_start + node_ind] = cycle_start + node_next%cycle_len
+            # unassigned_els.remove(cycle_start + node_ind)
             node_ind += len(tree)
         cycle_start += cycle_len
-    return f
+    tree_start = 0
+    for tree in unpack(function_structure):
+        l = len(tree)
+        func_tree = tree_to_func(tree, permutation=func[tree_start:tree_start+l])
+        func[tree_start:tree_start+l] = func_tree[:]
+        tree_start += l
+    return func
 
 func = (((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,)))
 print canonical_form(func)
