@@ -44,7 +44,14 @@ def divisorGen(n):
             if i >= nfactors:
                 return
 
-divisors = lambda n: list(divisorGen(n)) if n > 1 else [1]
+divisor_list = lambda n: list(divisorGen(n)) if n > 1 else [1]
+
+def divisors_memoized(n, factors={}):
+    if n not in factors:
+        factors[n] = divisor_list(n)
+    return factors[n]
+
+divisors = divisors_memoized
 
 def phi_product(n):
     return int(n*prod((1 - fractions.Fraction(1,p) for p in prime_divisors(n))))
@@ -76,6 +83,7 @@ class PrimeTest(unittest.TestCase):
         """Test number of divisors. See OEIS A000005."""
         counts = [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, 4, 4, 2, 8, 3, 4, 4, 6, 2, 8]
         for I in range(1,len(counts)+1):
+            self.assertEqual(counts[I-1],len(divisors(I)))
             self.assertEqual(counts[I-1],len(divisors(I)))
         
     def testTotients(self):

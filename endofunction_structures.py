@@ -52,15 +52,5 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual(n**n, sum([structure_multiplicity(func) for func in endofunction_structures(n)]))
             
 if __name__ == '__main__':
-    from primes import divisors
-    d =[]
-    for I in endofunction_structures(10):
-        m = structure_multiplicity(I)
-        print m
-        d.append(m)
-    print sorted(list(set(d)))
-    print len(list(set(d)))
-    print divisors(factorial(10))
-    print len(divisors(factorial(10)))
     unittest.main()
 
