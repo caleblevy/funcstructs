@@ -1,45 +1,66 @@
 #! /usr/bin/env python
-import numpy as np
+from numpy import ndarray
+from rooted_trees import split_set
+from sympy import Symbol
 
-def IterativePolynomial(a,part):
-    n = len(a)
-        
-    y = list(set(part))
+def monomial_symmetric_polynomial(x, power_partition):
+    """
+    Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed from the partition of powers
+    partition=[p_1,...,p_l]. It is equivalent to the sum (x[a[1]]**p_1)*(x[a[2]]**p_2)*...*(x[a[I]]**p_l) over all a
+    such that a[I] != a[J] for 0<=I<J<=l-1 which are not equivalent under permutation (I think anyway...).
+
+    If there are distinct powers p_1,...,p_j with multiplicities m_1,...,m_j and the list x has n elements then the
+    algorithm runs in O(n*m_1*...*m_j) steps, and takes O(m_1*...*m_j) memory in the form of an array of just as many
+    dimensions. Inputs may be symbolic, or anything you like.
+    """
+    n = len(x)
+    y, d = split_set(power_partition)
     l = len(y)
-    d = [part.count(y[I]) for I in range(l)]
-    
-    numf = tuple([I+2 for I in d])
+    shape = tuple([I+2 for I in d])
         
-    # Contains 1, possibly 2 more dimensions than necessary. Could possibly be rewritten with an inner function, but cost in elegance and practicality deemed not worth it for now.
-    T = np.ndarray(numf,object)
+    # Contains 1, possibly 2 more dimensions than necessary.
+    T = ndarray(shape, object)
     T[:] = 0
     V = [1]*l
     T[tuple(V)] = 1
     
-    numf = tuple([I-1 for I in numf])
+    shape = tuple([I-1 for I in shape])
 
     for K in range(n-sum(d)+1):
         # Begin the forward march
         go = True
         while go:
-            IndX = tuple(V)
+            ind = tuple(V)
             # The recursion itself
             for J in range(l):
-                IndXl = V[:]
-                IndXl[J] = IndXl[J] - 1
-                IndXl = tuple(IndXl)
-                T[IndX] = T[IndX] + a[(K-1)+(sum(V)-l)]**y[J]*T[IndXl]
+                ind_last = V[:]
+                ind_last[J] -= 1
+                ind_last = tuple(ind_last)
+                T[ind] += x[(K-1)+(sum(V)-l)]**y[J]*T[ind_last]
             
             # Counting voodoo
             V[0] = V[0] + 1
-            if V[0] > numf[0]:
+            if V[0] > shape[0]:
                 V[0] = 1
                 go = False
                 for I in range(1,l):
                     V[I] = V[I] + 1
-                    if V[I] <= numf[I]:
+                    if V[I] <= shape[I]:
                         go = True
                         break
-                    V[I] = 1
-                    
-    return T[numf]
+                    V[I] = 1                    
+    return T[shape]
+
+def symbol_vector(n):
+    x = []
+    for I in range(n):
+        x.append(Symbol('x%s'%str(I)))
+    return x
+        
+if __name__ == '__main__':
+    x = symbol_vector(5)
+    y = range(5)
+    d = [4,4,3,3]
+    print monomial_symmetric_polynomial(x,d).expand()
+    print monomial_symmetric_polynomial(y,d)
+    
