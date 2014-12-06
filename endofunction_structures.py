@@ -111,5 +111,7 @@ if __name__ == '__main__':
     func_struct = (((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,)))
     print endofunction_to_func(func_struct)
     f = endofunction_to_func(func_struct)
+    f = [f[f[I]] for I in range(len(f))]
+    print f
     unittest.main()
 
