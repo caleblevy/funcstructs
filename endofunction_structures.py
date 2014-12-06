@@ -58,48 +58,43 @@ def tree_to_func(tree, permutation=None):
         grafting_point[height-1] = node+1
     return func
     
-def inv(perm):
-    """Invert a permutation of integers I=1...n. """
-    inverse = [0] * len(perm)
-    for i, p in enumerate(perm):
-        inverse[p] = i
-    return inverse
+def _treeform_of_noncyclic_nodes(function_structure):
+    tree_start = 0
+    func = []
+    for tree in unpack(function_structure):
+        l = len(tree)
+        func_tree = tree_to_func(tree, permutation=range(tree_start, tree_start+l))
+        func.extend(func_tree)
+        tree_start += l
+    return func
     
-def canonical_form(function_structure):
+def endofunction_to_func(function_structure):
     """Convert function structure to canonical form by filling in numbers from 0 to n-1 on the cycles and trees."""
-    n = len(unpack(unpack(function_structure)))
-    func = range(n)
+    func = _treeform_of_noncyclic_nodes(function_structure)
     cycle_start = 0
-    # unassigned_els = range(n)
     for cycle in function_structure:
         node_ind = node_next = 0
         cycle_len = len(unpack(cycle))
         for tree in cycle:
             node_next += len(tree)
             func[cycle_start + node_ind] = cycle_start + node_next%cycle_len
-            # unassigned_els.remove(cycle_start + node_ind)
             node_ind += len(tree)
         cycle_start += cycle_len
-    tree_start = 0
-    for tree in unpack(function_structure):
-        l = len(tree)
-        func_tree = tree_to_func(tree, permutation=func[tree_start:tree_start+l])
-        func[tree_start:tree_start+l] = func_tree[:]
-        tree_start += l
     return func
+    
+def inv(perm):
+    """Invert a permutation of integers I=1...n. """
+    inverse = [0] * len(perm)
+    for i, p in enumerate(perm):
+        inverse[p] = i
+    return inverse
 
-func = (((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,)))
-print canonical_form(func)
-tree = [1,2,3,4,4,4, 3,4,4,  2,3,3, 2,3]
-print tree_to_func(tree)
-            
-        
-    
-    
+def first_iterate_multiplicity(function_structure):
+    return len(list(set(unpack(unpack(function_structure)))))
     
 class EndofunctionTest(unittest.TestCase):
     # OEIS A001372
-    counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]#, 163898, 466199]
+    counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903, 163898, 466199]
     def testStructures(self):
         """check rooted trees has the right number of outputs"""
         for n in range(len(self.counts)):
@@ -111,5 +106,10 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual(n**n, sum([structure_multiplicity(func) for func in endofunction_structures(n)]))
             
 if __name__ == '__main__':
+    tree = [1,2,3,4,4,4, 3,4,4,  2,3,3, 2,3]
+    print tree_to_func(tree)
+    func_struct = (((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,)))
+    print endofunction_to_func(func_struct)
+    f = endofunction_to_func(func_struct)
     unittest.main()
 
