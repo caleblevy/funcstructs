@@ -5,6 +5,7 @@ outputs a generator object enumerating  all isomorphic unlabeled rooted trees on
 N nodes. Consult OEIS A000055 to find len(list(rooted_trees(N))).
 
 Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+
 The terms  of non-commercial usage of  this code are simply  providing credit of
 some variety,  either in the  typical list of  contributors section of  the code
 repository or,  if used for an  academic paper, some contribution  in the paper.

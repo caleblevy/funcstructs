@@ -94,11 +94,13 @@ def necklaces(items):
 def periodicity(cycle):
     orig = deque(cycle)
     cycle = deque(cycle)
+    period_prev = 0
     for period in divisors(len(cycle)):
-        cycle.rotate(period)
+        cycle.rotate(period - period_prev)
+        period_prev = period
         if orig == cycle:
             return period
-        cycle.rotate(-1*period)
+        # cycle.rotate(-1*period)
 
 def cycle_degeneracy(cycle):
     return len(cycle)/periodicity(cycle)

@@ -1,3 +1,11 @@
+#! /usr/bin/env python
+"""endofunction_structures.py
+Enumerate every conjugacy class of graphs on N nodes with outdegree one for every vertex. As far as I know this is
+original work, and endofunction structures have not been enumerated anywhere else.
+
+Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
+"""
+
 from rooted_trees import forests, split_set, unpack, mset_degeneracy, tree_degeneracy
 from necklace import necklaces, cycle_degeneracy
 from itertools import combinations_with_replacement, product
@@ -39,6 +47,10 @@ def structure_multiplicity(function_structure):
     return factorial(n)/degeneracy
 
 def tree_to_func(tree, permutation=None):
+    """
+    Convert a tree into an endofunction list, whose root is by default at zero, but can be permuted according a
+    specified permutation.
+    """
     n = len(tree)
     if not permutation:
         permutation = range(n)
@@ -46,7 +58,7 @@ def tree_to_func(tree, permutation=None):
     func = range(n)
     func[0] = permutation[0]
     height_prev = 1
-    grafting_point = [None]*height
+    grafting_point = [None]*height # Most recent node found at height h. Where to graft the next node to.
     grafting_point[0] = 0
     for node, height in enumerate(tree[1:]):
         if height > height_prev:
