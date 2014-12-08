@@ -1,6 +1,6 @@
 from itertools import product, combinations, chain
 from collections import Iterable
-from sympy.utilities.iterables import multiset_partitions
+from eppstein.IntegerPartitions import fixed_length_partitions, conjugate
 import unittest
 
 def product_range(start, stop=None, step=None, iteration_order=None):
@@ -36,7 +36,7 @@ def compositions(n):
 
 endofunctions = lambda n: product_range([n]*n) 
 
-def partition(iterable, chain=chain, map=map):
+def partition1(iterable, chain=chain, map=map):
     s = iterable if hasattr(iterable, '__getslice__') else tuple(iterable)
     n = len(s)
     first, middle, last = [0], range(1, n), [n]
@@ -51,31 +51,45 @@ def sum_to_n(n):
     splits = (d for i in range(n) for d in combinations(mid, i)) 
     return (list(map(sub, chain(s, e), chain(b, s))) for s in splits)
 
-import time
-ts = time.time()
-for I in sum_to_n(21):
-    pass
-tf = time.time()
-print tf-ts
-ts = time.time()
-for I in compositions(21):
-    pass
-tf = time.time()
-print tf - ts
-ts = time.time()
-for I in sum_to_n(21):
-    pass
-tf = time.time()
-print tf-ts
-# print len(list(sum_to_n(17)))
-# for f in endofunctions(5):
-#     print f
-#
-# for p in partition([1,1,2,3,3,5]):
-#     print p
-#
-# for q in multiset_partitions([1,1,2,3,3,5]):
-#     print q
+def minimal_partition(n,L): 
+    h = n/L
+    err = n - L*h
+    bas = L - err
+    j = bas + 1
+    if h <> 1:
+        j = 1
+    return [h+1]*err + [h]*bas, j       
+
+def fixed_lex_partitions(n,L):
+    if L == 0:
+        if n == 0:
+            yield []
+        return
+    if L == 1:
+        if n > 0:
+            yield [n]
+        return
+    if n < L:
+        return
+        
+    partition, j = minimal_partition(n,L)
+    while True:
+        yield partition                   
+        k = 2
+        s = (j-1) + partition[L-j] - 1
+        while partition[L-j-k] == partition[L-j-1] and j+k-1<L:
+            s += partition[L-j-1]
+            k += 1            
+        if j+k-1 > L:
+            return                        
+        k -= 1
+        partition[L-j-k] += 1
+        partition[L-j-k+1:L], j = minimal_partition(s,j+k-1)     
+
+for I in fixed_lex_partitions(7,3):
+    print I
+for J in fixed_length_partitions(7,3):
+    print J
 class IteratorTest(unittest.TestCase):
     pass
         

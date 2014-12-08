@@ -23,10 +23,10 @@ def _recursive_monomial_alg(x, d, y):
     sense elegant, and is written as such for that reason.
 
     This function itero-recursive and HIGHLY inefficient, duplicating an extraordinary amount of work. It exists as a
-    showcase of the concepts behind MSP_iterative. Its running time might be something like len(x)^len(y), but either
+    showcase of the concepts behind MSP_iterative. Its running time might be something like len(y)^len(x), but either
     way, do not run this thing with input vectors of length greater than about 5 ot 10, depending on your system.
 
-    A = (a1,a2,...,an) - Vector of values for polynomial evaluation
+    X = (a1,a2,...,an) - Vector of values for polynomial evaluation
     D = (d1,d2,...,dl) - Vector of degeneracies of exponent partitions
     Y = (y1,y2,...,yl) - Vector of exponents.
 
@@ -104,7 +104,7 @@ def MSP_iterative(x, powers):
 
 monomial_symmetric_polynomial = MSP_iterative
 
-def symbol_vector(n):
+def symbol_vec(n):
     x = []
     for I in range(n):
         x.append(Symbol('x%s'%str(I)))
