@@ -9,8 +9,51 @@ from numpy import ndarray
 from rooted_trees import split_set
 from sympy import Symbol
 
+# MSP == Monomial Symmetric Polynomial
+def MSP_recursive(x, powers):
+    # Wrapper for _recursive_monomial_alg which separates the multiset powers into elements with degeneracies, and returns the value fo the function
+    y, d = split_set(powers)
+    return _recursive_monomial_alg(x, d, y)
+
+def _recursive_monomial_alg(x, d, y):
+    """_recursive_monomial_alg(x, d, y)
+
+    Recursive version of the general formula for evaluating symmetric
+    monomial polynomials. This one, while inefficient, is certainly in some
+    sense elegant, and is written as such for that reason.
+
+    This function itero-recursive and HIGHLY inefficient, duplicating an extraordinary amount of work. It exists as a
+    showcase of the concepts behind MSP_iterative. Its running time might be something like len(x)^len(y), but either
+    way, do not run this thing with input vectors of length greater than about 5 ot 10, depending on your system.
+
+    A = (a1,a2,...,an) - Vector of values for polynomial evaluation
+    D = (d1,d2,...,dl) - Vector of degeneracies of exponent partitions
+    Y = (y1,y2,...,yl) - Vector of exponents.
+
+    Premise of formula is given by:
+       T(n,d1,...,dl) = T(n-1,d1,...,dl) + an^y1*T(n-1,d1-1,...,dl) + ...
+                           ... + an^yl*T(n-1,d1,...,dl-1).
+                           
+    D and Y need to be of same length.
+    """
+    # This is the matlab copy version
+    if any(I<0 for I in d):
+        return 0
+    elif not x:   
+        if all(I==0 for I in d):
+            return 1
+        else:
+            return 0
+    else:
+        val = _recursive_monomial_alg(x[:-1],d,y)        
+        for I in range(len(d)):
+            d_temp = d[:]
+            d_temp[I] -= 1
+            val += x[-1]**y[I]*_recursive_monomial_alg(x[:-1],d_temp,y)               
+        return val
+
 # Not sure how to check this one, as there aren't many algorithms to compare against.
-def monomial_symmetric_polynomial(x, power_partition):
+def MSP_iterative(x, powers):
     """
     Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed from the partition of powers
     partition=[p_1,...,p_l]. It is equivalent to the sum (x[a[1]]**p_1)*(x[a[2]]**p_2)*...*(x[a[I]]**p_l) over all a
@@ -21,7 +64,7 @@ def monomial_symmetric_polynomial(x, power_partition):
     dimensions. Inputs may be symbolic, or anything you like.
     """
     n = len(x)
-    y, d = split_set(power_partition)
+    y, d = split_set(powers)
     l = len(y)
     shape = tuple([I+2 for I in d])
         
@@ -59,6 +102,8 @@ def monomial_symmetric_polynomial(x, power_partition):
                     V[I] = 1                    
     return T[shape]
 
+monomial_symmetric_polynomial = MSP_iterative
+
 def symbol_vector(n):
     x = []
     for I in range(n):
@@ -66,5 +111,6 @@ def symbol_vector(n):
     return x
         
 if __name__ == '__main__':
-    pass
+    print MSP_recursive([5,5,5],[3,3,2])
+    print monomial_symmetric_polynomial([5,5,5],[3,3,2])
     
