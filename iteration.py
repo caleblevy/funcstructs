@@ -34,9 +34,7 @@ def compositions(n):
         composition.append(tot)
         yield composition
 
-endofunctions = lambda n: product_range([n]*n) 
-
-def partition1(iterable, chain=chain, map=map):
+def set_partitions(iterable, chain=chain, map=map):
     s = iterable if hasattr(iterable, '__getslice__') else tuple(iterable)
     n = len(s)
     first, middle, last = [0], range(1, n), [n]
