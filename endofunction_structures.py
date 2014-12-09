@@ -104,7 +104,7 @@ def inv(perm):
 def first_iterate_multiplicity(function_structure):
     return len(list(set(unpack(unpack(function_structure)))))
     
-class EndofunctionTest(unittest.TestCase):
+class EndofunctionStructureTest(unittest.TestCase):
     # OEIS A001372
     counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903, 163898, 466199]
     def testStructures(self):
