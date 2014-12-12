@@ -7,7 +7,7 @@ Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
 from rooted_trees import forests, split_set, unpack, mset_degeneracy, tree_degeneracy
-from necklace import necklaces, cycle_degeneracy
+from necklaces import necklaces, cycle_degeneracy
 from itertools import combinations_with_replacement, product
 from sympy.utilities.iterables import multiset_partitions
 from math import factorial
@@ -116,6 +116,7 @@ class EndofunctionStructureTest(unittest.TestCase):
         # OEIS A000312
         for n in range(1, len(self.counts)):
             self.assertEqual(n**n, sum([structure_multiplicity(func) for func in endofunction_structures(n)]))
+            pass
             
 if __name__ == '__main__':
     tree = [1,2,3,4,4,4, 3,4,4,  2,3,3, 2,3]

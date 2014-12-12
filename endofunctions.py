@@ -1,7 +1,10 @@
-# from iteration import product_range
+from iteration import product_range
+from endofunction_structures import endofunction_structures, structure_multiplicity, endofunction_to_func
 import unittest
+import numpy as np
 
 endofunctions = lambda n: product_range([n]*n)
+
 def image_path_naive(f):
     """TODO: Unit test this MOFO"""
     cardinalities = []
@@ -28,6 +31,24 @@ def image_path(f):
             break
         card_prev = card
     return cardinalities
+
+def image_size_multiplicities_naive(n):
+    M = np.zeros((n,n-1), dtype=object)
+    for f in endofunctions(n):
+        im = image_path(f)
+        for it, card in enumerate(im):
+            M[card-1,it] += 1
+    return M
+
+def image_size_multiplicities(n):
+    M = np.zeros((n,n-1), dtype=object)
+    for func_struct in endofunction_structures(n):
+        mult = structure_multiplicity(func_struct)
+        f = endofunction_to_func(func_struct)
+        im = image_path(f)
+        for it, card in enumerate(im):
+            M[card-1,it] += mult
+    return M
 
 class EndofunctionTest(unittest.TestCase):
     def testImagePath(self):

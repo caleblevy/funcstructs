@@ -16,7 +16,7 @@ def product_range(start, stop=None, step=None, iteration_order=None):
     if not isinstance(step, Iterable):
         step = 1 if not step else step
         step = [step]*len(stop)
-    if not len(start) == len(setp) == len(stop):
+    if not len(start) == len(step) == len(stop):
         raise ValueError("Start, stop and step tuples must all be the same length.")
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
 
