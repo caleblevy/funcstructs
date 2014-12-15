@@ -1,18 +1,9 @@
-from iteration import product_range
+from iteration import product_range, compositions
 from endofunction_structures import endofunction_structures, structure_multiplicity, endofunction_to_func
-import unittest
 import numpy as np
+import unittest
 
 endofunctions = lambda n: product_range([n]*n)
-
-def imagepath_naive(f):
-    """TODO: Unit test this MOFO"""
-    cardinalities = []
-    f_orig = f[:]
-    for it in range(len(f_orig)-1):
-        cardinalities.append(len(set(f)))
-        f = [f_orig[x] for x in f]
-    return cardinalities
 
 def imagepath(f):
     """
@@ -32,7 +23,7 @@ def imagepath(f):
         card_prev = card
     return cardinalities
 
-def image_size_multiplicities_naive(n):
+def iterate_imagesize_multiplicities_naive(n):
     M = np.zeros((n,n-1), dtype=object)
     for f in endofunctions(n):
         im = imagepath(f)
@@ -40,7 +31,7 @@ def image_size_multiplicities_naive(n):
             M[card-1,it] += 1
     return M
 
-def image_size_multiplicities(n):
+def iterate_imagesize_multiplicities(n):
     M = np.zeros((n,n-1), dtype=object)
     for func_struct in endofunction_structures(n):
         mult = structure_multiplicity(func_struct)
@@ -49,6 +40,29 @@ def image_size_multiplicities(n):
         for it, card in enumerate(im):
             M[card-1,it] += mult
     return M
+
+def firstimage_multiplicities_compositional(n):
+    F = [0]*n
+    # Saves factor of 2 there.
+    for comp in product_range([1]+[0]*(n-1), [2]*n):
+        val = 1
+        rep = 0
+        for I in comp:
+            if not I:
+                val *= rep
+            else:
+                val *= n - rep
+                rep += 1
+        F[rep-1] += val
+    return F
+
+print firstimage_multiplicities_compositional(4)
+
+'''
+Top row: OEIS A236396 - labelled rooted trees of height at most k on n nodes
+Right column: OEIS A066324, A219694 (reverse), A243203
+Left column: OEIS A090657
+'''
 
 class EndofunctionTest(unittest.TestCase):
     def testImagePath(self):

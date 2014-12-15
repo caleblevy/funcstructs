@@ -1,6 +1,5 @@
-from itertools import product, combinations, chain
+from itertools import product
 from collections import Iterable
-from eppstein.IntegerPartitions import fixed_length_partitions, conjugate
 import unittest
 
 def product_range(start, stop=None, step=None, iteration_order=None):
@@ -33,30 +32,19 @@ def compositions(n):
             tot += 1
         composition.append(tot)
         yield composition
-
-def set_partitions(iterable, chain=chain, map=map):
-    s = iterable if hasattr(iterable, '__getslice__') else tuple(iterable)
-    n = len(s)
-    first, middle, last = [0], range(1, n), [n]
-    getslice = s.__getslice__
-    return [map(getslice, chain(first, div), chain(div, last))
-            for i in range(n) for div in combinations(middle, i)]
-            
-def sum_to_n(n):
-    'Generate the series of +ve integer lists which sum to a +ve integer, n.'
-    from operator import sub
-    b, mid, e = [0], list(range(1, n)), [n]
-    splits = (d for i in range(n) for d in combinations(mid, i)) 
-    return (list(map(sub, chain(s, e), chain(b, s))) for s in splits)
-
-def minimal_partition(n,L): 
+        
+def _minimal_partition(n,L): 
     h = n/L
     err = n - L*h
     bas = L - err
     j = bas + 1
     if h <> 1:
         j = 1
-    return [h+1]*err + [h]*bas, j       
+    return [h+1]*err + [h]*bas, j
+
+def minimal_partition(n,L):
+    min_part, _ = _minimal_partition(n,L)
+    return min_part     
 
 def fixed_lex_partitions(n,L):
     if L == 0:
@@ -70,7 +58,7 @@ def fixed_lex_partitions(n,L):
     if n < L:
         return
         
-    partition, j = minimal_partition(n,L)
+    partition, j = _minimal_partition(n,L)
     while True:
         yield partition                   
         k = 2
@@ -82,13 +70,11 @@ def fixed_lex_partitions(n,L):
             return                        
         k -= 1
         partition[L-j-k] += 1
-        partition[L-j-k+1:L], j = minimal_partition(s,j+k-1)     
+        partition[L-j-k+1:L], j = _minimal_partition(s,j+k-1)     
 
-for I in fixed_lex_partitions(7,3):
+print minimal_partition(10,10)
+for I in fixed_lex_partitions(40,7):
     print I
-for J in fixed_length_partitions(7,3):
-    print J
-class IteratorTest(unittest.TestCase):
-    pass
-        
+
+
         
