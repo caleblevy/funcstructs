@@ -1,15 +1,22 @@
 """endofunctions.py
+Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions defined on this set, and we shall denote
+the set of all such objects by S^S.
 
-Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions defined on this set, and we shall denote the set of all such objects by S^S. 
+For a given f in S^S, its image will have n=|f(S)| elements for n in range(1,N+1). Similarly it's second iterate will
+have |f(f(S))|=m<=n elements. Once |f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for k>j. The list of sizes of
+images of iterates of f from 1 to n-1 is called the "image path" of f.
 
-For a given f in S^S, its image will have n=|f(S)| elements for n in range(1,N+1). Similarly it's second iterate will have |f(f(S))|=m<=n elements. Once |f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for k>j. The list of sizes of images of iterates of f from 1 to n-1 is called the "image path" of f.
+This file mainly exists to calculate the distribution of image sizes of the iterates of all endofunctions on a set S.
+The naive way to do this is to literally enumerate every endofunction. This works for n up to about 8 on a decent
+desktop computer.
 
-This file mainly exists to calculate the distribution of image sizes of the iterates of all endofunctions on a set S. The naive way to do this is to literally enumerate every endofunction. This works for n up to about 8 on a decent desktop computer.
+The second, far more efficient method, is to enumerate the endofunction structures on S (i.e. orbits of the
+transformation monoid under the action of conjugation by the symmetric group), and then add up the multiplicities of
+each structure. This runs in roughly O(4^n) time. This is still quite horrendous, but it enables us to get up to n=16
+before being intolerably slow.
 
-The second, far more efficient method, is to enumerate the endofunction structures on S (i.e. orbits of the transformation monoid under the action of conjugation by the symmetric group). This runs in roughly O(4^n) time. This is still quite horrendous, but it enables us to get up to n=16 before being intolerably slow.
-
-Various special cases can be done much faster. This distribution of (first iterate) image sizes can be done in O(n^2) and the final set can be O(n).
-
+Various special cases can be done much faster. This distribution of (first iterate) image sizes can be done in O(n^2)
+and the final set can be O(n).
 """
 
 from iteration import product_range, compositions
@@ -73,7 +80,6 @@ def firstdist_composition(n):
         return [1]
         
     F = [0]*n
-    # Saves factor of 2 there.
     for comp in product_range([2]*(n-1)):
         val = n
         rep = 1
@@ -88,7 +94,8 @@ def firstdist_composition(n):
 
 def firstdists_upto(N):
     """
-    Count OEIS A090657 using recursion relation in O(n^2) time. This is the fastest method I know of and probably the fastest there is.
+    Count OEIS A090657 using recursion relation in O(n^2) time. This is the fastest method I know of and probably the
+    fastest there is.
     
     # TODO - Figure out the logic that went into this and the previous one and latex it up.
     """
@@ -106,14 +113,41 @@ def firstdists_upto(N):
     
 firstdist_recurse = firstdist = lambda n: list(firstdists_upto(n)[:,-1])
 
-
 '''
 Top row: OEIS A236396 - labelled rooted trees of height at most k on n nodes
 Right column: OEIS A066324, A219694 (reverse), A243203
 '''
 
-def lastdist_comp(n):
-    L = [factorial]
+def nCk_grid(N):
+    """nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
+    binomial_coeffs = np.zeros((N+1, N+1), dtype=object)
+    for I in xrange(N+1):
+        for J in xrange(N+1):
+            binomial_coeffs[I,J] = nCk(I,J)
+    return binomial_coeffs
+
+def powergrid(N):
+    """I**J == power_grid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
+    base = np.arange(N+1, dtype=object)
+    [bases, exponents] = np.meshgrid(base, base)
+    exponentials = bases**exponents
+    return exponentials.T
+
+def lastdist_comp(N):
+    L = [0]*N
+    exponentials = powergrid(N)
+    binomial_coeffs = nCk_grid(N)
+    for n in range(N-1,0,-1):
+        L[n] = factorial(N)/factorial(N-n)
+        
+        V = [0]*(N-n+1)
+        V[0] = n
+        V[1] = N-n
+        
+        tot = 0
+        go = True
+        
+    
 
 class EndofunctionTest(unittest.TestCase):
     iterate_imagedists = [
