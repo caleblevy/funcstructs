@@ -1,7 +1,22 @@
+"""endofunctions.py
+
+Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions defined on this set, and we shall denote the set of all such objects by S^S. 
+
+For a given f in S^S, its image will have n=|f(S)| elements for n in range(1,N+1). Similarly it's second iterate will have |f(f(S))|=m<=n elements. Once |f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for k>j. The list of sizes of images of iterates of f from 1 to n-1 is called the "image path" of f.
+
+This file mainly exists to calculate the distribution of image sizes of the iterates of all endofunctions on a set S. The naive way to do this is to literally enumerate every endofunction. This works for n up to about 8 on a decent desktop computer.
+
+The second, far more efficient method, is to enumerate the endofunction structures on S (i.e. orbits of the transformation monoid under the action of conjugation by the symmetric group). This runs in roughly O(4^n) time. This is still quite horrendous, but it enables us to get up to n=16 before being intolerably slow.
+
+Various special cases can be done much faster. This distribution of (first iterate) image sizes can be done in O(n^2) and the final set can be O(n).
+
+"""
+
 from iteration import product_range, compositions
 from endofunction_structures import endofunction_structures, structure_multiplicity, endofunction_to_func
 import numpy as np
 import unittest
+from math import factorial
 
 endofunctions = lambda n: product_range([n]*n)
 
@@ -23,7 +38,10 @@ def imagepath(f):
         card_prev = card
     return cardinalities
 
-def iterate_imagesize_multiplicities_naive(n):
+def iterate_imagedist_brute(n):
+    """
+    The most naive, straightforward way to calculate the distribution of 
+    """
     M = np.zeros((n,n-1), dtype=object)
     for f in endofunctions(n):
         im = imagepath(f)
@@ -31,7 +49,7 @@ def iterate_imagesize_multiplicities_naive(n):
             M[card-1,it] += 1
     return M
 
-def iterate_imagesize_multiplicities(n):
+def iterate_imagedist_endofunction(n):
     M = np.zeros((n,n-1), dtype=object)
     for func_struct in endofunction_structures(n):
         mult = structure_multiplicity(func_struct)
@@ -40,13 +58,18 @@ def iterate_imagesize_multiplicities(n):
         for it, card in enumerate(im):
             M[card-1,it] += mult
     return M
+print iterate_imagedist_brute(3)
+iterate_imagedist = iterate_imagedist_endofunction
 
-def firstimage_multiplicities_compositional(n):
+def firstdist_composition(n):
+    """
+    Count OEIS A090657 using integer compositions in O(2^n) time
+    """
     F = [0]*n
     # Saves factor of 2 there.
-    for comp in product_range([1]+[0]*(n-1), [2]*n):
-        val = 1
-        rep = 0
+    for comp in product_range([2]*(n-1)):
+        val = n
+        rep = 1
         for I in comp:
             if not I:
                 val *= rep
@@ -56,7 +79,27 @@ def firstimage_multiplicities_compositional(n):
         F[rep-1] += val
     return F
 
-print firstimage_multiplicities_compositional(4)
+def firstdist_recurse(n):
+    """
+    Count OEIS A090657 using recursion relation in O(n^2) time. This is the fastest method I know of and probably the fastest there is.
+    
+    # TODO - Figure out the logic that went into this and the previous one and latex it up.
+    """
+    FD = np.zeros((n,n),dtype=object)
+    FD[0,0] = 1
+    F = np.array([1],dtype=object)
+    for I in range(1,n):
+        F_Old = F
+        F = np.zeros(I+1,dtype=object)
+        # Set the boundaries
+        F[0] = 1; FD[0,I] = I+1
+        F[I] = 1; FD[I,I] = factorial(I+1)
+        for J in range(1,I):
+            F[J] = F_Old[J-1] + (J+1)*F_Old[J]
+            FD[J,I] = factorial(I+1)/factorial(I-J)*F[J]
+    return FD[:,-1]
+    
+firstdist = firstdist_recurse
 
 '''
 Top row: OEIS A236396 - labelled rooted trees of height at most k on n nodes
@@ -65,6 +108,25 @@ Left column: OEIS A090657
 '''
 
 class EndofunctionTest(unittest.TestCase):
+    imagedists = [
+        np.array([[3, 9],
+                  [18, 12],
+                  [6, 6]],
+                  dtype=object),
+                  
+        np.array([[4, 40, 64,],
+                  [84, 120, 96],
+                  [144, 72, 72],
+                  [24, 24, 24]],
+                  dtype=object),
+                  
+        np.array([[5, 205, 505, 625],
+                  [300, 1060, 1120, 1000],
+                  [1500, 1260, 900, 900],
+                  [1200, 480, 480, 480],
+                  [120, 120, 120, 120]], 
+                  dtype=object)
+              ]
     def testImagePath(self):
         """Check various special and degenerate cases, with right index"""
         self.assertEqual([1], imagepath([0]))
@@ -82,6 +144,9 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual([n]*(n-1), imagepath(cycle))
             self.assertEqual([n]*(n-1), imagepath(fixed))
             self.assertEqual([1]*(n-1), imagepath(degen))
+    
+    def testContractionDens(self):
+        """Check the star of the show; an exponential time algorithm for finding the multiplicities of image"""
 
 if __name__ == '__main__':
     unittest.main()
