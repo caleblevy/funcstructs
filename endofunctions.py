@@ -30,7 +30,7 @@ endofunctions = lambda n: product_range([n]*n)
 
 def imagepath(f):
     """
-    Given a list f of length n such that all([I in range(n) for I in f]), 
+    Give it a list so that all([I in range(len(f)) for I in f]) and this program spits out the image path of f.
     """
     n = len(f)
     cardinalities = [len(set(f))]
@@ -46,7 +46,7 @@ def imagepath(f):
         card_prev = card
     return cardinalities
 
-def iterate_imagedist_brute(n):
+def imagedist_brute(n):
     """
     The most naive, straightforward way to calculate the distribution of endofunctions is to count every endofunction.
     Although absurdly simple, and computationally infeasible, it is the only true way to check your work.
@@ -58,15 +58,15 @@ def iterate_imagedist_brute(n):
             M[card-1,it] += 1
     return M
 
-def iterate_imagedist_endofunction(n):
+def imagedist_endofunction(n):
     """
     To count distributions of image sizes, we don't really need every function, since pretty much every meaningful
     aspect of a function's structure is encoded by it's unlabeled directed graph.
     
-    It is relatively straightforward to determine the multiplicity of a function graph (relatively is the important
-    word; it's quite tricky, but doable). If you know the imagesize distribution for canonical functions of each
-    structure, and their multiplicities, you can simply enumerate structures and add that multiplicity to the image
-    path.
+    It is relatively straightforward to determine the multiplicity of a function graph (Note: for various definitions
+    of "straightforward". Yours may differ considerably). If you know the imagesize distribution for canonical functions
+    of each structure, and their multiplicities, you can simply enumerate structures and add that multiplicity to the
+    image path.
     
     That is the outline of this program:
     - For each endofuction structure:
@@ -89,13 +89,13 @@ def iterate_imagedist_endofunction(n):
             M[card-1,it] += mult
     return M
 
-iterate_imagedist = iterate_imagedist_endofunction
+imagedist = imagedist_endofunction
 
 def firstdist_composition(n):
     """
-    Count OEIS A090657 using integer compositions in O(2^n) time.
+    Produces OEIS A090657 using integer compositions in O(2^n) time.
     
-    The idea of the agorithm comes from a bigass binary tree. Need to find it.
+    The idea of the agorithm comes from a binary tree. Need to find it.
     """
     if n == 1:
         return [1]
@@ -154,24 +154,69 @@ def powergrid(N):
     exponentials = bases**exponents
     return exponentials.T
 
-def lastdist_comp(N):
+def lastdist_composition(N):
     L = [0]*N
     exponentials = powergrid(N)
-    binomial_coeffs = nCk_grid(N)
+    binomial_coefficients = nCk_grid(N)
+    # Do we want to agree at value or index? I.E. 
+    #
+    #   for n in range(1,N):
+    #     L[n-1] = n
+    #
+    #   for n in range(N-1):
+    #     M[n] = n+1
+    #
+    # are equivalent when converting from Matlab. Which to choose?
+    #
+    # Here, I choose to keep value the same since indexing isn't done much, and with indexing you just subtract 1 everywhere.
     for n in range(N-1,0,-1):
-        L[n] = factorial(N)/factorial(N-n)
-        
+        L[n-1] = factorial(N)/factorial(N-n)
         V = [0]*(N-n+1)
         V[0] = n
         V[1] = N-n
-        
-        tot = 0
-        go = True
-        
     
+        tot = 0
+        
+        while True:
+            val = 1
+            for J in range(1,N-n+1):
+                if V[J] == 0:
+                    break
+                val *= exponentials[V[J-1],V[J]]
+                val *= binomial_coefficients[sum(V[J:]), V[J]]
+
+            tot += val
+            if V[N-n] == 1:
+                break
+                
+            # Index shifting
+            for K in range(J,1,-1): # J-1:-1:1 (J has plus one too, so "2" is our "1")
+                # Keep descending (backwards) until hitting a "step" you can subtract from
+                if V[K-1]-1 != 0:
+                    V[K-1] -= 1
+                    V[K] += J-K+1
+                    break
+                # Haven't hit the target, collect the partition element, and step back
+                V[K-1] -= 1
+                
+        L[n-1] *= tot
+    L[-1] = factorial(N)
+    return L
+                
+                
+
+N = 15
+L = [0]*(N-1)
+M = [0]*(N-1)
+
+
+
+print L, M
+print lastdist_composition(5)
+                
 
 class EndofunctionTest(unittest.TestCase):
-    iterate_imagedists = [
+    imagedists = [
         np.array([[3, 9],
                   [18, 12],
                   [6, 6]],
@@ -220,18 +265,36 @@ class EndofunctionTest(unittest.TestCase):
     
     def testIterateImagedist(self):
         """Check the star of the show; an exponential time algorithm for finding the multiplicities of image"""
-        for dist in self.iterate_imagedists:
+        for dist in self.imagedists:
             n = dist.shape[0]
-            np.testing.assert_array_equal(dist, iterate_imagedist_brute(n))
-            np.testing.assert_array_equal(dist, iterate_imagedist_endofunction(n))
+            np.testing.assert_array_equal(dist, imagedist_brute(n))
+            np.testing.assert_array_equal(dist, imagedist_endofunction(n))
     
     def testFirstdist(self):
         """Left column: OEIS A101817 (A090657). Test number of endofunctions on n elements whose image has size k."""
         for dist in self.firstdists:
             n = len(dist)
             self.assertEqual(dist, firstdist_composition(n))
-            self.assertEqual(dist, list(iterate_imagedist(n)[:,0]))
+            self.assertEqual(dist, list(imagedist(n)[:,0]))
             self.assertEqual(dist, firstdist_recurse(n))
+        
+    def testBinomialGrid(self):
+        N = 20
+        binomial_coefficients = nCk_grid(N)
+        for n in range(N+1):
+            for k in range(n+1):
+                self.assertEqual(nCk(n,k), binomial_coefficients[n,k])
+
+    def testPowerGrid(self):
+        N = 20
+        exponentials = powergrid(N)
+        for I in range(N+1):
+            for J in range(N+1):
+                if I == J == 0:
+                    self.assertEqual(1, exponentials[0,0])
+                else:
+                    self.assertEqual(I**J, exponentials[I,J])
+        
         
 if __name__ == '__main__':
     unittest.main()

@@ -105,6 +105,8 @@ def periodicity(cycle):
 def cycle_degeneracy(cycle):
     return len(cycle)/periodicity(cycle)
 
+# self.assertEqual(factorial(n)/factorial(k)/factorial(n-k), nCk(n,k))
+
 if __name__ == '__main__':
     # print necklace_totient([4,4,4,3,3,2,1,1])
     # print type(necklace_totient([4,4,4,3,3,2,1,1]))
