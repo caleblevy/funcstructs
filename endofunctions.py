@@ -17,6 +17,7 @@ from endofunction_structures import endofunction_structures, structure_multiplic
 import numpy as np
 import unittest
 from math import factorial
+from necklaces import nCk
 
 endofunctions = lambda n: product_range([n]*n)
 
@@ -50,6 +51,9 @@ def iterate_imagedist_brute(n):
     return M
 
 def iterate_imagedist_endofunction(n):
+    if n == 1:
+        return np.array([1],dtype=object)
+        
     M = np.zeros((n,n-1), dtype=object)
     for func_struct in endofunction_structures(n):
         mult = structure_multiplicity(func_struct)
@@ -58,13 +62,16 @@ def iterate_imagedist_endofunction(n):
         for it, card in enumerate(im):
             M[card-1,it] += mult
     return M
-print iterate_imagedist_brute(3)
+
 iterate_imagedist = iterate_imagedist_endofunction
 
 def firstdist_composition(n):
     """
     Count OEIS A090657 using integer compositions in O(2^n) time
     """
+    if n == 1:
+        return [1]
+        
     F = [0]*n
     # Saves factor of 2 there.
     for comp in product_range([2]*(n-1)):
@@ -97,18 +104,20 @@ def firstdist_recurse(n):
         for J in range(1,I):
             F[J] = F_Old[J-1] + (J+1)*F_Old[J]
             FD[J,I] = factorial(I+1)/factorial(I-J)*F[J]
-    return FD[:,-1]
+    return list(FD[:,-1])
     
 firstdist = firstdist_recurse
 
 '''
 Top row: OEIS A236396 - labelled rooted trees of height at most k on n nodes
 Right column: OEIS A066324, A219694 (reverse), A243203
-Left column: OEIS A090657
 '''
 
+def lastdist_comp(n):
+    L = [factorial]
+
 class EndofunctionTest(unittest.TestCase):
-    imagedists = [
+    iterate_imagedists = [
         np.array([[3, 9],
                   [18, 12],
                   [6, 6]],
@@ -127,7 +136,17 @@ class EndofunctionTest(unittest.TestCase):
                   [120, 120, 120, 120]], 
                   dtype=object)
               ]
-    def testImagePath(self):
+    
+    firstdists = [
+        [2,2],
+        [3,18,6],
+        [4,84,144,24],
+        [5,300,1500,1200,120],
+        [6,930,10800,23400,10800,720],
+        [7,2646,63210,294000,352800,105840,5040]
+        ]
+        
+    def testImagepath(self):
         """Check various special and degenerate cases, with right index"""
         self.assertEqual([1], imagepath([0]))
         self.assertEqual([1], imagepath([0,0]))
@@ -145,8 +164,22 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual([n]*(n-1), imagepath(fixed))
             self.assertEqual([1]*(n-1), imagepath(degen))
     
-    def testContractionDens(self):
+    def testIterateImagedist(self):
         """Check the star of the show; an exponential time algorithm for finding the multiplicities of image"""
+        for dist in self.iterate_imagedists:
+            n = dist.shape[0]
+            np.testing.assert_array_equal(dist, iterate_imagedist_brute(n))
+            np.testing.assert_array_equal(dist, iterate_imagedist_endofunction(n))
+    
+    def testFirstdist(self):
+        """Left column: OEIS A101817 (A090657). Test number of endofunctions on n elements whose image has size k."""
+        for dist in self.firstdists:
+            n = len(dist)
+            print n
+            self.assertEqual(dist, firstdist_composition(n))
+            self.assertEqual(dist, list(iterate_imagedist(n)[:,0]))
+            self.assertEqual(dist, firstdist_recurse(n))
+        
 
 if __name__ == '__main__':
     unittest.main()
