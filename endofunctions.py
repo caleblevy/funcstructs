@@ -3,20 +3,20 @@ Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions d
 the set of all such objects by S^S.
 
 For a given f in S^S, its image will have n=|f(S)| elements for n in range(1,N+1). Similarly it's second iterate will
-have |f(f(S))|=m<=n elements. Once |f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for k>j. The list of sizes of
+have |f(f(S))|=m<=n elements. Once |f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for all j>k. The list of sizes of
 images of iterates of f from 1 to n-1 is called the "image path" of f.
 
 This file mainly exists to calculate the distribution of image sizes of the iterates of all endofunctions on a set S.
 The naive way to do this is to literally enumerate every endofunction. This works for n up to about 8 on a decent
 desktop computer.
 
-The second, far more efficient method, is to enumerate the endofunction structures on S (i.e. orbits of the
+The second, far more efficient method, is to enumerate the endofunction structures on S (i.e. orbits of the full
 transformation monoid under the action of conjugation by the symmetric group), and then add up the multiplicities of
 each structure. This runs in roughly O(4^n) time. This is still quite horrendous, but it enables us to get up to n=16
 before being intolerably slow.
 
 Various special cases can be done much faster. This distribution of (first iterate) image sizes can be done in O(n^2)
-and the final set can be O(n).
+and the distribution of last iterate image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
 from iteration import product_range, compositions
@@ -48,7 +48,8 @@ def imagepath(f):
 
 def iterate_imagedist_brute(n):
     """
-    The most naive, straightforward way to calculate the distribution of 
+    The most naive, straightforward way to calculate the distribution of endofunctions is to count every endofunction.
+    Although absurdly simple, and computationally infeasible, it is the only true way to check your work.
     """
     M = np.zeros((n,n-1), dtype=object)
     for f in endofunctions(n):
@@ -58,6 +59,24 @@ def iterate_imagedist_brute(n):
     return M
 
 def iterate_imagedist_endofunction(n):
+    """
+    To count distributions of image sizes, we don't really need every function, since pretty much every meaningful
+    aspect of a function's structure is encoded by it's unlabeled directed graph.
+    
+    It is relatively straightforward to determine the multiplicity of a function graph (relatively is the important
+    word; it's quite tricky, but doable). If you know the imagesize distribution for canonical functions of each
+    structure, and their multiplicities, you can simply enumerate structures and add that multiplicity to the image
+    path.
+    
+    That is the outline of this program:
+    - For each endofuction structure:
+        1) Determine the multiplicity of the structure
+        2) Convert the structure to a function
+        3) Calculate the image path of that function
+        4) Add that multiplicity to each point in the distribution corresponding to that iterate image size.
+        
+    Runs in O(4^n) time (since there are ~4^n structures on n elements). Proof will be in the "notes" section. 
+    """
     if n == 1:
         return np.array([1],dtype=object)
         
@@ -74,7 +93,9 @@ iterate_imagedist = iterate_imagedist_endofunction
 
 def firstdist_composition(n):
     """
-    Count OEIS A090657 using integer compositions in O(2^n) time
+    Count OEIS A090657 using integer compositions in O(2^n) time.
+    
+    The idea of the agorithm comes from a bigass binary tree. Need to find it.
     """
     if n == 1:
         return [1]
@@ -127,7 +148,7 @@ def nCk_grid(N):
     return binomial_coeffs
 
 def powergrid(N):
-    """I**J == power_grid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
+    """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
     base = np.arange(N+1, dtype=object)
     [bases, exponents] = np.meshgrid(base, base)
     exponentials = bases**exponents
