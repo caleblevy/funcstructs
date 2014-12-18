@@ -86,27 +86,26 @@ def firstdist_composition(n):
         F[rep-1] += val
     return F
 
-def firstdist_recurse(n):
+def firstdists_upto(N):
     """
     Count OEIS A090657 using recursion relation in O(n^2) time. This is the fastest method I know of and probably the fastest there is.
     
     # TODO - Figure out the logic that went into this and the previous one and latex it up.
     """
-    FD = np.zeros((n,n),dtype=object)
-    FD[0,0] = 1
-    F = np.array([1],dtype=object)
-    for I in range(1,n):
-        F_Old = F
-        F = np.zeros(I+1,dtype=object)
-        # Set the boundaries
-        F[0] = 1; FD[0,I] = I+1
-        F[I] = 1; FD[I,I] = factorial(I+1)
-        for J in range(1,I):
-            F[J] = F_Old[J-1] + (J+1)*F_Old[J]
-            FD[J,I] = factorial(I+1)/factorial(I-J)*F[J]
-    return list(FD[:,-1])
+    FD = np.zeros((N,N), dtype=object)
+    for n in xrange(N):
+        FD[0,n] = FD[n,n] = 1
+        for I in xrange(n):
+            FD[I,n] = FD[I-1,n-1] + (I+1)*FD[I,n-1]
     
-firstdist = firstdist_recurse
+    for n in xrange(N):
+        for I in xrange(n+1):
+            FD[I,n] *= factorial(n+1)/factorial(n-I)
+
+    return FD
+    
+firstdist_recurse = firstdist = lambda n: list(firstdists_upto(n)[:,-1])
+
 
 '''
 Top row: OEIS A236396 - labelled rooted trees of height at most k on n nodes
@@ -175,12 +174,10 @@ class EndofunctionTest(unittest.TestCase):
         """Left column: OEIS A101817 (A090657). Test number of endofunctions on n elements whose image has size k."""
         for dist in self.firstdists:
             n = len(dist)
-            print n
             self.assertEqual(dist, firstdist_composition(n))
             self.assertEqual(dist, list(iterate_imagedist(n)[:,0]))
             self.assertEqual(dist, firstdist_recurse(n))
         
-
 if __name__ == '__main__':
     unittest.main()
         
