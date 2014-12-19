@@ -11,7 +11,7 @@ some variety,  either in the  typical list of  contributors section of  the code
 repository or,  if used for an  academic paper, some contribution  in the paper.
 For commercial use, please contact me at caleb.levy@berkeley.edu.
 """
-from eppstein.IntegerPartitions import partitions
+from PADS.IntegerPartitions import partitions
 from itertools import combinations_with_replacement, product
 from collections import Counter
 from math import factorial
