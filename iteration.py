@@ -1,14 +1,15 @@
 from itertools import product
 from collections import Iterable
+from time import time
 import unittest
 
-def product_range(start, stop=None, step=None, iteration_order=None):
+def product_range(start, stop=None, step=None):
     """
     Nice wrapper for itertools.product. Give it a tuple of dimension lengths and it will return 
     """
     if stop is None:
         start, stop = stop, start
-    # If start is not iterable, it is either an int or none. Don't be a dick.
+    # If start is not iterable, it is either an int or none.
     if not isinstance(start, Iterable):
         start = 0 if not start else start
         start = [start]*len(stop)        
@@ -19,7 +20,7 @@ def product_range(start, stop=None, step=None, iteration_order=None):
         raise ValueError("Start, stop and step tuples must all be the same length.")
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
 
-def compositions(n):
+def compositions_binary(n):
     """Additive compositions of a number; i.e. partitions with ordering."""
     for binary_composition in product_range([2]*(n-1)):
         tot = 1
@@ -72,9 +73,37 @@ def fixed_lex_partitions(n,L):
         partition[L-j-k] += 1
         partition[L-j-k+1:L], j = _minimal_partition(s,j+k-1)     
 
-print minimal_partition(10,10)
-for I in fixed_lex_partitions(40,7):
-    print I
+def compositions_simple(n):
+    comp = [n]
+    while True:
+        yield comp
+        J = len(comp)
+        if J == n:
+            return
+        for K in range(J,0,-1):
+            # Keep descending (backwards) until hitting a "step" you can subtract from
+            if comp[K-1]-1 != 0:
+                comp[K-1] -= 1
+                comp.append(J-K+1)
+                break
+            # Haven't hit the target, pop the last element, and step back
+            comp.pop()
 
+compositions = compositions_simple # best by test.
 
-        
+class IterationTest(unittest.TestCase):
+    
+    def testCompositionCounts(self):
+        for n in range(1,10):
+            self.assertEqual(2**(n-1), len(list(compositions_simple(n))))
+            self.assertEqual(2**(n-1), len(list(compositions_binary(n))))
+            
+    def testCompositionSums(self):
+        for n in range(1,10):
+            for comp in compositions_simple(n):
+                self.assertEqual(n, sum(comp))
+            for comp in compositions_binary(n):
+                self.assertEqual(n, sum(comp))
+                
+if __name__ == '__main__':
+    unittest.main()

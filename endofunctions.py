@@ -153,68 +153,28 @@ def powergrid(N):
     [bases, exponents] = np.meshgrid(base, base)
     exponentials = bases**exponents
     return exponentials.T
-
+                
 def lastdist_composition(N):
     L = [0]*N
     exponentials = powergrid(N)
     binomial_coefficients = nCk_grid(N)
-    # Do we want to agree at value or index? I.E. 
-    #
-    #   for n in range(1,N):
-    #     L[n-1] = n
-    #
-    #   for n in range(N-1):
-    #     M[n] = n+1
-    #
-    # are equivalent when converting from Matlab. Which to choose?
-    #
-    # Here, I choose to keep value the same since indexing isn't done much, and with indexing you just subtract 1 everywhere.
-    for n in range(N-1,0,-1):
-        L[n-1] = factorial(N)/factorial(N-n)
-        V = [0]*(N-n+1)
-        V[0] = n
-        V[1] = N-n
-    
-        tot = 0
-        
-        while True:
-            val = 1
-            for J in range(1,N-n+1):
-                if V[J] == 0:
-                    break
-                val *= exponentials[V[J-1],V[J]]
-                val *= binomial_coefficients[sum(V[J:]), V[J]]
-
-            tot += val
-            if V[N-n] == 1:
-                break
-                
-            # Index shifting
-            for K in range(J,1,-1): # J-1:-1:1 (J has plus one too, so "2" is our "1")
-                # Keep descending (backwards) until hitting a "step" you can subtract from
-                if V[K-1]-1 != 0:
-                    V[K-1] -= 1
-                    V[K] += J-K+1
-                    break
-                # Haven't hit the target, collect the partition element, and step back
-                V[K-1] -= 1
-                
-        L[n-1] *= tot
-    L[-1] = factorial(N)
+    for comp in compositions(N):
+        val = 1
+        for J in range(1,len(comp)):
+            val *= exponentials[comp[J-1], comp[J]]
+            val *= binomial_coefficients[sum(comp[J:]), comp[J]]
+        L[comp[0]-1] += val
+    for n in range(N,0,-1):
+        L[n-1] *= factorial(N)/factorial(N-n)
     return L
+    
+def limitset_count(n,k):
+    return k*n**(n-k)*factorial(n-1)/factorial(n-k)
+
+def limitset(n):
+    return [limitset_count(n,k) for k in range(1,n+1)]
                 
                 
-
-N = 15
-L = [0]*(N-1)
-M = [0]*(N-1)
-
-
-
-print L, M
-print lastdist_composition(18)
-                
-
 class EndofunctionTest(unittest.TestCase):
     imagedists = [
         np.array([[3, 9],
