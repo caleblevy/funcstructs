@@ -19,12 +19,12 @@ Various special cases can be done much faster. This distribution of (first itera
 and the distribution of last iterate image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
-from iteration import product_range, compositions
 from endofunction_structures import endofunction_structures, structure_multiplicity, endofunction_to_func
-import numpy as np
-import unittest
+from iteration import product_range, compositions
 from math import factorial
 from necklaces import nCk
+import numpy as np
+import unittest
 
 endofunctions = lambda n: product_range([n]*n)
 
@@ -212,7 +212,7 @@ M = [0]*(N-1)
 
 
 print L, M
-print lastdist_composition(5)
+print lastdist_composition(18)
                 
 
 class EndofunctionTest(unittest.TestCase):
