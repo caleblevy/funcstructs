@@ -156,6 +156,7 @@ def powergrid(N):
                 
 def lastdist_composition(N):
     L = [0]*N
+    # Memoize these lookups; saves a lot of time.
     exponentials = powergrid(N)
     binomial_coefficients = nCk_grid(N)
     for comp in compositions(N):
@@ -193,8 +194,7 @@ class EndofunctionTest(unittest.TestCase):
                   [1500, 1260, 900, 900],
                   [1200, 480, 480, 480],
                   [120, 120, 120, 120]], 
-                  dtype=object)
-              ]
+                  dtype=object)]
     
     firstdists = [
         [2,2],
@@ -202,8 +202,7 @@ class EndofunctionTest(unittest.TestCase):
         [4,84,144,24],
         [5,300,1500,1200,120],
         [6,930,10800,23400,10800,720],
-        [7,2646,63210,294000,352800,105840,5040]
-        ]
+        [7,2646,63210,294000,352800,105840,5040]]
         
     def testImagepath(self):
         """Check various special and degenerate cases, with right index"""
@@ -254,7 +253,6 @@ class EndofunctionTest(unittest.TestCase):
                     self.assertEqual(1, exponentials[0,0])
                 else:
                     self.assertEqual(I**J, exponentials[I,J])
-        
         
 if __name__ == '__main__':
     unittest.main()
