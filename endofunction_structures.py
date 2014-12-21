@@ -94,19 +94,21 @@ def endofunction_to_func(function_structure):
         cycle_start += cycle_len
     return func
     
-def inv(perm):
-    """Invert a permutation of integers I=1...n. """
-    inverse = [0] * len(perm)
-    for i, p in enumerate(perm):
-        inverse[p] = i
-    return inverse
-
 def first_iterate_multiplicity(function_structure):
     return len(list(set(unpack(unpack(function_structure)))))
         
 class EndofunctionStructureTest(unittest.TestCase):
+    counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
+    def testTreeToFunc(self):
+        tree = [1,2,3,4,4,4,3,4,4,2,3,3,2,3]
+        func = [0,0,1,2,2,2,1,6,6,0,9,9,0,12]
+        self.assertEqual(func, tree_to_func(tree))
+    
+    def testEndofunctionToFunc(self):
+        func_struct = [((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,))]
+        func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
+        self.assertEqual(func, endofunction_to_func(func_struct))
     # OEIS A001372
-    counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903, 163898, 466199]
     def testStructures(self):
         """check rooted trees has the right number of outputs"""
         for n in range(len(self.counts)):
@@ -117,14 +119,7 @@ class EndofunctionStructureTest(unittest.TestCase):
         for n in range(1, len(self.counts)):
             self.assertEqual(n**n, sum([structure_multiplicity(func) for func in endofunction_structures(n)]))
             pass
-            
+
 if __name__ == '__main__':
-    tree = [1,2,3,4,4,4, 3,4,4,  2,3,3, 2,3]
-    print tree_to_func(tree)
-    func_struct = (((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,)))
-    print endofunction_to_func(func_struct)
-    f = endofunction_to_func(func_struct)
-    f = [f[f[I]] for I in range(len(f))]
-    print f
     unittest.main()
 

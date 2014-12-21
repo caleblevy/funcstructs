@@ -11,7 +11,7 @@ def binary_partitions(n):
             b[p-1] += 1
         yield b
 
-def burnside_deg(b):
+def burnside_partition_degeneracy(b):
     ss = []
     for i in range(1,len(b)+1):
         s = 0
@@ -23,14 +23,11 @@ def burnside_deg(b):
         s *= t
         s /= factorial(b[i-1])
         ss.append(s)
-        print s
     return prod(ss)
         
 def endofunction_count(n):
     tot = 0
     for bp in binary_partitions(n):
-        tot += burnside_deg(bp)
+        tot += burnside_partition_degeneracy(bp)
     return tot
-
-print endofunction_count(10)
     

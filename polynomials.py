@@ -8,6 +8,7 @@ Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 from numpy import ndarray
 from rooted_trees import split_set
 from sympy import Symbol
+import unittest
 
 # MSP == Monomial Symmetric Polynomial
 def MSP_recursive(x, powers):
@@ -104,13 +105,22 @@ def MSP_iterative(x, powers):
 
 monomial_symmetric_polynomial = MSP_iterative
 
-def symbol_vec(n):
+def symrange(*args):
     x = []
-    for I in range(n):
+    for I in range(*args):
         x.append(Symbol('x%s'%str(I)))
     return x
+class PolynomialTest(unittest.TestCase):
+    def testMonomialSymmetricPolynomial(self):
+        x = symrange(14)
+        # p = 
+        
+
+
         
 if __name__ == '__main__':
     print MSP_recursive([5,5,5],[3,3,2])
     print monomial_symmetric_polynomial([5,5,5],[3,3,2])
+    print monomial_symmetric_polynomial(symrange(14),[3,3,2]).expand()
+
     
