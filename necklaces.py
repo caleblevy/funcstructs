@@ -4,15 +4,17 @@ A set of functions for building necklaces of various partitions.
 """
 
 from fractions import gcd, Fraction
-from rooted_trees import prod, split_set, forests
+from rooted_trees import prod, split_set
 from primes import divisors, totient
 from math import factorial
 from collections import deque
+import unittest
 
 def nCk(n,k): 
-    return int( prod(Fraction(n-i, i+1) for i in range(k)) )
+    """Binomial coefficient (n k) = n choose k."""
+    return factorial(n)/factorial(k)/factorial(n-k)
 
-def necklace_totient_count(partition):
+def necklace_count_totient(partition):
     k = len(partition)
     n = sum(partition)
     w = reduce(gcd, partition)
@@ -28,7 +30,7 @@ def necklace_totient_count(partition):
 
     return int(sum(beads))
     
-def necklace_prime_count(partition):
+def partition_necklace_count_by_periodicity(partition):
     k = len(partition)
     N = sum(partition)
     w = reduce(gcd, partition)
@@ -41,7 +43,7 @@ def necklace_prime_count(partition):
         n = period = factor*p0
         beads[factor-1] = 1
         
-        for I in range(k):
+        for I in xrange(k):
             beads[factor-1] *= nCk(n, partition[I]*factor/w)
             n -= partition[I]*factor/w
             
@@ -53,42 +55,44 @@ def necklace_prime_count(partition):
         beads[factor-1] /= period
     return beads
     
-necklace_count = necklace_prime_count
+def necklace_count_by_periodicity(items):
+    _, partition = split_set(items)
+    return partition_necklace_count_by_periodicity(partition)
 
-def necklace_simple_enumerate(partition, equality=False):
+necklace_count = lambda items: sum(necklace_count_by_periodicity(items))
+
+def partition_necklaces(partition):
     partition = list(partition)
     a = [0]*sum(partition)
     partition[0] -= 1
     k = len(partition)
-    return _necklace_simple_enumerate(a, partition, 2, 1, k, equality=equality)
+    return _partition_necklaces(a, partition, 2, 1, k)
 
-def _necklace_simple_enumerate(a, partition, t, p, k, equality=False):
+def _partition_necklaces(a, partition, t, p, k):
     n = len(a)
-    if t > n:
-        if equality:
-            if n == p:
-                yield a
-        else:
-            if n % p == 0:
-                yield a
+    if t > n and not(n % p):
+        yield a
     else:
-        r = range(a[t-p-1],k)
-        for j in r:
+        for j in xrange(a[t-p-1],k):
             if partition[j] > 0:
                 a[t-1] = j
                 partition[j] -= 1
-                if j == a[t-p-1]:
-                    for z in _necklace_simple_enumerate(a[:],partition,t+1,p,k,equality=equality):
-                        yield z
-                else:
-                    for z in _necklace_simple_enumerate(a[:],partition,t+1,t,k,equality=equality):
-                        yield z
+                tp = p if(j == a[t-p-1]) else t
+                for z in _partition_necklaces(a,partition,t+1,tp,k):
+                    yield z
                 partition[j] += 1
 
 def necklaces(items):
+    """
+    Given a set of items (called beads) returns all necklaces which can be made
+    with those beads.
+    """
+    if not items:
+        return
     items = sorted(items)
     y, d = split_set(items)
-    for necklace in necklace_simple_enumerate(d):
+    for necklace in partition_necklaces(d):
+        # Explicitly make a tuple, since we must form the list of all necklaces in memory when constructing endofunction structures.
         yield tuple([y[I] for I in necklace])
     
 def periodicity(cycle):
@@ -100,29 +104,32 @@ def periodicity(cycle):
         period_prev = period
         if orig == cycle:
             return period
-        # cycle.rotate(-1*period)
-
+        
 def cycle_degeneracy(cycle):
     return len(cycle)/periodicity(cycle)
 
-# self.assertEqual(factorial(n)/factorial(k)/factorial(n-k), nCk(n,k))
-
+class NecklaceTests(unittest.TestCase):    
+    def testPeriodicities(self):
+        N = 20
+        for n in range(1,N+1):
+            for d in divisors(n):
+                # Creates lists of each periodicity
+                period_dn = ([0]+[1]*(d-1))*(n/d)
+                self.assertEqual(d, periodicity(period_dn))
+                
+    def testNecklaces(self):
+        beadsets = [[4,4,5,5,2,2,2,2,2,2,6,6], [4,4,5,5,2,2,2,2,2,2,6,6,6], [0]]
+        for beadset in beadsets:
+            count = 0
+            for necklace in necklaces(beadset):
+                count += 1
+            self.assertEqual(necklace_count(beadset), count)
+        
 if __name__ == '__main__':
     # print necklace_totient([4,4,4,3,3,2,1,1])
-    # print type(necklace_totient([4,4,4,3,3,2,1,1]))
-    # print nCk(6,3)
-    # print necklace_beads([4,4,4,3,3,2,1,1])
     # print necklace_beads([4,4,4,4,4,6,6,6])
     # print necklace_totient([4,4,4,4,4,6,6,6])
     # print necklace_beads([24,36])
-    for I in necklace_simple_enumerate([3,3,2]):
-        print I
-    print list(necklace_simple_enumerate([3,3]))
-    for forest in forests(10):
-        if len(list(necklaces(forest))) > 1:
-            print '-'*80
-            for necklace in necklaces(forest):
-                print necklace
-    print periodicity([1,1,1,2,3,1,1,1,2,3])
-    
+    # for I in necklace_simple_enumerate([3,3,2]):
+    unittest.main()
         

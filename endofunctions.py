@@ -161,6 +161,8 @@ def nCk_grid(N):
     binomial_coeffs = np.zeros((N+1, N+1), dtype=object)
     for I in xrange(N+1):
         for J in xrange(N+1):
+            if J > I:
+                continue
             binomial_coeffs[I,J] = nCk(I,J)
     return binomial_coeffs
 
@@ -191,7 +193,6 @@ def limitset_count(n,k):
 
 def limitset(n):
     return [limitset_count(n,k) for k in range(1,n+1)]
-                
                 
 class EndofunctionTest(unittest.TestCase):
     imagedists = [
@@ -254,14 +255,14 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual(dist, list(imagedist(n)[:,0]))
             self.assertEqual(dist, firstdist_recurse(n))
         
-    def testBinomialGrid(self):
+    def testBinomialgrid(self):
         N = 20
         binomial_coefficients = nCk_grid(N)
         for n in range(N+1):
             for k in range(n+1):
                 self.assertEqual(nCk(n,k), binomial_coefficients[n,k])
 
-    def testPowerGrid(self):
+    def testPowergrid(self):
         N = 20
         exponentials = powergrid(N)
         for I in range(N+1):

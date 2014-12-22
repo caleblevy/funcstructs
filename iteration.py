@@ -36,10 +36,7 @@ def product_range(start, stop=None, step=None):
         step = 1 if(step is None) else step
         step = [step]*len(stop)
     if not len(start) == len(step) == len(stop):
-        raise ValueError(
-            "Start, stop and step tuples must all be the same length."
-            )
-        
+        raise ValueError("start, stop and step must all be same length.")
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
 
 def compositions_binary(n):
