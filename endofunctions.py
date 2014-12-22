@@ -1,25 +1,33 @@
 """endofunctions.py
-Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions defined on this set, and we shall denote
-the set of all such objects by S^S.
+Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions
+defined on this set, and we shall denote the set of all such objects by S^S.
 
-For a given f in S^S, its image will have n=|f(S)| elements for n in range(1,N+1). Similarly it's second iterate will
-have |f(f(S))|=m<=n elements. Once |f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for all j>k. The list of sizes of
-images of iterates of f from 1 to n-1 is called the "image path" of f.
 
-This file mainly exists to calculate the distribution of image sizes of the iterates of all endofunctions on a set S.
-The naive way to do this is to literally enumerate every endofunction. This works for n up to about 8 on a decent
-desktop computer.
+For a given f in S^S, its image will have n=|f(S)| elements for 1 <= n <= N.
+Similarly its second iterate will have |f(f(S))|=m<=n elements. Once
+|f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for all j>k. The list of
+sizes of images of iterates of f from 1 to n-1 is called the "image path" of f.
 
-The second, far more efficient method, is to enumerate the endofunction structures on S (i.e. orbits of the full
-transformation monoid under the action of conjugation by the symmetric group), and then add up the multiplicities of
-each structure. This runs in roughly O(4^n) time. This is still quite horrendous, but it enables us to get up to n=16
-before being intolerably slow.
+This file mainly exists to calculate the distribution of image sizes of the
+iterates of all endofunctions on a set S. The naive way to do this is to
+literally enumerate every endofunction. This works for n up to about 8 on a
+decent desktop computer.
 
-Various special cases can be done much faster. This distribution of (first iterate) image sizes can be done in O(n^2)
-and the distribution of last iterate image sizes set can be O(n) (and has a lovely closed form formula).
+The second, far more efficient method, is to enumerate the endofunction
+structures on S (i.e. orbits of the full transformation monoid under the action
+of conjugation by the symmetric group), and then add up the multiplicities of
+each structure. This runs in roughly O(4^n) time. This is still quite
+horrendous, but it enables us to get up to n=16 before being intolerably slow.
+
+Various special cases can be done much faster. This distribution of (first
+iterate) image sizes can be done in O(n^2) and the distribution of last iterate
+image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
-from endofunction_structures import endofunction_structures, structure_multiplicity, endofunction_to_func
+from endofunction_structures import (endofunction_structures,
+                                    structure_multiplicity,
+                                    endofunction_to_func)
+                                    
 from iteration import product_range, compositions
 from math import factorial
 from necklaces import nCk
@@ -30,7 +38,8 @@ endofunctions = lambda n: product_range([n]*n)
 
 def imagepath(f):
     """
-    Give it a list so that all([I in range(len(f)) for I in f]) and this program spits out the image path of f.
+    Give it a list so that all([I in range(len(f)) for I in f]) and this
+    program spits out the image path of f.
     """
     n = len(f)
     cardinalities = [len(set(f))]
@@ -48,8 +57,9 @@ def imagepath(f):
 
 def imagedist_brute(n):
     """
-    The most naive, straightforward way to calculate the distribution of endofunctions is to count every endofunction.
-    Although absurdly simple, and computationally infeasible, it is the only true way to check your work.
+    The most naive, straightforward way to calculate the distribution of
+    endofunctions is to count every endofunction. Although absurdly simple, and
+    computationally infeasible, it is the only true way to check your work.
     """
     M = np.zeros((n,n-1), dtype=object)
     for f in endofunctions(n):
@@ -60,22 +70,27 @@ def imagedist_brute(n):
 
 def imagedist_endofunction(n):
     """
-    To count distributions of image sizes, we don't really need every function, since pretty much every meaningful
-    aspect of a function's structure is encoded by it's unlabeled directed graph.
+    To count distributions of image sizes, we don't really need every function,
+    since pretty much every meaningful aspect of a function's structure is
+    encoded by it's unlabeled directed graph.
     
-    It is relatively straightforward to determine the multiplicity of a function graph (Note: for various definitions
-    of "straightforward". Yours may differ considerably). If you know the imagesize distribution for canonical functions
-    of each structure, and their multiplicities, you can simply enumerate structures and add that multiplicity to the
-    image path.
+    It is relatively straightforward to determine the multiplicity of a
+    function graph (Note: for various definitions of "straightforward". Yours
+    may differ considerably). If you know the imagesize distribution for
+    canonical functions of each structure, and their multiplicities, you can
+    simply enumerate structures and add that multiplicity to the image path.
+
     
     That is the outline of this program:
     - For each endofuction structure:
         1) Determine the multiplicity of the structure
         2) Convert the structure to a function
         3) Calculate the image path of that function
-        4) Add that multiplicity to each point in the distribution corresponding to that iterate image size.
-        
-    Runs in O(4^n) time (since there are ~4^n structures on n elements). Proof will be in the "notes" section. 
+        4) Add that multiplicity to each point in the distribution
+           corresponding to that iterate image size.
+
+    Runs in O(4^n) time (since there are ~4^n structures on n elements). Proof
+    will be in the "notes" section.
     """
     if n == 1:
         return np.array([1],dtype=object)
@@ -93,7 +108,7 @@ imagedist = imagedist_endofunction
 
 def firstdist_composition(n):
     """
-    Produces OEIS A090657 using integer compositions in O(2^n) time.
+    Produces OEIS A101817 using integer compositions in O(2^n) time.
     
     The idea of the agorithm comes from a binary tree. Need to find it.
     """
@@ -115,10 +130,12 @@ def firstdist_composition(n):
 
 def firstdists_upto(N):
     """
-    Count OEIS A090657 using recursion relation in O(n^2) time. This is the fastest method I know of and probably the
-    fastest there is.
-    
-    # TODO - Figure out the logic that went into this and the previous one and latex it up.
+    Left column of imagedist, corresponding to OEIS A101817 (A090657). This
+    uses a recursion relation to run in O(n^2) time. This is the fastest method
+    I know of and probably the fastest there is.
+
+    # TODO - Figure out the logic that went into this and the previous one and
+    latex it up. Derived from the ideas in the first one.
     """
     FD = np.zeros((N,N), dtype=object)
     for n in xrange(N):
@@ -223,14 +240,14 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual([1]*(n-1), imagepath(degen))
     
     def testIterateImagedist(self):
-        """Check the star of the show; an exponential time algorithm for finding the multiplicities of image"""
+        """Check the multiplicities of sizes of images of iterates."""
         for dist in self.imagedists:
             n = dist.shape[0]
             np.testing.assert_array_equal(dist, imagedist_brute(n))
             np.testing.assert_array_equal(dist, imagedist_endofunction(n))
     
     def testFirstdist(self):
-        """Left column: OEIS A101817 (A090657). Test number of endofunctions on n elements whose image has size k."""
+        """Test number of endofunctions on n elements with image has size k."""
         for dist in self.firstdists:
             n = len(dist)
             self.assertEqual(dist, firstdist_composition(n))
@@ -250,7 +267,7 @@ class EndofunctionTest(unittest.TestCase):
         for I in range(N+1):
             for J in range(N+1):
                 if I == J == 0:
-                    self.assertEqual(1, exponentials[0,0])
+                    self.assertEqual(1, exponentials[I,J])
                 else:
                     self.assertEqual(I**J, exponentials[I,J])
         

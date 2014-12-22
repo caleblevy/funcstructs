@@ -5,8 +5,10 @@ import unittest
 
 def product_range(start, stop=None, step=None):
     """
-    Nice wrapper for itertools.product. Give it a tuple of starts, stops and increments and it will return the nested
-    for loop coresponding to them. I.E. if start = (r1,r2,...,rn), stop = (s1,s2,...,sn) and step = (t1,t2,...,tn) then
+    Nice wrapper for itertools.product. Give it a tuple of starts, stops and
+    increments and it will return the nested for loop coresponding to them.
+    I.E. if start = (r1,r2,...,rn), stop = (s1,s2,...,sn) and step =
+    (t1,t2,...,tn) then
     
         for tup in product_range(start,stop,step):
             yield tup
@@ -19,8 +21,10 @@ def product_range(start, stop=None, step=None):
               for In in range(rn,sn,tn):
                 yield tuple(I1,I2,...,In)
     
-    If stop==step==None then start is treated as stop and step is set by default to 1 and start to 0. If start and step
-    are integers they are transformed into start = [start]*len(stop) and step = [step]*len(step).
+    If stop==step==None then start is treated as stop and step is set by
+    default to 1 and start to 0. If start and step are integers they are
+    transformed into start = [start]*len(stop) and step = [step]*len(step).
+
     """
     if stop is None:
         start, stop = stop, start
@@ -32,7 +36,9 @@ def product_range(start, stop=None, step=None):
         step = 1 if(step is None) else step
         step = [step]*len(stop)
     if not len(start) == len(step) == len(stop):
-        raise ValueError("Start, stop and step tuples must all be the same length.")
+        raise ValueError(
+            "Start, stop and step tuples must all be the same length."
+            )
         
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
 
@@ -58,7 +64,8 @@ def compositions_simple(n):
         if J == n:
             return
         for K in xrange(J-1,-1,-1):
-            # Keep descending (backwards) until hitting a "step" you can subtract from
+            # Keep descending (backwards) until hitting a "step" you can 
+            # subtract from
             if comp[K] is not 1:
                 comp[K] -= 1
                 comp.append(J-K)

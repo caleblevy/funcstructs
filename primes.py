@@ -2,7 +2,6 @@
 """
 A set of functions for building necklaces of various partitions.
 """
-
 import fractions
 from rooted_trees import prod, split_set
 import unittest
@@ -33,7 +32,7 @@ def divisorGen(n):
     nfactors = len(factors)
     f = [0] * nfactors
     while True:
-        yield reduce(lambda x, y: x*y, [factors[x][0]**f[x] for x in range(nfactors)], 1)
+        yield prod([factors[x][0]**f[x] for x in xrange(nfactors)])
         i = 0
         while True:
             f[i] += 1
@@ -68,27 +67,32 @@ totient = phi_sum
 # If run standalone, perform unit tests
 class PrimeTest(unittest.TestCase):
     def testPrimeDivisorsRepeated(self):
-        """Test number of prime divisors with multiplicity. See OEIS A001222."""
-        counts = [0, 1, 1, 2, 1, 2, 1, 3, 2, 2, 1, 3, 1, 2, 2, 4, 1, 3, 1, 3, 2, 2, 1, 4, 2, 2, 3, 3, 1, 3]
+        """OEIS A001222: number of prime divisors with multiplicity."""
+        counts = [0, 1, 1, 2, 1, 2, 1, 3, 2, 2, 1, 3, 1, 2, 2, 4, 1, 3, 1, 3, \
+                  2, 2, 1, 4, 2, 2, 3, 3, 1, 3]
         for I in range(1,len(counts)+1):
             self.assertEqual(counts[I-1],len(prime_factorization(I)))
             
     def testPrimeDivisorsNonrepeated(self):
-        """Test number of prime divisors without multiplicity. See OEIS A001221."""
-        counts = [0, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 2, 1, 3]
+        """OEIS A001221: number of prime divisors without multiplicity."""
+        counts = [0, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, \
+                  2, 2, 1, 2, 1, 2, 1, 2, 1, 3]
         for I in range(1,len(counts)+1):
             self.assertEqual(counts[I-1],len(prime_divisors(I)))
     
     def testDivisors(self):
-        """Test number of divisors. See OEIS A000005."""
-        counts = [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, 4, 4, 2, 8, 3, 4, 4, 6, 2, 8]
+        """OEIS A000005: number of divisors."""
+        counts = [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, \
+                  4, 4, 2, 8, 3, 4, 4, 6, 2, 8]
         for I in range(1,len(counts)+1):
             self.assertEqual(counts[I-1],len(divisors(I)))
+            # Check twice, see if its been memoized properly.
             self.assertEqual(counts[I-1],len(divisors(I)))
         
     def testTotients(self):
-        '''Test values of the totient function. See OEIS A000010.'''
-        values = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4, 12, 6, 8, 8, 16, 6, 18, 8, 12, 10, 22, 8, 20, 12, 18]
+        """OEIS A000010: number of relatively prime smaller integers."""
+        values = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4, 12, 6, 8, 8, 16, 6, 18, \
+                  8, 12, 10, 22, 8, 20, 12, 18]
         for I in range(1,len(values)+1):
             self.assertEqual(values[I-1], phi_product(I))
             self.assertEqual(values[I-1], phi_sum(I))

@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 """
-Contains  one main  function:  rooted_trees. Takes  an integer  N  as input  and
-outputs a generator object enumerating  all isomorphic unlabeled rooted trees on
-N nodes. Consult OEIS A000055 to find len(list(rooted_trees(N))).
-
 Copyright (C) 2014 Caleb Levy - All Rights Reserved.
 
 The terms  of non-commercial usage of  this code are simply  providing credit of
@@ -13,7 +9,6 @@ For commercial use, please contact me at caleb.levy@berkeley.edu.
 """
 from PADS.IntegerPartitions import partitions
 from itertools import combinations_with_replacement, product
-from collections import Counter
 from math import factorial
 from operator import mul
 import unittest
@@ -21,7 +16,7 @@ import unittest
 prod = lambda iterable: reduce(mul, iterable, 1)
 factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 
-def successor(L):
+def successor_tree(L):
     N = len(L)
     p = N-1
     while L[p] == L[1]:
@@ -29,10 +24,27 @@ def successor(L):
     q = p-1
     while L[q] >= L[p]:
         q -= 1
-    for I in range(p,N):
+    for I in xrange(p,N):
         L[I] = L[I-(p-q)]
 
 def rooted_trees(N):
+    """
+    Takes an integer N as input and outputs a generator object enumerating all
+    isomorphic unlabeled rooted trees on N nodes. 
+    
+    The basic idea of the algorithm is to represent a tree by its level
+    sequence: list each vertice's height above the root, where vertex v+1 is
+    connected either to vertex v or the previous node at some lower level.
+
+    Choosing the lexicographically greatest level sequence gives a canonical
+    representation for each rooted tree. We start with the tallest rooted tree
+    given by T=range(1,N+1) and then go downward, lexicographically, until we
+    are flat so that T=[1]+[2]*(N-1).
+    
+    Algorithm and description provided in:
+        T. Beyer and S. M. Hedetniemi. "Constant time generation of rooted
+        trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
+    """
     if N == 0:
         return
     elif N == 1:
@@ -41,16 +53,16 @@ def rooted_trees(N):
     elif N == 2:
         yield (1,2)
         return
-    L = [I+1 for I in range(N)]
+    L = [I+1 for I in xrange(N)]
     yield L
     while L[1] != L[2]:
-        successor(L)
+        successor_tree(L)
         yield L
             
 def split_set(partition):
-    # splits a multiset into elements and multiplicities
+    """Splits a multiset into elements and multiplicities."""
     y = list(set(partition))
-    d = [partition.count(y[I]) for I in range(len(y))]
+    d = [partition.count(y[I]) for I in xrange(len(y))]
     return y,d
 
 def mset_degeneracy(mset):
@@ -58,7 +70,10 @@ def mset_degeneracy(mset):
     return factorial_prod(d)
     
 def unpack(tree):
-    # Takes a list of lists and outputs a list whose elements are those of the sublists.
+    """
+    Takes a list of lists and outputs a list whose elements are those of the
+    sublists.
+    """
     packed_list = [I for I in tree if isinstance(I,(tuple,list,set))]
     unpacked = []
     for I in packed_list:
@@ -67,19 +82,25 @@ def unpack(tree):
     return unpacked
 
 def unsplit_set(y, d):
-    packed_list = [[y[I]]*d[I] for I in range(len(y))]
+    """Reverse of split_set."""
+    packed_list = [[y[I]]*d[I] for I in xrange(len(y))]
     return unpack(packed_list)
     
 def partition_forests(partition):
     y, d = split_set(partition)
     l = len(y)
     trees = [tuple(rooted_trees(I)) for I in y]
-    seeds = [combinations_with_replacement(trees[I],d[I]) for I in range(l)]
+    seeds = [combinations_with_replacement(trees[I],d[I]) for I in xrange(l)]
     seeds = [list(seed) for seed in seeds]
     for forest in product(*seeds):
         yield unpack(forest)
         
 def forests_complex(n):
+    """
+    For a given partition of N elements, we can make combinations of trees on
+    each of the node groups of that partition. Iterating over all partitions
+    gives us all collections of rooted trees on N nodes.
+    """
     if n == 0:
         return
     for partition in partitions(n):
@@ -87,6 +108,9 @@ def forests_complex(n):
             yield forest
 
 def chop(tree):
+    """
+    Given a tree, returns the collection of subtrees connected to the root node.
+    """
     if not tree or len(tree) == 1:
         return
     tree = tree[1:]
@@ -106,6 +130,14 @@ def chop(tree):
     return tuple(forest)
 
 def forests_simple(N):
+    """
+    Any rooted tree on N+1 nodes can be identically described by a collection
+    of rooted trees on N nodes, grafted together at a single root.
+    
+    To enumerate all collections of rooted trees on N nodes, we reverse the
+    principal and enumerate all rooted trees on N+1 nodes, chopping them at the
+    base. Much simpler than finding all trees corresponding to a partition.
+    """
     if N == 0: return
     for tree in rooted_trees(N+1):
         yield chop(tree)
@@ -113,6 +145,15 @@ def forests_simple(N):
 forests = forests_simple
     
 def tree_degeneracy(tree):
+    """
+    To calculate the degeneracy of a collection of subtrees you start with the
+    lowest branches and then work downwards. If a group of nodes can be
+    "swapped" on the same level then they are identical for all intents and
+    purposes, and therefore we divide by the factorial of their multiplicity.
+    The same principal applies to subtrees.
+
+    TODO: A writeup of this with diagrams will be in the notes.
+    """
     if not chop(tree):
         return 1
     mul = 1
@@ -122,15 +163,14 @@ def tree_degeneracy(tree):
 
 # If run standalone, perform unit tests
 class TreeTest(unittest.TestCase):
-    # OEIS A000055
     counts = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286]
     def testTrees(self):
-        """check rooted trees has the right number of outputs"""
+        """OEIS A000055: number of unlabelled rooted trees on N nodes."""
         for n in range(len(self.counts)):
             self.assertEqual(self.counts[n],len(list(rooted_trees(n))))
     
     def testForests(self):
-        """Check each forest has the right number of outputs"""
+        """Check len(forests(N))==A000055(N+1)"""
         self.assertEqual(0,len(list(forests_simple(0))))
         self.assertEqual(0,len(list(forests_complex(0))))
         for n in range(1,len(self.counts)-1):
@@ -138,10 +178,13 @@ class TreeTest(unittest.TestCase):
             self.assertEqual(self.counts[n+1],len(list(forests_complex(n))))
     
     def testDegeneracy(self):
-        """Make sure our degeneracies add up to n^(n-1) trees"""
+        """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         self.assertEqual(1,tree_degeneracy(tuple()))
         for n in range(1,len(self.counts)):
-            self.assertEqual(n**(n-1),sum([factorial(n)/tree_degeneracy(tree) for tree in rooted_trees(n)]))
+            labelled_treecount = 0
+            for tree in rooted_trees(n):
+                labelled_treecount += factorial(n)/tree_degeneracy(tree)
+            self.assertEqual(n**(n-1), labelled_treecount)
 
 if __name__ == '__main__':
     unittest.main()
