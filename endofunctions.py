@@ -34,7 +34,9 @@ from necklaces import nCk
 import numpy as np
 import unittest
 
+
 endofunctions = lambda n: product_range([n]*n)
+
 
 def imagepath(f):
     """
@@ -55,6 +57,7 @@ def imagepath(f):
         card_prev = card
     return cardinalities
 
+
 def imagedist_brute(n):
     """
     The most naive, straightforward way to calculate the distribution of
@@ -68,6 +71,7 @@ def imagedist_brute(n):
             M[card-1,it] += 1
     return M
 
+
 def imagedist_endofunction(n):
     """
     To count distributions of image sizes, we don't really need every function,
@@ -80,7 +84,6 @@ def imagedist_endofunction(n):
     canonical functions of each structure, and their multiplicities, you can
     simply enumerate structures and add that multiplicity to the image path.
 
-    
     That is the outline of this program:
     - For each endofuction structure:
         1) Determine the multiplicity of the structure
@@ -104,7 +107,9 @@ def imagedist_endofunction(n):
             M[card-1,it] += mult
     return M
 
+
 imagedist = imagedist_endofunction
+
 
 def firstdist_composition(n):
     """
@@ -128,6 +133,7 @@ def firstdist_composition(n):
         F[rep-1] += val
     return F
 
+
 def firstdists_upto(N):
     """
     Left column of imagedist, corresponding to OEIS A101817 (A090657). This
@@ -149,6 +155,7 @@ def firstdists_upto(N):
 
     return FD
     
+    
 firstdist_recurse = firstdist = lambda n: list(firstdists_upto(n)[:,-1])
 
 '''
@@ -166,12 +173,14 @@ def nCk_grid(N):
             binomial_coeffs[I,J] = nCk(I,J)
     return binomial_coeffs
 
+
 def powergrid(N):
     """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
     base = np.arange(N+1, dtype=object)
     [bases, exponents] = np.meshgrid(base, base)
     exponentials = bases**exponents
     return exponentials.T
+                
                 
 def lastdist_composition(N):
     L = [0]*N
@@ -188,8 +197,10 @@ def lastdist_composition(N):
         L[n-1] *= factorial(N)/factorial(N-n)
     return L
     
+    
 def limitset_count(n,k):
     return k*n**(n-k)*factorial(n-1)/factorial(n-k)
+
 
 def limitset(n):
     return [limitset_count(n,k) for k in range(1,n+1)]
