@@ -180,7 +180,7 @@ def cycle_degeneracy(cycle):
     return len(cycle)/periodicity(cycle)
 
 
-class NecklaceTests(unittest.TestCase):  
+class NecklaceTests(unittest.TestCase): 
     beadsets = [[4,4,5,5,2,2,2,2,2,2,6,6], [4,4,5,5,2,2,2,2,2,2,6,6,6], [0]]
       
     def testPeriodicities(self):
@@ -190,7 +190,14 @@ class NecklaceTests(unittest.TestCase):
                 # Creates lists of each periodicity
                 period_dn = ([0]+[1]*(d-1))*(n/d)
                 self.assertEqual(d, periodicity(period_dn))          
-                
+    def testNecklaceCounts(self):
+        color_partitions = [[24,36], [3,3,2], [4,4,4,3,3,2,1,1]]
+        color_cardinalities = [600873126148801, 70, 51330759480000]
+        for cp, cc in zip(color_partitions, color_cardinalities):
+            self.assertEqual(cc, necklace_count_totient(cp))
+            self.assertEqual(cc,\
+                             sum(partition_necklace_count_by_periodicity(cp)))
+        
     def testNecklaces(self):
         for beadset in self.beadsets:
             count = 0
@@ -199,10 +206,5 @@ class NecklaceTests(unittest.TestCase):
             self.assertEqual(necklace_count(beadset), count)
         
 if __name__ == '__main__':
-    # print necklace_totient([4,4,4,3,3,2,1,1])
-    # print necklace_beads([4,4,4,4,4,6,6,6])
-    # print necklace_totient([4,4,4,4,4,6,6,6])
-    # print necklace_beads([24,36])
-    # for I in necklace_simple_enumerate([3,3,2]):
     unittest.main()
         
