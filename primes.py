@@ -23,7 +23,9 @@ def prime_factorization(n):
        primfac.append(n)
     return primfac
     
+    
 prime_divisors = lambda n: list(set(prime_factorization(n)))
+
 
 def factorGenerator(n):
     primes, multiplicities = split_set(prime_factorization(n))
@@ -31,6 +33,7 @@ def factorGenerator(n):
     for p, d in zip(primes, multiplicities):
         factors.append((p,d,))
     return factors
+
 
 def divisorGen(n):
     """
@@ -53,18 +56,27 @@ def divisorGen(n):
             if i >= nfactors:
                 return
 
+
 divisor_list = lambda n: list(divisorGen(n)) if n > 1 else [1]
+
 
 def divisors_memoized(n, factors={}):
     if n not in factors:
         factors[n] = divisor_list(n)
     return factors[n]
 
+
 divisors = divisors_memoized
+
+
+def divisor_sum(n, power=1):
+    return sum(map(lambda x: pow(x,power), divisors(n)))
+    
 
 def phi_product(n):
     """Return the totient using the fancy prime formula."""
     return int(n*prod((1 - fractions.Fraction(1,p) for p in prime_divisors(n))))
+    
     
 def phi_sum(n):
     """Return the totient using its definition. Code taken directly from 
@@ -76,6 +88,7 @@ def phi_sum(n):
         if fractions.gcd(n, k) == 1:
             phi += 1
     return int(phi)
+    
     
 totient = phi_sum
 
@@ -103,6 +116,21 @@ class PrimeTest(unittest.TestCase):
             self.assertEqual(counts[I-1],len(divisors(I)))
             # Check twice, see if its been memoized properly.
             self.assertEqual(counts[I-1],len(divisors(I)))
+    
+    def testDivisorSigma(self):
+        """Test sums of powers of divisors. Features:
+            -OEIS A000005: divisor_sum(n,0)
+            -OEIS A000203: divisor_sum(n,1)
+            -OEIS A001157: divisor_sum(n,2)
+            -OEIS A001158: divisor_sum(n,3)
+        """
+        sums = [ [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6],
+                 [1, 3, 4, 7, 6, 12, 8, 15, 13, 18],
+                 [1, 5, 10, 21, 26, 50, 50, 85, 91, 130],
+                 [1, 9, 28, 73, 126, 252, 344, 585, 757, 1134] ]
+        for power, seq in enumerate(sums):
+            for n, tot in enumerate(seq):
+                self.assertEqual(tot, divisor_sum(n+1,power))
         
     def testTotients(self):
         """OEIS A000010: number of relatively prime smaller integers."""
