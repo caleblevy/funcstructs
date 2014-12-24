@@ -3,6 +3,7 @@ from rooted_trees import split_set, prod
 from PADS.IntegerPartitions import partitions
 from math import factorial
 from fractions import Fraction
+import unittest
 
 def binary_partitions(n):
     for part in partitions(n):
@@ -42,6 +43,8 @@ def quotient_isint(a, b):
         return False
 
 def iroot_newton(n, k=2):
+    if not n:
+        return 0
     u, s = n, n+1
     while u < s:
         s = u
@@ -63,14 +66,22 @@ def iroot(n, k=2):
             hi = mid
         else:
             return mid
+            
     if pow(hi, k) == n:
         return hi
     else:
         return lo
+
+def iroot_roundup(n, k=2):
+    root = iroot(n,k)
+    if pow(root,k) < n:
+        return root+1
+    else:
+        return root
         
-def partition_number(N):
+def partition_numbers_upto(N):
     if N == 0:
-        return 1
+        return [1]
     P = [1]+[0]*N
     for n in range(1,N+1):
         for k in range(1,n+1):
@@ -82,7 +93,28 @@ def partition_number(N):
                 P[n] += (-1)**(k-1) * P[n-p_minus/2]
     return P
 
-from time import time
-ts = time()
-for root in range(2,14):
-    for val in range(2,1000):
+partition_number = lambda n: partition_numbers_upto(n)[-1]
+
+class CounterTest(unittest.TestCase):
+    def testIntegerRoots(self):
+        for val in range(1000)+range(2**96,2**96+100):
+            for power in range(2,5):
+                self.assertTrue(iroot(val,power)**power <= val)
+                self.assertTrue(val < (iroot(val,power)+1)**power)
+                
+                self.assertTrue(val <= iroot_roundup(val,power)**power)
+                if val > 0:
+                    self.assertTrue((iroot_roundup(val,power)-1)**power < val)
+                
+                self.assertTrue(iroot_newton(val,power)**power <= val)
+                self.assertTrue(val < (iroot_newton(val,power)+1)**power)
+    
+    def testPartitionNumbers(self):
+        counts = [1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135]
+        for n in range(len(counts)):
+            self.assertEqual(counts[n], partition_number(n))
+            
+
+if __name__ == '__main__':
+    unittest.main()
+    
