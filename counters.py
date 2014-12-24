@@ -22,7 +22,7 @@ def burnside_partition_degeneracy(b):
         t = Fraction(i,1)
         t **= (-1*b[i-1])
         s *= t
-        s /= factorial(b[i-1])
+        s //= factorial(b[i-1])
         ss.append(s)
     return prod(ss)
         
@@ -34,29 +34,37 @@ def endofunction_count(n):
 
 def ceildiv(a, b):
     """Does long integer division taking the ceiling instead of the floor"""
-    return -(-a / b)
-
-def quotient_isint(a, b):
-    if a/b == ceildiv(a,b):
-        return True
-    else:
-        return False
+    return -(-a // b)
 
 def iroot_newton(n, k=2):
+    """
+    Given input integer n, return the greatest integer whose kth power is less
+    than or equal to n. This algorithm works by Newton's method.
+    
+    Code taken directly from 
+        "How to find integer nth roots?" at http://stackoverflow.com/a/15979957.
+    """
     if not n:
         return 0
     u, s = n, n+1
     while u < s:
         s = u
-        t = (k-1) * s + n / pow(s, k-1)
-        u = t / k
+        t = (k-1) * s + n // pow(s, k-1)
+        u = t // k
     return s
     
 def iroot(n, k=2):
+    """
+    Given input integer n, return the greatest integer whose kth power is less
+    than or equal to n. This algorithm works by binary search.
+    
+    Code taken directly from 
+        "How to find integer nth roots?" at http://stackoverflow.com/a/15979957.
+    """
     hi = 1
     while pow(hi, k) < n:
         hi *= 2
-    lo = hi / 2
+    lo = hi // 2
     while hi - lo > 1:
         mid = (lo + hi) // 2
         midToK = pow(mid, k)
@@ -72,25 +80,31 @@ def iroot(n, k=2):
     else:
         return lo
 
-def iroot_roundup(n, k=2):
-    root = iroot(n,k)
-    if pow(root,k) < n:
-        return root+1
-    else:
-        return root
+def isqrt(n):
+    """
+    Faster method of iroot for the particular case of the integer square root.
+    
+    Code taken directly from 
+        "Integer square root in python" at http://stackoverflow.com/a/15391420.
+    """
+    x = n
+    y = (x + 1) // 2
+    while y < x:
+        x = y
+        y = (x + n // x) // 2
+    return x
         
 def partition_numbers_upto(N):
+    # Iterate over the pentagonal numbers. Formula from http://mathworld.wolfram.com/PartitionFunctionP.html
     if N == 0:
         return [1]
     P = [1]+[0]*N
     for n in range(1,N+1):
-        for k in range(1,n+1):
-            p_plus = k*(3*k+1)
-            p_minus = k*(3*k-1)
-            if quotient_isint(p_plus,2) and 1 <= p_plus/2 <= n:
-                P[n] += (-1)**(k-1) * P[n-p_plus/2]
-            if quotient_isint(p_minus,2) and 1 <= p_minus/2 <= n:
-                P[n] += (-1)**(k-1) * P[n-p_minus/2]
+        k_max = (isqrt(24*n+1)-1)//6
+        k_min = -1*((isqrt(24*n+1)+1)//6)
+        for k in range(k_min,0)+range(1,k_max+1):
+            pk = k*(3*k+1)
+            P[n] += (-1)**abs((k-1)) * P[n-pk//2]
     return P
 
 partition_number = lambda n: partition_numbers_upto(n)[-1]
@@ -101,10 +115,6 @@ class CounterTest(unittest.TestCase):
             for power in range(2,5):
                 self.assertTrue(iroot(val,power)**power <= val)
                 self.assertTrue(val < (iroot(val,power)+1)**power)
-                
-                self.assertTrue(val <= iroot_roundup(val,power)**power)
-                if val > 0:
-                    self.assertTrue((iroot_roundup(val,power)-1)**power < val)
                 
                 self.assertTrue(iroot_newton(val,power)**power <= val)
                 self.assertTrue(val < (iroot_newton(val,power)+1)**power)

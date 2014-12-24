@@ -89,7 +89,6 @@ def phi_sum(n):
             phi += 1
     return int(phi)
     
-    
 totient = phi_sum
 
 # If run standalone, perform unit tests
