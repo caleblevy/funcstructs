@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 """
-A set of functions for building necklaces of various partitions.
+A collection of short functions for enumerating factorizations of integers and
+other such things.
 """
 import fractions
 from rooted_trees import prod, split_set
 import unittest
 
 def prime_factorization(n):
+    """
+    Find the prime factorization of an integer n. Code taken directly from
+        "Prime factorization - list" at http://stackoverflow.com/a/16996439.
+    """
     primfac = []
     d = 2
     while d*d <= n:
@@ -28,6 +33,11 @@ def factorGenerator(n):
     return factors
 
 def divisorGen(n):
+    """
+    Find every divisor of an integer n. Code taken directly from
+        "What is the best way to get all the divisors of a number" at
+        http://stackoverflow.com/a/171784.
+    """
     factors = factorGenerator(n)
     nfactors = len(factors)
     f = [0] * nfactors
@@ -53,11 +63,16 @@ def divisors_memoized(n, factors={}):
 divisors = divisors_memoized
 
 def phi_product(n):
+    """Return the totient using the fancy prime formula."""
     return int(n*prod((1 - fractions.Fraction(1,p) for p in prime_divisors(n))))
     
 def phi_sum(n):
+    """Return the totient using its definition. Code taken directly from 
+        "Computing Eulers Totient Function" at
+        http://stackoverflow.com/a/18114286
+    """
     phi = 0
-    for k in range(1, n + 1):
+    for k in xrange(1, n + 1):
         if fractions.gcd(n, k) == 1:
             phi += 1
     return int(phi)
