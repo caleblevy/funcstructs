@@ -28,7 +28,6 @@ from math import factorial
 from collections import deque
 import unittest
 
-
 def nCk(n,k): 
     """Binomial coefficient (n k) = n choose k."""
     return factorial(n)/factorial(k)/factorial(n-k)
@@ -54,7 +53,6 @@ def necklace_count_totient(partition):
             beads[I] /= factorial(partition[J]/factors[I])
 
     return int(sum(beads))
-    
     
 def partition_necklace_count_by_periodicity(partition):
     """
@@ -94,7 +92,6 @@ def partition_necklace_count_by_periodicity(partition):
         beads[factor-1] /= period
     return beads
     
-    
 def necklace_count_by_periodicity(beads):
     """
     Returns a list whose kth element is the number of necklaces corresponding
@@ -103,9 +100,7 @@ def necklace_count_by_periodicity(beads):
     _, partition = split_set(beads)
     return partition_necklace_count_by_periodicity(partition)
 
-
 necklace_count = lambda items: sum(necklace_count_by_periodicity(items))
-
 
 def partition_necklaces(partition):
     """ 
@@ -144,7 +139,6 @@ def _partition_necklaces(a, partition, t, p, k):
                     yield z
                 partition[j] += 1
 
-
 def necklaces(items):
     """
     Given a set of items (called beads) returns all necklaces which can be made
@@ -157,7 +151,6 @@ def necklaces(items):
     for necklace in partition_necklaces(d):
         # Explicitly make a tuple, since we must form the list of all necklaces in memory when constructing endofunction structures.
         yield tuple([y[I] for I in necklace])
-    
     
 def periodicity(cycle):
     """
@@ -175,10 +168,8 @@ def periodicity(cycle):
         if orig == cycle:
             return period
         
-        
 def cycle_degeneracy(cycle):
     return len(cycle)/periodicity(cycle)
-
 
 class NecklaceTests(unittest.TestCase): 
           
@@ -195,8 +186,7 @@ class NecklaceTests(unittest.TestCase):
         color_cardinalities = [600873126148801, 70, 51330759480000]
         for cp, cc in zip(color_partitions, color_cardinalities):
             self.assertEqual(cc, necklace_count_totient(cp))
-            self.assertEqual(cc,
-                             sum(partition_necklace_count_by_periodicity(cp)))
+            self.assertEqual(cc, sum(partition_necklace_count_by_periodicity(cp)))
         
     def testNecklaces(self):
         beadsets = [[4,4,5,5,2,2,2,2,2,2,6,6], [4,4,5,5,2,2,2,2,2,2,6,6,6], [0]]

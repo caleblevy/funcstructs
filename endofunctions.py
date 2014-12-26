@@ -2,7 +2,6 @@
 Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions
 defined on this set, and we shall denote the set of all such objects by S^S.
 
-
 For a given f in S^S, its image will have n=|f(S)| elements for 1 <= n <= N.
 Similarly its second iterate will have |f(f(S))|=m<=n elements. Once
 |f^(k)(S)|=|f^(k+1)(S)| then |f^(j)(S)|=|f^(k)(S)| for all j>k. The list of
@@ -24,19 +23,15 @@ iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
-from endofunction_structures import (endofunction_structures,
-                                    structure_multiplicity,
-                                    endofunction_to_func)
-                                    
+from endofunction_structures import (funcstructs, funcstruct_degeneracy,
+                                     funcstruct_to_func)
 from iteration import product_range, compositions
 from math import factorial
 from necklaces import nCk
 import numpy as np
 import unittest
 
-
 endofunctions = lambda n: product_range([n]*n)
-
 
 def imagepath(f):
     """
@@ -57,7 +52,6 @@ def imagepath(f):
         card_prev = card
     return cardinalities
 
-
 def imagedist_brute(n):
     """
     The most naive, straightforward way to calculate the distribution of
@@ -70,7 +64,6 @@ def imagedist_brute(n):
         for it, card in enumerate(im):
             M[card-1,it] += 1
     return M
-
 
 def imagedist_endofunction(n):
     """
@@ -99,17 +92,16 @@ def imagedist_endofunction(n):
         return np.array([1],dtype=object)
         
     M = np.zeros((n,n-1), dtype=object)
-    for func_struct in endofunction_structures(n):
-        mult = structure_multiplicity(func_struct)
-        f = endofunction_to_func(func_struct)
-        im = imagepath(f)
+    nfac = factorial(n)
+    for struct in funcstructs(n):
+        mult = nfac/funcstruct_degeneracy(struct)
+        func = funcstruct_to_func(struct)
+        im = imagepath(func)
         for it, card in enumerate(im):
             M[card-1,it] += mult
     return M
 
-
 imagedist = imagedist_endofunction
-
 
 def firstdist_composition(n):
     """
@@ -133,7 +125,6 @@ def firstdist_composition(n):
         F[rep-1] += val
     return F
 
-
 def firstdists_upto(N):
     """
     Left column of imagedist, corresponding to OEIS A101817 (A090657). This
@@ -155,7 +146,6 @@ def firstdists_upto(N):
 
     return FD
     
-    
 firstdist_recurse = firstdist = lambda n: list(firstdists_upto(n)[:,-1])
 
 '''
@@ -173,14 +163,12 @@ def nCk_grid(N):
             binomial_coeffs[I,J] = nCk(I,J)
     return binomial_coeffs
 
-
 def powergrid(N):
     """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
     base = np.arange(N+1, dtype=object)
     [bases, exponents] = np.meshgrid(base, base)
     exponentials = bases**exponents
     return exponentials.T
-                
                 
 def lastdist_composition(N):
     L = [0]*N
@@ -195,12 +183,10 @@ def lastdist_composition(N):
         L[comp[0]-1] += val
     for n in range(N,0,-1):
         L[n-1] *= factorial(N)/factorial(N-n)
-    return L
-    
+    return L   
     
 def limitset_count(n,k):
     return k*n**(n-k)*factorial(n-1)/factorial(n-k)
-
 
 def limitset(n):
     return [limitset_count(n,k) for k in range(1,n+1)]

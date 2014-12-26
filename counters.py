@@ -1,6 +1,7 @@
 from primes import divisors
 from rooted_trees import split_set, prod
 from PADS.IntegerPartitions import partitions
+from itertools import chain
 from math import factorial
 from fractions import Fraction
 import unittest
@@ -102,7 +103,7 @@ def partition_numbers_upto(N):
     for n in range(1,N+1):
         k_max = (isqrt(24*n+1)-1)//6
         k_min = -1*((isqrt(24*n+1)+1)//6)
-        for k in range(k_min,0)+range(1,k_max+1):
+        for k in chain(xrange(k_min,0),xrange(1,k_max+1)):
             pk = k*(3*k+1)
             P[n] += (-1)**abs((k-1)) * P[n-pk//2]
     return P

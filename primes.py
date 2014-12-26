@@ -23,7 +23,6 @@ def prime_factorization(n):
        primfac.append(n)
     return primfac
     
-    
 prime_divisors = lambda n: list(set(prime_factorization(n)))
 
 
@@ -33,7 +32,6 @@ def factorGenerator(n):
     for p, d in zip(primes, multiplicities):
         factors.append((p,d,))
     return factors
-
 
 def divisorGen(n):
     """
@@ -56,27 +54,22 @@ def divisorGen(n):
             if i >= nfactors:
                 return
 
-
 divisor_list = lambda n: list(divisorGen(n)) if n > 1 else [1]
-
 
 def divisors_memoized(n, factors={}):
     if n not in factors:
         factors[n] = divisor_list(n)
     return factors[n]
 
-
 divisors = divisors_memoized
-
 
 def divisor_sum(n, power=1):
     return sum(map(lambda x: pow(x,power), divisors(n)))
     
-
+    
 def phi_product(n):
     """Return the totient using the fancy prime formula."""
     return int(n*prod((1 - fractions.Fraction(1,p) for p in prime_divisors(n))))
-    
     
 def phi_sum(n):
     """Return the totient using its definition. Code taken directly from 
@@ -91,7 +84,6 @@ def phi_sum(n):
     
 totient = phi_sum
 
-# If run standalone, perform unit tests
 class PrimeTest(unittest.TestCase):
     def testPrimeDivisorsRepeated(self):
         """OEIS A001222: number of prime divisors with multiplicity."""

@@ -9,6 +9,7 @@ For commercial use, please contact me at caleb.levy@berkeley.edu.
 """
 from PADS.IntegerPartitions import partitions
 from itertools import combinations_with_replacement, product
+from itertools import chain
 from math import factorial
 from operator import mul
 import unittest
@@ -69,22 +70,16 @@ def mset_degeneracy(mset):
     y, d = split_set(mset)
     return factorial_prod(d)
     
-def unpack(tree):
-    """
-    Takes a list of lists and outputs a list whose elements are those of the
-    sublists.
-    """
-    packed_list = [I for I in tree if isinstance(I,(tuple,list,set))]
-    unpacked = []
-    for I in packed_list:
-        for el in I:
-            unpacked.append(el)
-    return unpacked
+def flatten(listOfLists):
+    "Flatten one level of nesting"
+    return chain.from_iterable(listOfLists)
+
+flatten_to_list = lambda iterable: list(flatten(iterable))
 
 def unsplit_set(y, d):
     """Reverse of split_set."""
     packed_list = [[y[I]]*d[I] for I in xrange(len(y))]
-    return unpack(packed_list)
+    return flatten(packed_list)
     
 def partition_forests(partition):
     y, d = split_set(partition)
@@ -93,7 +88,7 @@ def partition_forests(partition):
     seeds = [combinations_with_replacement(trees[I],d[I]) for I in xrange(l)]
     seeds = [list(seed) for seed in seeds]
     for forest in product(*seeds):
-        yield unpack(forest)
+        yield flatten(forest)
         
 def forests_complex(n):
     """
