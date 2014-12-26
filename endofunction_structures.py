@@ -20,7 +20,8 @@ def mset_functions(mset):
     necklace_lists = []
     for ind, el in enumerate(elems):
         el_necklaces = list(necklaces(el))
-        el_strands = list(combinations_with_replacement(el_necklaces, multiplicities[ind]))
+        el_strands = list(combinations_with_replacement(el_necklaces, 
+                                                        multiplicities[ind]))
         necklace_lists.append(el_strands)
         
     for bundle in product(*necklace_lists):
@@ -99,9 +100,6 @@ def funcstruct_to_func(function_structure):
             node_ind += len(tree)
         cycle_start += cycle_len
     return func
-    
-def first_iterate_multiplicity(function_structure):
-    return len(set(flatten(flatten(function_structure))))
         
 class EndofunctionStructureTest(unittest.TestCase):
     counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]

@@ -14,8 +14,8 @@ def binary_partitions(n):
         yield b
 
 def burnside_partition_degeneracy(b):
-    ss = []
-    for i in range(1,len(b)+1):
+    product_terms = []
+    for i in xrange(1,len(b)+1):
         s = 0
         for j in divisors(i):
             s += j*b[j-1]
@@ -23,15 +23,15 @@ def burnside_partition_degeneracy(b):
         t = Fraction(i,1)
         t **= (-1*b[i-1])
         s *= t
-        s //= factorial(b[i-1])
-        ss.append(s)
-    return prod(ss)
+        s /= factorial(b[i-1])
+        product_terms.append(s)
+    return prod(product_terms)
         
-def endofunction_count(n):
+def funcstruct_count(n):
     tot = 0
     for bp in binary_partitions(n):
         tot += burnside_partition_degeneracy(bp)
-    return tot
+    return int(tot)
 
 def ceildiv(a, b):
     """Does long integer division taking the ceiling instead of the floor"""
@@ -65,7 +65,7 @@ def iroot(n, k=2):
     hi = 1
     while pow(hi, k) < n:
         hi *= 2
-    lo = hi // 2
+    lo = hi / 2
     while hi - lo > 1:
         mid = (lo + hi) // 2
         midToK = pow(mid, k)
@@ -111,9 +111,14 @@ def partition_numbers_upto(N):
 partition_number = lambda n: partition_numbers_upto(n)[-1]
 
 class CounterTest(unittest.TestCase):
+    def testEndofunctionStructureCount(self):
+        counts = [1, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
+        for n in range(len(counts)):
+            self.assertEqual(counts[n], funcstruct_count(n))
+            
     def testIntegerRoots(self):
         for val in range(1000)+range(2**96,2**96+100):
-            for power in range(2,5):
+            for power in range(1,5):
                 self.assertTrue(iroot(val,power)**power <= val)
                 self.assertTrue(val < (iroot(val,power)+1)**power)
                 
