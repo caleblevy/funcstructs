@@ -1,14 +1,37 @@
 #!/usr/bin/env python
-"""
-Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# 
+# This program is free for personal use. If you plan to:
+# any code from 
+# YOU MUST READ THE TERMS OF USE
+# BEFORE PUBLICLY RELEASING OR MONETIZING ANY PROGRAMS, CODE OR IDEAS BASED ON
+# THE CODE IN THIS PROJECT.
 
-The terms  of non-commercial usage of  this code are simply  providing credit of
-some variety,  either in the  typical list of  contributors section of  the code
-repository or,  if used for an  academic paper, some contribution  in the paper.
-For commercial use, please contact me at caleb.levy@berkeley.edu.
+
+# The terms of non-commercial usage of this code are simply providing credit of
+# some variety, either in the typical list of contributors section of the code
+# repository or, if used for an academic paper, some contribution in the paper.
+# For commercial use, please contact me at caleb.levy@berkeley.edu.
+
 """
-from PADS.IntegerPartitions import partitions
+A rooted tree is a connected digraph with a single cycle such that every node's
+outdegree and every cycle's length is exactly one. Alternatively, it is a tree
+with a designated "root" node, where every path ends with the root. They are
+equivalent to filesystems consisting entirely of folders with no symbolic
+links. An unlablled rooted tree is the equivalence class of a given directory
+where folders in each subdirectory may be rearranged in any desired order
+(alphebetical, reverse-alphabetical, date added, or any other permutation). A
+forest is any collection of rooted trees.
+
+Any endofunction structure may be represented as a forest of trees, grouped
+together in multisets corresponding to cycle decompositions of the final set
+(the subset of its domain on which it is invertible). The orderings of the
+trees in the multisets correspond to necklaces whose beads are the trees
+themselves.
+"""
 from itertools import combinations_with_replacement, product
+from PADS.IntegerPartitions import partitions
+from functools import reduce
 from itertools import chain
 from math import factorial
 from operator import mul
@@ -186,6 +209,3 @@ class TreeTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    
-                    
-    
