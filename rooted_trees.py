@@ -1,17 +1,12 @@
 #!/usr/bin/env python
 # Copyright (C) 2014 Caleb Levy - All Rights Reserved.
 # 
-# This program is free for personal use. If you plan to:
-# any code from 
-# YOU MUST READ THE TERMS OF USE
-# BEFORE PUBLICLY RELEASING OR MONETIZING ANY PROGRAMS, CODE OR IDEAS BASED ON
-# THE CODE IN THIS PROJECT.
-
-
 # The terms of non-commercial usage of this code are simply providing credit of
 # some variety, either in the typical list of contributors section of the code
-# repository or, if used for an academic paper, some contribution in the paper.
-# For commercial use, please contact me at caleb.levy@berkeley.edu.
+# repository or, if used for an academic paper, it must be cited in the
+# references. For commercial use (any application of the ideas or code contained
+# in this project employed for monetary gain directly or in a project aiding
+# toward monetary gain), please contact me at caleb.levy@berkeley.edu.
 
 """
 A rooted tree is a connected digraph with a single cycle such that every node's
