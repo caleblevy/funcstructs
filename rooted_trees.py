@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # Copyright (C) 2014 Caleb Levy - All Rights Reserved.
 # 
-# The terms of non-commercial usage of this code are simply providing credit of
-# some variety, either in the typical list of contributors section of the code
-# repository or, if used for an academic paper, it must be cited in the
-# references. For commercial use (any application of the ideas or code contained
-# in this project employed for monetary gain directly or in a project aiding
-# toward monetary gain), please contact me at caleb.levy@berkeley.edu.
+# The terms of use, license and copyright information for the code and ideas 
+# contained herein are described in the LICENSE file included with this 
+# project. For more information please contact me at caleb.levy@berkeley.edu.
 
 """
 A rooted tree is a connected digraph with a single cycle such that every node's
@@ -83,7 +80,7 @@ def split_set(partition):
     """Splits a multiset into elements and multiplicities."""
     y = list(set(partition))
     d = [partition.count(y[I]) for I in xrange(len(y))]
-    return y,d
+    return y, d
 
 def mset_degeneracy(mset):
     y, d = split_set(mset)

@@ -1,4 +1,11 @@
-"""endofunctions.py
+#!/usr/bin/env python
+# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# 
+# The terms of use, license and copyright information for the code and ideas 
+# contained herein are described in the LICENSE file included with this 
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
+"""
 Let S be a finite set with N elements; i.e. |S|=N. There are N^N endofunctions
 defined on this set, and we shall denote the set of all such objects by S^S.
 

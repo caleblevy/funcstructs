@@ -1,6 +1,11 @@
-#! /usr/bin/env python
-"""polynomials.py
+#!/usr/bin/env python
+# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# 
+# The terms of use, license and copyright information for the code and ideas 
+# contained herein are described in the LICENSE file included with this 
+# project. For more information please contact me at caleb.levy@berkeley.edu.
 
+"""
 Enumerate and produce polynomials of various kinds.
 
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.

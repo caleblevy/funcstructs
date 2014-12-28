@@ -1,5 +1,11 @@
-#! /usr/bin/env python
-"""endofunction_structures.py
+#!/usr/bin/env python
+# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# 
+# The terms of use, license and copyright information for the code and ideas 
+# contained herein are described in the LICENSE file included with this 
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
+"""
 Enumerate every conjugacy class of graphs on N nodes with outdegree one for
 every vertex. As far as I know this is original work, and endofunction
 structures have not been enumerated anywhere else.

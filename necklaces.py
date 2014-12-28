@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# 
+# The terms of use, license and copyright information for the code and ideas 
+# contained herein are described in the LICENSE file included with this 
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 """
 When you were in first grade you may have gotten to play with strings and a bucket of beads of different shapes and colors. By stringing together different colored beads and tying the ends of the rope together you could make different necklaces. You can wear necklaces in different ways by rotating them.
 

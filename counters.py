@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# 
+# The terms of use, license and copyright information for the code and ideas 
+# contained herein are described in the LICENSE file included with this 
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 from primes import divisors
 from rooted_trees import split_set, prod
 from PADS.IntegerPartitions import partitions
