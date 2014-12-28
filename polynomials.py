@@ -28,9 +28,11 @@ def _recursive_monomial_alg(x, d, y):
     monomial polynomials. This one, while inefficient, is certainly in some
     sense elegant, and is written as such for that reason.
 
-    This function itero-recursive and HIGHLY inefficient, duplicating an extraordinary amount of work. It exists as a
-    showcase of the concepts behind MSP_iterative. Its running time might be something like len(y)^len(x), but either
-    way, do not run this thing with input vectors of length greater than about 5 ot 10, depending on your system.
+    This function itero-recursive and HIGHLY inefficient, duplicating an
+    extraordinary amount of work. It exists as a showcase of the concepts
+    behind MSP_iterative. Its running time might be something like
+    len(y)^len(x), but either way, do not run this thing with input vectors of
+    length greater than about 5 ot 10, depending on your system.
 
     X = (a1,a2,...,an) - Vector of values for polynomial evaluation
     D = (d1,d2,...,dl) - Vector of degeneracies of exponent partitions
@@ -61,13 +63,17 @@ def _recursive_monomial_alg(x, d, y):
 # Not sure how to check this one, as there aren't many algorithms to compare against.
 def MSP_iterative(x, powers):
     """
-    Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed from the partition of powers
-    partition=[p_1,...,p_l]. It is equivalent to the sum (x[a[1]]**p_1)*(x[a[2]]**p_2)*...*(x[a[I]]**p_l) over all a
-    such that a[I] != a[J] for 0<=I<J<=l-1 which are not equivalent under permutation (I think anyway...).
+    Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed
+    from the partition of powers partition=[p_1,...,p_l]. It is equivalent to
+    the sum (x[a[1]]**p_1)*(x[a[2]]**p_2)*...*(x[a[I]]**p_l) over all a such
+    that a[I] != a[J] for 0<=I<J<=l-1 which are not equivalent under
+    permutation (I think anyway...).
 
-    If there are distinct powers p_1,...,p_j with multiplicities m_1,...,m_j and the list x has n elements then the
-    algorithm runs in O(n*m_1*...*m_j) steps, and takes O(m_1*...*m_j) memory in the form of an array of just as many
-    dimensions. Inputs may be symbolic, or anything you like.
+
+    If there are distinct powers p_1,...,p_j with multiplicities m_1,...,m_j
+    and the list x has n elements then the algorithm runs in O(n*m_1*...*m_j)
+    steps, and takes O(m_1*...*m_j) memory in the form of an array of just as
+    many dimensions. Inputs may be symbolic, or anything you like.
     """
     n = len(x)
     y, d = split_set(powers)
@@ -115,13 +121,10 @@ def symrange(*args):
     for I in range(*args):
         x.append(Symbol('x%s'%str(I)))
     return x
+    
 class PolynomialTest(unittest.TestCase):
     def testMonomialSymmetricPolynomial(self):
         x = symrange(14)
-        # p = 
-        
-
-
         
 if __name__ == '__main__':
     print MSP_recursive([5,5,5],[3,3,2])

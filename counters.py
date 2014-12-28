@@ -13,7 +13,13 @@ from math import factorial
 from fractions import Fraction
 import unittest
 
-def binary_partitions(n):
+def tuple_partition(n):
+    """
+    Every partition on N may be represented in the form as a tuple of numbers
+    (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N.
+    
+    This program outputs every partition of n in a tuple format.
+    """
     for part in partitions(n):
         b = [0]*n
         for p in part:
@@ -36,7 +42,7 @@ def burnside_partition_degeneracy(b):
         
 def funcstruct_count(n):
     tot = 0
-    for bp in binary_partitions(n):
+    for bp in tuple_partitions(n):
         tot += burnside_partition_degeneracy(bp)
     return int(tot)
 
