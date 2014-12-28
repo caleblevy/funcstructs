@@ -22,7 +22,7 @@ def binary_partitions(n):
 
 def burnside_partition_degeneracy(b):
     product_terms = []
-    for i in xrange(1,len(b)+1):
+    for i in range(1,len(b)+1):
         s = 0
         for j in divisors(i):
             s += j*b[j-1]
@@ -72,7 +72,7 @@ def iroot(n, k=2):
     hi = 1
     while pow(hi, k) < n:
         hi *= 2
-    lo = hi / 2
+    lo = hi // 2
     while hi - lo > 1:
         mid = (lo + hi) // 2
         midToK = pow(mid, k)
@@ -110,7 +110,7 @@ def partition_numbers_upto(N):
     for n in range(1,N+1):
         k_max = (isqrt(24*n+1)-1)//6
         k_min = -1*((isqrt(24*n+1)+1)//6)
-        for k in chain(xrange(k_min,0),xrange(1,k_max+1)):
+        for k in chain(range(k_min,0),range(1,k_max+1)):
             pk = k*(3*k+1)
             P[n] += (-1)**abs((k-1)) * P[n-pk//2]
     return P
@@ -124,7 +124,7 @@ class CounterTest(unittest.TestCase):
             self.assertEqual(counts[n], funcstruct_count(n))
             
     def testIntegerRoots(self):
-        for val in range(1000)+range(2**96,2**96+100):
+        for val in chain(range(1000),range(2**96,2**96+100)):
             for power in range(1,5):
                 self.assertTrue(iroot(val,power)**power <= val)
                 self.assertTrue(val < (iroot(val,power)+1)**power)

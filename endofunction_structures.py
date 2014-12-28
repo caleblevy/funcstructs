@@ -63,9 +63,9 @@ def tree_to_func(tree, permutation=None):
     """
     n = len(tree)
     if permutation is None:
-        permutation = range(n)
+        permutation = list(range(n))
     height = max(tree)
-    func = range(n)
+    func = [0]*n
     func[0] = permutation[0]
     height_prev = 1
     # Most recent node found at height h. Where to graft the next node to.
@@ -85,7 +85,8 @@ def _treeform_of_noncyclic_nodes(function_structure):
     func = []
     for tree in flatten(function_structure):
         l = len(tree)
-        func_tree = tree_to_func(tree, permutation=range(tree_start, tree_start+l)) 
+        tree_perm = list(range(tree_start, tree_start+l))
+        func_tree = tree_to_func(tree, permutation=tree_perm)
         func.extend(func_tree)
         tree_start += l
     return func

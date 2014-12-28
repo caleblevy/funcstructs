@@ -32,6 +32,7 @@ from rooted_trees import prod, split_set
 from primes import divisors, totient
 from math import factorial
 from collections import deque
+from functools import reduce
 import unittest
 
 def nCk(n,k): 
@@ -53,9 +54,9 @@ def necklace_count_totient(partition):
     m = len(factors)
     beads = [0]*m
     
-    for I in xrange(m):
+    for I in range(m):
         beads[I] = Fraction(totient(factors[I])*factorial(n/factors[I]),n)
-        for J in xrange(k):
+        for J in range(k):
             beads[I] /= factorial(partition[J]/factors[I])
 
     return int(sum(beads))
@@ -85,7 +86,7 @@ def partition_necklace_count_by_periodicity(partition):
         n = period = factor*p0
         beads[factor-1] = 1
         # The number of character permutations is simply the multinomial coefficient corresponding to that subset of the multiplicity partition.
-        for I in xrange(k):
+        for I in range(k):
             beads[factor-1] *= nCk(n, partition[I]*factor/w)
             n -= partition[I]*factor/w
             
@@ -136,7 +137,7 @@ def _partition_necklaces(a, partition, t, p, k):
     if t > n and not(n % p):
         yield a
     else:
-        for j in xrange(a[t-p-1],k):
+        for j in range(a[t-p-1],k):
             if partition[j] > 0:
                 a[t-1] = j
                 partition[j] -= 1
@@ -184,7 +185,7 @@ class NecklaceTests(unittest.TestCase):
         for n in range(1,N+1):
             for d in divisors(n):
                 # Creates lists of each periodicity
-                period_dn = ([0]+[1]*(d-1))*(n/d)
+                period_dn = ([0]+[1]*(d-1))*(n//d)
                 self.assertEqual(d, periodicity(period_dn))          
                 
     def testNecklaceCounts(self):

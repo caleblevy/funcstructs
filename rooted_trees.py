@@ -41,7 +41,7 @@ def successor_tree(L):
     q = p-1
     while L[q] >= L[p]:
         q -= 1
-    for I in xrange(p,N):
+    for I in range(p,N):
         L[I] = L[I-(p-q)]
 
 def rooted_trees(N):
@@ -70,7 +70,7 @@ def rooted_trees(N):
     elif N == 2:
         yield (1,2)
         return
-    L = [I+1 for I in xrange(N)]
+    L = [I+1 for I in range(N)]
     yield L
     while L[1] != L[2]:
         successor_tree(L)
@@ -79,7 +79,7 @@ def rooted_trees(N):
 def split_set(partition):
     """Splits a multiset into elements and multiplicities."""
     y = list(set(partition))
-    d = [partition.count(y[I]) for I in xrange(len(y))]
+    d = [partition.count(y[I]) for I in range(len(y))]
     return y, d
 
 def mset_degeneracy(mset):
@@ -94,7 +94,7 @@ flatten_to_list = lambda iterable: list(flatten(iterable))
 
 def unsplit_set(y, d):
     """Reverse of split_set."""
-    packed_list = [[y[I]]*d[I] for I in xrange(len(y))]
+    packed_list = [[y[I]]*d[I] for I in range(len(y))]
     return flatten(packed_list)
     
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
@@ -103,7 +103,7 @@ def partition_forests(partition):
     y, d = split_set(partition)
     l = len(y)
     trees = [tree_tuples(I) for I in y]
-    pre_seed = [combinations_with_replacement(trees[I],d[I]) for I in xrange(l)]
+    pre_seed = [combinations_with_replacement(trees[I],d[I]) for I in range(l)]
     seeds = [list(seed) for seed in pre_seed]
     for forest in product(*seeds):
         yield tuple(flatten(forest))

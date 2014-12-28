@@ -23,7 +23,7 @@ def prime_factorization(n):
     while d*d <= n:
         while (n % d) == 0:
             primfac.append(d)  # supposing you want multiple factors repeated
-            n /= d
+            n //= d
         d += 1
     if n > 1:
        primfac.append(n)
@@ -49,7 +49,7 @@ def divisorGen(n):
     nfactors = len(factors)
     f = [0] * nfactors
     while True:
-        yield prod([factors[x][0]**f[x] for x in xrange(nfactors)])
+        yield prod([factors[x][0]**f[x] for x in range(nfactors)])
         i = 0
         while True:
             f[i] += 1
@@ -72,7 +72,6 @@ divisors = divisors_memoized
 def divisor_sum(n, power=1):
     return sum(map(lambda x: pow(x,power), divisors(n)))
     
-    
 def phi_product(n):
     """Return the totient using the fancy prime formula."""
     return int(n*prod((1 - fractions.Fraction(1,p) for p in prime_divisors(n))))
@@ -83,7 +82,7 @@ def phi_sum(n):
         http://stackoverflow.com/a/18114286
     """
     phi = 0
-    for k in xrange(1, n + 1):
+    for k in range(1, n + 1):
         if fractions.gcd(n, k) == 1:
             phi += 1
     return int(phi)

@@ -67,7 +67,7 @@ def compositions_simple(n):
         J = len(comp)
         if J == n:
             return
-        for K in xrange(J-1,-1,-1):
+        for K in range(J-1,-1,-1):
             # Keep descending (backwards) until hitting a "step" you can 
             # subtract from
             if comp[K] is not 1:
@@ -84,7 +84,7 @@ def _min_part(n,L):
     err = n - L*h
     bas = L - err
     j = bas + 1
-    if h <> 1:
+    if h != 1:
         j = 1
     return [h+1]*err + [h]*bas, j
 

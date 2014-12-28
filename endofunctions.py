@@ -142,13 +142,13 @@ def firstdists_upto(N):
     latex it up. Derived from the ideas in the first one.
     """
     FD = np.zeros((N,N), dtype=object)
-    for n in xrange(N):
+    for n in range(N):
         FD[0,n] = FD[n,n] = 1
-        for I in xrange(n):
+        for I in range(n):
             FD[I,n] = FD[I-1,n-1] + (I+1)*FD[I,n-1]
     
-    for n in xrange(N):
-        for I in xrange(n+1):
+    for n in range(N):
+        for I in range(n+1):
             FD[I,n] *= factorial(n+1)/factorial(n-I)
 
     return FD
@@ -163,8 +163,8 @@ Right column: OEIS A066324, A219694 (reverse), A243203
 def nCk_grid(N):
     """nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
     binomial_coeffs = np.zeros((N+1, N+1), dtype=object)
-    for I in xrange(N+1):
-        for J in xrange(N+1):
+    for I in range(N+1):
+        for J in range(N+1):
             if J > I:
                 continue
             binomial_coeffs[I,J] = nCk(I,J)
