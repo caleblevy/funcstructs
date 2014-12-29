@@ -5,8 +5,8 @@
 # contained herein are described in the LICENSE file included with this 
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-from itertools import product
 from collections import Iterable
+from itertools import product
 from time import time
 import unittest
 
@@ -31,17 +31,15 @@ def product_range(start, stop=None, step=None):
     If stop==step==None then start is treated as stop and step is set by
     default to 1 and start to 0. If start and step are integers they are
     transformed into start = [start]*len(stop) and step = [step]*len(step).
-
     """
+    
     if stop is None:
         start, stop = stop, start
     # If start is not iterable, it is either an int or none.
     if not isinstance(start, Iterable):
-        start = 0 if(start is None) else start
-        start = [start]*len(stop)        
+        start = [0 if(start is None) else start]*len(stop)
     if not isinstance(step, Iterable):
-        step = 1 if(step is None) else step
-        step = [step]*len(stop)
+        step = [1 if(step is None) else step]*len(stop)
     if not len(start) == len(step) == len(stop):
         raise ValueError("start, stop and step must all be same length.")
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
@@ -79,20 +77,42 @@ def compositions_simple(n):
 
 compositions = compositions_simple # best by test.
 
-def _min_part(n,L): 
-    h = n/L
-    err = n - L*h
-    bas = L - err
-    j = bas + 1
-    if h != 1:
-        j = 1
-    return [h+1]*err + [h]*bas, j
+def _min_part(n,L):
+    """
+    Helper function for fixed_lex_partitions. Returns a tuple containing:
+        1) The output of minimal_partition(n,L)
+        2) #(Occurances of 1 in this partition)+1.
+
+    The second output is returned so as to avoid calling the count() method of
+    the list corresponding to the partition, since this information is
+    necessarily contained in the process of its creation. It is needed by
+    fixed_lexed_partitions for the index on which to decrement.
+    """
+    
+    binsize = n//L 
+    overstuffed = n - L*binsize 
+    regular = L - overstuffed
+    ones_count = 1 if binsize != 1 else regular + 1
+    return [binsize+1]*overstuffed + [binsize]*regular, ones_count
 
 def minimal_partition(n,L):
+    """
+    A wrapper for _min_partition. Given integers n > 0 and L <= n, returns the
+    lexicographically smallest unordered integer partition of n into L nonzero
+    parts.
+    """
+    
     min_part, _ = _min_part(n,L)
     return min_part     
 
 def fixed_lex_partitions(n,L):
+    """
+    Integer partitions of n into L parts, in lexicographic order. This
+    algorithm was derived and implemented by Caleb C. Levy in 2014. Its form
+    was taken from David Eppstein's equivalent generator for fixed length
+    partitions in colex order.
+    """
+    
     if L == 0:
         if n == 0:
             yield []
@@ -109,14 +129,14 @@ def fixed_lex_partitions(n,L):
         yield partition                   
         k = 2
         s = (j-1) + partition[L-j] - 1
-        while partition[L-j-k] == partition[L-j-1] and j+k-1<L:
+        while j+k-1<L and partition[L-j-k] == partition[L-j-1]:
             s += partition[L-j-1]
             k += 1            
         if j+k-1 > L:
             return                        
         k -= 1
         partition[L-j-k] += 1
-        partition[L-j-k+1:L], j = _min_part(s,j+k-1)    
+        partition[L-j-k+1:L], j = _min_part(s,j+k-1)   
 
 def inv(perm):
     """Invert a permutation of integers I=1...n. """
@@ -125,7 +145,22 @@ def inv(perm):
         inverse[p] = i
     return inverse 
 
+
+from PADS.IntegerPartitions import lex_partitions
+from rooted_trees import prod
+
 class IterationTest(unittest.TestCase):
+    
+    def testProductRange(self):
+        
+        starts = [None,   0,      1,      (1,)*4,  (3,)*4, (1,2,3,3)]
+        stops =  [(4,)*4, (4,)*4, (7,)*3, (10,)*4, (6,)*4, (2,4,8,10)]
+        steps =  [1,      None,   2,      3,       None,   (1,1,2,2)]
+        counts = [4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
+        
+        for count, start, stop, step in zip(counts, starts, stops, steps):
+            self.assertEqual(count, len(list(product_range(start, stop, step))))
+            self.assertEqual(prod(stop), len(list(product_range(stop))))
     
     def testCompositionCounts(self):
         for n in range(1,10):
@@ -138,6 +173,27 @@ class IterationTest(unittest.TestCase):
                 self.assertEqual(n, sum(comp))
             for comp in compositions_binary(n):
                 self.assertEqual(n, sum(comp))
+    
+    def testSmallestPartition(self):
+        N = 20
+        for n in range(1,N):
+            for L in range(1,n+1):
+                mp = minimal_partition(n,L)
+                self.assertTrue(max(mp) - min(mp) in [0,1])
+                self.assertTrue(len(mp) == L)
+                self.assertTrue(sum(mp) == n)
+    
+    def testFixedLexPartitions(self):
+        """Check that the fixed length lex partition outputs are correct."""
+        N = 15
+        for n in range(N):
+            pn = [list(p) for p in lex_partitions(n)]
+            np = 0
+            for L in range(n+1):
+                pnL = [list(p) for p in fixed_lex_partitions(n,L)]
+                np += len(pnL)
+                self.assertEqual(pnL,[p for p in pn if len(p) == L])
+            self.assertEqual(np,len(pn))
                 
 if __name__ == '__main__':
     unittest.main()

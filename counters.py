@@ -5,12 +5,12 @@
 # contained herein are described in the LICENSE file included with this 
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-from primes import divisors
-from rooted_trees import split_set, prod
 from PADS.IntegerPartitions import partitions
+from rooted_trees import split_set, prod
+from fractions import Fraction
+from primes import divisors
 from itertools import chain
 from math import factorial
-from fractions import Fraction
 import unittest
 
 def tuple_partitions(n):

@@ -27,12 +27,12 @@ precisely the distinct ways of connecting the trees to form a cycle of length
 n. Thus the ways of connecting a collection of rooted trees together in a cycle
 are precisely the necklaces whose beads are the rooted trees.
 """
-from fractions import gcd, Fraction
 from rooted_trees import prod, split_set
 from primes import divisors, totient
-from math import factorial
+from fractions import gcd, Fraction
 from collections import deque
 from functools import reduce
+from math import factorial
 import unittest
 
 def nCk(n,k): 
@@ -60,7 +60,7 @@ def necklace_count_totient(partition):
 
     return int(sum(beads))
     
-def partition_necklace_count_by_periodicity(partition):
+def partition_necklace_count_by_period(partition):
     """
     Given a partition of multiplicities, returns the number of necklaces on
     this partition of beads of each possible period of the necklace. To this,
@@ -98,15 +98,15 @@ def partition_necklace_count_by_periodicity(partition):
         beads[factor-1] /= period
     return beads
     
-def necklace_count_by_periodicity(beads):
+def necklace_count_by_period(beads):
     """
     Returns a list whose kth element is the number of necklaces corresponding
     to the input set of beads with k+1 distinct rotations.
     """
     _, partition = split_set(beads)
-    return partition_necklace_count_by_periodicity(partition)
+    return partition_necklace_count_by_period(partition)
 
-necklace_count = lambda items: sum(necklace_count_by_periodicity(items))
+necklace_count = lambda items: sum(necklace_count_by_period(items))
 
 def partition_necklaces(partition):
     """ 
@@ -192,7 +192,7 @@ class NecklaceTests(unittest.TestCase):
         color_cardinalities = [600873126148801, 70, 51330759480000]
         for cp, cc in zip(color_partitions, color_cardinalities):
             self.assertEqual(cc, necklace_count_totient(cp))
-            self.assertEqual(cc, sum(partition_necklace_count_by_periodicity(cp)))
+            self.assertEqual(cc, sum(partition_necklace_count_by_period(cp)))
         
     def testNecklaces(self):
         beadsets = [[4,4,5,5,2,2,2,2,2,2,6,6], [4,4,5,5,2,2,2,2,2,2,6,6,6], [0]]

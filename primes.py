@@ -9,8 +9,8 @@
 A collection of short functions for enumerating factorizations of integers and
 other such things.
 """
-import fractions
 from rooted_trees import prod, split_set
+import fractions
 import unittest
 
 def prime_factorization(n):
