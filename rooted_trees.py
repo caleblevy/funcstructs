@@ -65,10 +65,10 @@ def rooted_trees(N):
     if N == 0:
         return
     elif N == 1:
-        yield (1,)
+        yield [1,]
         return
     elif N == 2:
-        yield (1,2)
+        yield [1,2]
         return
     L = [I+1 for I in range(N)]
     yield L
@@ -160,10 +160,10 @@ forests = forests_simple
 def tree_degeneracy(tree):
     """
     To calculate the degeneracy of a collection of subtrees you start with the
-    lowest branches and then work downwards. If a group of nodes can be
-    "swapped" on the same level then they are identical for all intents and
-    purposes, and therefore we divide by the factorial of their multiplicity.
-    The same principal applies to subtrees.
+    lowest branches and then work upwards. If a group of identical subbranches
+    are connected to the same node, we multiply the degeneracy of the tree by
+    the factorial of the multiplicity of these subbranches to account for their
+    distinct orderings. The same principal applies to subtrees.
 
     TODO: A writeup of this with diagrams will be in the notes.
     """

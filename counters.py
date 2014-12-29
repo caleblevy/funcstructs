@@ -13,7 +13,7 @@ from math import factorial
 from fractions import Fraction
 import unittest
 
-def tuple_partition(n):
+def tuple_partitions(n):
     """
     Every partition on N may be represented in the form as a tuple of numbers
     (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N.
@@ -28,15 +28,12 @@ def tuple_partition(n):
 
 def burnside_partition_degeneracy(b):
     product_terms = []
-    for i in range(1,len(b)+1):
+    for I in range(1,len(b)+1):
         s = 0
-        for j in divisors(i):
-            s += j*b[j-1]
-        s **= b[i-1]
-        t = Fraction(i,1)
-        t **= (-1*b[i-1])
-        s *= t
-        s /= factorial(b[i-1])
+        for J in divisors(I):
+            s += J*b[J-1]
+        s **= b[I-1]
+        s *= Fraction(I,1)**(-b[I-1])/factorial(b[I-1])
         product_terms.append(s)
     return prod(product_terms)
         
@@ -115,7 +112,7 @@ def partition_numbers_upto(N):
     P = [1]+[0]*N
     for n in range(1,N+1):
         k_max = (isqrt(24*n+1)-1)//6
-        k_min = -1*((isqrt(24*n+1)+1)//6)
+        k_min = -((isqrt(24*n+1)+1)//6)
         for k in chain(range(k_min,0),range(1,k_max+1)):
             pk = k*(3*k+1)
             P[n] += (-1)**abs((k-1)) * P[n-pk//2]

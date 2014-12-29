@@ -22,7 +22,7 @@ contains a collection of functions for counting and enumerating necklaces of a
 given multiset.
 
 Their relavence to enumerating endofunction structures is as follows: given a
-collection of N forests, the necklaces whose beads are the forest's trees are
+collection of N forests, the necklaces whose beads are the forests' trees are
 precisely the distinct ways of connecting the trees to form a cycle of length
 n. Thus the ways of connecting a collection of rooted trees together in a cycle
 are precisely the necklaces whose beads are the rooted trees.
@@ -36,7 +36,6 @@ from functools import reduce
 import unittest
 
 def nCk(n,k): 
-    """Binomial coefficient (n k) = n choose k."""
     return factorial(n)/factorial(k)/factorial(n-k)
 
 # We may canonically represent a multiset with an unordered partition corresponding to the multiplicities of the elements. It is simpler to enumerate necklaces on a canonical partition and then match those to necklaces formed from the beads.
