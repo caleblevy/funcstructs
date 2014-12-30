@@ -101,7 +101,7 @@ def imagedist_endofunction(n):
     M = np.zeros((n,n-1), dtype=object)
     nfac = factorial(n)
     for struct in funcstructs(n):
-        mult = nfac/funcstruct_degeneracy(struct)
+        mult = nfac//funcstruct_degeneracy(struct)
         func = funcstruct_to_func(struct)
         im = imagepath(func)
         for it, card in enumerate(im):
@@ -112,7 +112,7 @@ imagedist = imagedist_endofunction
 
 def firstdist_composition(n):
     """
-    Produces OEIS A101817 using integer compositions in O(2^n) time.
+    Produces left column of imagedist using integer compositions in O(2^n) time.
     
     The idea of the agorithm comes from a binary tree. Need to find it.
     """
@@ -134,9 +134,9 @@ def firstdist_composition(n):
 
 def firstdists_upto(N):
     """
-    Left column of imagedist, corresponding to OEIS A101817 (A090657). This
-    uses a recursion relation to run in O(n^2) time. This is the fastest method
-    I know of and probably the fastest there is.
+    Left column of imagedist. This uses a recursion relation to run in O(n^2)
+    time. This is the fastest method I know of and probably the fastest there
+    is.
 
     # TODO - Figure out the logic that went into this and the previous one and
     latex it up. Derived from the ideas in the first one.
@@ -149,7 +149,7 @@ def firstdists_upto(N):
     
     for n in range(N):
         for I in range(n+1):
-            FD[I,n] *= factorial(n+1)/factorial(n-I)
+            FD[I,n] *= factorial(n+1)//factorial(n-I)
 
     return FD
     
@@ -189,34 +189,38 @@ def lastdist_composition(N):
             val *= binomial_coefficients[sum(comp[J:]), comp[J]]
         L[comp[0]-1] += val
     for n in range(N,0,-1):
-        L[n-1] *= factorial(N)/factorial(N-n)
+        L[n-1] *= factorial(N)//factorial(N-n)
     return L   
     
 def limitset_count(n,k):
-    return k*n**(n-k)*factorial(n-1)/factorial(n-k)
+    return k*n**(n-k)*factorial(n-1)//factorial(n-k)
 
 def limitset(n):
     return [limitset_count(n,k) for k in range(1,n+1)]
                 
 class EndofunctionTest(unittest.TestCase):
     imagedists = [
-        np.array([[3, 9],
-                  [18, 12],
-                  [6, 6]],
-                  dtype=object),
+        np.array([
+            [3, 9],
+            [18, 12],
+            [6, 6]],
+            dtype=object),
                   
-        np.array([[4, 40, 64,],
-                  [84, 120, 96],
-                  [144, 72, 72],
-                  [24, 24, 24]],
-                  dtype=object),
+        np.array([
+            [4, 40, 64,],
+            [84, 120, 96],
+            [144, 72, 72],
+            [24, 24, 24]],
+            dtype=object),
                   
-        np.array([[5, 205, 505, 625],
-                  [300, 1060, 1120, 1000],
-                  [1500, 1260, 900, 900],
-                  [1200, 480, 480, 480],
-                  [120, 120, 120, 120]], 
-                  dtype=object)]
+        np.array([
+            [5, 205, 505, 625],
+            [300, 1060, 1120, 1000],
+            [1500, 1260, 900, 900],
+            [1200, 480, 480, 480],
+            [120, 120, 120, 120]], 
+            dtype=object)
+    ]
     
     firstdists = [
         [2,2],
@@ -224,7 +228,17 @@ class EndofunctionTest(unittest.TestCase):
         [4,84,144,24],
         [5,300,1500,1200,120],
         [6,930,10800,23400,10800,720],
-        [7,2646,63210,294000,352800,105840,5040]]
+        [7,2646,63210,294000,352800,105840,5040]
+    ]
+    
+    lastdists = [
+        [2,2],
+        [9,12,6],
+        [64,96,72,24],
+        [625,1000,900,480,120],
+        [7776,12960,12960,8640,3600,720],
+        [117649,201684,216090,164640,88200,30240,5040]
+    ]
         
     def testImagepath(self):
         """Check various special and degenerate cases, with right index"""
@@ -252,7 +266,10 @@ class EndofunctionTest(unittest.TestCase):
             np.testing.assert_array_equal(dist, imagedist_endofunction(n))
     
     def testFirstdist(self):
-        """Test number of endofunctions on n elements with image has size k."""
+        """
+        OEIS A101817: T(n,h) = number of functions f:{1,2,...,n}->{1,2,...,n}
+        such that |Image(f)|=h; h=1,2,...,n, n=1,2,3,...
+        """
         for dist in self.firstdists:
             n = len(dist)
             self.assertEqual(dist, firstdist_composition(n))
@@ -275,6 +292,18 @@ class EndofunctionTest(unittest.TestCase):
                     self.assertEqual(1, exponentials[I,J])
                 else:
                     self.assertEqual(I**J, exponentials[I,J])
+    
+    def testLastdist(self):
+        """
+        OEIS A066324: Number of endofunctions on n labeled points constructed
+        from k rooted trees.
+        """
+        for dist in self.lastdists:
+            n = len(dist)
+            self.assertEqual(dist, lastdist_composition(n))
+            self.assertEqual(dist, list(imagedist(n)[:,-1]))
+            self.assertEqual(dist, limitset(n))
+        
         
 if __name__ == '__main__':
     unittest.main()

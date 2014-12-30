@@ -196,7 +196,7 @@ class TreeTest(unittest.TestCase):
         for n in range(1,len(self.counts)):
             labelled_treecount = 0
             for tree in rooted_trees(n):
-                labelled_treecount += factorial(n)/tree_degeneracy(tree)
+                labelled_treecount += factorial(n)//tree_degeneracy(tree)
             self.assertEqual(n**(n-1), labelled_treecount)
 
 if __name__ == '__main__':

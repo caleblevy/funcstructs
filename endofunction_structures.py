@@ -135,7 +135,7 @@ class EndofunctionStructureTest(unittest.TestCase):
             nfac = factorial(n)
             func_count = 0
             for funcstruct in funcstructs(n):
-                func_count += nfac/funcstruct_degeneracy(funcstruct)
+                func_count += nfac//funcstruct_degeneracy(funcstruct)
             self.assertEqual(n**n, func_count)
 
 if __name__ == '__main__':

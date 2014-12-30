@@ -36,7 +36,7 @@ from math import factorial
 import unittest
 
 def nCk(n,k): 
-    return factorial(n)/factorial(k)/factorial(n-k)
+    return factorial(n)//factorial(k)//factorial(n-k)
 
 # We may canonically represent a multiset with an unordered partition corresponding to the multiplicities of the elements. It is simpler to enumerate necklaces on a canonical partition and then match those to necklaces formed from the beads.
 
@@ -54,9 +54,9 @@ def necklace_count_totient(partition):
     beads = [0]*m
     
     for I in range(m):
-        beads[I] = Fraction(totient(factors[I])*factorial(n/factors[I]),n)
+        beads[I] = Fraction(totient(factors[I])*factorial(n//factors[I]),n)
         for J in range(k):
-            beads[I] /= factorial(partition[J]/factors[I])
+            beads[I] /= factorial(partition[J]//factors[I])
 
     return int(sum(beads))
     
@@ -75,7 +75,7 @@ def partition_necklace_count_by_period(partition):
     k = len(partition)
     N = sum(partition)
     w = reduce(gcd, partition)
-    p0 = N/w
+    p0 = N//w
     
     factors = divisors(w)
     beads = [0]*factors[-1]
@@ -86,8 +86,8 @@ def partition_necklace_count_by_period(partition):
         beads[factor-1] = 1
         # The number of character permutations is simply the multinomial coefficient corresponding to that subset of the multiplicity partition.
         for I in range(k):
-            beads[factor-1] *= nCk(n, partition[I]*factor/w)
-            n -= partition[I]*factor/w
+            beads[factor-1] *= nCk(n, partition[I]*factor//w)
+            n -= partition[I]*factor//w
             
         # Subtact off the number of necklaces whose period subdivides our divisor of w, to make sure beads[factor-1] give the EXACTLY the number of necklaces with period k.
         subdivisors = divisors(factor)
@@ -95,7 +95,7 @@ def partition_necklace_count_by_period(partition):
             for subfactor in subdivisors[:-1]:
                 beads[factor-1] -= subfactor*p0*beads[subfactor-1]
         # Finally, normalize by the period, the number of distinct rotations of any member of beads[k].
-        beads[factor-1] /= period
+        beads[factor-1] //= period
     return beads
     
 def necklace_count_by_period(beads):
@@ -175,7 +175,7 @@ def periodicity(cycle):
             return period
         
 def cycle_degeneracy(cycle):
-    return len(cycle)/periodicity(cycle)
+    return len(cycle)//periodicity(cycle)
 
 class NecklaceTests(unittest.TestCase): 
           
@@ -188,8 +188,8 @@ class NecklaceTests(unittest.TestCase):
                 self.assertEqual(d, periodicity(period_dn))          
                 
     def testNecklaceCounts(self):
-        color_partitions = [[24,36], [3,3,2], [4,4,4,3,3,2,1,1]]
-        color_cardinalities = [600873126148801, 70, 51330759480000]
+        color_partitions = [ [3,3,2], [4,4,4,3,3,2,1,1], [24,36]]
+        color_cardinalities = [70, 51330759480000, 600873126148801]
         for cp, cc in zip(color_partitions, color_cardinalities):
             self.assertEqual(cc, necklace_count_totient(cp))
             self.assertEqual(cc, sum(partition_necklace_count_by_period(cp)))
