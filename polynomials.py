@@ -185,9 +185,10 @@ class PolynomialTest(unittest.TestCase):
             
         
 if __name__ == '__main__':
+    print MSP_recursive([5,5,5],[3,3,2])
+    print monomial_symmetric_polynomial([5,5,5],[3,3,2])
     unittest.main()
-    # print MSP_recursive([5,5,5],[3,3,2])
-    # print monomial_symmetric_polynomial([5,5,5],[3,3,2])
+
     # print monomial_symmetric_polynomial(symrange(14),[3,3,2]).expand()
     # a = range(101)
     # for I in range(1,101):

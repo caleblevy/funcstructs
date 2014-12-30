@@ -5,11 +5,32 @@
 # contained herein are described in the LICENSE file included with this 
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
+"""
+A collection of miscellaneous generator functions that do not fit elsewhere.
+"""
+
 from PADS.IntegerPartitions import partitions, lex_partitions
 from collections import Iterable
 from rooted_trees import prod
 from itertools import product
 import unittest
+
+def parse_ranges(start, stop, step):
+    """
+    If stop==step==None then start is treated as stop and step is set by
+    default to 1 and start to 0. If start and step are integers they are
+    transformed into start = [start]*len(stop) and step = [step]*len(step).
+    """
+    if stop is None:
+        start, stop = stop, start
+    # If start is not iterable, it is either an int or none.
+    if not isinstance(start, Iterable):
+        start = [0 if(start is None) else start]*len(stop)
+    if not isinstance(step, Iterable):
+        step = [1 if(step is None) else step]*len(stop)
+    if not len(start) == len(step) == len(stop):
+        raise ValueError("start, stop and step must all be same length.")
+    return start, stop, step
 
 def product_range(start, stop=None, step=None):
     """
@@ -28,21 +49,8 @@ def product_range(start, stop=None, step=None):
             ...
               for In in range(rn,sn,tn):
                 yield tuple(I1,I2,...,In)
-    
-    If stop==step==None then start is treated as stop and step is set by
-    default to 1 and start to 0. If start and step are integers they are
-    transformed into start = [start]*len(stop) and step = [step]*len(step).
     """
-    
-    if stop is None:
-        start, stop = stop, start
-    # If start is not iterable, it is either an int or none.
-    if not isinstance(start, Iterable):
-        start = [0 if(start is None) else start]*len(stop)
-    if not isinstance(step, Iterable):
-        step = [1 if(step is None) else step]*len(stop)
-    if not len(start) == len(step) == len(stop):
-        raise ValueError("start, stop and step must all be same length.")
+    start, stop, step = parse_ranges(start, stop, step)
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
 
 def tuple_partitions(n):
@@ -71,8 +79,9 @@ def compositions_binary(n):
             tot += 1
         composition.append(tot)
         yield composition
-
+    
 def compositions_simple(n):
+    """A more direct way of enumerating compositions."""
     comp = [n]
     while True:
         yield comp
@@ -88,7 +97,7 @@ def compositions_simple(n):
                 break
             # Haven't hit the target, pop the last element, and step back
             comp.pop()
-
+    
 compositions = compositions_simple # best by test.
 
 def _min_part(n,L):
@@ -115,7 +124,6 @@ def minimal_partition(n,L):
     lexicographically smallest unordered integer partition of n into L nonzero
     parts.
     """
-    
     min_part, _ = _min_part(n,L)
     return min_part     
 
@@ -140,7 +148,13 @@ def fixed_lex_partitions(n,L):
         
     partition, j = _min_part(n,L)
     while True:
-        # Algorithm starts with minimal partition, and index of the last 1 counting backwards. 
+        # Algorithm starts with minimal partition, and index of the last 1 
+        # counting backwards. We then decrement the rightmost components and 
+        # increment those to their immediate left, up to the point where the 
+        # partition would beak ordering.
+        #
+        # Once we have decremented as far as possible, we append the new 
+        # minimum partition, and repeat.
         yield partition                   
         k = 2
         s = (j-1) + partition[L-j] - 1
@@ -168,10 +182,11 @@ class IterationTest(unittest.TestCase):
         stops =  [(4,)*4, (4,)*4, (7,)*3, (10,)*4, (6,)*4, (2,4,8,10)]
         steps =  [1,      None,   2,      3,       None,   (1,1,2,2)]
         counts = [4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
+        
         for count, start, stop, step in zip(counts, starts, stops, steps):
             self.assertEqual(count, len(list(product_range(start, stop, step))))
-            self.assertEqual(prod(stop), len(list(product_range(stop))))
-    
+            self.assertEqual(prod(stop), len(list(product_range(stop)))) 
+            
     def testCompositionCounts(self):
         for n in range(1,10):
             self.assertEqual(2**(n-1), len(list(compositions_simple(n))))
@@ -202,7 +217,9 @@ class IterationTest(unittest.TestCase):
             for L in range(n+1):
                 pnL = [list(p) for p in fixed_lex_partitions(n,L)]
                 np += len(pnL)
+                # Check for the right order
                 self.assertEqual(pnL,[p for p in pn if len(p) == L])
+            # Check for the right number
             self.assertEqual(np,len(pn))
                 
 if __name__ == '__main__':
