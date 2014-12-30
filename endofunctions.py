@@ -235,11 +235,11 @@ class EndofunctionTest(unittest.TestCase):
         self.assertEqual([2], imagepath([1,0]))
         node_count = [2,3,5,15]
         for n in node_count:
-            tower = [0] + range(n-1)
-            cycle = [n-1] + range(n-1)
-            fixed = range(n)
+            tower = [0] + list(range(n-1))
+            cycle = [n-1] + list(range(n-1))
+            fixed = list(range(n))
             degen = [0]*n
-            self.assertEqual(range(n)[:0:-1], imagepath(tower))
+            self.assertEqual(list(range(n)[:0:-1]), imagepath(tower))
             self.assertEqual([n]*(n-1), imagepath(cycle))
             self.assertEqual([n]*(n-1), imagepath(fixed))
             self.assertEqual([1]*(n-1), imagepath(degen))

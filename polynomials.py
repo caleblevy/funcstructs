@@ -150,7 +150,6 @@ def FOIL(roots):
     """
     monomials = [(1,-root) for root in roots]
     return reduce(poly_multiply, monomials, [1,])
-    
 
 def symrange(*args):
     x = []
@@ -182,18 +181,17 @@ class PolynomialTest(unittest.TestCase):
             if n <= 5:
                 recmon = [MSP_recursive(x, [1]*I) for I in range(1,n+1)]
                 self.assertEqual(foilmon, recmon)
-            
-        
-if __name__ == '__main__':
-    print MSP_recursive([5,5,5],[3,3,2])
-    print monomial_symmetric_polynomial([5,5,5],[3,3,2])
-    unittest.main()
+                
+        vecs = [[5,5,5]]
+        powers = [[3,3,2]]
+        counts = [1171875]
+        for vec, power, count in zip(vecs, powers, counts):
+            self.assertEqual(count, MSP_iterative(vec, power))
+            self.assertEqual(count, MSP_recursive(vec, power))
+     
 
-    # print monomial_symmetric_polynomial(symrange(14),[3,3,2]).expand()
-    # a = range(101)
-    # for I in range(1,101):
-    #     print monomial_symmetric_polynomial(a,[1]*I)
-    pass
+if __name__ == '__main__':
+    unittest.main()
 
         
 
