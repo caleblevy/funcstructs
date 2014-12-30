@@ -5,9 +5,10 @@
 # contained herein are described in the LICENSE file included with this 
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
+from PADS.IntegerPartitions import partitions, lex_partitions
 from collections import Iterable
+from rooted_trees import prod
 from itertools import product
-from time import time
 import unittest
 
 def product_range(start, stop=None, step=None):
@@ -43,6 +44,19 @@ def product_range(start, stop=None, step=None):
     if not len(start) == len(step) == len(stop):
         raise ValueError("start, stop and step must all be same length.")
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
+
+def tuple_partitions(n):
+    """
+    Every partition on N may be represented in the form as a tuple of numbers
+    (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N.
+    
+    This program outputs every partition of n in a tuple format.
+    """
+    for part in partitions(n):
+        b = [0]*n
+        for p in part:
+            b[p-1] += 1
+        yield b
 
 def compositions_binary(n):
     """Additive compositions of a number; i.e. partitions with ordering."""
@@ -126,10 +140,11 @@ def fixed_lex_partitions(n,L):
         
     partition, j = _min_part(n,L)
     while True:
+        # Algorithm starts with minimal partition, and index of the last 1 counting backwards. 
         yield partition                   
         k = 2
         s = (j-1) + partition[L-j] - 1
-        while j+k-1<L and partition[L-j-k] == partition[L-j-1]:
+        while j+k-1 < L and partition[L-j-k] == partition[L-j-1]:
             s += partition[L-j-1]
             k += 1            
         if j+k-1 > L:
@@ -145,10 +160,6 @@ def inv(perm):
         inverse[p] = i
     return inverse 
 
-
-from PADS.IntegerPartitions import lex_partitions
-from rooted_trees import prod
-
 class IterationTest(unittest.TestCase):
     
     def testProductRange(self):
@@ -157,7 +168,6 @@ class IterationTest(unittest.TestCase):
         stops =  [(4,)*4, (4,)*4, (7,)*3, (10,)*4, (6,)*4, (2,4,8,10)]
         steps =  [1,      None,   2,      3,       None,   (1,1,2,2)]
         counts = [4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
-        
         for count, start, stop, step in zip(counts, starts, stops, steps):
             self.assertEqual(count, len(list(product_range(start, stop, step))))
             self.assertEqual(prod(stop), len(list(product_range(stop))))

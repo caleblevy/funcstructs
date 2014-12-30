@@ -5,26 +5,13 @@
 # contained herein are described in the LICENSE file included with this 
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-from PADS.IntegerPartitions import partitions
 from rooted_trees import split_set, prod
+from iteration import tuple_partitions
 from fractions import Fraction
 from primes import divisors
 from itertools import chain
 from math import factorial
 import unittest
-
-def tuple_partitions(n):
-    """
-    Every partition on N may be represented in the form as a tuple of numbers
-    (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N.
-    
-    This program outputs every partition of n in a tuple format.
-    """
-    for part in partitions(n):
-        b = [0]*n
-        for p in part:
-            b[p-1] += 1
-        yield b
 
 def burnside_partition_degeneracy(b):
     product_terms = []

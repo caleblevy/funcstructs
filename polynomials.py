@@ -10,10 +10,14 @@ Enumerate and produce polynomials of various kinds.
 
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
-from numpy import ndarray
+
 from rooted_trees import split_set
+from functools import reduce
 from sympy import Symbol
+import numpy as np
 import unittest
+# For unit testing.
+from necklaces import nCk
 
 # MSP == Monomial Symmetric Polynomial
 def MSP_recursive(x, powers):
@@ -32,7 +36,7 @@ def _recursive_monomial_alg(x, d, y):
     extraordinary amount of work. It exists as a showcase of the concepts
     behind MSP_iterative. Its running time might be something like
     len(y)^len(x), but either way, do not run this thing with input vectors of
-    length greater than about 5 ot 10, depending on your system.
+    length greater than about 5 to 10, depending on your system.
 
     X = (a1,a2,...,an) - Vector of values for polynomial evaluation
     D = (d1,d2,...,dl) - Vector of degeneracies of exponent partitions
@@ -57,10 +61,11 @@ def _recursive_monomial_alg(x, d, y):
         for I in range(len(d)):
             d_temp = d[:]
             d_temp[I] -= 1
-            val += x[-1]**y[I]*_recursive_monomial_alg(x[:-1],d_temp,y)               
+            val += x[-1]**y[I]*_recursive_monomial_alg(x[:-1],d_temp,y)         
+            
         return val
 
-# Not sure how to check this one, as there aren't many algorithms to compare against.
+
 def MSP_iterative(x, powers):
     """
     Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed
@@ -68,7 +73,6 @@ def MSP_iterative(x, powers):
     the sum (x[a[1]]**p_1)*(x[a[2]]**p_2)*...*(x[a[I]]**p_l) over all a such
     that a[I] != a[J] for 0<=I<J<=l-1 which are not equivalent under
     permutation (I think anyway...).
-
 
     If there are distinct powers p_1,...,p_j with multiplicities m_1,...,m_j
     and the list x has n elements then the algorithm runs in O(n*m_1*...*m_j)
@@ -81,7 +85,7 @@ def MSP_iterative(x, powers):
     shape = tuple([I+2 for I in d])
         
     # Contains 1, possibly 2 more dimensions than necessary.
-    T = ndarray(shape, object)
+    T = np.ndarray(shape, object)
     T[:] = 0
     V = [1]*l
     T[tuple(V)] = 1
@@ -116,19 +120,80 @@ def MSP_iterative(x, powers):
 
 monomial_symmetric_polynomial = MSP_iterative
 
+def poly_multiply(coeffs1, coeffs2):
+    """
+    Given numerical lists c and d of length n and m, returns the coefficients
+    of P(X)*Q(X) in decreasing order, where
+        P(X) = c[-1] + c[-2]*X + ... + c[0]*x^n
+        Q(X) = d[-1] + d[-2]*X + ... + d[0]*x^m
+    
+    For some reason sympy and numpy do not seem to have this capacity easily
+    accessible, or at least nothing dedicated to the purpose. Very likely to be
+    faster than the expand method.
+    
+    Source taken from:
+        "How can I multiply two polynomials in Python using a loop and by
+        calling another function?" found at http://stackoverflow.com/a/18116401.
+    """
+    final_coeffs = [0] * (len(coeffs1)+len(coeffs2)-1)
+    for ind1, coef1 in enumerate(coeffs1):
+        for ind2, coef2 in enumerate(coeffs2):
+            final_coeffs[ind1 + ind2] += coef1 * coef2
+    return final_coeffs
+
+def FOIL(roots):
+    """First Outer Inner Last
+    
+    Given a list of values roots, return the polynomial of degree len(roots)+1
+    with leading coefficient 1 given by
+        (X - roots[0]) * (X - roots[1]) * ... * (X - roots[-1])
+    """
+    monomials = [(1,-root) for root in roots]
+    return reduce(poly_multiply, monomials, [1,])
+    
+
 def symrange(*args):
     x = []
     for I in range(*args):
         x.append(Symbol('x%s'%str(I)))
     return x
     
+
 class PolynomialTest(unittest.TestCase):
+    
+    def testFOIL(self):
+        N = 20
+        """Check binomial coefficients."""
+        for n in range(N+1):
+            self.assertEqual([nCk(n,k) for k in range(n+1)], FOIL([-1]*n))
+            
     def testMonomialSymmetricPolynomial(self):
-        x = symrange(14)
+        """
+        Verify MSP for the simple case of the elementary symmetric polynomials.
+        We can calculate them independently by using the Newton identities to
+        FOIL a polynomial with the given roots
+        """
+        N = 20
+        for n in range(1,N):
+            foilmon = FOIL(range(-n,0))[1:]
+            x = range(1,n+1)
+            symmon = [MSP_iterative(x, [1]*I) for I in range(1,n+1)]
+            self.assertEqual(foilmon, symmon)
+            if n <= 5:
+                recmon = [MSP_recursive(x, [1]*I) for I in range(1,n+1)]
+                self.assertEqual(foilmon, recmon)
+            
         
 if __name__ == '__main__':
-    print MSP_recursive([5,5,5],[3,3,2])
-    print monomial_symmetric_polynomial([5,5,5],[3,3,2])
-    print monomial_symmetric_polynomial(symrange(14),[3,3,2]).expand()
+    unittest.main()
+    # print MSP_recursive([5,5,5],[3,3,2])
+    # print monomial_symmetric_polynomial([5,5,5],[3,3,2])
+    # print monomial_symmetric_polynomial(symrange(14),[3,3,2]).expand()
+    # a = range(101)
+    # for I in range(1,101):
+    #     print monomial_symmetric_polynomial(a,[1]*I)
+    pass
+
+        
 
     
