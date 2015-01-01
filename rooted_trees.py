@@ -174,6 +174,30 @@ def tree_degeneracy(tree):
         mul *= tree_degeneracy(subtree)
     return mul*mset_degeneracy(chop(tree))
 
+def tree_to_func(tree, permutation=None):
+    """
+    Convert a tree into an endofunction list, whose root is by default at zero,
+    but can be permuted according a specified permutation.
+    """
+    n = len(tree)
+    if permutation is None:
+        permutation = list(range(n))
+    height = max(tree)
+    func = [0]*n
+    func[0] = permutation[0]
+    height_prev = 1
+    # Most recent node found at height h. Where to graft the next node to.
+    grafting_point = [0]*height 
+    for node, height in enumerate(tree[1:]):
+        if height > height_prev:
+            func[node+1] = permutation[grafting_point[height_prev-1]]
+            height_prev += 1
+        else:
+            func[node+1] = permutation[grafting_point[height-2]]
+            height_prev = height
+        grafting_point[height-1] = node+1
+    return func
+
 # If run standalone, perform unit tests
 class TreeTest(unittest.TestCase):
     counts = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286]
@@ -198,6 +222,11 @@ class TreeTest(unittest.TestCase):
             for tree in rooted_trees(n):
                 labelled_treecount += factorial(n)//tree_degeneracy(tree)
             self.assertEqual(n**(n-1), labelled_treecount)
+            
+    def testTreeToFunc(self):
+        tree = [1,2,3,4,4,4,3,4,4,2,3,3,2,3]
+        func = [0,0,1,2,2,2,1,6,6,0,9,9,0,12]
+        self.assertEqual(func, tree_to_func(tree))
 
 if __name__ == '__main__':
     unittest.main()

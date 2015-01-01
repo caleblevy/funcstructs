@@ -13,8 +13,8 @@ structures have not been enumerated anywhere else.
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
-from rooted_trees import forests, split_set, flatten, mset_degeneracy,\
-                                                      tree_degeneracy
+from rooted_trees import forests, split_set, flatten, mset_degeneracy,
+                         tree_degeneracy, tree_to_func           
 from itertools import combinations_with_replacement, product
 from sympy.utilities.iterables import multiset_partitions
 from necklaces import necklaces, cycle_degeneracy
@@ -56,30 +56,6 @@ def funcstruct_degeneracy(function_structure, n=None):
     for tree in flatten(function_structure):
         degeneracy *= tree_degeneracy(tree)
     return degeneracy
-
-def tree_to_func(tree, permutation=None):
-    """
-    Convert a tree into an endofunction list, whose root is by default at zero,
-    but can be permuted according a specified permutation.
-    """
-    n = len(tree)
-    if permutation is None:
-        permutation = list(range(n))
-    height = max(tree)
-    func = [0]*n
-    func[0] = permutation[0]
-    height_prev = 1
-    # Most recent node found at height h. Where to graft the next node to.
-    grafting_point = [0]*height 
-    for node, height in enumerate(tree[1:]):
-        if height > height_prev:
-            func[node+1] = permutation[grafting_point[height_prev-1]]
-            height_prev += 1
-        else:
-            func[node+1] = permutation[grafting_point[height-2]]
-            height_prev = height
-        grafting_point[height-1] = node+1
-    return func
     
 def _treeform_of_noncyclic_nodes(function_structure):
     tree_start = 0
@@ -111,18 +87,14 @@ def funcstruct_to_func(function_structure):
         
 class EndofunctionStructureTest(unittest.TestCase):
     counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
-    def testTreeToFunc(self):
-        tree = [1,2,3,4,4,4,3,4,4,2,3,3,2,3]
-        func = [0,0,1,2,2,2,1,6,6,0,9,9,0,12]
-        self.assertEqual(func, tree_to_func(tree))
     
     def testFuncstructToFunc(self):
         func_struct = [((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,))]
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
         self.assertEqual(func, funcstruct_to_func(func_struct))
-    # OEIS A001372
+
     def testFuncstructCount(self):
-        """check rooted trees has the right number of outputs"""
+        """OEIS A001372: Number of self-mapping patterns."""
         for n in range(len(self.counts)):
             struct_count = 0
             for struct in funcstructs(n):
@@ -130,7 +102,7 @@ class EndofunctionStructureTest(unittest.TestCase):
             self.assertEqual(self.counts[n], struct_count)
             
     def testFuncstructDegeneracy(self):
-        # OEIS A000312
+        """OEIS A000312: Number of labeled maps from n points to themselves."""
         for n in range(1, len(self.counts)):
             nfac = factorial(n)
             func_count = 0
