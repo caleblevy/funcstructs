@@ -53,6 +53,7 @@ def product_range(start, stop=None, step=None):
     start, stop, step = parse_ranges(start, stop, step)
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])
 
+
 def tuple_partitions(n):
     """
     Every partition on N may be represented in the form as a tuple of numbers
@@ -65,6 +66,7 @@ def tuple_partitions(n):
         for p in part:
             b[p-1] += 1
         yield b
+
 
 def compositions_binary(n):
     """Additive compositions of a number; i.e. partitions with ordering."""
@@ -79,6 +81,7 @@ def compositions_binary(n):
             tot += 1
         composition.append(tot)
         yield composition
+    
     
 def compositions_simple(n):
     """A more direct way of enumerating compositions."""
@@ -100,6 +103,7 @@ def compositions_simple(n):
     
 compositions = compositions_simple # best by test.
 
+
 def _min_part(n,L):
     """
     Helper function for fixed_lex_partitions. Returns a tuple containing:
@@ -118,6 +122,7 @@ def _min_part(n,L):
     ones_count = 1 if binsize != 1 else regular + 1
     return [binsize+1]*overstuffed + [binsize]*regular, ones_count
 
+
 def minimal_partition(n,L):
     """
     A wrapper for _min_partition. Given integers n > 0 and L <= n, returns the
@@ -126,6 +131,7 @@ def minimal_partition(n,L):
     """
     min_part, _ = _min_part(n,L)
     return min_part     
+
 
 def fixed_lex_partitions(n,L):
     """
@@ -167,6 +173,7 @@ def fixed_lex_partitions(n,L):
         partition[L-j-k] += 1
         partition[L-j-k+1:L], j = _min_part(s,j+k-1)   
 
+
 def inv(perm):
     """Invert a permutation of integers I=1...n. """
     inverse = [0] * len(perm)
@@ -174,23 +181,25 @@ def inv(perm):
         inverse[p] = i
     return inverse 
 
+
 class IterationTest(unittest.TestCase):
     
     def testProductRange(self):
-        
         starts = [None,   0,      1,      (1,)*4,  (3,)*4, (1,2,3,3)]
         stops =  [(4,)*4, (4,)*4, (7,)*3, (10,)*4, (6,)*4, (2,4,8,10)]
         steps =  [1,      None,   2,      3,       None,   (1,1,2,2)]
-        counts = [4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
         
+        counts = [4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
         for count, start, stop, step in zip(counts, starts, stops, steps):
             self.assertEqual(count, len(list(product_range(start, stop, step))))
             self.assertEqual(prod(stop), len(list(product_range(stop)))) 
+            
             
     def testCompositionCounts(self):
         for n in range(1,10):
             self.assertEqual(2**(n-1), len(list(compositions_simple(n))))
             self.assertEqual(2**(n-1), len(list(compositions_binary(n))))
+            
             
     def testCompositionSums(self):
         for n in range(1,10):
@@ -198,6 +207,7 @@ class IterationTest(unittest.TestCase):
                 self.assertEqual(n, sum(comp))
             for comp in compositions_binary(n):
                 self.assertEqual(n, sum(comp))
+    
     
     def testSmallestPartition(self):
         N = 20
@@ -207,7 +217,8 @@ class IterationTest(unittest.TestCase):
                 self.assertTrue(max(mp) - min(mp) in [0,1])
                 self.assertTrue(len(mp) == L)
                 self.assertTrue(sum(mp) == n)
-    
+
+
     def testFixedLexPartitions(self):
         """Check that the fixed length lex partition outputs are correct."""
         N = 15
@@ -221,6 +232,7 @@ class IterationTest(unittest.TestCase):
                 self.assertEqual(pnL,[p for p in pn if len(p) == L])
             # Check for the right number
             self.assertEqual(np,len(pn))
+                
                 
 if __name__ == '__main__':
     unittest.main()

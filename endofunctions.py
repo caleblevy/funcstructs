@@ -38,6 +38,7 @@ from necklaces import nCk
 import numpy as np
 import unittest
 
+
 endofunctions = lambda n: product_range([n]*n)
 
 def imagepath(f):
@@ -59,6 +60,7 @@ def imagepath(f):
         card_prev = card
     return cardinalities
 
+
 def imagedist_brute(n):
     """
     The most naive, straightforward way to calculate the distribution of
@@ -71,6 +73,7 @@ def imagedist_brute(n):
         for it, card in enumerate(im):
             M[card-1,it] += 1
     return M
+
 
 def imagedist_endofunction(n):
     """
@@ -102,13 +105,13 @@ def imagedist_endofunction(n):
     nfac = factorial(n)
     for struct in funcstructs(n):
         mult = nfac//funcstruct_degeneracy(struct)
-        func = funcstruct_to_func(struct)
-        im = imagepath(func)
+        im = funcstruct_imagepath(struct)
         for it, card in enumerate(im):
             M[card-1,it] += mult
     return M
 
 imagedist = imagedist_endofunction
+
 
 def firstdist_composition(n):
     """
@@ -131,6 +134,7 @@ def firstdist_composition(n):
                 rep += 1
         F[rep-1] += val
     return F
+
 
 def firstdists_upto(N):
     """
@@ -155,10 +159,6 @@ def firstdists_upto(N):
     
 firstdist_recurse = firstdist = lambda n: list(firstdists_upto(n)[:,-1])
 
-'''
-Top row: OEIS A236396 - labelled rooted trees of height at most k on n nodes
-Right column: OEIS A066324, A219694 (reverse), A243203
-'''
 
 def nCk_grid(N):
     """nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
@@ -170,12 +170,14 @@ def nCk_grid(N):
             binomial_coeffs[I,J] = nCk(I,J)
     return binomial_coeffs
 
+
 def powergrid(N):
     """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
     base = np.arange(N+1, dtype=object)
     [bases, exponents] = np.meshgrid(base, base)
     exponentials = bases**exponents
     return exponentials.T
+           
                 
 def lastdist_composition(N):
     L = [0]*N
@@ -192,14 +194,18 @@ def lastdist_composition(N):
         L[n-1] *= factorial(N)//factorial(N-n)
     return L   
     
+    
 def limitset_count(n,k):
     return k*n**(n-k)*factorial(n-1)//factorial(n-k)
+
 
 def limitset(n):
     return [limitset_count(n,k) for k in range(1,n+1)]
                 
+                
 class EndofunctionTest(unittest.TestCase):
     imagedists = [
+        
         np.array([
             [3, 9],
             [18, 12],
@@ -239,6 +245,16 @@ class EndofunctionTest(unittest.TestCase):
         [7776,12960,12960,8640,3600,720],
         [117649,201684,216090,164640,88200,30240,5040]
     ]
+    
+    treefuncs = [
+        [3, 9],
+        [4, 40, 64],
+        [5, 205, 505, 625],
+        [6, 1176, 4536, 7056, 7776],
+        [7, 7399, 46249, 89929, 112609, 117649],
+        [8, 50576, 526352, 1284032, 1835072, 2056832, 2097152]
+    ]
+     
         
     def testImagepath(self):
         """Check various special and degenerate cases, with right index"""
@@ -258,23 +274,33 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual([n]*(n-1), imagepath(fixed))
             self.assertEqual([1]*(n-1), imagepath(degen))
     
-    def testPaths(self):
+    
+    def testFuncstructImagepath(self):
         N = 8
         for n in range(1,N):
             for struct in funcstructs(n):
-                try:
-                    np.testing.assert_array_equal(imagepath(funcstruct_to_func(struct)),funcstruct_imagepath(struct))
-                except AssertionError:
-                       print struct
-                       raise
+                im = imagepath(funcstruct_to_func(struct))
+                imstruct = funcstruct_imagepath(struct)
+                np.testing.assert_array_equal(im, imstruct)
                 
-    
+                
     def testIterateImagedist(self):
         """Check the multiplicities of sizes of images of iterates."""
         for dist in self.imagedists:
             n = dist.shape[0]
             np.testing.assert_array_equal(dist, imagedist_brute(n))
             np.testing.assert_array_equal(dist, imagedist_endofunction(n))
+    
+    
+    def testSingularImages(self):
+        '''
+        OEIS A236396: labelled rooted trees of height at most k on n nodes.
+        Corresponds to the top row of imagedist.
+        '''
+        for dist in self.treefuncs:
+            n = len(dist) + 1
+            np.testing.assert_array_equal(dist, imagedist_endofunction(n)[0,:])
+    
     
     def testFirstdist(self):
         """
@@ -287,12 +313,14 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual(dist, list(imagedist(n)[:,0]))
             self.assertEqual(dist, firstdist_recurse(n))
         
+        
     def testBinomialgrid(self):
         N = 20
         binomial_coefficients = nCk_grid(N)
         for n in range(N+1):
             for k in range(n+1):
                 self.assertEqual(nCk(n,k), binomial_coefficients[n,k])
+
 
     def testPowergrid(self):
         N = 20
@@ -303,6 +331,7 @@ class EndofunctionTest(unittest.TestCase):
                     self.assertEqual(1, exponentials[I,J])
                 else:
                     self.assertEqual(I**J, exponentials[I,J])
+    
     
     def testLastdist(self):
         """
