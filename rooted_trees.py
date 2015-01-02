@@ -26,10 +26,10 @@ from PADS.IntegerPartitions import partitions
 from functools import reduce
 from itertools import chain
 from math import factorial
-from operator import mul
+import operator
 import unittest
 
-prod = lambda iterable: reduce(mul, iterable, 1)
+prod = lambda iterable: reduce(operator.mul, iterable, 1)
 factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 
 def successor_tree(L):
@@ -142,6 +142,25 @@ def chop(tree):
     forest.append(tuple(subtree))
     return tuple(forest)
 
+def monotone_subsequences(seq, comparison):
+    if not seq:
+        return
+    subseq = [seq[0]]
+    term_prev = seq[0]
+    for term in seq[1:]:
+        if comparison(term, term_prev):
+            subseq.append(term)
+        else: 
+            yield subseq
+            subseq = [term]
+        term_prev = term
+    yield subseq
+
+increasing_subsequences = lambda seq: monotone_subsequences(seq, operator.gt)
+nondecreasing_subsequences = lambda seq: monotone_subsequences(seq, operator.ge)
+decreasing_subsequences = lambda seq: monotone_subsequences(seq,operator.lt)
+nonincreasing_subsequences = lambda seq: monotone_subsequences(seq, operator.le)
+
 def forests_simple(N):
     """
     Any rooted tree on N+1 nodes can be identically described by a collection
@@ -227,6 +246,25 @@ class TreeTest(unittest.TestCase):
         tree = [1,2,3,4,4,4,3,4,4,2,3,3,2,3]
         func = [0,0,1,2,2,2,1,6,6,0,9,9,0,12]
         self.assertEqual(func, tree_to_func(tree))
+    
+    def testMonotoneSubsequences(self):
+        test_tree = [1,2,3,4,3,3,2,3,4,5,4,5,3,3,2,3,4,5,6,5,5,5,5]
+        
+        inc = [[1,2,3,4], [3], [3], [2,3,4,5], [4,5], [3], [3], [2,3,4,5,6],
+               [5], [5], [5], [5]]
+        nondec = [[1,2,3,4], [3,3], [2,3,4,5],[4,5],[3,3],[2,3,4,5,6],[5,5,5,5]]
+        dec = [[1],[2],[3],[4,3],[3,2],[3],[4],[5,4],[5,3],[3,2],[3],[4],[5],
+               [6,5],[5],[5],[5]]
+        noninc = [[1],[2],[3],[4,3,3,2],[3],[4],[5,4],[5,3,3,2],[3],[4],[5],
+                  [6,5,5,5,5]]
+        for I, ss in enumerate(increasing_subsequences(test_tree)):
+            self.assertEqual(inc[I], ss)
+        for I, ss in enumerate(nondecreasing_subsequences(test_tree)):
+            self.assertEqual(nondec[I], ss)
+        for I, ss in enumerate(decreasing_subsequences(test_tree)):
+            self.assertEqual(dec[I], ss)
+        for I, ss in enumerate(nonincreasing_subsequences(test_tree)):
+            self.assertEqual(noninc[I], ss)
 
 if __name__ == '__main__':
     unittest.main()

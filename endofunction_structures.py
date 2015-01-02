@@ -13,8 +13,8 @@ structures have not been enumerated anywhere else.
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
-from rooted_trees import forests, split_set, flatten, mset_degeneracy,
-                         tree_degeneracy, tree_to_func           
+from rooted_trees import forests, split_set, flatten, mset_degeneracy,\
+                         tree_degeneracy, tree_to_func, increasing_subsequences 
 from itertools import combinations_with_replacement, product
 from sympy.utilities.iterables import multiset_partitions
 from necklaces import necklaces, cycle_degeneracy
@@ -30,7 +30,6 @@ def mset_functions(mset):
         el_strands = list(combinations_with_replacement(el_necklaces, 
                                                         multiplicities[ind]))
         necklace_lists.append(el_strands)
-        
     for bundle in product(*necklace_lists):
         function_structure = []
         for item in bundle:
@@ -84,7 +83,10 @@ def funcstruct_to_func(function_structure):
             node_ind += len(tree)
         cycle_start += cycle_len
     return func
-        
+
+def funcstruct_imagepath(funcstruct):
+    func = list(flatten(flatten(funcstruct)))
+
 class EndofunctionStructureTest(unittest.TestCase):
     counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
     

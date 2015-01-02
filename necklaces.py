@@ -38,7 +38,10 @@ import unittest
 def nCk(n,k): 
     return factorial(n)//factorial(k)//factorial(n-k)
 
-# We may canonically represent a multiset with an unordered partition corresponding to the multiplicities of the elements. It is simpler to enumerate necklaces on a canonical partition and then match those to necklaces formed from the beads.
+# We may canonically represent a multiset with an unordered partition 
+# corresponding to the multiplicities of the elements. It is simpler to 
+# enumerate necklaces on a canonical partition and then match those to 
+# necklaces formed from the beads.
 
 def necklace_count_totient(partition):
     """
@@ -63,7 +66,7 @@ def necklace_count_totient(partition):
 def partition_necklace_count_by_period(partition):
     """
     Given a partition of multiplicities, returns the number of necklaces on
-    this partition of beads of each possible period of the necklace. To this,
+    this partition of beads of each possible period of the necklace. To do this,
     we start with the smallest divisor of the gcd of all the multiplicities,
     and find all necklaces with period less than or equal to this divisor.
     
@@ -84,7 +87,7 @@ def partition_necklace_count_by_period(partition):
     for factor in factors:
         n = period = factor*p0
         beads[factor-1] = 1
-        # The number of character permutations is simply the multinomial coefficient corresponding to that subset of the multiplicity partition.
+        # The number of character permutations which are periodic in at most "factor" is simply the multinomial coefficient corresponding to that subset of the multiplicity partition.
         for I in range(k):
             beads[factor-1] *= nCk(n, partition[I]*factor//w)
             n -= partition[I]*factor//w
@@ -94,6 +97,7 @@ def partition_necklace_count_by_period(partition):
         if subdivisors[-1] != 1:
             for subfactor in subdivisors[:-1]:
                 beads[factor-1] -= subfactor*p0*beads[subfactor-1]
+                
         # Finally, normalize by the period, the number of distinct rotations of any member of beads[k].
         beads[factor-1] //= period
     return beads
@@ -106,6 +110,7 @@ def necklace_count_by_period(beads):
     _, partition = split_set(beads)
     return partition_necklace_count_by_period(partition)
 
+partition_necklace_count = lambda partition: sum(partition_necklace_count_by_period(partition))
 necklace_count = lambda items: sum(necklace_count_by_period(items))
 
 def partition_necklaces(partition):

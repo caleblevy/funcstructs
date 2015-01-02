@@ -156,6 +156,12 @@ def symrange(*args):
     for I in range(*args):
         x.append(Symbol('x%s'%str(I)))
     return x
+
+def polysum(n, coeffs):
+    """
+    Given given polynomial with given coeffs=[c0,c1,..,ck], calculates
+    sum(p(n), n=[0...k]) where p(k)=c0+c1*n+...+ck*n**k
+    """
     
 
 class PolynomialTest(unittest.TestCase):
