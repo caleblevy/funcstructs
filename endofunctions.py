@@ -31,7 +31,7 @@ image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
 from endofunction_structures import (funcstructs, funcstruct_degeneracy,
-                                     funcstruct_to_func)
+                                     funcstruct_to_func, funcstruct_imagepath)
 from iteration import product_range, compositions
 from math import factorial
 from necklaces import nCk
@@ -257,6 +257,17 @@ class EndofunctionTest(unittest.TestCase):
             self.assertEqual([n]*(n-1), imagepath(cycle))
             self.assertEqual([n]*(n-1), imagepath(fixed))
             self.assertEqual([1]*(n-1), imagepath(degen))
+    
+    def testPaths(self):
+        N = 8
+        for n in range(1,N):
+            for struct in funcstructs(n):
+                try:
+                    np.testing.assert_array_equal(imagepath(funcstruct_to_func(struct)),funcstruct_imagepath(struct))
+                except AssertionError:
+                       print struct
+                       raise
+                
     
     def testIterateImagedist(self):
         """Check the multiplicities of sizes of images of iterates."""

@@ -19,6 +19,7 @@ from itertools import combinations_with_replacement, product
 from sympy.utilities.iterables import multiset_partitions
 from necklaces import necklaces, cycle_degeneracy
 from math import factorial
+import numpy as np
 import unittest
         
 def mset_functions(mset):
@@ -84,8 +85,20 @@ def funcstruct_to_func(function_structure):
         cycle_start += cycle_len
     return func
 
-def funcstruct_imagepath(funcstruct):
-    func = list(flatten(flatten(funcstruct)))
+def funcstruct_imagepath(funcstruct, n=None):
+    forest = list(flatten(funcstruct))
+    if n is None:
+        n = len(list(flatten(forest)))
+    cardinalities = np.array([0]+[0]*(n-2), dtype=object)
+    for tree in forest:
+        cardinalities += 1
+        for subseq in increasing_subsequences(tree):
+            k = len(subseq) - 1
+            k -= 1 if subseq[0] is 1 else 0
+            if k > 0:
+                # Microoptimization: memoize the calls to range
+                cardinalities[:k] += range(k,0,-1)
+    return cardinalities
 
 class EndofunctionStructureTest(unittest.TestCase):
     counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
