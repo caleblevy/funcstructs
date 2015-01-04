@@ -30,10 +30,6 @@ def funcstruct_count(n):
         tot += burnside_partition_degeneracy(bp)
     return int(tot)
 
-def ceildiv(a, b):
-    """Does long integer division taking the ceiling instead of the floor"""
-    return -(-a // b)
-
 def iroot_newton(n, k=2):
     """
     Given input integer n, return the greatest integer whose kth power is less

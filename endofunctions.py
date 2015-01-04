@@ -276,6 +276,7 @@ class EndofunctionTest(unittest.TestCase):
     
     
     def testFuncstructImagepath(self):
+        """Verify equivalence of methods for computing structure image paths."""
         N = 8
         for n in range(1,N):
             for struct in funcstructs(n):
@@ -315,6 +316,7 @@ class EndofunctionTest(unittest.TestCase):
         
         
     def testBinomialgrid(self):
+        """Check that nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
         N = 20
         binomial_coefficients = nCk_grid(N)
         for n in range(N+1):
@@ -323,6 +325,7 @@ class EndofunctionTest(unittest.TestCase):
 
 
     def testPowergrid(self):
+        """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
         N = 20
         exponentials = powergrid(N)
         for I in range(N+1):

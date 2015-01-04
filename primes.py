@@ -10,6 +10,7 @@ A collection of short functions for enumerating factorizations of integers and
 other such things.
 """
 from rooted_trees import prod, split_set
+from math import ceil
 import fractions
 import unittest
 
@@ -30,7 +31,6 @@ def prime_factorization(n):
     return primfac
     
 prime_divisors = lambda n: list(set(prime_factorization(n)))
-
 
 def factorGenerator(n):
     primes, multiplicities = split_set(prime_factorization(n))
@@ -68,6 +68,15 @@ def divisors_memoized(n, factors={}):
     return factors[n]
 
 divisors = divisors_memoized
+
+def ceildiv(a, b):
+    """Does long integer division taking the ceiling instead of the floor"""
+    return -(-a // b)
+
+def isdivisor(d, n):
+    if ceildiv(n,d) == n//d:
+        return True
+    return False
 
 def divisor_sum(n, power=1):
     return sum(map(lambda x: pow(x,power), divisors(n)))
@@ -113,6 +122,18 @@ class PrimeTest(unittest.TestCase):
             # Check twice, see if its been memoized properly.
             self.assertEqual(counts[I-1],len(divisors(I)))
     
+    def testCeildiv(self):
+        N = 20
+        for I in range(-N,0)+range(1,N+1):
+            for J in range(-N,0)+range(1,N+1):
+                self.assertEqual(ceildiv(I,J), ceil(1.*I/J))
+    
+    def testIsDivisor(self):
+        N = 20
+        for I in range(1,N):
+            for J in range(1,N):
+                self.assertEqual(J in divisors(I), isdivisor(J,I))
+                
     def testDivisorSigma(self):
         """Test sums of powers of divisors. Features:
             -OEIS A000005: divisor_sum(n,0)

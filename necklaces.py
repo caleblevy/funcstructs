@@ -6,8 +6,6 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 """
-When you were in first grade you may have gotten to play with strings and a bucket of beads of different shapes and colors. By stringing together different colored beads and tying the ends of the rope together you could make different necklaces. You can wear necklaces in different ways by rotating them.
-
 Mathematically, a necklace is a class of n-character strings equivalent under
 rotation (orbits of the set of n-character strings under the action of cyclic
 permutation by the cyclic group). For example, the following are examples of a
@@ -27,8 +25,9 @@ precisely the distinct ways of connecting the trees to form a cycle of length
 n. Thus the ways of connecting a collection of rooted trees together in a cycle
 are precisely the necklaces whose beads are the rooted trees.
 """
+
+from primes import divisors, totient, isdivisor
 from rooted_trees import prod, split_set
-from primes import divisors, totient
 from fractions import gcd, Fraction
 from collections import deque
 from functools import reduce
@@ -160,10 +159,50 @@ def necklaces(items):
     items = sorted(items)
     y, d = split_set(items)
     for necklace in partition_necklaces(d):
-        # Explicitly make a tuple, since we must form the list of all necklaces in memory when constructing endofunction structures.
+        # Explicitly make a tuple, since we must form the list of all necklaces 
+        # in memory when constructing endofunction structures.
         yield tuple([y[I] for I in necklace])
-    
-def periodicity(cycle):
+
+def isseed(seed, necklace):
+    l = len(seed)
+    n = len(necklace)
+    if not isdivisor(l,n):
+        return False
+    for I in range(n//l):
+        if seed != necklace[I*l:(I+1)*l]:
+            return False
+    return True
+
+def patternbreak_index(seed, necklace, start=0):
+    if isinstance(seed, int):
+        seed = necklace[:seed]
+    l = len(seed)
+    n = len(necklace)
+    for I in range(start,n//l):
+        if seed != necklace[I*l:(I+1)*l]:
+            return l*I
+    return n
+
+def periodicity_seed(necklace):
+    seed = [necklace[0]]
+    n = len(necklace)
+    breakind = 0
+    while True:
+        breakind = patternbreak_index(seed, necklace, start=1)
+        if breakind == len(necklace):
+            return len(seed)
+        l = len(seed)
+        seed.extend(necklace[l:breakind])
+        next_terms = []
+        for I in range(breakind, n-l):
+            if seed == necklace[I:I+l]:
+                seed.extend(next_terms)
+                break
+            next_terms.append(necklace[I])
+        if len(seed) == l:
+            return n
+        
+def periodicity_rotation(cycle):
     """
     Find the "periodicity" of a list; i.e. the number of its distinct cyclic
     rotations. To do this, represent the cycle as a queue, and rotate the queue
@@ -174,23 +213,17 @@ def periodicity(cycle):
     cycle = deque(cycle)
     period_prev = 0
     for period in divisors(len(cycle)):
-        cycle.rotate(period - period_prev)
+        cycle.rotate(period-period_prev)
         period_prev = period
         if orig == cycle:
             return period
-        
-def cycle_degeneracy(cycle):
-    return len(cycle)//periodicity(cycle)
 
-class NecklaceTests(unittest.TestCase): 
-          
-    def testPeriodicities(self):
-        N = 20
-        for n in range(1,N+1):
-            for d in divisors(n):
-                # Creates lists of each periodicity
-                period_dn = ([0]+[1]*(d-1))*(n//d)
-                self.assertEqual(d, periodicity(period_dn))          
+periodicity = periodicity_rotation
+
+def cycle_degeneracy(cycle):
+    return len(cycle)//periodicity(cycle)        
+
+class NecklaceTests(unittest.TestCase):          
                 
     def testNecklaceCounts(self):
         color_partitions = [ [3,3,2], [4,4,4,3,3,2,1,1], [24,36]]
@@ -206,6 +239,64 @@ class NecklaceTests(unittest.TestCase):
             for necklace in necklaces(beadset):
                 count += 1
             self.assertEqual(necklace_count(beadset), count)
+    
+    def testIsSeed(self):
+        N = 20
+        for n in range(1,N+1):
+            for d in divisors(n):
+                # Creates lists of each periodicity
+                seed = [1]*(d-1)+[0]
+                notseed = [1]*(d-1)+[2]
+                necklace = seed*(n//d)
+                self.assertTrue(isseed(seed, necklace))
+                self.assertFalse(isseed(notseed, necklace))
+                if d == 1:
+                    self.assertTrue(isseed([0],necklace))
+                else:
+                    self.assertFalse(isseed([0],necklace))
+    
+    def testPatternbreakIndex(self):
+        N = 20
+        for n in range(1,N+1):
+            for d in divisors(n):
+                # Creates lists of each periodicity
+                seed = [1]*(d-1)+[0]
+                necklace = seed*(n//d)
+                self.assertEqual(n, patternbreak_index(seed, necklace))
+                self.assertEqual(d-1, patternbreak_index([1], necklace))
+                
+        s1 = [1,1,1,2]
+        s2 = s1*3 + [1,1,1,4]
+        s3 = s2*2 + [1,1,1,5]
+        s4 = s3*3 + [1,1,1,6]
+        s = s4*4
+        
+        self.assertEqual(3, patternbreak_index([1],s,1))
+        self.assertEqual(len(s1)*3, patternbreak_index(s1,s,1))
+        self.assertEqual(len(s1)+1, patternbreak_index(s1+[1],s,1))    
+            
+        self.assertEqual(len(s2)*2, patternbreak_index(s2,s,1))
+        self.assertEqual(len(s3)*3, patternbreak_index(s3,s,1))
+        self.assertEqual(len(s4)*4, patternbreak_index(s4,s,1))
+        
+    def testPeriodicities(self):
+        N = 20
+        for n in range(1,N+1):
+            for d in divisors(n):
+                # Creates lists of each periodicity
+                period_dn = ([0]+[1]*(d-1))*(n//d)
+                self.assertEqual(d, periodicity_rotation(period_dn))
+                self.assertEqual(d, periodicity_seed(period_dn))
+                
+        s1 = [0,0,0,2]
+        s2 = s1*3 + [1,1,1,4]
+        s3 = s2*2 + [1,1,1,5]
+        s4 = s3*3 + [1,1,1,6]
+        s = s4*4
+        
+        self.assertEqual(112,periodicity_rotation(s))
+        self.assertEqual(112,periodicity_seed(s))
+        
         
 if __name__ == '__main__':
     unittest.main()
