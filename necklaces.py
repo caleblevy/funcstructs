@@ -163,6 +163,7 @@ def necklaces(items):
         # in memory when constructing endofunction structures.
         yield tuple([y[I] for I in necklace])
 
+
 def isseed(seed, necklace):
     l = len(seed)
     n = len(necklace)
@@ -178,23 +179,24 @@ def patternbreak_index(seed, necklace, start=0):
         seed = necklace[:seed]
     l = len(seed)
     n = len(necklace)
-    for I in range(start,n//l):
+    for I in range(start,n//l+1):
         if seed != necklace[I*l:(I+1)*l]:
             return l*I
     return n
 
 def periodicity_seed(necklace):
+    necklace = list(necklace)
     seed = [necklace[0]]
     n = len(necklace)
-    breakind = 0
+    break_ind = 0
     while True:
-        breakind = patternbreak_index(seed, necklace, start=1)
-        if breakind == len(necklace):
+        break_ind = patternbreak_index(seed, necklace, start=1)
+        if break_ind == len(necklace):
             return len(seed)
         l = len(seed)
-        seed.extend(necklace[l:breakind])
+        seed.extend(necklace[l:break_ind])
         next_terms = []
-        for I in range(breakind, n-l):
+        for I in range(break_ind, n-l):
             if seed == necklace[I:I+l]:
                 seed.extend(next_terms)
                 break
@@ -219,9 +221,10 @@ def periodicity_rotation(cycle):
             return period
 
 periodicity = periodicity_rotation
+# periodicity = periodicity_seed
 
 def cycle_degeneracy(cycle):
-    return len(cycle)//periodicity(cycle)        
+    return len(cycle)//periodicity(cycle)       
 
 class NecklaceTests(unittest.TestCase):          
                 
@@ -255,7 +258,7 @@ class NecklaceTests(unittest.TestCase):
                 else:
                     self.assertFalse(isseed([0],necklace))
     
-    def testPatternbreakIndex(self):
+    def testPatternbreak_index(self):
         N = 20
         for n in range(1,N+1):
             for d in divisors(n):
@@ -279,6 +282,11 @@ class NecklaceTests(unittest.TestCase):
         self.assertEqual(len(s3)*3, patternbreak_index(s3,s,1))
         self.assertEqual(len(s4)*4, patternbreak_index(s4,s,1))
         
+        # Make sure we check the tail of the necklace
+        t = [(1,2),(1,),(1,2),(1,),(1,)]
+        self.assertEqual(4, patternbreak_index(t[:2],t))
+        self.assertEqual(4, patternbreak_index(t[:4],t))
+        
     def testPeriodicities(self):
         N = 20
         for n in range(1,N+1):
@@ -296,6 +304,29 @@ class NecklaceTests(unittest.TestCase):
         
         self.assertEqual(112,periodicity_rotation(s))
         self.assertEqual(112,periodicity_seed(s))
+        
+        d1 = [(1,2),]*3+[(1,1)]
+        d2 = d1*3 + [(1,4,3)]*3 + [(1,)]
+        d3 = d2*2 + [(2,)]*3 + [(1,4,3)]
+        d4 = d3*3 + [(3,)]*3+[(1,2)]
+        d = d4*4
+        
+        self.assertEqual(112,periodicity_rotation(d))
+        self.assertEqual(112,periodicity_seed(d))
+        
+        self.assertEqual(1,periodicity_rotation([(1,2),(1,2)]))
+        self.assertEqual(2,periodicity_rotation([(1,2),(1,)]))
+        self.assertEqual(2,periodicity_seed([(1,2),(1,)]))
+        self.assertEqual(1,periodicity_seed([(1,2),(1,2)]))
+
+        # Check the tail of the necklace
+        self.assertEqual(5, periodicity_rotation([(1,2),(1,),(1,2),(1,),(1,)]))
+        self.assertEqual(5, periodicity_seed([(1,2), (1,), (1,2), (1,), (1,)]))
+        
+        
+        
+        
+        
         
         
 if __name__ == '__main__':
