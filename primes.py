@@ -32,6 +32,7 @@ def prime_factorization(n):
     
 prime_divisors = lambda n: list(set(prime_factorization(n)))
 
+
 def factorGenerator(n):
     primes, multiplicities = split_set(prime_factorization(n))
     factors = []
@@ -62,12 +63,14 @@ def divisorGen(n):
 
 divisor_list = lambda n: list(divisorGen(n)) if n > 1 else [1]
 
+
 def divisors_memoized(n, factors={}):
     if n not in factors:
         factors[n] = divisor_list(n)
     return factors[n]
 
 divisors = divisors_memoized
+
 
 def ceildiv(a, b):
     """Does long integer division taking the ceiling instead of the floor"""
@@ -78,8 +81,10 @@ def isdivisor(d, n):
         return True
     return False
 
+
 def divisor_sum(n, power=1):
     return sum(map(lambda x: pow(x,power), divisors(n)))
+    
     
 def phi_product(n):
     """Return the totient using the fancy prime formula."""
@@ -104,23 +109,23 @@ class PrimeTest(unittest.TestCase):
         counts = [0, 1, 1, 2, 1, 2, 1, 3, 2, 2, 1, 3, 1, 2, 2, 4, 1, 3, 1, 3, \
                   2, 2, 1, 4, 2, 2, 3, 3, 1, 3]
         for I in range(1,len(counts)+1):
-            self.assertEqual(counts[I-1],len(prime_factorization(I)))
+            self.assertEqual(counts[I-1], len(prime_factorization(I)))
             
     def testPrimeDivisorsNonrepeated(self):
         """OEIS A001221: number of prime divisors without multiplicity."""
         counts = [0, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1, 2, 1, 2, \
                   2, 2, 1, 2, 1, 2, 1, 2, 1, 3]
         for I in range(1,len(counts)+1):
-            self.assertEqual(counts[I-1],len(prime_divisors(I)))
+            self.assertEqual(counts[I-1], len(prime_divisors(I)))
     
     def testDivisors(self):
         """OEIS A000005: number of divisors."""
         counts = [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, \
                   4, 4, 2, 8, 3, 4, 4, 6, 2, 8]
         for I in range(1,len(counts)+1):
-            self.assertEqual(counts[I-1],len(divisors(I)))
+            self.assertEqual(counts[I-1], len(divisors(I)))
             # Check twice, see if its been memoized properly.
-            self.assertEqual(counts[I-1],len(divisors(I)))
+            self.assertEqual(counts[I-1], len(divisors(I)))
     
     def testCeildiv(self):
         N = 20

@@ -30,6 +30,28 @@ def funcstruct_count(n):
         tot += burnside_partition_degeneracy(bp)
     return int(tot)
 
+
+def rooted_treecount_upto(N):
+    if N == 0:
+        return [0]
+    if N == 1:
+        return [0,1]
+    T = [0,1]+[0]*(N-1)
+    for n in range(2,N+1):
+        for I in range(1,n):
+            s = 0
+            for d in divisors(I):
+                s += T[d]*d
+            s *= T[n-I]
+            T[n] += s
+        T[n] //= (n-1)
+    return T
+
+rooted_treecount = lambda n: rooted_treecount_upto(n)[-1]
+
+                
+                
+                
 def iroot_newton(n, k=2):
     """
     Given input integer n, return the greatest integer whose kth power is less
@@ -89,7 +111,8 @@ def isqrt(n):
     return x
         
 def partition_numbers_upto(N):
-    # Iterate over the pentagonal numbers. Formula from http://mathworld.wolfram.com/PartitionFunctionP.html
+    # Iterate over the pentagonal numbers. Formula from 
+    # http://mathworld.wolfram.com/PartitionFunctionP.html
     if N == 0:
         return [1]
     P = [1]+[0]*N
@@ -110,18 +133,22 @@ class CounterTest(unittest.TestCase):
             self.assertEqual(counts[n], funcstruct_count(n))
             
     def testIntegerRoots(self):
-        for val in chain(range(1000),range(2**96,2**96+100)):
+        for val in chain(range(1000),[2**96]):
             for power in range(1,5):
                 self.assertTrue(iroot(val,power)**power <= val)
                 self.assertTrue(val < (iroot(val,power)+1)**power)
                 
                 self.assertTrue(iroot_newton(val,power)**power <= val)
                 self.assertTrue(val < (iroot_newton(val,power)+1)**power)
-    
+
     def testPartitionNumbers(self):
         counts = [1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135]
         for n in range(len(counts)):
             self.assertEqual(counts[n], partition_number(n))
+            
+    def testTreeCounts(self):
+        A000081 = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286, 719, 1842, 4766, 12486]
+        self.assertEqual(A000081, rooted_treecount_upto(len(A000081)-1))
             
 
 if __name__ == '__main__':

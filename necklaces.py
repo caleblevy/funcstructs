@@ -6,10 +6,10 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 """
-Mathematically, a necklace is a class of n-character strings equivalent under
-rotation (orbits of the set of n-character strings under the action of cyclic
-permutation by the cyclic group). For example, the following are examples of a
-necklace using [a,b,c,d], [a,b,b] and [c,d]:
+A necklace is a class of n-character strings equivalent under rotation (orbits
+of the set of n-character strings under the action of cyclic permutation by the
+cyclic group). For example, the following are examples of a necklace using
+[a,b,c,d], [a,b,b] and [c,d]:
 
     [a,b,c,d] ~ [b,c,d,a] ~ [c,d,a,b] ~ [d,a,b,c]
     [a,b,b] ~ [b,a,b] ~ [b,b,a]
@@ -87,18 +87,23 @@ def partition_necklace_count_by_period(partition):
     for factor in factors:
         n = period = factor*p0
         beads[factor-1] = 1
-        # The number of character permutations which are periodic in at most "factor" is simply the multinomial coefficient corresponding to that subset of the multiplicity partition.
+        # The number of character permutations which are periodic in at most 
+        # "factor" is simply the multinomial coefficient corresponding to that 
+        # subset of the multiplicity partition.
         for I in range(k):
             beads[factor-1] *= nCk(n, partition[I]*factor//w)
             n -= partition[I]*factor//w
             
-        # Subtact off the number of necklaces whose period subdivides our divisor of w, to make sure beads[factor-1] give the EXACTLY the number of necklaces with period k.
+        # Subtact off the number of necklaces whose period subdivides our 
+        # divisor of w, to make sure beads[factor-1] give the EXACTLY the 
+        # number of necklaces with period k.
         subdivisors = divisors(factor)
         if subdivisors[-1] != 1:
             for subfactor in subdivisors[:-1]:
                 beads[factor-1] -= subfactor*p0*beads[subfactor-1]
                 
-        # Finally, normalize by the period, the number of distinct rotations of any member of beads[k].
+        # Finally, normalize by the period, the number of distinct rotations of 
+        # any member of beads[k].
         beads[factor-1] //= period
     return beads
     
@@ -133,7 +138,6 @@ def _partition_necklaces(a, partition, t, p, k):
     
     The original code was written by Mike Hansen <mhansen@gmail.com> in 2007,
     who based his algorithm on
-    
         Sawada, Joe. "A fast algorithm to generate necklaces with fixed
         content", Theoretical Computer Science archive Volume 301 , Issue 1-3,
         May 2003.
@@ -166,12 +170,10 @@ def necklaces(items):
         yield tuple([y[I] for I in necklace])
         
 
-def _patternbreak_index(seed, necklace, start=0):
-    if isinstance(seed, int):
-        seed = necklace[:seed]
+def _patternbreak_index(seed, necklace, start=1):
     l = len(seed)
     n = len(necklace)
-    for I in range(start,n//l+1):
+    for I in range(start, n//l+1):
         if seed != necklace[I*l:(I+1)*l]:
             return l*I
     return n
@@ -182,7 +184,7 @@ def periodicity_seed(necklace):
     n = len(necklace)
     break_ind = 0
     while True:
-        break_ind = _patternbreak_index(seed, necklace, start=1)
+        break_ind = _patternbreak_index(seed, necklace)
         if break_ind == len(necklace):
             return len(seed)
         l = len(seed)
@@ -273,7 +275,12 @@ class NecklaceTests(unittest.TestCase):
 
         # Check the tail of the necklace
         self.assertEqual(5, periodicity_rotation([(1,2),(1,),(1,2),(1,),(1,)]))
-        self.assertEqual(5, periodicity_seed([(1,2), (1,), (1,2), (1,), (1,)]))
+        self.assertEqual(5, periodicity_seed([(1,2),(1,),(1,2),(1,),(1,)]))
+        
+        # Check that if tail is too short but agrees with head of seed then we 
+        # do not return periodic.
+        self.assertEqual(5, periodicity_rotation([(1,2),(1,),(1,2),(1,),(1,2)]))
+        self.assertEqual(5, periodicity_seed([(1,2),(1,),(1,2),(1,),(1,2)]))
         
 
 if __name__ == '__main__':
