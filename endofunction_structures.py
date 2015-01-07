@@ -101,8 +101,7 @@ def funcstruct_imagepath(funcstruct, n=None):
     return cardinalities
 
 class EndofunctionStructureTest(unittest.TestCase):
-    counts = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
-    
+
     def testFuncstructToFunc(self):
         func_struct = [((1,2,3,),(1,2,2,)),((1,2,),),((1,2,2),(1,),(1,2,2,))]
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
@@ -110,15 +109,17 @@ class EndofunctionStructureTest(unittest.TestCase):
 
     def testFuncstructCount(self):
         """OEIS A001372: Number of self-mapping patterns."""
-        for n in range(len(self.counts)):
+        A001372 = [0, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
+        for n, num in enumerate(A001372):
             struct_count = 0
             for struct in funcstructs(n):
                 struct_count += 1
-            self.assertEqual(self.counts[n], struct_count)
+            self.assertEqual(num, struct_count)
             
     def testFuncstructDegeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
-        for n in range(1, len(self.counts)):
+        N = 10
+        for n in range(1,N):
             nfac = factorial(n)
             func_count = 0
             for funcstruct in funcstructs(n):

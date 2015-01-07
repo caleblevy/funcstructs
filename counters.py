@@ -48,9 +48,7 @@ def rooted_treecount_upto(N):
     return T
 
 rooted_treecount = lambda n: rooted_treecount_upto(n)[-1]
-
-                
-                
+    
                 
 def iroot_newton(n, k=2):
     """
@@ -120,8 +118,7 @@ def partition_numbers_upto(N):
         k_max = (isqrt(24*n+1)-1)//6
         k_min = -((isqrt(24*n+1)+1)//6)
         for k in chain(range(k_min,0),range(1,k_max+1)):
-            pk = k*(3*k+1)
-            P[n] += (-1)**abs((k-1)) * P[n-pk//2]
+            P[n] += (-1)**abs((k-1)) * P[n-k*(3*k+1)//2]
     return P
 
 partition_number = lambda n: partition_numbers_upto(n)[-1]

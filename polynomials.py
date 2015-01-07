@@ -162,6 +162,10 @@ def polysum(n, coeffs):
     Given given polynomial with given coeffs=[c0,c1,..,ck], calculates
     sum(p(n), n=[0...k]) where p(k)=c0+c1*n+...+ck*n**k
     """
+    pass
+
+def poly_compose(p1, p2):
+    pass
     
 
 class PolynomialTest(unittest.TestCase):
@@ -176,7 +180,7 @@ class PolynomialTest(unittest.TestCase):
         """
         Verify MSP for the simple case of the elementary symmetric polynomials.
         We can calculate them independently by using the Newton identities to
-        FOIL a polynomial with the given roots
+        FOIL a polynomial with the given roots.
         """
         N = 20
         for n in range(1,N):

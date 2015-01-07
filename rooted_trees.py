@@ -143,6 +143,14 @@ def chop(tree):
     return tuple(forest)
 
 def monotone_subsequences(seq, comparison):
+    """
+    Given an iterable seq and a comparsion function, returns a generator of the
+    subsequences of seq such that comparison(seq[I],seq[I+1]) holds for
+    0<=I<=len(seq)-1.
+    
+    For example, if comparison is >=, then this returns nondecreasing
+    subsequences, while comparison of > returns increasing.
+    """
     if not seq:
         return
     subseq = [seq[0]]
@@ -217,7 +225,7 @@ def tree_to_func(tree, permutation=None):
         grafting_point[height-1] = node+1
     return func
 
-# If run standalone, perform unit tests
+
 class TreeTest(unittest.TestCase):
     counts = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286]
     def testTrees(self):
@@ -257,14 +265,15 @@ class TreeTest(unittest.TestCase):
                [6,5],[5],[5],[5]]
         noninc = [[1],[2],[3],[4,3,3,2],[3],[4],[5,4],[5,3,3,2],[3],[4],[5],
                   [6,5,5,5,5]]
-        for I, ss in enumerate(increasing_subsequences(test_tree)):
-            self.assertEqual(inc[I], ss)
-        for I, ss in enumerate(nondecreasing_subsequences(test_tree)):
-            self.assertEqual(nondec[I], ss)
-        for I, ss in enumerate(decreasing_subsequences(test_tree)):
-            self.assertEqual(dec[I], ss)
-        for I, ss in enumerate(nonincreasing_subsequences(test_tree)):
-            self.assertEqual(noninc[I], ss)
+
+        self.assertEqual(inc, list(increasing_subsequences(test_tree)))
+        self.assertEqual(nondec, list(nondecreasing_subsequences(test_tree)))
+        self.assertEqual(dec, list(decreasing_subsequences(test_tree)))
+        self.assertEqual(noninc, list(nonincreasing_subsequences(test_tree)))
+        
+        inc2 = [1,2,3,4,5]
+        # Test the end isn't double counted.
+        self.assertEqual([inc2], list(increasing_subsequences(inc2)))
 
 if __name__ == '__main__':
     unittest.main()
