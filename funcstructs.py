@@ -14,8 +14,8 @@ Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
 from setops import split_set, flatten, mset_degeneracy, prod
-from rootedtrees import forests, tree_degeneracy, tree_to_func, \
-                        increasing_subsequences 
+from rootedtrees import forests, tree_degeneracy, tree_to_func
+from monotones import increasing_subsequences
 from itertools import combinations_with_replacement, product
 from sympy.utilities.iterables import multiset_partitions
 from necklaces import necklaces, cycle_degeneracy
