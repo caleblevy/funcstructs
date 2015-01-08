@@ -10,7 +10,6 @@ A collection of miscellaneous generator functions that do not fit elsewhere.
 """
 
 from PADS.IntegerPartitions import partitions, lex_partitions
-from collections import Iterable
 from rooted_trees import prod
 from itertools import product
 import unittest
@@ -24,9 +23,9 @@ def parse_ranges(start, stop, step):
     if stop is None:
         start, stop = stop, start
     # If start is not iterable, it is either an int or none.
-    if not isinstance(start, Iterable):
+    if not hasattr(start, '__iter__'):
         start = [0 if(start is None) else start]*len(stop)
-    if not isinstance(step, Iterable):
+    if not hasattr(step, '__iter__'):
         step = [1 if(step is None) else step]*len(stop)
     if not len(start) == len(step) == len(stop):
         raise ValueError("start, stop and step must all be same length.")

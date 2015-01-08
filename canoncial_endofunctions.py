@@ -6,14 +6,20 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 """
+These should all be made into methods. We will have:
+    - f.cycles()
+    - f.preimage(I)
 """
 
 import unittest
 from random import randrange
-import matplotlib.pyplot as plt
+from collections import deque
+# Unittest imports
+from endofunctions import endofunctions, imagepath
+from rooted_trees import flatten
 
 randfunc = lambda n: [randrange(n) for I in range(n)]
-
+# import matplotlib.pyplot as plt
 # N = 10
 # It = 100000
 # fdist = [0]*N
@@ -31,11 +37,25 @@ def get(S):
         return x
     raise ValueError("Cannot retrieve an item from the empty set")
 
-def modrange(start, stop, modulus):
-    for I in range(start,stop):
-        yield I%modulus
+
+def preimage(f, I, D=None):
+    """
+    Given an endofunction f, return the primage of I restricted to subset of
+    the domain D.
+    """
+    if not hasattr(I, '__iter__'):
+        I = [I]
+    preim = [x for x in range(len(f)) if f[x] in I]
+    
+    if D is not None:
+        preim = [x for x in preim if x in D]
+    return preim
+
 
 def funccycles(f):
+    """
+    Given an endofunction f, return its cycle decomposition.
+    """
     N = len(f)
     if N == 1:
         return [(0,),]
@@ -56,10 +76,17 @@ def funccycles(f):
             cycle_els.extend(path[I+1:])
     return cycles
 
+def smallest_rotation(lst):
+    lst = list(lst)
+    minrot = deque(lst)
+    cycle = deque(lst)
+    for I in range(len(lst)-1):
+        cycle.rotate()
+        cy = list(cycle)
+        if minrot > cy:
+            minrot = cy
+    return tuple(minrot)
 
-# Unittest imports
-from endofunctions import endofunctions, imagepath
-from rooted_trees import flatten
 
 class CycleTests(unittest.TestCase):
     funcs = [

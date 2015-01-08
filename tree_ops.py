@@ -102,11 +102,8 @@ def TreeForm(f):
         
     return Tree
     
-
-    
-# Add canonical form
-# Add Function Form
-# Add ImagePath
-
-# To other functions add scripts that find distributions of these objects
-# Maybe add to this random subset?
+from rooted_trees import rooted_trees, tree_to_func
+for tree in rooted_trees(20):
+    print tree_to_func(tree),
+    print TreeForm(tree_to_func(tree))
+    print

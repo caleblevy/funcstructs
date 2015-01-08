@@ -13,7 +13,6 @@ Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 
 from rooted_trees import split_set
 from functools import reduce
-from sympy import Symbol
 import numpy as np
 import unittest
 # For unit testing.
@@ -150,12 +149,7 @@ def FOIL(roots):
     """
     monomials = [(1,-root) for root in roots]
     return reduce(poly_multiply, monomials, [1,])
-
-def symrange(*args):
-    x = []
-    for I in range(*args):
-        x.append(Symbol('x%s'%str(I)))
-    return x
+    
 
 def polysum(n, coeffs):
     """
