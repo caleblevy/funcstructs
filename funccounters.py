@@ -30,8 +30,8 @@ iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
-from endofunction_structures import (funcstructs, funcstruct_degeneracy,
-                                     funcstruct_to_func, funcstruct_imagepath)
+from funcstructs import funcstructs, funcstruct_degeneracy, funcstruct_to_func,\
+                        funcstruct_imagepath
 from iteration import product_range, compositions
 from math import factorial
 from necklaces import nCk

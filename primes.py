@@ -9,7 +9,7 @@
 A collection of short functions for enumerating factorizations of integers and
 other such things.
 """
-from rooted_trees import prod, split_set
+from rootedtrees import prod, split_set
 from math import ceil
 import fractions
 import unittest

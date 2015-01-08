@@ -13,7 +13,7 @@ structures have not been enumerated anywhere else.
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
-from rooted_trees import forests, split_set, flatten, mset_degeneracy,\
+from rootedtrees import forests, split_set, flatten, mset_degeneracy,\
                          tree_degeneracy, tree_to_func, increasing_subsequences 
 from itertools import combinations_with_replacement, product
 from sympy.utilities.iterables import multiset_partitions

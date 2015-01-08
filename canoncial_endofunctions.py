@@ -15,8 +15,8 @@ import unittest
 from random import randrange
 from collections import deque
 # Unittest imports
-from endofunctions import endofunctions, imagepath
-from rooted_trees import flatten
+from funccounters import endofunctions, imagepath
+from rootedtrees import flatten
 
 randfunc = lambda n: [randrange(n) for I in range(n)]
 # import matplotlib.pyplot as plt

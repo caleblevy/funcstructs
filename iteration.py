@@ -10,7 +10,7 @@ A collection of miscellaneous generator functions that do not fit elsewhere.
 """
 
 from PADS.IntegerPartitions import partitions, lex_partitions
-from rooted_trees import prod
+from rootedtrees import prod
 from itertools import product
 import unittest
 

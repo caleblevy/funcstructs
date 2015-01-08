@@ -11,7 +11,7 @@ Enumerate and produce polynomials of various kinds.
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
-from rooted_trees import split_set
+from rootedtrees import split_set
 from functools import reduce
 import numpy as np
 import unittest
