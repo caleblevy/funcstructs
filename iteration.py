@@ -10,8 +10,8 @@ A collection of miscellaneous generator functions that do not fit elsewhere.
 """
 
 from PADS.IntegerPartitions import partitions, lex_partitions
-from rootedtrees import prod
 from itertools import product
+from setops import prod
 import unittest
 
 def parse_ranges(start, stop, step):

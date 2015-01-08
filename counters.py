@@ -5,7 +5,7 @@
 # contained herein are described in the LICENSE file included with this 
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-from rootedtrees import split_set, prod
+from setops import split_set, prod
 from iteration import tuple_partitions
 from fractions import Fraction
 from primes import divisors

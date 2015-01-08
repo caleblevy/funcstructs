@@ -21,16 +21,12 @@ together in multisets corresponding to cycle decompositions of the final set
 trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
+from setops import mset_degeneracy, split_set, flatten
 from itertools import combinations_with_replacement, product
 from PADS.IntegerPartitions import partitions
-from functools import reduce
-from itertools import chain
+from operator import gt, ge, le, lt
 from math import factorial
-import operator
 import unittest
-
-prod = lambda iterable: reduce(operator.mul, iterable, 1)
-factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 
 def successor_tree(L):
     """Given a tree L, returns the successor."""
@@ -75,29 +71,9 @@ def rooted_trees(N):
     while L[1] != L[2]:
         successor_tree(L)
         yield L
-            
-def split_set(partition):
-    """Splits a multiset into elements and multiplicities."""
-    y = list(set(partition))
-    d = [partition.count(y[I]) for I in range(len(y))]
-    return y, d
-
-def mset_degeneracy(mset):
-    y, d = split_set(mset)
-    return factorial_prod(d)
-    
-def flatten(listOfLists):
-    "Flatten one level of nesting"
-    return chain.from_iterable(listOfLists)
-
-flatten_to_list = lambda iterable: list(flatten(iterable))
-
-def unsplit_set(y, d):
-    """Reverse of split_set."""
-    packed_list = [[y[I]]*d[I] for I in range(len(y))]
-    return flatten(packed_list)
     
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
+
 
 def partition_forests(partition):
     y, d = split_set(partition)
@@ -164,10 +140,10 @@ def monotone_subsequences(seq, comparison):
         term_prev = term
     yield subseq
 
-increasing_subsequences = lambda seq: monotone_subsequences(seq, operator.gt)
-nondecreasing_subsequences = lambda seq: monotone_subsequences(seq, operator.ge)
-decreasing_subsequences = lambda seq: monotone_subsequences(seq,operator.lt)
-nonincreasing_subsequences = lambda seq: monotone_subsequences(seq, operator.le)
+increasing_subsequences = lambda seq: monotone_subsequences(seq, gt)
+nondecreasing_subsequences = lambda seq: monotone_subsequences(seq, ge)
+decreasing_subsequences = lambda seq: monotone_subsequences(seq, lt)
+nonincreasing_subsequences = lambda seq: monotone_subsequences(seq, le)
 
 def forests_simple(N):
     """
