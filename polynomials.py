@@ -1,17 +1,13 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
 # 
 # The terms of use, license and copyright information for the code and ideas 
 # contained herein are described in the LICENSE file included with this 
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""
-Enumerate and produce polynomials of various kinds.
+""" Enumerate and produce polynomials of various kinds. """
 
-Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
-"""
-
-from rootedtrees import split_set
+from setops import split_set
 from functools import reduce
 import numpy as np
 import unittest
@@ -20,7 +16,8 @@ from necklaces import nCk
 
 # MSP == Monomial Symmetric Polynomial
 def MSP_recursive(x, powers):
-    # Wrapper for _recursive_monomial_alg which separates the multiset powers into elements with degeneracies, and returns the value fo the function
+    # Wrapper for _recursive_monomial_alg which separates the multiset powers 
+    # into elements with degeneracies, and returns the value of the function.
     y, d = split_set(powers)
     return _recursive_monomial_alg(x, d, y)
 
@@ -149,17 +146,6 @@ def FOIL(roots):
     """
     monomials = [(1,-root) for root in roots]
     return reduce(poly_multiply, monomials, [1,])
-    
-
-def polysum(n, coeffs):
-    """
-    Given given polynomial with given coeffs=[c0,c1,..,ck], calculates
-    sum(p(n), n=[0...k]) where p(k)=c0+c1*n+...+ck*n**k
-    """
-    pass
-
-def poly_compose(p1, p2):
-    pass
     
 
 class PolynomialTest(unittest.TestCase):

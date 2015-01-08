@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2014 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2013, 2014 and 2015 Caleb Levy - All Rights Reserved.
 # 
 # The terms of use, license and copyright information for the code and ideas 
 # contained herein are described in the LICENSE file included with this 
@@ -350,5 +350,3 @@ class EndofunctionTest(unittest.TestCase):
         
 if __name__ == '__main__':
     unittest.main()
-        
-        

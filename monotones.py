@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+# 
+# The terms of use, license and copyright information for the code and ideas 
+# contained herein are described in the LICENSE file included with this 
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 from operator import gt, ge, le, lt
 import unittest
 
@@ -8,7 +15,8 @@ def monotone_subsequences(seq, comparison):
     0<=I<=len(seq)-1.
     
     For example, if comparison is >=, then this returns nondecreasing
-    subsequences, while comparison of > returns increasing.
+    subsequences, while comparison of > returns increasing. Equivalent to
+    sympy's runs() method.
     """
     if not seq:
         return
