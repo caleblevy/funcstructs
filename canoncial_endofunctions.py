@@ -10,7 +10,6 @@
 
 import unittest
 from random import randrange
-from endofunctions import endofunctions
 import matplotlib.pyplot as plt
 
 randfunc = lambda n: [randrange(n) for I in range(n)]
@@ -36,13 +35,12 @@ def modrange(start, stop, modulus):
     for I in range(start,stop):
         yield I%modulus
 
-def funccycles(f, S=None):
-    pass
 def funccycles(f):
     N = len(f)
     if N == 1:
         return [(0,),]
     cycles = []
+    cycle_els = []
     if N == 1:
         return [(0,),]
     for x in range(N):
@@ -53,11 +51,16 @@ def funccycles(f):
         I = N-1
         while I >= 0 and path[I] != path[-1]:
             I -= 1
-        cycles.append(tuple(path[I+1:]))
+        if path[-1] not in cycle_els:
+            cycles.append(tuple(path[I+1:]))
+            cycle_els.extend(path[I+1:])
     return cycles
 
 
-from endofunctions import endofunctions
+# Unittest imports
+from endofunctions import endofunctions, imagepath
+from rooted_trees import flatten
+
 class CycleTests(unittest.TestCase):
     funcs = [
              [1,0], 
@@ -69,13 +72,22 @@ class CycleTests(unittest.TestCase):
     funcs += list(endofunctions(1))
     funcs += list(endofunctions(3)) + list(endofunctions(4))
     
-    def testTuplesAreCycles(self):
-
+    def testCyclesAreCyclic(self):
         for f in self.funcs:
             c = funccycles(f)
             for cycle in c:
                 for ind, el in enumerate(cycle):
                     self.assertEqual(cycle[(ind+1)%len(cycle)], f[el])
+    
+    def testCyclesAreUnique(self):
+        for f in self.funcs:
+            cycle_els = list(flatten(funccycles(f)))
+            self.assertEqual(len(cycle_els), len(set(cycle_els)))
+    
+    def testCyclesAreComplete(self):
+        for f in self.funcs:
+            cycle_size = len(list(flatten(funccycles(f))))
+            self.assertEqual(imagepath(f)[-1], cycle_size)
 
 if __name__ == '__main__':
     unittest.main()
