@@ -1,3 +1,9 @@
+% Copyright (C) 2013 Caleb Levy - All Rights Reserved.
+%
+% The terms of use, license and copyright information for the code and ideas
+% contained herein are described in the LICENSE file included with this
+% project. For more information please contact me at caleb.levy@berkeley.edu.
+
 %% Map Density
 % Find density of functions a set A with N elements to a set B with M
 % elements.

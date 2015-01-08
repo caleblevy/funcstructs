@@ -46,3 +46,7 @@ Module.symvers
 *.orig
 *~
 \#*#
+
+# Local folders
+/myrefs/
+__pycache__/

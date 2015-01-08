@@ -1,3 +1,9 @@
+% Copyright (C) 2013 Caleb Levy - All Rights Reserved.
+%
+% The terms of use, license and copyright information for the code and ideas
+% contained herein are described in the LICENSE file included with this
+% project. For more information please contact me at caleb.levy@berkeley.edu.
+
 %% Brute Force Map Density
 % Brute force computation of map density between two sets A and B. Used as
 % a check for the "merely" exponential version.

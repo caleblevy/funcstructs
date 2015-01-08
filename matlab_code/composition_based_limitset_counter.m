@@ -1,3 +1,9 @@
+% Copyright (C) 2013 Caleb Levy - All Rights Reserved.
+%
+% The terms of use, license and copyright information for the code and ideas
+% contained herein are described in the LICENSE file included with this
+% project. For more information please contact me at caleb.levy@berkeley.edu.
+
 %% Contraction Density
 % Calculate probability distribution of functions on N space with respect
 % to size of set limit

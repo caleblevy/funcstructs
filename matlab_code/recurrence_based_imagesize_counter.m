@@ -1,3 +1,9 @@
+% Copyright (C) 2013 Caleb Levy - All Rights Reserved.
+%
+% The terms of use, license and copyright information for the code and ideas
+% contained herein are described in the LICENSE file included with this
+% project. For more information please contact me at caleb.levy@berkeley.edu.
+
 %% Recursive Map Density
 % Recursively calculate probability that the image of a random function on
 % an N element set will have k elements.
