@@ -199,9 +199,16 @@ def limitset_count(n,k):
     return k*n**(n-k)*factorial(n-1)//factorial(n-k)
 
 
-def limitset(n):
+def limitset_direct(n):
     return [limitset_count(n,k) for k in range(1,n+1)]
-                
+
+def limitset_recurse(n):
+    L = [n**(n-1)]+[0]*(n-1)
+    for k in range(1,n):
+        L[k] = (L[k-1]*(k+1)*(n-k))//(k*n)
+    return L
+    
+limitset = limitset_recurse
                 
 class EndofunctionTest(unittest.TestCase):
     imagedists = [
@@ -345,8 +352,9 @@ class EndofunctionTest(unittest.TestCase):
             n = len(dist)
             self.assertEqual(dist, lastdist_composition(n))
             self.assertEqual(dist, list(imagedist(n)[:,-1]))
-            self.assertEqual(dist, limitset(n))
-        
-        
+            self.assertEqual(dist, limitset_direct(n))
+            self.assertEqual(dist, limitset_recurse(n))
+            
+
 if __name__ == '__main__':
     unittest.main()

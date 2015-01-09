@@ -10,9 +10,9 @@ A rooted tree is a connected digraph with a single cycle such that every node's
 outdegree and every cycle's length is exactly one. Alternatively, it is a tree
 with a designated "root" node, where every path ends with the root. They are
 equivalent to filesystems consisting entirely of folders with no symbolic
-links. An unlablled rooted tree is the equivalence class of a given directory
+links. An unlabelled rooted tree is the equivalence class of a given directory
 where folders in each subdirectory may be rearranged in any desired order
-(alphebetical, reverse-alphabetical, date added, or any other permutation). A
+(alphabetical, reverse-alphabetical, date added, or any other permutation). A
 forest is any collection of rooted trees.
 
 Any endofunction structure may be represented as a forest of trees, grouped
