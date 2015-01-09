@@ -168,6 +168,7 @@ class PolynomialTest(unittest.TestCase):
             x = range(1,n+1)
             symmon = [MSP_iterative(x, [1]*I) for I in range(1,n+1)]
             self.assertEqual(foilmon, symmon)
+            # Recursive version is far more expensive; test small values.
             if n <= 5:
                 recmon = [MSP_recursive(x, [1]*I) for I in range(1,n+1)]
                 self.assertEqual(foilmon, recmon)

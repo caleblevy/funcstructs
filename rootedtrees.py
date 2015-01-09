@@ -145,10 +145,10 @@ def tree_degeneracy(tree):
     """
     if not chop(tree):
         return 1
-    mul = 1
+    degeneracy = 1
     for subtree in chop(tree):
-        mul *= tree_degeneracy(subtree)
-    return mul*mset_degeneracy(chop(tree))
+        degeneracy *= tree_degeneracy(subtree)
+    return degeneracy*mset_degeneracy(chop(tree))
     
 
 def tree_to_func(tree, permutation=None):

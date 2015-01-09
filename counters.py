@@ -10,10 +10,10 @@ Two common kinds of problem in combinatorics are enumeration and counting. In
 theory we may view counting as a strict subproblem of enumeration, since
 enumerating all elements in a set necessarily allows us to count them.
 
-In practice, there are many tricks one may use to count the number of objects
-in a set while performing far less work than listing the elements directly.
-This module collects efficient ways of counting endofunction-related objects
-without direct enumeration.
+In practice, there are many tricks one may use to count the number of objects in
+a set while performing far less work than listing the elements directly. This
+module collects efficient ways of counting endofunction-related objects without
+direct enumeration.
 """
 
 from setops import split_set, prod
@@ -79,20 +79,20 @@ def partition_numbers_upto(N):
 partition_number = lambda n: partition_numbers_upto(n)[-1]
 
 class CounterTest(unittest.TestCase):
-    def testEndofunctionStructureCount(self):
-        counts = [1, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
-        for n in range(len(counts)):
-            self.assertEqual(counts[n], funcstruct_count(n))
 
-    def testPartitionNumbers(self):
-        counts = [1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135]
-        for n in range(len(counts)):
-            self.assertEqual(counts[n], partition_number(n))
+    def testEndofunctionStructureCount(self):
+        A001372 = [1, 1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
+        for n, count in enumerate(A001372):
+            self.assertEqual(count, funcstruct_count(n))
             
     def testTreeCounts(self):
         A000081 = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286, 719, 1842, 4766, 12486]
         self.assertEqual(A000081, rooted_treecount_upto(len(A000081)-1))
-            
+        
+    def testPartitionNumbers(self):
+        A000041 = [1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135]
+        self.assertEqual(A000041, partition_numbers_upto(len(A000041)-1))
+
 
 if __name__ == '__main__':
     unittest.main()

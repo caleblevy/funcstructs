@@ -16,7 +16,7 @@ from random import randrange
 from collections import deque
 # Unittest imports
 from funcdists import endofunctions, imagepath
-from rootedtrees import flatten
+from setops import flatten, isiterable
 
 randfunc = lambda n: [randrange(n) for I in range(n)]
 # import matplotlib.pyplot as plt
@@ -43,7 +43,7 @@ def preimage(f, I, D=None):
     Given an endofunction f, return the primage of I restricted to subset of
     the domain D.
     """
-    if not hasattr(I, '__iter__'):
+    if not isiterable(I):
         I = [I]
     preim = [x for x in range(len(f)) if f[x] in I]
     

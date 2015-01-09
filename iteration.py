@@ -11,7 +11,7 @@ A collection of miscellaneous generator functions that do not fit elsewhere.
 
 from PADS.IntegerPartitions import partitions, lex_partitions
 from itertools import product
-from setops import prod
+from setops import prod, isiterable
 import unittest
 
 def parse_ranges(start, stop, step):
@@ -23,9 +23,9 @@ def parse_ranges(start, stop, step):
     if stop is None:
         start, stop = stop, start
     # If start is not iterable, it is either an int or none.
-    if not hasattr(start, '__iter__'):
+    if not isiterable(start):
         start = [0 if(start is None) else start]*len(stop)
-    if not hasattr(step, '__iter__'):
+    if not isiterable(step):
         step = [1 if(step is None) else step]*len(stop)
     if not len(start) == len(step) == len(stop):
         raise ValueError("start, stop and step must all be same length.")
@@ -47,7 +47,7 @@ def product_range(start, stop=None, step=None):
           for I2 in range(r2,s2,t2):
             ...
               for In in range(rn,sn,tn):
-                yield tuple(I1,I2,...,In)
+                yield tuple([I1,I2,...,In])
     """
     start, stop, step = parse_ranges(start, stop, step)
     return product(*[range(I,J,K) for I,J,K in zip(start,stop,step)])

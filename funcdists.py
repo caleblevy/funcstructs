@@ -212,7 +212,6 @@ limitset = limitset_recurse
                 
 class EndofunctionTest(unittest.TestCase):
     imagedists = [
-        
         np.array([
             [3, 9],
             [18, 12],

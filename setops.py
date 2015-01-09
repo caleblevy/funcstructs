@@ -11,8 +11,9 @@ from math import factorial
 from operator import mul
 
 prod = lambda iterable: reduce(mul, iterable, 1)
-
 factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
+
+isiterable = lambda obj: hasattr(obj, '__iter__')
 
 def split_set(partition):
     """Splits a multiset into elements and multiplicities."""
@@ -24,14 +25,16 @@ def mset_degeneracy(mset):
     y, d = split_set(mset)
     return factorial_prod(d)
     
-def unsplit_set(y, d):
-    """Reverse of split_set."""
-    packed_list = [[y[I]]*d[I] for I in range(len(y))]
-    return flatten(packed_list)
-    
-    
 def flatten(listOfLists):
     "Flatten one level of nesting"
     return chain.from_iterable(listOfLists)
     
 flatten_to_list = lambda iterable: list(flatten(iterable))
+    
+def unsplit_set(y, d):
+    """Reverse of split_set."""
+    packed_list = [[y[I]]*d[I] for I in range(len(y))]
+    return flatten_to_list(packed_list)
+    
+    
+

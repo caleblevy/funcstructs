@@ -6,13 +6,8 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 import numpy as np
+import unittest
 
-def IMSet(part):
-    y = list(set(part))
-    l = len(y)
-    d = [y.count(y[I]) for I in range(l)]
-    return (y,d)
-    
 def Unpack(PList): # Extract the next level of a rooted tree
     PList = [M for M in PList if isinstance(M,list)]
     UP = []    
@@ -20,11 +15,6 @@ def Unpack(PList): # Extract the next level of a rooted tree
         for El in M:
             UP.append(El)            
     return UP
-    
-def MSet(y,d): # Make a multiset
-    # NOTE: List=MakeSet(MSet(List))
-    PList = [[y[I]]*d[I] for I in range(len(y))]
-    return Unpack(PList)
     
 def ListNestedEls(Tree,d): # List all elements at depth d, representing nodes with further connections as their own trees
     for I in range(d):
@@ -40,7 +30,7 @@ def Unwind(Tree): # Give all the elements in the nodes of a tree
         Tree = Unpack(Tree)
     return list(set(S))
         
-def RootLevelPath(Tree): # Find the level path of a rooted tree, including 1 in the base
+def numels_by_nestdepth(Tree): # Find the level path of a rooted tree, including 1 in the base
     L = []
     L.append(1)
     while Tree:
@@ -101,9 +91,23 @@ def TreeForm(f):
         IndSet = NewSet
         
     return Tree
+
+class NestedtreeTest(unittest.TestCase):
+    funcforms = [
+        [0, 0, 1, 2, 3, 4, 2, 0, 7, 8],
+        [0, 0, 1, 2, 3, 4, 2, 0, 7, 7],
+        [0, 0, 1, 2, 3, 3, 3, 3, 3, 0],
+    ]
+    nestedforms = [
+        [[[[[[]]], []]], [[[]]]],
+        [[[[[[]]], []]], [[], []]],
+        [[[[[], [], [], [], []]]], []]
+    ]
     
-from rooted_trees import rooted_trees, tree_to_func
-for tree in rooted_trees(20):
-    print tree_to_func(tree),
-    print TreeForm(tree_to_func(tree))
-    print
+    def testTreeform(self):
+        for I, tree in enumerate(self.funcforms):
+            self.assertEqual(self.nestedforms[I], TreeForm(tree))
+    
+
+if __name__ == '__main__':
+    unittest.main()
