@@ -32,9 +32,9 @@ image sizes set can be O(n) (and has a lovely closed form formula).
 
 from funcstructs import funcstructs, funcstruct_degeneracy, funcstruct_to_func,\
                         funcstruct_imagepath
+from setops import nCk
 from iteration import product_range, compositions
 from math import factorial
-from necklaces import nCk
 import numpy as np
 import unittest
 

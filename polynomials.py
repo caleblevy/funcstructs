@@ -7,12 +7,10 @@
 
 """ Enumerate and produce polynomials of various kinds. """
 
-from setops import split_set
+from setops import split_set, nCk
 from functools import reduce
 import numpy as np
 import unittest
-# For unit testing.
-from necklaces import nCk
 
 # MSP == Monomial Symmetric Polynomial
 def MSP_recursive(x, powers):

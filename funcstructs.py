@@ -13,14 +13,17 @@ structures have not been enumerated anywhere else.
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
-from setops import split_set, flatten, mset_degeneracy, prod
+from setops import split_set, mset_degeneracy, prod
+from nestops import flatten
 from rootedtrees import forests, tree_degeneracy, tree_to_func
 from monotones import increasing_subsequences
 from itertools import combinations_with_replacement, product
-from sympy.utilities.iterables import multiset_partitions
 from necklaces import necklaces, cycle_degeneracy
 from math import factorial
+
+from sympy.utilities.iterables import multiset_partitions
 import numpy as np
+
 import unittest
         
 def mset_functions(mset):
@@ -78,7 +81,7 @@ def funcstruct_to_func(function_structure):
     cycle_start = 0
     for cycle in function_structure:
         node_ind = node_next = 0
-        cycle_len = len(list(flatten(cycle)))
+        cycle_len = len(flatten(cycle))
         for tree in cycle:
             node_next += len(tree)
             func[cycle_start + node_ind] = cycle_start + node_next%cycle_len
@@ -87,9 +90,9 @@ def funcstruct_to_func(function_structure):
     return func
 
 def funcstruct_imagepath(funcstruct, n=None):
-    forest = list(flatten(funcstruct))
+    forest = flatten(funcstruct)
     if n is None:
-        n = len(list(flatten(forest)))
+        n = len(flatten(forest))
     cardinalities = np.array([0]+[0]*(n-2), dtype=object)
     for tree in forest:
         cardinalities += 1

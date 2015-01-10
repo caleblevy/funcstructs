@@ -16,41 +16,9 @@ from random import randrange
 from collections import deque
 # Unittest imports
 from funcdists import endofunctions, imagepath
-from setops import flatten, isiterable
+from nestops import flatten
 
 randfunc = lambda n: [randrange(n) for I in range(n)]
-# import matplotlib.pyplot as plt
-# N = 10
-# It = 100000
-# fdist = [0]*N
-# for I in range(It):
-#     f = randfunc(N)
-#     print f
-#     fdist[len(set(f))-1] += 1
-#
-# print fdist
-# plt.plot(fdist)
-# plt.show()
-
-def get(S):
-    for x in S:
-        return x
-    raise ValueError("Cannot retrieve an item from the empty set")
-
-
-def preimage(f, I, D=None):
-    """
-    Given an endofunction f, return the primage of I restricted to subset of
-    the domain D.
-    """
-    if not isiterable(I):
-        I = [I]
-    preim = [x for x in range(len(f)) if f[x] in I]
-    
-    if D is not None:
-        preim = [x for x in preim if x in D]
-    return preim
-
 
 def funccycles(f):
     """
@@ -113,7 +81,7 @@ class CycleTests(unittest.TestCase):
     
     def testCyclesAreComplete(self):
         for f in self.funcs:
-            cycle_size = len(list(flatten(funccycles(f))))
+            cycle_size = len(flatten(funccycles(f)))
             self.assertEqual(imagepath(f)[-1], cycle_size)
 
 if __name__ == '__main__':

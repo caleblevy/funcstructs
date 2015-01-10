@@ -27,15 +27,12 @@ are precisely the necklaces whose beads are the rooted trees.
 """
 
 from primes import divisors, totient, isdivisor
-from setops import prod, split_set
+from setops import prod, split_set, nCk
 from fractions import gcd, Fraction
 from collections import deque
 from functools import reduce
 from math import factorial
 import unittest
-
-def nCk(n,k): 
-    return factorial(n)//factorial(k)//factorial(n-k)
 
 # We may canonically represent a multiset with an unordered partition 
 # corresponding to the multiplicities of the elements. It is simpler to 

@@ -11,8 +11,10 @@ A collection of miscellaneous generator functions that do not fit elsewhere.
 
 from PADS.IntegerPartitions import partitions, lex_partitions
 from itertools import product
-from setops import prod, isiterable
+from setops import prod
 import unittest
+
+isiterable = lambda obj: hasattr(obj, '__iter__')
 
 def parse_ranges(start, stop, step):
     """

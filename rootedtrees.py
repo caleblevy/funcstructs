@@ -21,7 +21,8 @@ together in multisets corresponding to cycle decompositions of the final set
 trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
-from setops import mset_degeneracy, split_set, flatten
+from setops import mset_degeneracy, split_set, preimage
+from nestops import flatten, get_nested_el, change_nested_el
 from itertools import combinations_with_replacement, product
 from PADS.IntegerPartitions import partitions
 from math import factorial
@@ -117,7 +118,7 @@ def subtrees(tree):
 def chop(tree):
     return tuple(tuple(subtree) for subtree in subtrees(tree))
     
-
+    
 def forests_simple(N):
     """
     Any rooted tree on N+1 nodes can be identically described by a collection
@@ -177,6 +178,35 @@ def tree_to_func(tree, permutation=None):
     return func
 
 
+def treefunc_to_brackets(treefunc):
+    n = len(treefunc)
+    S = range(n)
+    im = preimage(treefunc)
+    fix = [I for I in S if treefunc[I]==I]
+    
+    assert len(fix) == 1 # The tree better be rooted, or we will have an infinite loop
+    
+    fix = fix[0]
+    tree = im[fix]
+    tree.remove(fix)
+    
+    indset = [[I] for I in range(len(tree))]
+    
+    while indset:
+        nextinds = []
+        for ind in indset:
+            el = get_nested_el(tree, ind)
+            for I in range(len(im[el])):
+                indn = ind[:]
+                indn.append(I)
+                nextinds.append(indn)
+            
+            change_nested_el(tree, ind, im[el])
+                
+        indset = nextinds
+        
+    return tree
+
 class TreeTest(unittest.TestCase):
     counts = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286]
     
@@ -206,6 +236,23 @@ class TreeTest(unittest.TestCase):
         tree = [1,2,3,4,4,4,3,4,4,2,3,3,2,3]
         func = [0,0,1,2,2,2,1,6,6,0,9,9,0,12]
         self.assertEqual(func, tree_to_func(tree))
+    
+    
+    def testTreeform(self):
+        funcforms = [
+            [0, 0, 1, 2, 3, 4, 2, 0, 7, 8],
+            [0, 0, 1, 2, 3, 4, 2, 0, 7, 7],
+            [0, 0, 1, 2, 3, 3, 3, 3, 3, 0],
+        ]
+        
+        nestedforms = (
+            [[[[[[]]], []]], [[[]]]],
+            [[[[[[]]], []]], [[], []]],
+            [[[[[], [], [], [], []]]], []]
+        )
+        
+        for I, tree in enumerate(funcforms):
+            self.assertEqual(nestedforms[I], treefunc_to_brackets(tree))
 
 
 if __name__ == '__main__':

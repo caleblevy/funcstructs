@@ -6,14 +6,12 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 from functools import reduce
-from itertools import chain
 from math import factorial
 from operator import mul
 
 prod = lambda iterable: reduce(mul, iterable, 1)
 factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
-
-isiterable = lambda obj: hasattr(obj, '__iter__')
+nCk = lambda n,k: factorial(n)//factorial(k)//factorial(n-k)
 
 def split_set(partition):
     """Splits a multiset into elements and multiplicities."""
@@ -25,16 +23,30 @@ def mset_degeneracy(mset):
     y, d = split_set(mset)
     return factorial_prod(d)
     
-def flatten(listOfLists):
-    "Flatten one level of nesting"
-    return chain.from_iterable(listOfLists)
+def get(S):
+    """ Get a random element from a set (or any iterable). """
+    for x in S:
+        return x
+    raise ValueError("Cannot retrieve an item from the empty set")
     
-flatten_to_list = lambda iterable: list(flatten(iterable))
+def preimage(f):
+    """
+    Given an endofunction f defined on S=range(len(f)), returns the preimage of
+    f. If g=preimage(f), we have 
     
-def unsplit_set(y, d):
-    """Reverse of split_set."""
-    packed_list = [[y[I]]*d[I] for I in range(len(y))]
-    return flatten_to_list(packed_list)
+        g[y]=[x for x in S if f[x]==y],
+        
+    or mathematically:
+    
+        f^-1(y)={x in S: f(x)=y}. 
+    
+    Note the particularly close correspondence between python's list
+    comprehensions and mathematical set-builder notation.
+    """
+    S = range(len(f))
+    preim = []
+    for y in S:
+        preim.append([ x for x in S if y == f[x] ])
+    return preim
     
     
-
