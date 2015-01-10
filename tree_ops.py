@@ -6,6 +6,7 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 import numpy as np
+from setops import isiterable
 import unittest
 
 def Unpack(PList): # Extract the next level of a rooted tree
@@ -38,21 +39,28 @@ def numels_by_nestdepth(Tree): # Find the level path of a rooted tree, including
         Tree = Unpack(Tree)
     return L
     
-def GetTreeEl(Tree,Ind):
-    if len(Ind) == 1:
-        return Tree[Ind[0]]
-    else:
-        return GetTreeEl(Tree[Ind[0]],Ind[1:])
-    
-def ChangeTreeEl(Tree,Ind,El):
-    if not hasattr(Tree,'__iter__'):
+def get_nested_el(tree, ind):
+    # As long as we can still iterate through tree, continue
+    if not isiterable(tree):
         raise ValueError('Tree depth exceeded')
-    if not hasattr(Ind,'__iter__'):
-        Tree[Ind] = El
-    elif len(Ind) == 1:
-        Tree[Ind[0]] = El
+    if not isiterable(ind):
+        return tree[ind]
+    if len(ind) == 1:
+        return tree[ind[0]]
     else:
-        ChangeTreeEl(Tree[Ind[0]],Ind[1:],El)
+        return get_nested_el(tree[ind[0]], ind[1:])
+    
+def change_nested_el(tree, ind, el):
+    # As long as we can still iterate through tree, continue
+    if not isiterable(tree):
+        raise ValueError('Tree depth exceeded')
+    # Guard against base case of integer index
+    if not isiterable(ind):
+        tree[ind] = el
+    elif len(ind) == 1:
+        tree[ind[0]] = el
+    else:
+        change_nested_el(tree[ind[0]], ind[1:], el)
         
 def IImage(f): # Return the inverse image of S under f
     N = len(f)
@@ -62,35 +70,34 @@ def IImage(f): # Return the inverse image of S under f
         Im[I] = [J for J in S if f[J]==I]               
     return Im
     
-def TreeForm(f):
-    N = len(f)
-    S = range(N)
-    Im = IImage(f)
-    Fix = [I for I in S if f[I]==I]
+def nestedform(treefunc):
+    n = len(treefunc)
+    S = range(n)
+    im = IImage(treefunc)
+    fix = [I for I in S if treefunc[I]==I]
     
-    assert len(Fix) == 1 # The tree better be rooted, or we will have an infinite loop
+    assert len(fix) == 1 # The tree better be rooted, or we will have an infinite loop
     
-    Fix = Fix[0]
-    Tree = Im[Fix]
-    Tree.remove(Fix)
+    fix = fix[0]
+    tree = im[fix]
+    tree.remove(fix)
     
-    IndSet = [[I] for I in range(len(Tree))]
+    indset = [[I] for I in range(len(tree))]
     
-    while IndSet:
-        NewSet = []
-        for Ind in IndSet:
-            El = GetTreeEl(Tree,Ind)
-            range(len(Im[El]))
-            for I in range(len(Im[El])):
-                IndN = Ind[:]
-                IndN.append(I)
-                NewSet.append(IndN)
+    while indset:
+        nextinds = []
+        for ind in indset:
+            el = get_nested_el(tree, ind)
+            for I in range(len(im[el])):
+                indn = ind[:]
+                indn.append(I)
+                nextinds.append(indn)
             
-            ChangeTreeEl(Tree,Ind,Im[El])
+            change_nested_el(tree, ind, im[el])
                 
-        IndSet = NewSet
+        indset = nextinds
         
-    return Tree
+    return tree
 
 class NestedtreeTest(unittest.TestCase):
     funcforms = [
@@ -106,7 +113,7 @@ class NestedtreeTest(unittest.TestCase):
     
     def testTreeform(self):
         for I, tree in enumerate(self.funcforms):
-            self.assertEqual(self.nestedforms[I], TreeForm(tree))
+            self.assertEqual(self.nestedforms[I], nestedform(tree))
     
 
 if __name__ == '__main__':

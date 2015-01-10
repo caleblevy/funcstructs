@@ -95,27 +95,28 @@ def forests_complex(n):
         for forest in partition_forests(partition):
             yield forest
 
-def chop(tree):
+def subtrees(tree):
     """
     Given a tree, returns the collection of subtrees connected to the root node.
     """
     if not tree or len(tree) == 1:
         return
-    tree = tree[1:]
-    tree = [t-1 for t in tree]
-    forest = []
+    tree = [t-1 for t in tree[1:]]
     subtree = []
     for ind, node in enumerate(tree[:-1]):
         subtree.append(node)
         if tree[ind+1] == 1:
-            forest.append(tuple(subtree))
+            yield subtree
             subtree = []
     if tree[-1] != 1:
         subtree.append(tree[-1])
     else:
         subtree = [tree[-1]]
-    forest.append(tuple(subtree))
-    return tuple(forest)
+    yield subtree
+
+def chop(tree):
+    return tuple(tuple(subtree) for subtree in subtrees(tree))
+    
 
 def forests_simple(N):
     """
