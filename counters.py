@@ -21,30 +21,43 @@ from iteration import tuple_partitions
 from fractions import Fraction
 from primes import divisors
 from integerroots import isqrt
+
 from itertools import chain
 from math import factorial
+
 import unittest
-
-
-def burnside_partition_degeneracy(b):
-    product_terms = []
-    for I in range(1,len(b)+1):
-        s = 0
-        for J in divisors(I):
-            s += J*b[J-1]
-        s **= b[I-1]
-        s *= Fraction(I,1)**(-b[I-1])/factorial(b[I-1])
-        product_terms.append(s)
-    return prod(product_terms)
         
 def funcstruct_count(n):
+    """
+    Count the number of endofunction structures on n nodes. Iterates over the
+    tuple representation of partitions using the formula featured in
+        De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
+        Combinatorial Theory, Volume 12, 1972.
+
+    See the papers directory for the original reference.
+    """
     tot = 0
     for b in tuple_partitions(n):
-        tot += burnside_partition_degeneracy(b)
+        product_terms = []
+        for I in range(1,len(b)+1):
+            s = 0
+            for J in divisors(I):
+                s += J*b[J-1]
+            s **= b[I-1]
+            s *= Fraction(I,1)**(-b[I-1])/factorial(b[I-1])
+            product_terms.append(s)
+        tot += prod(product_terms)
     return int(tot)
 
 
 def rooted_treecount_upto(N):
+    """
+    Returns the number of rooted tree structures on n nodes. Algorithm featured
+    without derivation in
+        Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
+        "Mathematical Constants", Cambridge, England: Cambridge University
+        Press, pp. 295-316, 2003.
+    """
     if N == 0:
         return [0]
     if N == 1:
@@ -64,8 +77,13 @@ rooted_treecount = lambda n: rooted_treecount_upto(n)[-1]
 
         
 def partition_numbers_upto(N):
-    # Iterate over the pentagonal numbers. Formula from 
-    # http://mathworld.wolfram.com/PartitionFunctionP.html
+    """
+    Uses Euler's Pentagonal Number Theorem to count partition number using the
+    previous terms. The sum is taken over O(sqrt(n)) terms on each pass, so the
+    algorithm runs in O(n**3/2)
+    
+    See the Knoch paper in papers folder for a proof of the theorem.
+    """
     if N == 0:
         return [1]
     P = [1]+[0]*N

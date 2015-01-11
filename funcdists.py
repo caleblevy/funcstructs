@@ -30,9 +30,8 @@ iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
-from funcstructs import funcstructs, funcstruct_degeneracy, funcstruct_to_func,\
-                        funcstruct_imagepath
-from setops import nCk
+from funcstructs import funcstructs, funcstruct_degeneracy, funcstruct_imagepath
+from setops import imagepath, nCk
 from iteration import product_range, compositions
 from math import factorial
 import numpy as np
@@ -41,27 +40,7 @@ import unittest
 
 endofunctions = lambda n: product_range([n]*n)
 
-def imagepath(f):
-    """
-    Give it a list so that all([I in range(len(f)) for I in f]) and this
-    program spits out the image path of f.
-    """
-    n = len(f)
-    cardinalities = [len(set(f))]
-    f_orig = f[:]
-    card_prev = n
-    for it in range(1,n-1):
-        f = [f_orig[x] for x in f]
-        card = len(set(f))
-        cardinalities.append(len(set(f)))
-        if card == card_prev:
-            cardinalities.extend([card]*(n-2-it))
-            break
-        card_prev = card
-    return cardinalities
-
-
-def imagedist_brute(n):
+def iterdist_brute(n):
     """
     The most naive, straightforward way to calculate the distribution of
     endofunctions is to count every endofunction. Although absurdly simple, and
@@ -75,7 +54,7 @@ def imagedist_brute(n):
     return M
 
 
-def imagedist_endofunction(n):
+def iterdist_funcstruct(n):
     """
     To count distributions of image sizes, we don't really need every function,
     since pretty much every meaningful aspect of a function's structure is
@@ -110,10 +89,10 @@ def imagedist_endofunction(n):
             M[card-1,it] += mult
     return M
 
-imagedist = imagedist_endofunction
+iterdist = iterdist_funcstruct
 
 
-def firstdist_composition(n):
+def imagedist_composition(n):
     """
     Produces left column of imagedist using integer compositions in O(2^n) time.
     
@@ -136,7 +115,7 @@ def firstdist_composition(n):
     return F
 
 
-def firstdists_upto(N):
+def imagedists_upto(N):
     """
     Left column of imagedist. This uses a recursion relation to run in O(n^2)
     time. This is the fastest method I know of and probably the fastest there
@@ -157,7 +136,7 @@ def firstdists_upto(N):
 
     return FD
     
-firstdist_recurse = firstdist = lambda n: list(firstdists_upto(n)[:,-1])
+imagedist_recurse = imagedist = lambda n: list(imagedists_upto(n)[:,-1])
 
 
 def nCk_grid(N):
@@ -179,7 +158,7 @@ def powergrid(N):
     return exponentials.T
            
                 
-def lastdist_composition(N):
+def limitdist_composition(N):
     L = [0]*N
     # Memoize these lookups; saves a lot of time.
     exponentials = powergrid(N)
@@ -199,19 +178,19 @@ def limitset_count(n,k):
     return k*n**(n-k)*factorial(n-1)//factorial(n-k)
 
 
-def limitset_direct(n):
+def limitdist_direct(n):
     return [limitset_count(n,k) for k in range(1,n+1)]
 
-def limitset_recurse(n):
+def limitdist_recurse(n):
     L = [n**(n-1)]+[0]*(n-1)
     for k in range(1,n):
         L[k] = (L[k-1]*(k+1)*(n-k))//(k*n)
     return L
     
-limitset = limitset_recurse
+limitdist = limitdist_recurse
                 
 class EndofunctionTest(unittest.TestCase):
-    imagedists = [
+    iterdists = [
         np.array([
             [3, 9],
             [18, 12],
@@ -234,7 +213,8 @@ class EndofunctionTest(unittest.TestCase):
             dtype=object)
     ]
     
-    firstdists = [
+    
+    imagedists = [
         [2,2],
         [3,18,6],
         [4,84,144,24],
@@ -243,7 +223,8 @@ class EndofunctionTest(unittest.TestCase):
         [7,2646,63210,294000,352800,105840,5040]
     ]
     
-    lastdists = [
+    
+    limitdists = [
         [2,2],
         [9,12,6],
         [64,96,72,24],
@@ -251,6 +232,7 @@ class EndofunctionTest(unittest.TestCase):
         [7776,12960,12960,8640,3600,720],
         [117649,201684,216090,164640,88200,30240,5040]
     ]
+    
     
     treefuncs = [
         [3, 9],
@@ -260,44 +242,13 @@ class EndofunctionTest(unittest.TestCase):
         [7, 7399, 46249, 89929, 112609, 117649],
         [8, 50576, 526352, 1284032, 1835072, 2056832, 2097152]
     ]
-     
-        
-    def testImagepath(self):
-        """Check various special and degenerate cases, with right index"""
-        self.assertEqual([1], imagepath([0]))
-        self.assertEqual([1], imagepath([0,0]))
-        self.assertEqual([1], imagepath([1,1]))
-        self.assertEqual([2], imagepath([0,1]))
-        self.assertEqual([2], imagepath([1,0]))
-        node_count = [2,3,5,15]
-        for n in node_count:
-            tower = [0] + list(range(n-1))
-            cycle = [n-1] + list(range(n-1))
-            fixed = list(range(n))
-            degen = [0]*n
-            self.assertEqual(list(range(n)[:0:-1]), imagepath(tower))
-            self.assertEqual([n]*(n-1), imagepath(cycle))
-            self.assertEqual([n]*(n-1), imagepath(fixed))
-            self.assertEqual([1]*(n-1), imagepath(degen))
-    
-    
-    def testFuncstructImagepath(self):
-        """Verify equivalence of methods for computing structure image paths."""
-        N = 8
-        for n in range(1,N):
-            for struct in funcstructs(n):
-                im = imagepath(funcstruct_to_func(struct))
-                imstruct = funcstruct_imagepath(struct)
-                np.testing.assert_array_equal(im, imstruct)
-                
-                
-    def testIterateImagedist(self):
+                 
+    def testIterdist(self):
         """Check the multiplicities of sizes of images of iterates."""
-        for dist in self.imagedists:
+        for dist in self.iterdists:
             n = dist.shape[0]
-            np.testing.assert_array_equal(dist, imagedist_brute(n))
-            np.testing.assert_array_equal(dist, imagedist_endofunction(n))
-    
+            np.testing.assert_array_equal(dist, iterdist_brute(n))
+            np.testing.assert_array_equal(dist, iterdist_funcstruct(n))
     
     def testSingularImages(self):
         '''
@@ -306,21 +257,19 @@ class EndofunctionTest(unittest.TestCase):
         '''
         for dist in self.treefuncs:
             n = len(dist) + 1
-            np.testing.assert_array_equal(dist, imagedist_endofunction(n)[0,:])
-    
+            np.testing.assert_array_equal(dist, iterdist_funcstruct(n)[0,:])
     
     def testFirstdist(self):
         """
         OEIS A101817: T(n,h) = number of functions f:{1,2,...,n}->{1,2,...,n}
         such that |Image(f)|=h; h=1,2,...,n, n=1,2,3,...
         """
-        for dist in self.firstdists:
+        for dist in self.imagedists:
             n = len(dist)
-            self.assertEqual(dist, firstdist_composition(n))
-            self.assertEqual(dist, list(imagedist(n)[:,0]))
-            self.assertEqual(dist, firstdist_recurse(n))
-        
-        
+            self.assertEqual(dist, imagedist_composition(n))
+            self.assertEqual(dist, list(iterdist(n)[:,0]))
+            self.assertEqual(dist, imagedist_recurse(n))
+
     def testBinomialgrid(self):
         """Check that nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
         N = 20
@@ -328,7 +277,6 @@ class EndofunctionTest(unittest.TestCase):
         for n in range(N+1):
             for k in range(n+1):
                 self.assertEqual(nCk(n,k), binomial_coefficients[n,k])
-
 
     def testPowergrid(self):
         """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
@@ -341,18 +289,17 @@ class EndofunctionTest(unittest.TestCase):
                 else:
                     self.assertEqual(I**J, exponentials[I,J])
     
-    
     def testLastdist(self):
         """
         OEIS A066324: Number of endofunctions on n labeled points constructed
         from k rooted trees.
         """
-        for dist in self.lastdists:
+        for dist in self.limitdists:
             n = len(dist)
-            self.assertEqual(dist, lastdist_composition(n))
-            self.assertEqual(dist, list(imagedist(n)[:,-1]))
-            self.assertEqual(dist, limitset_direct(n))
-            self.assertEqual(dist, limitset_recurse(n))
+            self.assertEqual(dist, limitdist_composition(n))
+            self.assertEqual(dist, limitdist_direct(n))
+            self.assertEqual(dist, limitdist_recurse(n))
+            self.assertEqual(dist, list(iterdist(n)[:,-1]))
             
 
 if __name__ == '__main__':

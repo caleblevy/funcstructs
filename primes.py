@@ -10,6 +10,7 @@ A collection of short functions for enumerating factorizations of integers and
 other such things.
 """
 from setops import prod, split_set
+from iteration import product_range
 from math import ceil
 import fractions
 import unittest
@@ -32,37 +33,20 @@ def prime_factorization(n):
     
 prime_divisors = lambda n: list(set(prime_factorization(n)))
 
-
-def factorGenerator(n):
-    primes, multiplicities = split_set(prime_factorization(n))
-    factors = []
-    for p, d in zip(primes, multiplicities):
-        factors.append((p,d,))
-    return factors
-
+                
 def divisorGen(n):
     """
-    Find every divisor of an integer n. Code taken directly from
+    Find every divisor of an integer n. Code inspired by
         "What is the best way to get all the divisors of a number" at
         http://stackoverflow.com/a/171784.
     """
-    factors = factorGenerator(n)
-    nfactors = len(factors)
-    f = [0] * nfactors
-    while True:
-        yield prod([factors[x][0]**f[x] for x in range(nfactors)])
-        i = 0
-        while True:
-            f[i] += 1
-            if f[i] <= factors[i][1]:
-                break
-            f[i] = 0
-            i += 1
-            if i >= nfactors:
-                return
+    factors, powers = split_set(prime_factorization(n))
+    # Since the factors are prime, every unique partition of powers represents 
+    # a different divisor.
+    for power_combo in product_range([m+1 for m in powers]):
+        yield prod([factors[I]**p for I, p in enumerate(power_combo)])
 
-divisor_list = lambda n: list(divisorGen(n)) if n > 1 else [1]
-
+divisor_list = lambda n: list(divisorGen(n))
 
 def divisors_memoized(n, factors={}):
     if n not in factors:
@@ -70,6 +54,10 @@ def divisors_memoized(n, factors={}):
     return factors[n]
 
 divisors = divisors_memoized
+
+
+def divisor_sum(n, power=1):
+    return sum(map(lambda x: pow(x,power), divisors(n)))
 
 
 def ceildiv(a, b):
@@ -80,10 +68,6 @@ def isdivisor(d, n):
     if ceildiv(n,d) == n//d:
         return True
     return False
-
-
-def divisor_sum(n, power=1):
-    return sum(map(lambda x: pow(x,power), divisors(n)))
     
     
 def phi_product(n):
@@ -118,19 +102,19 @@ class PrimeTest(unittest.TestCase):
         for I in range(1,len(counts)+1):
             self.assertEqual(counts[I-1], len(prime_divisors(I)))
     
-    def testDivisors(self):
+    def testDivisorCount(self):
         """OEIS A000005: number of divisors."""
-        counts = [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, \
+        A000005 = [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6, \
                   4, 4, 2, 8, 3, 4, 4, 6, 2, 8]
-        for I in range(1,len(counts)+1):
-            self.assertEqual(counts[I-1], len(divisors(I)))
-            # Check twice, see if its been memoized properly.
-            self.assertEqual(counts[I-1], len(divisors(I)))
+        for I, divcount in enumerate(A000005):
+            self.assertEqual(divcount, len(divisors(I+1)))
+            self.assertEqual(divcount, len(divisors(I+1)))
     
     def testCeildiv(self):
         N = 20
-        for I in range(-N,0)+range(1,N+1):
-            for J in range(-N,0)+range(1,N+1):
+        divrange = list(range(-N,0))+list(range(1,N+1))
+        for I in divrange:
+            for J in divrange:
                 self.assertEqual(ceildiv(I,J), ceil(1.*I/J))
     
     def testIsDivisor(self):

@@ -112,7 +112,9 @@ def necklace_count_by_period(beads):
     _, partition = split_set(beads)
     return partition_necklace_count_by_period(partition)
 
-partition_necklace_count = lambda partition: sum(partition_necklace_count_by_period(partition))
+def partition_necklace_count(partition):
+     return sum(partition_necklace_count_by_period(partition))
+     
 necklace_count = lambda items: sum(necklace_count_by_period(items))
 
 
@@ -135,6 +137,7 @@ def _partition_necklaces(a, partition, t, p, k):
     
     The original code was written by Mike Hansen <mhansen@gmail.com> in 2007,
     who based his algorithm on
+    
         Sawada, Joe. "A fast algorithm to generate necklaces with fixed
         content", Theoretical Computer Science archive Volume 301 , Issue 1-3,
         May 2003.
@@ -176,6 +179,12 @@ def _patternbreak_index(seed, necklace, start=1):
     return n
 
 def periodicity_seed(necklace):
+    """
+    An arguably faster way of finding the periodicity of a list. Starting with
+    the first element, any sublist from which a necklace is built must have at
+    least as many elements as there are between the next repetition of the
+    first element. This logic repeats until there is a break.
+    """
     necklace = list(necklace)
     seed = [necklace[0]]
     n = len(necklace)

@@ -109,10 +109,11 @@ def MSP_iterative(x, powers):
                     if V[I] <= shape[I]:
                         go = True
                         break
-                    V[I] = 1                    
+                    V[I] = 1               
     return T[shape]
 
 monomial_symmetric_polynomial = MSP_iterative
+
 
 def poly_multiply(coeffs1, coeffs2):
     """

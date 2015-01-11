@@ -13,7 +13,7 @@ structures have not been enumerated anywhere else.
 Caleb Levy, February 2014. For more information contact caleb.levy@berkeley.edu.
 """
 
-from setops import split_set, mset_degeneracy, prod
+from setops import split_set, mset_degeneracy, prod, imagepath
 from nestops import flatten
 from rootedtrees import forests, tree_degeneracy, tree_to_func
 from monotones import increasing_subsequences
@@ -129,6 +129,15 @@ class EndofunctionStructureTest(unittest.TestCase):
             for funcstruct in funcstructs(n):
                 func_count += nfac//funcstruct_degeneracy(funcstruct)
             self.assertEqual(n**n, func_count)
+    
+    def testFuncstructImagepath(self):
+        """Verify equivalence of methods for computing structure image paths."""
+        N = 8
+        for n in range(1,N):
+            for struct in funcstructs(n):
+                im = imagepath(funcstruct_to_func(struct))
+                imstruct = funcstruct_imagepath(struct)
+                np.testing.assert_array_equal(im, imstruct)
 
 if __name__ == '__main__':
     unittest.main()
