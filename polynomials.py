@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
-# 
-# The terms of use, license and copyright information for the code and ideas 
-# contained herein are described in the LICENSE file included with this 
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 """ Enumerate and produce polynomials of various kinds. """
@@ -12,12 +12,14 @@ from functools import reduce
 import numpy as np
 import unittest
 
+
 # MSP == Monomial Symmetric Polynomial
-def MSP_recursive(x, powers):
-    # Wrapper for _recursive_monomial_alg which separates the multiset powers 
+def msp_recursive(x, powers):
+    # Wrapper for _recursive_monomial_alg which separates the multiset powers
     # into elements with degeneracies, and returns the value of the function.
     y, d = split_set(powers)
     return _recursive_monomial_alg(x, d, y)
+
 
 def _recursive_monomial_alg(x, d, y):
     """_recursive_monomial_alg(x, d, y)
@@ -34,33 +36,33 @@ def _recursive_monomial_alg(x, d, y):
 
     X = (a1,a2,...,an) - Vector of values for polynomial evaluation
     D = (d1,d2,...,dl) - Vector of degeneracies of exponent partitions
-    Y = (y1,y2,...,yl) - Vector of exponents.
+    Y = (y1,y2,...,yl) - Vector of exponents
 
     Premise of formula is given by:
        T(n,d1,...,dl) = T(n-1,d1,...,dl) + an^y1*T(n-1,d1-1,...,dl) + ...
                            ... + an^yl*T(n-1,d1,...,dl-1).
-                           
+
     D and Y need to be of same length.
     """
     # This is the matlab copy version
-    if any(I<0 for I in d):
+    if any(I < 0 for I in d):
         return 0
-    elif not x:   
-        if all(I==0 for I in d):
+    elif not x:
+        if all(I == 0 for I in d):
             return 1
         else:
             return 0
     else:
-        val = _recursive_monomial_alg(x[:-1],d,y)        
+        val = _recursive_monomial_alg(x[:-1], d, y)
         for I in range(len(d)):
             d_temp = d[:]
             d_temp[I] -= 1
-            val += x[-1]**y[I]*_recursive_monomial_alg(x[:-1],d_temp,y)         
-            
+            val += x[-1]**y[I]*_recursive_monomial_alg(x[:-1], d_temp, y)
+
         return val
 
 
-def MSP_iterative(x, powers):
+def msp_iterative(x, powers):
     """
     Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed
     from the partition of powers partition=[p_1,...,p_l]. It is equivalent to
@@ -77,15 +79,15 @@ def MSP_iterative(x, powers):
     y, d = split_set(powers)
     l = len(y)
     shape = tuple([I+2 for I in d])
-        
+
     # Contains 1, possibly 2 more dimensions than necessary.
     T = np.ndarray(shape, object)
     T[:] = 0
     V = [1]*l
     T[tuple(V)] = 1
-    
+
     shape = tuple([I-1 for I in shape])
-    
+
     # The powers use up sum(multiplcities) of the original x.
     for K in range(n-sum(d)+1):
         # Begin the forward march
@@ -98,21 +100,22 @@ def MSP_iterative(x, powers):
                 ind_last[J] -= 1
                 ind_last = tuple(ind_last)
                 T[ind] += x[(K-1)+(sum(V)-l)]**y[J]*T[ind_last]
-            
-            # Counting voodoo. Could be replaced with itertools.product, but then we would have type conversions.
+
+            # Counting voodoo. Could be replaced with itertools.product, but
+            # then we would have type conversions.
             V[0] = V[0] + 1
             if V[0] > shape[0]:
                 V[0] = 1
                 go = False
-                for I in range(1,l):
+                for I in range(1, l):
                     V[I] = V[I] + 1
                     if V[I] <= shape[I]:
                         go = True
                         break
-                    V[I] = 1               
+                    V[I] = 1
     return T[shape]
 
-monomial_symmetric_polynomial = MSP_iterative
+monomial_symmetric_polynomial = msp_iterative
 
 
 def poly_multiply(coeffs1, coeffs2):
@@ -121,14 +124,14 @@ def poly_multiply(coeffs1, coeffs2):
     of P(X)*Q(X) in decreasing order, where
         P(X) = c[-1] + c[-2]*X + ... + c[0]*x^n
         Q(X) = d[-1] + d[-2]*X + ... + d[0]*x^m
-    
+
     For some reason sympy and numpy do not seem to have this capacity easily
     accessible, or at least nothing dedicated to the purpose. Very likely to be
     faster than the expand method.
-    
+
     Source taken from:
         "How can I multiply two polynomials in Python using a loop and by
-        calling another function?" found at http://stackoverflow.com/a/18116401.
+        calling another function?" at http://stackoverflow.com/a/18116401.
     """
     final_coeffs = [0] * (len(coeffs1)+len(coeffs2)-1)
     for ind1, coef1 in enumerate(coeffs1):
@@ -136,25 +139,26 @@ def poly_multiply(coeffs1, coeffs2):
             final_coeffs[ind1 + ind2] += coef1 * coef2
     return final_coeffs
 
+
 def FOIL(roots):
     """First Outer Inner Last
-    
+
     Given a list of values roots, return the polynomial of degree len(roots)+1
     with leading coefficient 1 given by
         (X - roots[0]) * (X - roots[1]) * ... * (X - roots[-1])
     """
-    monomials = [(1,-root) for root in roots]
-    return reduce(poly_multiply, monomials, [1,])
-    
+    monomials = [(1, -root) for root in roots]
+    return reduce(poly_multiply, monomials, [1])
+
 
 class PolynomialTest(unittest.TestCase):
-    
+
     def testFOIL(self):
         N = 20
         """Check binomial coefficients."""
         for n in range(N+1):
-            self.assertEqual([nCk(n,k) for k in range(n+1)], FOIL([-1]*n))
-            
+            self.assertEqual([nCk(n, k) for k in range(n+1)], FOIL([-1]*n))
+
     def testMonomialSymmetricPolynomial(self):
         """
         Verify MSP for the simple case of the elementary symmetric polynomials.
@@ -162,27 +166,23 @@ class PolynomialTest(unittest.TestCase):
         FOIL a polynomial with the given roots.
         """
         N = 20
-        for n in range(1,N):
-            foilmon = FOIL(range(-n,0))[1:]
-            x = range(1,n+1)
-            symmon = [MSP_iterative(x, [1]*I) for I in range(1,n+1)]
+        for n in range(1, N):
+            foilmon = FOIL(range(-n, 0))[1:]
+            x = range(1, n+1)
+            symmon = [msp_iterative(x, [1]*I) for I in range(1, n+1)]
             self.assertEqual(foilmon, symmon)
             # Recursive version is far more expensive; test small values.
             if n <= 5:
-                recmon = [MSP_recursive(x, [1]*I) for I in range(1,n+1)]
+                recmon = [msp_recursive(x, [1]*I) for I in range(1, n+1)]
                 self.assertEqual(foilmon, recmon)
-                
-        vecs = [[5,5,5]]
-        powers = [[3,3,2]]
+
+        vecs = [[5, 5, 5]]
+        powers = [[3, 3, 2]]
         counts = [1171875]
         for vec, power, count in zip(vecs, powers, counts):
-            self.assertEqual(count, MSP_iterative(vec, power))
-            self.assertEqual(count, MSP_recursive(vec, power))
-     
+            self.assertEqual(count, msp_iterative(vec, power))
+            self.assertEqual(count, msp_recursive(vec, power))
+
 
 if __name__ == '__main__':
     unittest.main()
-
-        
-
-    

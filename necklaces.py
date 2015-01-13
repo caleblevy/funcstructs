@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
-# 
-# The terms of use, license and copyright information for the code and ideas 
-# contained herein are described in the LICENSE file included with this 
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 """
@@ -31,12 +31,14 @@ from setops import prod, split_set, nCk
 from fractions import gcd, Fraction
 from collections import deque
 from functools import reduce
+
 from math import factorial
 import unittest
 
-# We may canonically represent a multiset with an unordered partition 
-# corresponding to the multiplicities of the elements. It is simpler to 
-# enumerate necklaces on a canonical partition and then match those to 
+
+# We may canonically represent a multiset with an unordered partition
+# corresponding to the multiplicities of the elements. It is simpler to
+# enumerate necklaces on a canonical partition and then match those to
 # necklaces formed from the beads.
 
 def necklace_count_totient(partition):
@@ -47,26 +49,27 @@ def necklace_count_totient(partition):
     k = len(partition)
     n = sum(partition)
     w = reduce(gcd, partition)
-    
+
     factors = divisors(w)
     m = len(factors)
     beads = [0]*m
-    
+
     for I in range(m):
-        beads[I] = Fraction(totient(factors[I])*factorial(n//factors[I]),n)
+        beads[I] = Fraction(totient(factors[I]) * factorial(n//factors[I]), n)
         for J in range(k):
             beads[I] /= factorial(partition[J]//factors[I])
 
     return int(sum(beads))
-    
-    
+
+
 def partition_necklace_count_by_period(partition):
     """
     Given a partition of multiplicities, returns the number of necklaces on
-    this partition of beads of each possible period of the necklace. To do this,
-    we start with the smallest divisor of the gcd of all the multiplicities,
-    and find all necklaces with period less than or equal to this divisor.
-    
+    this partition of beads of each possible period of the necklace. To do
+    this, we start with the smallest divisor of the gcd of all the
+    multiplicities, and find all necklaces with period less than or equal to
+    this divisor.
+
     Before normalizing by the period of the necklace (to account for its
     distinct rotations) we subtract the number of necklaces with each period
     which is a subdivisor of our given period, to ensure we give the number of
@@ -76,34 +79,35 @@ def partition_necklace_count_by_period(partition):
     N = sum(partition)
     w = reduce(gcd, partition)
     p0 = N//w
-    
+
     factors = divisors(w)
     beads = [0]*factors[-1]
-    
+
     # Find the multiplicity of each period
     for factor in factors:
         n = period = factor*p0
         beads[factor-1] = 1
-        # The number of character permutations which are periodic in at most 
-        # "factor" is simply the multinomial coefficient corresponding to that 
+        # The number of character permutations which are periodic in at most
+        # "factor" is simply the multinomial coefficient corresponding to that
         # subset of the multiplicity partition.
         for I in range(k):
             beads[factor-1] *= nCk(n, partition[I]*factor//w)
             n -= partition[I]*factor//w
-            
-        # Subtact off the number of necklaces whose period subdivides our 
-        # divisor of w, to make sure beads[factor-1] give the EXACTLY the 
+
+        # Subtact off the number of necklaces whose period subdivides our
+        # divisor of w, to make sure beads[factor-1] give the EXACTLY the
         # number of necklaces with period k.
         subdivisors = divisors(factor)
         if subdivisors[-1] != 1:
             for subfactor in subdivisors[:-1]:
                 beads[factor-1] -= subfactor*p0*beads[subfactor-1]
-                
-        # Finally, normalize by the period, the number of distinct rotations of 
+
+        # Finally, normalize by the period, the number of distinct rotations of
         # any member of beads[k].
         beads[factor-1] //= period
     return beads
-    
+
+
 def necklace_count_by_period(beads):
     """
     Returns a list whose kth element is the number of necklaces corresponding
@@ -112,14 +116,15 @@ def necklace_count_by_period(beads):
     _, partition = split_set(beads)
     return partition_necklace_count_by_period(partition)
 
+
 def partition_necklace_count(partition):
-     return sum(partition_necklace_count_by_period(partition))
-     
+    return sum(partition_necklace_count_by_period(partition))
+
 necklace_count = lambda items: sum(necklace_count_by_period(items))
 
 
 def partition_necklaces(partition):
-    """ 
+    """
     Wrapper for partition necklaces, which takes a partition of multiplicities
     and enumerates canonical necklaces on that partition.
     """
@@ -129,15 +134,16 @@ def partition_necklaces(partition):
     k = len(partition)
     return _partition_necklaces(a, partition, 2, 1, k)
 
+
 def _partition_necklaces(a, partition, t, p, k):
     """
     This function is a result of refactoring of Sage's _simple_fixed_content
     algorithm, featured in Sage at https://github.com/sagemath/sage.git,
     located in src/sage/combinat/neckalce.py as of December 23, 2014.
-    
+
     The original code was written by Mike Hansen <mhansen@gmail.com> in 2007,
     who based his algorithm on
-    
+
         Sawada, Joe. "A fast algorithm to generate necklaces with fixed
         content", Theoretical Computer Science archive Volume 301 , Issue 1-3,
         May 2003.
@@ -146,14 +152,15 @@ def _partition_necklaces(a, partition, t, p, k):
     if t > n and not(n % p):
         yield a
     else:
-        for j in range(a[t-p-1],k):
+        for j in range(a[t-p-1], k):
             if partition[j] > 0:
                 a[t-1] = j
                 partition[j] -= 1
                 tp = p if(j == a[t-p-1]) else t
-                for z in _partition_necklaces(a,partition,t+1,tp,k):
+                for z in _partition_necklaces(a, partition, t+1, tp, k):
                     yield z
                 partition[j] += 1
+
 
 def necklaces(items):
     """
@@ -165,10 +172,10 @@ def necklaces(items):
     items = sorted(items)
     y, d = split_set(items)
     for necklace in partition_necklaces(d):
-        # Explicitly make a tuple, since we must form the list of all necklaces 
+        # Explicitly make a tuple, since we must form the list of all necklaces
         # in memory when constructing endofunction structures.
         yield tuple([y[I] for I in necklace])
-        
+
 
 def _patternbreak_index(seed, necklace, start=1):
     l = len(seed)
@@ -177,6 +184,7 @@ def _patternbreak_index(seed, necklace, start=1):
         if seed != necklace[I*l:(I+1)*l]:
             return l*I
     return n
+
 
 def periodicity_seed(necklace):
     """
@@ -194,7 +202,7 @@ def periodicity_seed(necklace):
         if break_ind == len(necklace):
             return len(seed)
         l = len(seed)
-        seed.extend(necklace[l:break_ind])
+        seed.extend(necklace[l: break_ind])
         next_terms = []
         for I in range(break_ind, n-l):
             if seed == necklace[I:I+l]:
@@ -203,8 +211,8 @@ def periodicity_seed(necklace):
             next_terms.append(necklace[I])
         if len(seed) == l:
             return n
-        
-        
+
+
 def periodicity_rotation(cycle):
     """
     Find the "periodicity" of a list; i.e. the number of its distinct cyclic
@@ -225,69 +233,73 @@ periodicity = periodicity_rotation
 
 
 def cycle_degeneracy(cycle):
-    return len(cycle)//periodicity(cycle)       
+    return len(cycle)//periodicity(cycle)
 
 
-class NecklaceTests(unittest.TestCase):          
-                
+class NecklaceTests(unittest.TestCase):
+
     def testNecklaceCounts(self):
-        color_partitions = [ [3,3,2], [4,4,4,3,3,2,1,1], [24,36]]
+        color_partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
         color_cardinalities = [70, 51330759480000, 600873126148801]
         for cp, cc in zip(color_partitions, color_cardinalities):
             self.assertEqual(cc, necklace_count_totient(cp))
             self.assertEqual(cc, sum(partition_necklace_count_by_period(cp)))
-        
-        
+
     def testNecklaces(self):
-        beadsets = [[4,4,5,5,2,2,2,2,2,2,6,6], [4,4,5,5,2,2,2,2,2,2,6,6,6], [0]]
+        beadsets = [
+            [4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6],
+            [4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6],
+            [0]
+        ]
         for beadset in beadsets:
             count = 0
             for necklace in necklaces(beadset):
                 count += 1
             self.assertEqual(necklace_count(beadset), count)
-        
-        
+
     def testPeriodicities(self):
         N = 20
-        for n in range(1,N+1):
+        for n in range(1, N+1):
             for d in divisors(n):
                 # Creates lists of each periodicity
                 period_dn = ([0]+[1]*(d-1))*(n//d)
                 self.assertEqual(d, periodicity_rotation(period_dn))
                 self.assertEqual(d, periodicity_seed(period_dn))
-                
-        s1 = [0,0,0,2]
-        s2 = s1*3 + [1,1,1,4]
-        s3 = s2*2 + [1,1,1,5]
-        s4 = s3*3 + [1,1,1,6]
+
+        s1 = [0, 0, 0, 2]
+        s2 = s1*3 + [1, 1, 1, 4]
+        s3 = s2*2 + [1, 1, 1, 5]
+        s4 = s3*3 + [1, 1, 1, 6]
         s = s4*4
-        
-        self.assertEqual(112,periodicity_rotation(s))
-        self.assertEqual(112,periodicity_seed(s))
-        
-        d1 = [(1,2),]*3+[(1,1)]
-        d2 = d1*3 + [(1,4,3)]*3 + [(1,)]
-        d3 = d2*2 + [(2,)]*3 + [(1,4,3)]
-        d4 = d3*3 + [(3,)]*3+[(1,2)]
+
+        self.assertEqual(112, periodicity_rotation(s))
+        self.assertEqual(112, periodicity_seed(s))
+
+        d1 = [(1, 2), ]*3+[(1, 1)]
+        d2 = d1*3 + [(1, 4, 3)]*3 + [(1, )]
+        d3 = d2*2 + [(2, )]*3 + [(1, 4, 3)]
+        d4 = d3*3 + [(3, )]*3+[(1, 2)]
         d = d4*4
-        
-        self.assertEqual(112,periodicity_rotation(d))
-        self.assertEqual(112,periodicity_seed(d))
-        
-        self.assertEqual(1,periodicity_rotation([(1,2),(1,2)]))
-        self.assertEqual(2,periodicity_rotation([(1,2),(1,)]))
-        self.assertEqual(2,periodicity_seed([(1,2),(1,)]))
-        self.assertEqual(1,periodicity_seed([(1,2),(1,2)]))
+
+        self.assertEqual(112, periodicity_rotation(d))
+        self.assertEqual(112, periodicity_seed(d))
+
+        self.assertEqual(1, periodicity_rotation([(1, 2), (1, 2)]))
+        self.assertEqual(2, periodicity_rotation([(1, 2), (1, )]))
+        self.assertEqual(2, periodicity_seed([(1, 2), (1, )]))
+        self.assertEqual(1, periodicity_seed([(1, 2), (1, 2)]))
 
         # Check the tail of the necklace
-        self.assertEqual(5, periodicity_rotation([(1,2),(1,),(1,2),(1,),(1,)]))
-        self.assertEqual(5, periodicity_seed([(1,2),(1,),(1,2),(1,),(1,)]))
-        
-        # Check that if tail is too short but agrees with head of seed then we 
+        tail = [(1, 2), (1, ), (1, 2), (1, ), (1, )]
+        self.assertEqual(5, periodicity_rotation(tail))
+        self.assertEqual(5, periodicity_seed(tail))
+
+        # Check that if tail is too short but agrees with head of seed then we
         # do not return periodic.
-        self.assertEqual(5, periodicity_rotation([(1,2),(1,),(1,2),(1,),(1,2)]))
-        self.assertEqual(5, periodicity_seed([(1,2),(1,),(1,2),(1,),(1,2)]))
-        
+        agreeing_tail = [(1, 2), (1, ), (1, 2), (1, ), (1, 2)]
+        self.assertEqual(5, periodicity_rotation(agreeing_tail))
+        self.assertEqual(5, periodicity_seed(agreeing_tail))
+
 
 if __name__ == '__main__':
     unittest.main()
