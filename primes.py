@@ -10,7 +10,7 @@ A collection of short functions for enumerating factorizations of integers and
 other such things.
 """
 
-from setops import prod, split_set
+from multiset import prod, split_set
 from iteration import product_range
 from math import ceil
 import fractions
@@ -155,6 +155,7 @@ class PrimeTest(unittest.TestCase):
         for I in range(1, len(values)+1):
             self.assertEqual(values[I-1], phi_product(I))
             self.assertEqual(values[I-1], phi_sum(I))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -32,7 +32,7 @@ image sizes set can be O(n) (and has a lovely closed form formula).
 
 from funcstructs import (funcstructs, funcstruct_degeneracy,
                          funcstruct_imagepath)
-from setops import nCk
+from multiset import nCk
 from funcimage import imagepath
 from iteration import endofunctions, compositions, product_range
 

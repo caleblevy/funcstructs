@@ -11,7 +11,7 @@ A collection of miscellaneous generator functions that do not fit elsewhere.
 
 from PADS.IntegerPartitions import partitions, lex_partitions
 from itertools import product
-from setops import prod
+from multiset import prod
 import unittest
 
 isiterable = lambda obj: hasattr(obj, '__iter__')

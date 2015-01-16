@@ -7,7 +7,7 @@
 
 """ Enumerate and produce polynomials of various kinds. """
 
-from setops import split_set, nCk
+from multiset import split_set, nCk
 from functools import reduce
 import numpy as np
 import unittest

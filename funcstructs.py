@@ -14,7 +14,7 @@ Most of these algorithms were derived by Caleb Levy in February 2014. For more
 information contact caleb.levy@berkeley.edu.
 """
 
-from setops import split_set, mset_degeneracy, prod
+from multiset import split_set, mset_degeneracy, prod
 from funcimage import imagepath
 from nestops import flatten
 from rootedtrees import forests, tree_degeneracy, tree_to_func

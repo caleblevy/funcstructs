@@ -16,7 +16,7 @@ This module collects efficient ways of counting endofunction-related objects
 without direct enumeration.
 """
 
-from setops import split_set, prod
+from multiset import split_set, prod
 from iteration import tuple_partitions
 from fractions import Fraction
 from primes import divisors

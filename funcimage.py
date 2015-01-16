@@ -13,12 +13,13 @@ These should all be made into methods. We will have:
     - f.cycles()
     - f.preimage(I)
 """
-import unittest
+from nestops import flatten
+from iteration import endofunctions
+
 from random import randrange
 from collections import deque
-from nestops import flatten
+import unittest
 
-from iteration import endofunctions
 
 
 randfunc = lambda n: [randrange(n) for I in range(n)]

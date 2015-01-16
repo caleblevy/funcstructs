@@ -22,7 +22,7 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
 
-from setops import mset_degeneracy, split_set
+from multiset import mset_degeneracy, split_set
 from funcimage import preimage, attached_treenodes
 from nestops import flatten, get_nested_el, change_nested_el
 from itertools import combinations_with_replacement, product
