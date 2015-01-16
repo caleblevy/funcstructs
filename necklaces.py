@@ -26,10 +26,9 @@ n. Thus the ways of connecting a collection of rooted trees together in a cycle
 are precisely the necklaces whose beads are the rooted trees.
 """
 
-from primes import divisors, totient, isdivisor
+from primes import divisors, totient
 from setops import prod, split_set, nCk
 from fractions import gcd, Fraction
-from collections import deque
 from functools import reduce
 
 from math import factorial
@@ -177,65 +176,6 @@ def necklaces(items):
         yield tuple([y[I] for I in necklace])
 
 
-def _patternbreak_index(seed, necklace, start=1):
-    l = len(seed)
-    n = len(necklace)
-    for I in range(start, n//l+1):
-        if seed != necklace[I*l:(I+1)*l]:
-            return l*I
-    return n
-
-
-def periodicity_seed(necklace):
-    """
-    An arguably faster way of finding the periodicity of a list. Starting with
-    the first element, any sublist from which a necklace is built must have at
-    least as many elements as there are between the next repetition of the
-    first element. This logic repeats until there is a break.
-    """
-    necklace = list(necklace)
-    seed = [necklace[0]]
-    n = len(necklace)
-    break_ind = 0
-    while True:
-        break_ind = _patternbreak_index(seed, necklace)
-        if break_ind == len(necklace):
-            return len(seed)
-        l = len(seed)
-        seed.extend(necklace[l: break_ind])
-        next_terms = []
-        for I in range(break_ind, n-l):
-            if seed == necklace[I:I+l]:
-                seed.extend(next_terms)
-                break
-            next_terms.append(necklace[I])
-        if len(seed) == l:
-            return n
-
-
-def periodicity_rotation(cycle):
-    """
-    Find the "periodicity" of a list; i.e. the number of its distinct cyclic
-    rotations. To do this, represent the cycle as a queue, and rotate the queue
-    by the divisors of its length until they are equal. The first occurance of
-    this is the period.
-    """
-    orig = deque(cycle)
-    cycle = deque(cycle)
-    period_prev = 0
-    for period in divisors(len(cycle)):
-        cycle.rotate(period-period_prev)
-        period_prev = period
-        if orig == cycle:
-            return period
-
-periodicity = periodicity_rotation
-
-
-def cycle_degeneracy(cycle):
-    return len(cycle)//periodicity(cycle)
-
-
 class NecklaceTests(unittest.TestCase):
 
     def testNecklaceCounts(self):
@@ -256,49 +196,6 @@ class NecklaceTests(unittest.TestCase):
             for necklace in necklaces(beadset):
                 count += 1
             self.assertEqual(necklace_count(beadset), count)
-
-    def testPeriodicities(self):
-        N = 20
-        for n in range(1, N+1):
-            for d in divisors(n):
-                # Creates lists of each periodicity
-                period_dn = ([0]+[1]*(d-1))*(n//d)
-                self.assertEqual(d, periodicity_rotation(period_dn))
-                self.assertEqual(d, periodicity_seed(period_dn))
-
-        s1 = [0, 0, 0, 2]
-        s2 = s1*3 + [1, 1, 1, 4]
-        s3 = s2*2 + [1, 1, 1, 5]
-        s4 = s3*3 + [1, 1, 1, 6]
-        s = s4*4
-
-        self.assertEqual(112, periodicity_rotation(s))
-        self.assertEqual(112, periodicity_seed(s))
-
-        d1 = [(1, 2), ]*3+[(1, 1)]
-        d2 = d1*3 + [(1, 4, 3)]*3 + [(1, )]
-        d3 = d2*2 + [(2, )]*3 + [(1, 4, 3)]
-        d4 = d3*3 + [(3, )]*3+[(1, 2)]
-        d = d4*4
-
-        self.assertEqual(112, periodicity_rotation(d))
-        self.assertEqual(112, periodicity_seed(d))
-
-        self.assertEqual(1, periodicity_rotation([(1, 2), (1, 2)]))
-        self.assertEqual(2, periodicity_rotation([(1, 2), (1, )]))
-        self.assertEqual(2, periodicity_seed([(1, 2), (1, )]))
-        self.assertEqual(1, periodicity_seed([(1, 2), (1, 2)]))
-
-        # Check the tail of the necklace
-        tail = [(1, 2), (1, ), (1, 2), (1, ), (1, )]
-        self.assertEqual(5, periodicity_rotation(tail))
-        self.assertEqual(5, periodicity_seed(tail))
-
-        # Check that if tail is too short but agrees with head of seed then we
-        # do not return periodic.
-        agreeing_tail = [(1, 2), (1, ), (1, 2), (1, ), (1, 2)]
-        self.assertEqual(5, periodicity_rotation(agreeing_tail))
-        self.assertEqual(5, periodicity_seed(agreeing_tail))
 
 
 if __name__ == '__main__':

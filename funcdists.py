@@ -32,16 +32,14 @@ image sizes set can be O(n) (and has a lovely closed form formula).
 
 from funcstructs import (funcstructs, funcstruct_degeneracy,
                          funcstruct_imagepath)
-from setops import imagepath, nCk
-from iteration import product_range, compositions
+from setops import nCk
+from funcimage import imagepath
+from iteration import endofunctions, compositions, product_range
 
 import numpy as np
 
 from math import factorial
 import unittest
-
-
-endofunctions = lambda n: product_range([n]*n)
 
 
 def iterdist_brute(n):

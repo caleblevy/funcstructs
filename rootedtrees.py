@@ -22,7 +22,8 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
 
-from setops import mset_degeneracy, split_set, preimage
+from setops import mset_degeneracy, split_set
+from funcimage import preimage, attached_treenodes
 from nestops import flatten, get_nested_el, change_nested_el
 from itertools import combinations_with_replacement, product
 from PADS.IntegerPartitions import partitions
@@ -213,6 +214,32 @@ def treefunc_to_brackets(treefunc):
     return tree
 
 
+def attached_subtree(f, node):
+    """
+    Given an endofunction f and node in range(len(f)), returns the levelpath
+    form of the rooted tree attached to element node.
+    """
+    treenodes = attached_treenodes(f)
+    leveltree = [1]
+    if not treenodes[node]:
+        return leveltree
+    level = 2
+    for x in treenodes[node]:
+        leveltree += _attached_subtree(x, level, treenodes)
+    return leveltree
+
+
+def _attached_subtree(node, level, treenodes):
+    """
+    Recursive portion of the subtree algorithm. Returns [level] of the node
+    plus level path of all attached subnodes, hence the itero-recursion.
+    """
+    leveltree = [level]
+    for x in treenodes[node]:
+        leveltree.extend(_attached_subtree(x, level+1, treenodes))
+    return leveltree
+
+
 class TreeTest(unittest.TestCase):
     A000055 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
 
@@ -249,15 +276,19 @@ class TreeTest(unittest.TestCase):
             [0, 0, 1, 2, 3, 4, 2, 0, 7, 7],
             [0, 0, 1, 2, 3, 3, 3, 3, 3, 0],
         ]
-
         nestedforms = (
             [[[[[[]]], []]], [[[]]]],
             [[[[[[]]], []]], [[], []]],
             [[[[[], [], [], [], []]]], []]
         )
-
         for I, tree in enumerate(funcforms):
             self.assertEqual(nestedforms[I], treefunc_to_brackets(tree))
+
+    def testAttachedSubtrees(self):
+        for n in range(1, len(self.A000055)+1):
+            for tree in rooted_trees(n):
+                self.assertEqual(tree, attached_subtree(tree_to_func(tree), 0))
+
 
 if __name__ == '__main__':
     unittest.main()

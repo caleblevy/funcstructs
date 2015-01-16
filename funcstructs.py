@@ -14,12 +14,14 @@ Most of these algorithms were derived by Caleb Levy in February 2014. For more
 information contact caleb.levy@berkeley.edu.
 """
 
-from setops import split_set, mset_degeneracy, prod, imagepath
+from setops import split_set, mset_degeneracy, prod
+from funcimage import imagepath
 from nestops import flatten
 from rootedtrees import forests, tree_degeneracy, tree_to_func
 from monotones import increasing_subsequences
 from itertools import combinations_with_replacement, product
-from necklaces import necklaces, cycle_degeneracy
+from necklaces import necklaces
+from rotation import cycle_degeneracy
 from math import factorial
 
 from sympy.utilities.iterables import multiset_partitions

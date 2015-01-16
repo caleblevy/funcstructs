@@ -59,6 +59,8 @@ def product_range(begin, end=None, step=None):
     begin, end, step = parse_ranges(begin, end, step)
     return product(*[range(I, J, K) for I, J, K in zip(begin, end, step)])
 
+endofunctions = lambda n: product_range([n]*n)
+
 
 def tuple_partitions(n):
     """
