@@ -22,14 +22,17 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
 
+from math import factorial
+import unittest
+
 from monotones import breakat
 from multiset import mset_degeneracy, split_set
 from funcimage import preimage, attached_treenodes
 from nestops import flatten, get_nested_el, change_nested_el
 from itertools import combinations_with_replacement, product
 from PADS.IntegerPartitions import partitions
-from math import factorial
-import unittest
+from primes import divisors
+
 
 
 def successor_tree(L):
@@ -242,6 +245,32 @@ def canonical_treeorder(tree):
     return [tree[0]]+flatten(sorted(branch_list, reverse=True))
 
 
+def rooted_treecount_upto(N):
+    """
+    Returns the number of rooted tree structures on n nodes. Algorithm featured
+    without derivation in
+        Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
+        "Mathematical Constants", Cambridge, England: Cambridge University
+        Press, pp. 295-316, 2003.
+    """
+    if N == 0:
+        return [0]
+    if N == 1:
+        return [0, 1]
+    T = [0, 1]+[0]*(N-1)
+    for n in range(2, N+1):
+        for I in range(1, n):
+            s = 0
+            for d in divisors(I):
+                s += T[d]*d
+            s *= T[n-I]
+            T[n] += s
+        T[n] //= (n-1)
+    return T
+
+rooted_treecount = lambda n: rooted_treecount_upto(n)[-1]
+
+
 class TreeTest(unittest.TestCase):
     A000055 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
 
@@ -290,6 +319,10 @@ class TreeTest(unittest.TestCase):
         for n in range(1, len(self.A000055)+1):
             for tree in rooted_trees(n):
                 self.assertEqual(tree, attached_subtree(tree_to_func(tree), 0))
+
+    def testTreeCounts(self):
+        A000081 = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286, 719, 1842, 4766, 12486]
+        self.assertEqual(A000081, rooted_treecount_upto(len(A000081)-1))
 
 
 if __name__ == '__main__':

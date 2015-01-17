@@ -14,6 +14,13 @@ Most of these algorithms were derived by Caleb Levy in February 2014. For more
 information contact caleb.levy@berkeley.edu.
 """
 
+import unittest
+from math import factorial
+from fractions import Fraction
+
+from sympy.utilities.iterables import multiset_partitions
+import numpy as np
+
 from multiset import split_set, mset_degeneracy, prod
 from funcimage import imagepath
 from nestops import flatten
@@ -22,12 +29,8 @@ from monotones import increasing_subsequences
 from itertools import combinations_with_replacement, product
 from necklaces import necklaces
 from rotation import cycle_degeneracy
-from math import factorial
-
-from sympy.utilities.iterables import multiset_partitions
-import numpy as np
-
-import unittest
+from partitions2 import tuple_partitions
+from primes import divisors
 
 
 def multiset_funcstructs(mset):
@@ -56,6 +59,29 @@ def funcstructs(n):
         for mset in multiset_partitions(forest):
             for funcstruct in multiset_funcstructs(mset):
                 yield funcstruct
+
+
+def funcstruct_count(n):
+    """
+    Count the number of endofunction structures on n nodes. Iterates over the
+    tuple representation of partitions using the formula featured in
+        De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
+        Combinatorial Theory, Volume 12, 1972.
+
+    See the papers directory for the original reference.
+    """
+    tot = 0
+    for b in tuple_partitions(n):
+        product_terms = []
+        for I in range(1, len(b)+1):
+            s = 0
+            for J in divisors(I):
+                s += J*b[J-1]
+            s **= b[I-1]
+            s *= Fraction(I, 1)**(-b[I-1])/factorial(b[I-1])
+            product_terms.append(s)
+        tot += prod(product_terms)
+    return int(tot)
 
 
 def funcstruct_degeneracy(function_structure, n=None):
@@ -149,7 +175,7 @@ class EndofunctionStructureTest(unittest.TestCase):
                 imstruct = funcstruct_imagepath(struct)
                 np.testing.assert_array_equal(im, imstruct)
 
-    def testFuncstructCount(self):
+    def testFuncstructCounts(self):
         """OEIS A001372: Number of self-mapping patterns."""
         A001372 = [1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
         for n, num in enumerate(A001372):
@@ -157,6 +183,7 @@ class EndofunctionStructureTest(unittest.TestCase):
             for struct in funcstructs(n+1):
                 struct_count += 1
             self.assertEqual(num, struct_count)
+            self.assertEqual(num, funcstruct_count(n+1))
 
     def testFuncstructDegeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
