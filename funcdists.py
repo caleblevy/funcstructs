@@ -30,8 +30,8 @@ iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
-from funcstructs import (funcstructs, funcstruct_degeneracy,
-                         funcstruct_imagepath)
+from funcstructs import funcstructs, funcstruct_degeneracy, \
+    funcstruct_imagepath
 from multiset import nCk
 from funcimage import imagepath
 from iteration import endofunctions, compositions, product_range
@@ -96,9 +96,8 @@ iterdist = iterdist_funcstruct
 
 def imagedist_composition(n):
     """
-    Produces left column of imagedist using integer compositions in O(2^n)
+    Produces left column of iterdist using integer compositions in O(2^n)
     operations.
-
 
     The idea of the agorithm comes from a binary tree. Need to find it.
     """
@@ -121,7 +120,7 @@ def imagedist_composition(n):
 
 def imagedists_upto(N):
     """
-    Left column of imagedist. This uses a recursion relation to run in O(n^2)
+    Left column of iterdist. This uses a recursion relation to run in O(n^2)
     time. This is the fastest method I know of and probably the fastest there
     is.
 
@@ -163,6 +162,23 @@ def powergrid(N):
 
 
 def limitdist_composition(N):
+    """
+    Right column of iterdist. Idea of the algorithm is the calculate the number
+    of functions corresponding to each levelpath (distribution of nodes by
+    height), which happens to correspond with compositions of a number.
+
+    The number of endofunctions with a given level path L=[l0, l1, ..., ln] is
+    given by the number of functions from a set with ln to ln-1 elements, times
+    the number of labellings, multiplied by the number of endofunctions from
+    ln-1 to ln-2 times the number of possible remaining labellings, and so
+    forth.
+
+    The idea works for the last iterate because we may by definition assume
+    everything ends up in l0. I tried for many months to expand on this idea
+    for the general case, and failed, since there may be many image paths
+    corresponding to a given level path; conversely one image path may be found
+    from functions of many different image paths.
+    """
     L = [0]*N
     # Memoize these lookups; saves a lot of time.
     exponentials = powergrid(N)
@@ -179,14 +195,29 @@ def limitdist_composition(N):
 
 
 def limitset_count(n, k):
+    """
+    Analytic expression for the number of endofunctions on n nodes whose cycle
+    decomposition contains k elements.
+    """
     return k*n**(n-k)*factorial(n-1)//factorial(n-k)
 
 
 def limitdist_direct(n):
+    """Exact formula for the right-hand column of iterdist(n)"""
     return [limitset_count(n, k) for k in range(1, n+1)]
 
 
 def limitdist_recurse(n):
+    """
+    Faster way to find the limitdist which reduces duplication of work. I
+    discovered the above two formulas from this recursion relation, which I
+    derived emperically from the output of limitdist_composition.
+
+    Apparently some people have proven it, with citations found on the
+    corresponding OEIS entry. I don't understand how to show the equivalence of
+    these two programs formally, but apparently it can be done.
+    """
+
     L = [n**(n-1)]+[0]*(n-1)
     for k in range(1, n):
         L[k] = (L[k-1]*(k+1)*(n-k))//(k*n)
@@ -196,73 +227,67 @@ limitdist = limitdist_recurse
 
 
 class EndofunctionTest(unittest.TestCase):
-    iterdists = [
-        np.array([
-            [3, 9],
-            [18, 12],
-            [6, 6]],
-            dtype=object),
-        np.array([
-            [4, 40, 64],
-            [84, 120, 96],
-            [144, 72, 72],
-            [24, 24, 24]],
-            dtype=object),
-        np.array([
-            [5, 205, 505, 625],
-            [300, 1060, 1120, 1000],
-            [1500, 1260, 900, 900],
-            [1200, 480, 480, 480],
-            [120, 120, 120, 120]],
-            dtype=object)
-    ]
-    imagedists = [
-        [2, 2],
-        [3, 18, 6],
-        [4, 84, 144, 24],
-        [5, 300, 1500, 1200, 120],
-        [6, 930, 10800, 23400, 10800, 720],
-        [7, 2646, 63210, 294000, 352800, 105840, 5040]
-    ]
-    limitdists = [
-        [2, 2],
-        [9, 12, 6],
-        [64, 96, 72, 24],
-        [625, 1000, 900, 480, 120],
-        [7776, 12960, 12960, 8640, 3600, 720],
-        [117649, 201684, 216090, 164640, 88200, 30240, 5040]
-    ]
-    treefuncs = [
-        [3, 9],
-        [4, 40, 64],
-        [5, 205, 505, 625],
-        [6, 1176, 4536, 7056, 7776],
-        [7, 7399, 46249, 89929, 112609, 117649],
-        [8, 50576, 526352, 1284032, 1835072, 2056832, 2097152]
-    ]
 
     def testIterdist(self):
         """Check the multiplicities of sizes of images of iterates."""
-        for dist in self.iterdists:
+        iterdists = [
+            np.array([
+                [3, 9],
+                [18, 12],
+                [6, 6]],
+                dtype=object),
+            np.array([
+                [4, 40, 64],
+                [84, 120, 96],
+                [144, 72, 72],
+                [24, 24, 24]],
+                dtype=object),
+            np.array([
+                [5, 205, 505, 625],
+                [300, 1060, 1120, 1000],
+                [1500, 1260, 900, 900],
+                [1200, 480, 480, 480],
+                [120, 120, 120, 120]],
+                dtype=object)
+        ]
+        for dist in iterdists:
             n = dist.shape[0]
             np.testing.assert_array_equal(dist, iterdist_brute(n))
             np.testing.assert_array_equal(dist, iterdist_funcstruct(n))
 
     def testSingularImages(self):
         '''
-        OEIS A236396: labelled rooted trees of height at most k on n nodes.
-        Corresponds to the top row of imagedist.
+        Test iterdist(n)[k] == labelled rooted trees of height at most k on n
+        nodes. Corresponds to the top row of imagedist.
         '''
-        for dist in self.treefuncs:
+        # Distribution of functions whose nth iterate has size 1; i.e connected
+        # to the root
+        A236396 = [
+            [3, 9],
+            [4, 40, 64],
+            [5, 205, 505, 625],
+            [6, 1176, 4536, 7056, 7776],
+            [7, 7399, 46249, 89929, 112609, 117649],
+            [8, 50576, 526352, 1284032, 1835072, 2056832, 2097152]
+        ]
+        for dist in A236396:
             n = len(dist) + 1
-            np.testing.assert_array_equal(dist, iterdist_funcstruct(n)[0, :])
+            self.assertEqual(dist, list(iterdist_funcstruct(n)[0, :]))
 
     def testFirstdist(self):
         """
-        OEIS A101817: T(n,h) = number of functions f:{1,2,...,n}->{1,2,...,n}
+        Test imagedist(n)[h] = number of functions f:{1,2,...,n}->{1,2,...,n}
         such that |Image(f)|=h; h=1,2,...,n, n=1,2,3,...
         """
-        for dist in self.imagedists:
+        A101817 = [
+            [2, 2],
+            [3, 18, 6],
+            [4, 84, 144, 24],
+            [5, 300, 1500, 1200, 120],
+            [6, 930, 10800, 23400, 10800, 720],
+            [7, 2646, 63210, 294000, 352800, 105840, 5040]
+        ]
+        for dist in A101817:
             n = len(dist)
             self.assertEqual(dist, imagedist_composition(n))
             self.assertEqual(dist, list(iterdist(n)[:, 0]))
@@ -289,10 +314,18 @@ class EndofunctionTest(unittest.TestCase):
 
     def testLimitdists(self):
         """
-        OEIS A066324: Number of endofunctions on n labeled points constructed
-        from k rooted trees.
+        Test limitdist(n)[k] == number of endofunctions on n labeled points
+        constructed from k rooted trees.
         """
-        for dist in self.limitdists:
+        A066324 = [
+            [2, 2],
+            [9, 12, 6],
+            [64, 96, 72, 24],
+            [625, 1000, 900, 480, 120],
+            [7776, 12960, 12960, 8640, 3600, 720],
+            [117649, 201684, 216090, 164640, 88200, 30240, 5040]
+        ]
+        for dist in A066324:
             n = len(dist)
             self.assertEqual(dist, limitdist_composition(n))
             self.assertEqual(dist, limitdist_direct(n))

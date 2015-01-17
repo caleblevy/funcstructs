@@ -21,7 +21,6 @@ from collections import deque
 import unittest
 
 
-
 randfunc = lambda n: [randrange(n) for I in range(n)]
 
 

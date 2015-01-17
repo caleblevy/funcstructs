@@ -22,6 +22,7 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
 
+from monotones import breakat
 from multiset import mset_degeneracy, split_set
 from funcimage import preimage, attached_treenodes
 from nestops import flatten, get_nested_el, change_nested_el
@@ -102,28 +103,16 @@ def forests_complex(n):
             yield forest
 
 
+branches = lambda tree: breakat(tree[1:], lambda node: node == tree[0]+1)
+
+
 def subtrees(tree):
-    """
-    Returns a generator of the collection of subtrees directly connected tree's
-    root node.
-    """
-    if not tree or len(tree) == 1:
-        return
-    tree = [t-1 for t in tree[1:]]
-    subtree = []
-    for ind, node in enumerate(tree[:-1]):
-        subtree.append(node)
-        if tree[ind+1] == 1:
-            yield subtree
-            subtree = []
-    if tree[-1] != 1:
-        subtree.append(tree[-1])
-    else:
-        subtree = [tree[-1]]
-    yield subtree
+    for branch in branches(tree):
+        yield [node-1 for node in branch]
 
 
 def chop(tree):
+    """Generates the canonical subtrees of the input tree's root node."""
     return tuple(tuple(subtree) for subtree in subtrees(tree))
 
 
@@ -238,6 +227,19 @@ def _attached_subtree(node, level, treenodes):
     for x in treenodes[node]:
         leveltree.extend(_attached_subtree(x, level+1, treenodes))
     return leveltree
+
+
+def canonical_treeorder(tree):
+    """
+    Given a noncanonical (non lexicographically maximal) level sequence, return
+    the canonical representation of the equivalent tree.
+    """
+    if not list(branches(tree)):
+        return tree
+    branch_list = []
+    for branch in branches(tree):
+        branch_list.append(canonical_treeorder(branch))
+    return [tree[0]]+flatten(sorted(branch_list, reverse=True))
 
 
 class TreeTest(unittest.TestCase):

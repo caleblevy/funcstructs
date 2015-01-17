@@ -38,7 +38,29 @@ decreasing_subsequences = lambda seq: monotone_subsequences(seq, lt)
 nonincreasing_subsequences = lambda seq: monotone_subsequences(seq, le)
 
 
-class MonotoneTest(unittest.TestCase):
+def breakat(seq, cond):
+    """
+    Given a sequence seq and boolean function of a single input cond, returns a
+    generator of subsequences such that a new subsequence begins if and only if
+    cond is true for the first element in the subsequence. If cond is never
+    true, returns the original sequence.
+    """
+    if not seq:
+        return
+    subseq = [seq[0]]
+    if len(seq) == 1:
+        yield subseq
+        return
+    for ind, el in enumerate(seq[1:]):
+        if cond(el):
+            yield subseq
+            subseq = [el]
+        else:
+            subseq.append(el)
+    yield subseq
+
+
+class SubsequenceTest(unittest.TestCase):
 
     def testMonotoneSubsequences(self):
         test_tree = [1, 2, 3, 4, 3, 3, 2, 3, 4, 5, 4, 5, 3, 3, 2, 3, 4, 5, 6,
@@ -69,6 +91,31 @@ class MonotoneTest(unittest.TestCase):
         inc2 = [1, 2, 3, 4, 5]
         # Test the end isn't double counted.
         self.assertEqual([inc2], list(increasing_subsequences(inc2)))
+
+    def testBreakpointSequences(self):
+        testat = lambda seq: breakat(seq, lambda x: x == 1)
+        seqs = [
+            [1, 2, 3, 3, 2, 3, 1, 2, 1, 1, 2, 2, 1, 2],
+            [2, 2, 3, 3, 4, 2],
+            [1],
+            [4, 3, 2, 1],
+            [4, 3, 2, 1, 2, 3, 4],
+            [4, 4, 4, 1, 1],
+            [1, 1, 1, 1]
+        ]
+
+        subseqs = [
+            [[1, 2, 3, 3, 2, 3], [1, 2], [1], [1, 2, 2], [1, 2]],
+            [[2, 2, 3, 3, 4, 2]],
+            [[1]],
+            [[4, 3, 2], [1]],
+            [[4, 3, 2], [1, 2, 3, 4]],
+            [[4, 4, 4], [1], [1]],
+            [[1], [1], [1], [1]]
+        ]
+
+        for seq, subseq in zip(seqs, subseqs):
+            self.assertEqual(subseq, list(testat(seq)))
 
 
 if __name__ == '__main__':

@@ -182,14 +182,6 @@ def fixed_lex_partitions(n, L):
         partition[L-j-k+1: L], j = _min_part(s, j+k-1)
 
 
-def inv(perm):
-    """Invert a permutation of integers I=1...n. """
-    inverse = [0] * len(perm)
-    for i, p in enumerate(perm):
-        inverse[p] = i
-    return inverse
-
-
 class IterationTest(unittest.TestCase):
 
     def testProductRange(self):
