@@ -7,10 +7,12 @@
 
 """ Enumerate and produce polynomials of various kinds. """
 
-from multiset import split_set, nCk
+
 from functools import reduce
 import numpy as np
 import unittest
+
+from multiset import split_set, nCk
 
 
 # MSP == Monomial Symmetric Polynomial

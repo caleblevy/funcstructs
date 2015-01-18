@@ -13,15 +13,16 @@ These should all be made into methods. We will have:
     - f.cycles()
     - f.preimage(I)
 """
-from nestops import flatten
-from productrange import endofunctions
 
-from random import randrange
-from collections import deque
+
+import random
 import unittest
 
+import nestops
+import productrange
 
-randfunc = lambda n: [randrange(n) for I in range(n)]
+
+randfunc = lambda n: [random.randrange(n) for I in range(n)]
 
 
 def preimage(f):
@@ -87,7 +88,7 @@ def funccycles(f):
             yield path[I+1:]
             cycle_els.extend(path[I+1:])
 
-limitset = lambda f: flatten(funccycles(f))
+limitset = lambda f: nestops.flatten(funccycles(f))
 
 
 def attached_treenodes(f):
@@ -132,8 +133,9 @@ class CycleTests(unittest.TestCase):
     ]
     # Use magic number for python3 compatibility
     funcs += list([randfunc(20) for I in range(100)])
-    funcs += list(endofunctions(1))
-    funcs += list(endofunctions(3)) + list(endofunctions(4))
+    funcs += list(productrange.endofunctions(1))
+    funcs += list(productrange.endofunctions(3))
+    funcs += list(productrange.endofunctions(4))
 
     def testCyclesAreCyclic(self):
         for f in self.funcs:
@@ -148,7 +150,7 @@ class CycleTests(unittest.TestCase):
 
     def testCyclesAreComplete(self):
         for f in self.funcs:
-            cycle_size = len(flatten(funccycles(f)))
+            cycle_size = len(nestops.flatten(funccycles(f)))
             self.assertEqual(imagepath(f)[-1], cycle_size)
 
     def testTreenodesAreNotCyclic(self):

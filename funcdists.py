@@ -36,12 +36,11 @@ import unittest
 
 import numpy as np
 
-from funcstructs import funcstructs, funcstruct_degeneracy, \
-    funcstruct_imagepath
-from multiset import nCk
-from funcimage import imagepath
-from productrange import endofunctions, product_range
-from compositions import compositions
+import funcstructs
+import multiset
+import funcimage
+import productrange
+import compositions
 
 
 def iterdist_brute(n):
@@ -51,8 +50,8 @@ def iterdist_brute(n):
     computationally infeasible, it is the only true way to check your work.
     """
     M = np.zeros((n, n-1), dtype=object)
-    for f in endofunctions(n):
-        im = imagepath(f)
+    for f in productrange.endofunctions(n):
+        im = funcimage.imagepath(f)
         for it, card in enumerate(im):
             M[card-1, it] += 1
     return M
@@ -86,9 +85,9 @@ def iterdist_funcstruct(n):
 
     M = np.zeros((n, n-1), dtype=object)
     nfac = factorial(n)
-    for struct in funcstructs(n):
-        mult = nfac//funcstruct_degeneracy(struct)
-        im = funcstruct_imagepath(struct)
+    for struct in funcstructs.funcstructs(n):
+        mult = nfac//funcstructs.funcstruct_degeneracy(struct)
+        im = funcstructs.funcstruct_imagepath(struct)
         for it, card in enumerate(im):
             M[card-1, it] += mult
     return M
@@ -107,7 +106,7 @@ def imagedist_composition(n):
         return [1]
 
     F = [0]*n
-    for comp in product_range([2]*(n-1)):
+    for comp in productrange.product_range([2]*(n-1)):
         val = n
         rep = 1
         for I in comp:
@@ -151,7 +150,7 @@ def nCk_grid(N):
         for J in range(N+1):
             if J > I:
                 continue
-            binomial_coeffs[I, J] = nCk(I, J)
+            binomial_coeffs[I, J] = multiset.nCk(I, J)
     return binomial_coeffs
 
 
@@ -185,7 +184,7 @@ def limitdist_composition(N):
     # Memoize these lookups; saves a lot of time.
     exponentials = powergrid(N)
     binomial_coefficients = nCk_grid(N)
-    for comp in compositions(N):
+    for comp in compositions.compositions(N):
         val = 1
         for J in range(1, len(comp)):
             val *= exponentials[comp[J-1], comp[J]]
@@ -298,10 +297,10 @@ class EndofunctionTest(unittest.TestCase):
     def testBinomialgrid(self):
         """Check that nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
         N = 20
-        binomial_coefficients = nCk_grid(N)
+        binomial_coeffs = nCk_grid(N)
         for n in range(N+1):
             for k in range(n+1):
-                self.assertEqual(nCk(n, k), binomial_coefficients[n, k])
+                self.assertEqual(multiset.nCk(n, k), binomial_coeffs[n, k])
 
     def testPowergrid(self):
         """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""

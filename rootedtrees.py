@@ -22,16 +22,16 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
 
-from math import factorial
 import unittest
-from itertools import combinations_with_replacement, product
+import itertools
 
-from subsequences import breakat
-from multiset import mset_degeneracy, split_set
-from funcimage import preimage, attached_treenodes
-from nestops import flatten, get_nested_el, change_nested_el
 from PADS.IntegerPartitions import partitions
-from factorization import divisors
+
+import subsequences
+import multiset
+import funcimage
+import nestops
+import factorization
 
 
 def successor_tree(L):
@@ -83,13 +83,20 @@ tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
 
 
 def partition_forests(partition):
-    y, d = split_set(partition)
+    """
+    Generates the forests formed from rooted trees with sizes specified by
+    partitions
+    """
+    y, d = multiset.split_set(partition)
     l = len(y)
     trees = [tree_tuples(I) for I in y]
-    preseed = [combinations_with_replacement(trees[I], d[I]) for I in range(l)]
+
+    preseed = [itertools.combinations_with_replacement(trees[I], d[I])
+               for I in range(l)]
+
     seeds = [list(seed) for seed in preseed]
-    for forest in product(*seeds):
-        yield tuple(flatten(forest))
+    for forest in itertools.product(*seeds):
+        yield tuple(nestops.flatten(forest))
 
 
 def forests_complex(n):
@@ -105,7 +112,9 @@ def forests_complex(n):
             yield forest
 
 
-branches = lambda tree: breakat(tree[1:], lambda node: node == tree[0]+1)
+def branches(tree):
+    """Return each major subbranch of a tree (even chopped)"""
+    return subsequences.breakat(tree[1:], lambda node: node == tree[0]+1)
 
 
 def subtrees(tree):
@@ -150,7 +159,7 @@ def tree_degeneracy(tree):
     degeneracy = 1
     for subtree in chop(tree):
         degeneracy *= tree_degeneracy(subtree)
-    return degeneracy*mset_degeneracy(chop(tree))
+    return degeneracy*multiset.mset_degeneracy(chop(tree))
 
 
 def tree_to_func(tree, permutation=None):
@@ -185,7 +194,7 @@ def treefunc_to_brackets(treefunc):
     shouldn't be used for anything practical.
     """
     n = len(treefunc)
-    preim = preimage(treefunc)
+    preim = funcimage.preimage(treefunc)
     root = [x for x in range(n) if treefunc[x] == x][0]
     tree = preim[root]
     tree.remove(root)
@@ -195,11 +204,11 @@ def treefunc_to_brackets(treefunc):
         nextinds = []
         for ind in indset:
             # For each ind, get the corresponding node
-            el = get_nested_el(tree, ind)
+            el = nestops.get_nested_el(tree, ind)
             # Collect the indicies of all nodes connected to el
             nextinds.extend([ind+[I] for I in range(len(preim[el]))])
             # Set el to its preimage until only empty lists are left.
-            change_nested_el(tree, ind, preim[el])
+            nestops.change_nested_el(tree, ind, preim[el])
         indset = nextinds
 
     return tree
@@ -210,7 +219,7 @@ def attached_subtree(f, node):
     Given an endofunction f and node in range(len(f)), returns the levelpath
     form of the rooted tree attached to element node.
     """
-    treenodes = attached_treenodes(f)
+    treenodes = funcimage.attached_treenodes(f)
     leveltree = [1]
     if not treenodes[node]:
         return leveltree
@@ -241,7 +250,7 @@ def canonical_treeorder(tree):
     branch_list = []
     for branch in branches(tree):
         branch_list.append(canonical_treeorder(branch))
-    return [tree[0]]+flatten(sorted(branch_list, reverse=True))
+    return [tree[0]]+nestops.flatten(sorted(branch_list, reverse=True))
 
 
 def rooted_treecount_upto(N):
@@ -260,7 +269,7 @@ def rooted_treecount_upto(N):
     for n in range(2, N+1):
         for I in range(1, n):
             s = 0
-            for d in divisors(I):
+            for d in factorization.divisors(I):
                 s += T[d]*d
             s *= T[n-I]
             T[n] += s
@@ -286,11 +295,14 @@ class TreeTest(unittest.TestCase):
 
     def testDegeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
+
+        import math
+
         self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000055)):
             labelled_treecount = 0
             for tree in rooted_trees(n):
-                labelled_treecount += factorial(n)//tree_degeneracy(tree)
+                labelled_treecount += math.factorial(n)//tree_degeneracy(tree)
             self.assertEqual(n**(n-1), labelled_treecount)
 
     def testTreeToFunc(self):

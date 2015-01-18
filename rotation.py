@@ -16,11 +16,12 @@ one straightforward, and one much more complicated, but presumably more
 efficient. It also provides a function for finding the lexicographically
 minimal rotation of a list.
 """
-import unittest
-from collections import deque
 
-from factorization import divisors
-from productrange import endofunctions
+
+import unittest
+import collections
+
+import factorization
 
 
 def _patternbreak_index(seed, necklace, start=1):
@@ -72,10 +73,10 @@ def periodicity_rotation(cycle):
     by the divisors of its length until they are equal. The first occurance of
     this is the period.
     """
-    orig = deque(cycle)
-    cycle = deque(cycle)
+    orig = collections.deque(cycle)
+    cycle = collections.deque(cycle)
     period_prev = 0
-    for period in divisors(len(cycle)):
+    for period in factorization.divisors(len(cycle)):
         cycle.rotate(period-period_prev)
         period_prev = period
         if orig == cycle:
@@ -90,13 +91,12 @@ def cycle_degeneracy(cycle):
 
 def smallest_rotation(lst):
     """Return the lexicographically smallest rotation of a list."""
-    lst = list(lst)
-    minrot = deque(lst)
-    cycle = deque(lst)
+    minrot = list(lst)
+    cycle = collections.deque(lst)
     for I in range(len(lst)-1):
         cycle.rotate()
-        if list(minrot) > list(cycle):
-            minrot = list(deque(cycle))
+        if minrot > list(cycle):
+            minrot = list(cycle)
     return list(minrot)
 
 
@@ -106,7 +106,7 @@ class RotationTests(unittest.TestCase):
 
     N = 20
     for n in range(1, N+1):
-        for d in divisors(n):
+        for d in factorization.divisors(n):
             periods.append(d)
             lists.append(([0]+[1]*(d-1))*(n//d))
 

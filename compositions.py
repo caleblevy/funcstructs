@@ -31,12 +31,12 @@ compositions of N.
 
 
 import unittest
-from productrange import product_range
+import productrange
 
 
 def compositions_binary(n):
     """Additive compositions of a number; i.e. partitions with ordering."""
-    for binary_composition in product_range([2]*(n-1)):
+    for binary_composition in productrange.product_range([2]*(n-1)):
         tot = 1
         composition = []
         for I in binary_composition:

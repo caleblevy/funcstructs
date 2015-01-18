@@ -13,10 +13,11 @@ myself.
 
 
 import unittest
-from itertools import chain
+import itertools
 
 from PADS.IntegerPartitions import partitions, lex_partitions
-from integerroots import isqrt
+
+import integerroots
 
 
 def tuple_partitions(n):
@@ -115,9 +116,9 @@ def partition_numbers_upto(N):
         return [1]
     P = [1]+[0]*N
     for n in range(1, N+1):
-        k_max = (isqrt(24*n+1)-1)//6
-        k_min = -((isqrt(24*n+1)+1)//6)
-        for k in chain(range(k_min, 0), range(1, k_max+1)):
+        k_max = (integerroots.isqrt(24*n+1)-1)//6
+        k_min = -((integerroots.isqrt(24*n+1)+1)//6)
+        for k in itertools.chain(range(k_min, 0), range(1, k_max+1)):
             P[n] += (-1)**abs((k-1)) * P[n-k*(3*k+1)//2]
     return P
 

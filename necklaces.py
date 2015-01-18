@@ -27,7 +27,7 @@ are precisely the necklaces whose beads are the rooted trees.
 """
 
 from factorization import divisors, totient
-from multiset import prod, split_set, nCk
+from multiset import split_set, nCk
 from fractions import gcd, Fraction
 from functools import reduce
 
