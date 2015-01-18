@@ -20,7 +20,7 @@ sum to N, for example:
       = 1 + 1 + 1 +1
 
 The compositions of 4 are thus (4), (3,1), (2,2), (2,1,1), (1,3), (1,2,1),
-(1,1,2) and (1,1,1,1). 
+(1,1,2) and (1,1,1,1).
 
 One can see a clear correspondance between compositions of N and the subsets of
 a set with N-1 elements. Simply list N zeros in a row; every way to draw
