@@ -19,7 +19,7 @@ minimal rotation of a list.
 import unittest
 from collections import deque
 
-from primes import divisors
+from factorization import divisors
 from productrange import endofunctions
 
 

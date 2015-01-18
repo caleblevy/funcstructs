@@ -27,11 +27,11 @@ from multiset import split_set, mset_degeneracy, prod
 from funcimage import imagepath
 from nestops import flatten
 from rootedtrees import forests, tree_degeneracy, tree_to_func
-from monotones import increasing_subsequences
+from subsequences import increasing_subsequences
 from necklaces import necklaces
 from rotation import cycle_degeneracy
 from levypartitions import tuple_partitions
-from primes import divisors
+from factorization import divisors
 
 
 def multiset_funcstructs(mset):

@@ -26,12 +26,12 @@ from math import factorial
 import unittest
 from itertools import combinations_with_replacement, product
 
-from monotones import breakat
+from subsequences import breakat
 from multiset import mset_degeneracy, split_set
 from funcimage import preimage, attached_treenodes
 from nestops import flatten, get_nested_el, change_nested_el
 from PADS.IntegerPartitions import partitions
-from primes import divisors
+from factorization import divisors
 
 
 def successor_tree(L):

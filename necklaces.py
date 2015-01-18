@@ -26,7 +26,7 @@ n. Thus the ways of connecting a collection of rooted trees together in a cycle
 are precisely the necklaces whose beads are the rooted trees.
 """
 
-from primes import divisors, totient
+from factorization import divisors, totient
 from multiset import prod, split_set, nCk
 from fractions import gcd, Fraction
 from functools import reduce
