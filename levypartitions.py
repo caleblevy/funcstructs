@@ -5,61 +5,18 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
+
 """
-A collection of miscellaneous generator functions that do not fit elsewhere.
+Further modules for enumerating and counting partitions, mostly derived by
+myself.
 """
+
+
+import unittest
+from itertools import chain
 
 from PADS.IntegerPartitions import partitions, lex_partitions
-from itertools import product
-from multiset import prod
-import unittest
-
-isiterable = lambda obj: hasattr(obj, '__iter__')
-
-
-def parse_ranges(begin, end, step):
-    """
-    If begin == end == None then begin is treated as end and step is set by
-    default to 1 and begin to 0. If begin and step are integers they are
-    transformed into begin = [begin]*len(end) and step = [step]*len(end).
-    """
-    if end is None:
-        begin, end = end, begin
-    # If start is not iterable, it is either an int or none.
-    if not isiterable(begin):
-        begin = [0 if(begin is None) else begin]*len(end)
-
-    if not isiterable(step):
-        step = [1 if(step is None) else step]*len(end)
-
-    if not len(begin) == len(step) == len(end):
-        raise ValueError("start, stop and step must all be same length.")
-
-    return begin, end, step
-
-
-def product_range(begin, end=None, step=None):
-    """
-    Nice wrapper for itertools.product. Give it a tuple of starts, stops and
-    increments and it will return the nested for loop coresponding to them.
-    I.E. if begin = (r1, r2, ..., rn), end = (s1, s2, ..., sn) and step =
-    (t1, t2, ..., tn) then
-
-        for tup in product_range(begin, end, step):
-            yield tup
-
-    is equivalent to:
-
-        for I1 in range(r1, s1, t1):
-          for I2 in range(r2, s2, t2):
-            ...
-              for I in range(rn, sn, tn):
-                yield tuple([I1, I2, ..., In])
-    """
-    begin, end, step = parse_ranges(begin, end, step)
-    return product(*[range(I, J, K) for I, J, K in zip(begin, end, step)])
-
-endofunctions = lambda n: product_range([n]*n)
+from integerroots import isqrt
 
 
 def tuple_partitions(n):
@@ -74,42 +31,6 @@ def tuple_partitions(n):
         for p in part:
             b[p-1] += 1
         yield b
-
-
-def compositions_binary(n):
-    """Additive compositions of a number; i.e. partitions with ordering."""
-    for binary_composition in product_range([2]*(n-1)):
-        tot = 1
-        composition = []
-        for I in binary_composition:
-            if I:
-                composition.append(tot)
-                tot = 1
-                continue
-            tot += 1
-        composition.append(tot)
-        yield composition
-
-
-def compositions_simple(n):
-    """A more direct way of enumerating compositions."""
-    comp = [n]
-    while True:
-        yield comp
-        J = len(comp)
-        if J == n:
-            return
-        for K in range(J-1, -1, -1):
-            # Keep descending (backwards) until hitting a "step" you can
-            # subtract from
-            if comp[K] is not 1:
-                comp[K] -= 1
-                comp.append(J-K)
-                break
-            # Haven't hit the target, pop the last element, and step back
-            comp.pop()
-
-compositions = compositions_simple  # best by test.
 
 
 def _min_part(n, L):
@@ -182,31 +103,28 @@ def fixed_lex_partitions(n, L):
         partition[L-j-k+1: L], j = _min_part(s, j+k-1)
 
 
-class IterationTest(unittest.TestCase):
+def partition_numbers_upto(N):
+    """
+    Uses Euler's Pentagonal Number Theorem to count partition number using the
+    previous terms. The sum is taken over O(sqrt(n)) terms on each pass, so the
+    algorithm runs in O(n**3/2)
 
-    def testProductRange(self):
-        begins = [None,   0,      1,      [1]*4,  [3]*4, (1, 2, 3, 3)]
-        ends = [[4]*4, [4]*4, [7]*3, [10]*4, [6]*4, (2, 4, 8, 10)]
-        steps = [1,      None,   2,      3,       None,   (1, 1, 2, 2)]
+    See the Knoch paper in papers folder for a proof of the theorem.
+    """
+    if N == 0:
+        return [1]
+    P = [1]+[0]*N
+    for n in range(1, N+1):
+        k_max = (isqrt(24*n+1)-1)//6
+        k_min = -((isqrt(24*n+1)+1)//6)
+        for k in chain(range(k_min, 0), range(1, k_max+1)):
+            P[n] += (-1)**abs((k-1)) * P[n-k*(3*k+1)//2]
+    return P
 
-        counts = [4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
-        for c, b, e, s in zip(counts, begins, ends, steps):
-            self.assertEqual(c, len(list(product_range(b, e, s))))
-            self.assertEqual(prod(e), len(list(product_range(e))))
+partition_number = lambda n: partition_numbers_upto(n)[-1]
 
-    def testCompositionCounts(self):
-        N = 10
-        for n in range(1, N):
-            self.assertEqual(2**(n-1), len(list(compositions_simple(n))))
-            self.assertEqual(2**(n-1), len(list(compositions_binary(n))))
 
-    def testCompositionSums(self):
-        N = 10
-        for n in range(1, N):
-            for comp in compositions_simple(n):
-                self.assertEqual(n, sum(comp))
-            for comp in compositions_binary(n):
-                self.assertEqual(n, sum(comp))
+class LevyPartitionTest(unittest.TestCase):
 
     def testSmallestPartition(self):
         N = 20
@@ -230,6 +148,10 @@ class IterationTest(unittest.TestCase):
                 self.assertEqual(pnL, [p for p in pn if len(p) == L])
             # Check for the right number
             self.assertEqual(np, len(pn))
+
+    def testPartitionNumbers(self):
+        A000041 = [1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135]
+        self.assertEqual(A000041, partition_numbers_upto(len(A000041)-1))
 
 
 if __name__ == '__main__':

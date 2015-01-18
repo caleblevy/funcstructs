@@ -10,11 +10,12 @@ A collection of short functions for enumerating factorizations of integers and
 other such things.
 """
 
-from multiset import prod, split_set
-from iteration import product_range
 from math import ceil
 import fractions
 import unittest
+
+from multiset import prod, split_set
+from productrange import product_range
 
 
 def prime_factorization(n):

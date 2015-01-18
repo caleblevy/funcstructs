@@ -30,16 +30,18 @@ iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula).
 """
 
+
+from math import factorial
+import unittest
+
+import numpy as np
+
 from funcstructs import funcstructs, funcstruct_degeneracy, \
     funcstruct_imagepath
 from multiset import nCk
 from funcimage import imagepath
-from iteration import endofunctions, compositions, product_range
-
-import numpy as np
-
-from math import factorial
-import unittest
+from productrange import endofunctions, product_range
+from compositions import compositions
 
 
 def iterdist_brute(n):

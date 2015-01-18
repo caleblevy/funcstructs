@@ -11,7 +11,7 @@ A collection of functions for dealing with nested containers.
 """
 
 from itertools import chain
-from iteration import isiterable
+from productrange import isiterable
 
 
 def flatten(listOfLists):

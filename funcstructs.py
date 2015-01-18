@@ -17,6 +17,8 @@ information contact caleb.levy@berkeley.edu.
 import unittest
 from math import factorial
 from fractions import Fraction
+from itertools import combinations_with_replacement, product
+
 
 from sympy.utilities.iterables import multiset_partitions
 import numpy as np
@@ -26,10 +28,9 @@ from funcimage import imagepath
 from nestops import flatten
 from rootedtrees import forests, tree_degeneracy, tree_to_func
 from monotones import increasing_subsequences
-from itertools import combinations_with_replacement, product
 from necklaces import necklaces
 from rotation import cycle_degeneracy
-from partitions2 import tuple_partitions
+from levypartitions import tuple_partitions
 from primes import divisors
 
 
@@ -84,7 +85,7 @@ def funcstruct_count(n):
     return int(tot)
 
 
-def funcstruct_degeneracy(function_structure, n=None):
+def funcstruct_degeneracy(function_structure):
     """
     The number of equivalent representations of a labelling of an endofunction
     with unlabelled structure funcstruct.

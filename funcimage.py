@@ -14,7 +14,7 @@ These should all be made into methods. We will have:
     - f.preimage(I)
 """
 from nestops import flatten
-from iteration import endofunctions
+from productrange import endofunctions
 
 from random import randrange
 from collections import deque

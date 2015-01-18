@@ -20,7 +20,7 @@ import unittest
 from collections import deque
 
 from primes import divisors
-from iteration import endofunctions
+from productrange import endofunctions
 
 
 def _patternbreak_index(seed, necklace, start=1):
