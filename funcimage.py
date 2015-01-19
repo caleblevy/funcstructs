@@ -25,6 +25,28 @@ import productrange
 randfunc = lambda n: [random.randrange(n) for I in range(n)]
 
 
+def compose(f, g):
+    """Takes two endofunctions f, g and returns f(g(x))."""
+    return [f[x] for x in g]
+
+
+def iter2(f):
+    """Compose f with itself"""
+    return compose(f, f)
+
+
+def iterate(f, n):
+    """Iteration by self-composing, inspired by exponentiation by squaring."""
+    # Convert to string of binary digits, clip off 0b, then reverse.
+    component_iterates = bin(n)[2::][::-1]
+    f_iter = range(len(f))
+    for it in component_iterates:
+        if it == '1':
+            f_iter = compose(f_iter, f)
+        f = iter2(f, f)
+    return f_iter
+
+
 def preimage(f):
     """
     Given an endofunction f defined on S=range(len(f)), returns the preimage of
@@ -53,35 +75,48 @@ def imagepath(f):
     """
     n = len(f)
     cardinalities = [len(set(f))]
-    f_orig = f[:]
+    f_iter = f[:]
     card_prev = n
     for it in range(1, n-1):
-        f = [f_orig[x] for x in f]
-        card = len(set(f))
-        cardinalities.append(len(set(f)))
+        f_iter = compose(f_iter, f)
+        card = len(set(f_iter))
+        cardinalities.append(card)
+        # Save some time; if we have reached the fixed set, return.
         if card == card_prev:
             cardinalities.extend([card]*(n-2-it))
             break
+
         card_prev = card
+
     return cardinalities
 
 
 def funccycles(f):
-    """
-    Given an endofunction f, return its cycle decomposition.
-    """
-    N = len(f)
-    if N == 1:
+    """Given an endofunction f, return its cycle decomposition."""
+    n = len(f)
+    if n == 1:
         yield [0]
         return
-    cycles = []
+
     cycle_els = []
-    for x in range(N):
+    prev_els = []
+    for x in range(n):
         path = [x]
-        for it in range(N):
+        skipel = False
+        k = n - len(cycle_els)
+
+        for it in range(k):
             x = f[x]
+            if x in prev_els:
+                skipel = True
+                break
             path.append(x)
-        I = N-1
+
+        prev_els.extend(path)
+        if skipel:
+            continue
+
+        I = k-1
         while I >= 0 and path[I] != path[-1]:
             I -= 1
         if path[-1] not in cycle_els:
