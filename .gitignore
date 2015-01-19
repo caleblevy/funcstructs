@@ -10,31 +10,6 @@
 # Normal rules
 #
 .*
-*.o
-*.o.*
-*.a
-*.s
-*.ko
-*.so
-*.so.dbg
-*.mod.c
-*.i
-*.lst
-*.symtypes
-*.order
-*.elf
-*.bin
-*.gz
-*.bz2
-*.lzma
-*.xz
-*.lz4
-*.lzo
-*.patch
-*.gcno
-modules.builtin
-Module.symvers
-*.dwo
 *.pyc
 
 #
@@ -51,3 +26,4 @@ Module.symvers
 # Local folders
 /myrefs/
 __pycache__/
+/holding_area/
