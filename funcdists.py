@@ -38,7 +38,7 @@ import numpy as np
 
 import funcstructs
 import multiset
-import funcimage
+import iterate
 import productrange
 import compositions
 
@@ -51,7 +51,7 @@ def iterdist_brute(n):
     """
     M = np.zeros((n, n-1), dtype=object)
     for f in productrange.endofunctions(n):
-        im = funcimage.imagepath(f)
+        im = iterate.imagepath(f)
         for it, card in enumerate(im):
             M[card-1, it] += 1
     return M

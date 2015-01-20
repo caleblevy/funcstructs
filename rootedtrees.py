@@ -29,7 +29,7 @@ from PADS.IntegerPartitions import partitions
 
 import subsequences
 import multiset
-import funcimage
+import iterate
 import nestops
 import factorization
 
@@ -194,7 +194,7 @@ def treefunc_to_brackets(treefunc):
     shouldn't be used for anything practical.
     """
     n = len(treefunc)
-    preim = funcimage.preimage(treefunc)
+    preim = iterate.preimage(treefunc)
     root = [x for x in range(n) if treefunc[x] == x][0]
     tree = preim[root]
     tree.remove(root)
@@ -219,7 +219,7 @@ def attached_subtree(f, node):
     Given an endofunction f and node in range(len(f)), returns the levelpath
     form of the rooted tree attached to element node.
     """
-    treenodes = funcimage.attached_treenodes(f)
+    treenodes = iterate.attached_treenodes(f)
     leveltree = [1]
     if not treenodes[node]:
         return leveltree

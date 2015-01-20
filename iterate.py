@@ -4,6 +4,8 @@
 # The terms of use, license and copyright information for the code and ideas
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
+
+
 """
 A collection of utilities returning certain information about and kinds of
 images of sets under functions: preimages, cardinalities of iterate images,
@@ -14,10 +16,8 @@ These should all be made into methods. We will have:
     - f.preimage(I)
 """
 
-
 import random
 import unittest
-
 import nestops
 import productrange
 
@@ -43,8 +43,29 @@ def iterate(f, n):
     for it in component_iterates:
         if it == '1':
             f_iter = compose(f_iter, f)
-        f = iter2(f, f)
+        f = iter2(f)
     return f_iter
+
+
+def imagepath(f):
+    """
+    Give it a list such that all([I in range(len(f)) for I in f]) and this
+    program spits out the image path of f.
+    """
+    n = len(f)
+    cardinalities = [len(set(f))]
+    f_iter = f[:]
+    card_prev = n
+    for it in range(1, n-1):
+        f_iter = compose(f_iter, f)
+        card = len(set(f_iter))
+        cardinalities.append(card)
+        # Save some time; if we have reached the fixed set, return.
+        if card == card_prev:
+            cardinalities.extend([card]*(n-2-it))
+            break
+        card_prev = card
+    return cardinalities
 
 
 def preimage(f):
@@ -68,60 +89,42 @@ def preimage(f):
     return preim
 
 
-def imagepath(f):
-    """
-    Give it a list so that all([I in range(len(f)) for I in f]) and this
-    program spits out the image path of f.
-    """
-    n = len(f)
-    cardinalities = [len(set(f))]
-    f_iter = f[:]
-    card_prev = n
-    for it in range(1, n-1):
-        f_iter = compose(f_iter, f)
-        card = len(set(f_iter))
-        cardinalities.append(card)
-        # Save some time; if we have reached the fixed set, return.
-        if card == card_prev:
-            cardinalities.extend([card]*(n-2-it))
-            break
-
-        card_prev = card
-
-    return cardinalities
-
-
 def funccycles(f):
-    """Given an endofunction f, return its cycle decomposition."""
+    """
+    Returns the cycle decomposition of an endofunction f. Should take O(len(f))
+    time.
+    """
     n = len(f)
     if n == 1:
         yield [0]
         return
-
-    cycle_els = []
-    prev_els = []
+    # If we run  elements for total of O(len(f)) time.
+    prev_els = set()
     for x in range(n):
+        skip_el = False
         path = [x]
-        skipel = False
-        k = n - len(cycle_els)
-
-        for it in range(k):
+        path_els = set(path)
+        for it in range(n+1):
             x = f[x]
-            if x in prev_els:
-                skipel = True
-                break
             path.append(x)
-
-        prev_els.extend(path)
-        if skipel:
+            # If we hit an element seen in a previous path, this path will not 
+            # contain a new cycle.
+            if x in prev_els:
+                skip_el = True
+                break
+            # If an element appears in the path twice, we have already found 
+            # the cycle
+            if x in path_els:
+                break
+            path_els.add(x)
+        prev_els.update(path)
+        if skip_el:
             continue
 
-        I = k-1
+        I = len(path)-2
         while I >= 0 and path[I] != path[-1]:
             I -= 1
-        if path[-1] not in cycle_els:
-            yield path[I+1:]
-            cycle_els.extend(path[I+1:])
+        yield path[I+1:]
 
 limitset = lambda f: nestops.flatten(funccycles(f))
 
@@ -173,22 +176,26 @@ class CycleTests(unittest.TestCase):
     funcs += list(productrange.endofunctions(4))
 
     def testCyclesAreCyclic(self):
+        """Make sure funccylces actually returns cycles."""
         for f in self.funcs:
             for cycle in funccycles(f):
                 for ind, el in enumerate(cycle):
                     self.assertEqual(cycle[(ind+1) % len(cycle)], f[el])
 
     def testCyclesAreUnique(self):
+        """Ensure funccycles returns no duplicates."""
         for f in self.funcs:
             cycleset = [tuple(cycle) for cycle in funccycles(f)]
             self.assertEqual(len(cycleset), len(set(cycleset)))
 
     def testCyclesAreComplete(self):
+        """Ensure funccycles returns every cycle."""
         for f in self.funcs:
             cycle_size = len(nestops.flatten(funccycles(f)))
             self.assertEqual(imagepath(f)[-1], cycle_size)
 
     def testTreenodesAreNotCyclic(self):
+        """Make sure attached_treenodes returns nodes not in cycles.."""
         for f in self.funcs:
             lim = limitset(f)
             descendents = attached_treenodes(f)

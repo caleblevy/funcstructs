@@ -175,12 +175,12 @@ class EndofunctionStructureTest(unittest.TestCase):
 
     def testFuncstructImagepath(self):
         """Check methods for computing structure image paths are equivalent."""
-        import funcimage
+        import iterate
 
         N = 8
         for n in range(1, N):
             for struct in funcstructs(n):
-                im = funcimage.imagepath(funcstruct_to_func(struct))
+                im = iterate.imagepath(funcstruct_to_func(struct))
                 imstruct = funcstruct_imagepath(struct)
                 np.testing.assert_array_equal(im, imstruct)
 
