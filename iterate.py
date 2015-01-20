@@ -18,6 +18,7 @@ These should all be made into methods. We will have:
 
 import random
 import unittest
+
 import nestops
 import productrange
 
