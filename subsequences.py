@@ -63,8 +63,8 @@ def breakat(seq, cond):
 class SubsequenceTest(unittest.TestCase):
 
     def testMonotoneSubsequences(self):
-        test_tree = [1, 2, 3, 4, 3, 3, 2, 3, 4, 5, 4, 5, 3, 3, 2, 3, 4, 5, 6,
-                     5, 5, 5, 5]
+        seq = [1, 2, 3, 4, 3, 3, 2, 3, 4, 5, 4, 5, 3, 3, 2, 3, 4, 5, 6, 5, 5,
+               5, 5]
 
         inc = [
             [1, 2, 3, 4], [3], [3], [2, 3, 4, 5], [4, 5], [3], [3],
@@ -83,14 +83,14 @@ class SubsequenceTest(unittest.TestCase):
             [4], [5], [6, 5, 5, 5, 5]
         ]
 
-        self.assertEqual(inc, list(increasing_subsequences(test_tree)))
-        self.assertEqual(nondec, list(nondecreasing_subsequences(test_tree)))
-        self.assertEqual(dec, list(decreasing_subsequences(test_tree)))
-        self.assertEqual(noninc, list(nonincreasing_subsequences(test_tree)))
+        self.assertSequenceEqual(inc, list(increasing_subsequences(seq)))
+        self.assertSequenceEqual(nondec, list(nondecreasing_subsequences(seq)))
+        self.assertSequenceEqual(dec, list(decreasing_subsequences(seq)))
+        self.assertSequenceEqual(noninc, list(nonincreasing_subsequences(seq)))
 
         inc2 = [1, 2, 3, 4, 5]
         # Test the end isn't double counted.
-        self.assertEqual([inc2], list(increasing_subsequences(inc2)))
+        self.assertSequenceEqual([inc2], list(increasing_subsequences(inc2)))
 
     def testBreakpointSequences(self):
         testat = lambda seq: breakat(seq, lambda x: x == 1)
@@ -115,7 +115,7 @@ class SubsequenceTest(unittest.TestCase):
         ]
 
         for seq, subseq in zip(seqs, subseqs):
-            self.assertEqual(subseq, list(testat(seq)))
+            self.assertSequenceEqual(subseq, list(testat(seq)))
 
 
 if __name__ == '__main__':

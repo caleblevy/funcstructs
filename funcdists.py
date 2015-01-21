@@ -273,7 +273,7 @@ class EndofunctionTest(unittest.TestCase):
         ]
         for dist in A236396:
             n = len(dist) + 1
-            self.assertEqual(dist, list(iterdist_funcstruct(n)[0, :]))
+            self.assertSequenceEqual(dist, list(iterdist_funcstruct(n)[0, :]))
 
     def testFirstdist(self):
         """
@@ -290,9 +290,9 @@ class EndofunctionTest(unittest.TestCase):
         ]
         for dist in A101817:
             n = len(dist)
-            self.assertEqual(dist, imagedist_composition(n))
-            self.assertEqual(dist, list(iterdist(n)[:, 0]))
-            self.assertEqual(dist, imagedist_recurse(n))
+            self.assertSequenceEqual(dist, imagedist_composition(n))
+            self.assertSequenceEqual(dist, list(iterdist(n)[:, 0]))
+            self.assertSequenceEqual(dist, imagedist_recurse(n))
 
     def testBinomialgrid(self):
         """Check that nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
@@ -328,10 +328,10 @@ class EndofunctionTest(unittest.TestCase):
         ]
         for dist in A066324:
             n = len(dist)
-            self.assertEqual(dist, limitdist_composition(n))
-            self.assertEqual(dist, limitdist_direct(n))
-            self.assertEqual(dist, limitdist_recurse(n))
-            self.assertEqual(dist, list(iterdist(n)[:, -1]))
+            self.assertSequenceEqual(dist, limitdist_composition(n))
+            self.assertSequenceEqual(dist, limitdist_direct(n))
+            self.assertSequenceEqual(dist, limitdist_recurse(n))
+            self.assertSequenceEqual(dist, list(iterdist(n)[:, -1]))
 
 
 if __name__ == '__main__':

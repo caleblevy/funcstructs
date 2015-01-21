@@ -35,7 +35,7 @@ def inv(perm):
     return inverse
 
 
-def conjugate(perm, f):
+def conj(perm, f):
     """Conjugate a function f by a permutation."""
     return iterate.compose(inv(perm), iterate.compose(f, perm))
 
@@ -43,7 +43,7 @@ def conjugate(perm, f):
 def randconj(f):
     """Return a random conjugate of f."""
     r = randperm(len(f))
-    return conjugate(r, f)
+    return conj(r, f)
 
 
 class PermutationTests(unittest.TestCase):
@@ -56,9 +56,9 @@ class PermutationTests(unittest.TestCase):
                 permlist.append(randperm(n))
 
         for perm in permlist:
-            identity = list(range(len(perm)))
-            self.assertEqual(identity, iterate.compose(perm, inv(perm)))
-            self.assertEqual(identity, iterate.compose(inv(perm), perm))
+            e = list(range(len(perm)))
+            self.assertSequenceEqual(e, iterate.compose(perm, inv(perm)))
+            self.assertSequenceEqual(e, iterate.compose(inv(perm), perm))
 
     def testConjugation(self):
         """Test that conjugation is invertible, with the obvious inverse."""
@@ -69,7 +69,7 @@ class PermutationTests(unittest.TestCase):
             for _ in range(20):
                 perm = randperm(len(f))
                 iperm = inv(perm)
-                self.assertEqual(list(f), conjugate(iperm, conjugate(perm, f)))
+                self.assertSequenceEqual(f, conj(inv(perm), conj(perm, f)))
 
 
 if __name__ == '__main__':

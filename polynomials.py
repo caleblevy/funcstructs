@@ -159,7 +159,8 @@ class PolynomialTest(unittest.TestCase):
         N = 20
         """Check binomial coefficients."""
         for n in range(N+1):
-            self.assertEqual([nCk(n, k) for k in range(n+1)], FOIL([-1]*n))
+            binomial_coeffs = [nCk(n, k) for k in range(n+1)]
+            self.assertSequenceEqual(binomial_coeffs, FOIL([-1]*n))
 
     def testMonomialSymmetricPolynomial(self):
         """
@@ -172,11 +173,11 @@ class PolynomialTest(unittest.TestCase):
             foilmon = FOIL(range(-n, 0))[1:]
             x = range(1, n+1)
             symmon = [msp_iterative(x, [1]*I) for I in range(1, n+1)]
-            self.assertEqual(foilmon, symmon)
+            self.assertSequenceEqual(foilmon, symmon)
             # Recursive version is far more expensive; test small values.
             if n <= 5:
                 recmon = [msp_recursive(x, [1]*I) for I in range(1, n+1)]
-                self.assertEqual(foilmon, recmon)
+                self.assertSequenceEqual(foilmon, recmon)
 
         vecs = [[5, 5, 5]]
         powers = [[3, 3, 2]]

@@ -321,7 +321,7 @@ class TreeTest(unittest.TestCase):
         """Make sure treetofunc correctly represents trees as endofunctions"""
         tree = [1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3]
         func = [0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12]
-        self.assertEqual(func, tree_to_func(tree))
+        self.assertSequenceEqual(func, tree_to_func(tree))
 
     def testTreeform(self):
         """Test the bracket representation of these rooted trees."""
@@ -335,8 +335,8 @@ class TreeTest(unittest.TestCase):
             [[[[[[]]], []]], [[], []]],
             [[[[[], [], [], [], []]]], []]
         )
-        for I, tree in enumerate(trees):
-            self.assertEqual(nestedforms[I], tree_to_brackets(tree))
+        for tree, nest in zip(trees, nestedforms):
+            self.assertSequenceEqual(nest, tree_to_brackets(tree))
 
     def testTreefuncToTree(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
@@ -344,8 +344,8 @@ class TreeTest(unittest.TestCase):
             for tree in rooted_trees(n):
                 treefunc = tree_to_func(tree)
                 for _ in range(10):
-                    rtree = conjugates.randconj(treefunc)
-                    self.assertEqual(tree, treefunc_to_tree(rtree))
+                    rtreefunc = conjugates.randconj(treefunc)
+                    self.assertSequenceEqual(tree, treefunc_to_tree(rtreefunc))
 
 
 if __name__ == '__main__':

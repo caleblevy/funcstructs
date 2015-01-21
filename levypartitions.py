@@ -146,13 +146,14 @@ class LevyPartitionTest(unittest.TestCase):
                 pnL = [list(p) for p in fixed_lex_partitions(n, L)]
                 np += len(pnL)
                 # Check for the right order
-                self.assertEqual(pnL, [p for p in pn if len(p) == L])
+                self.assertSequenceEqual(pnL, [p for p in pn if len(p) == L])
             # Check for the right number
             self.assertEqual(np, len(pn))
 
     def testPartitionNumbers(self):
         A000041 = [1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135]
-        self.assertEqual(A000041, partition_numbers_upto(len(A000041)-1))
+        for n, count in enumerate(A000041):
+            self.assertEqual(count, partition_number(n))
 
 
 if __name__ == '__main__':
