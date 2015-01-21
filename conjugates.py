@@ -7,14 +7,14 @@
 
 
 """
-A collection of utilities returning certain information about and kinds of
-images of sets under functions: preimages, cardinalities of iterate images,
-cycle decompositions and limitsets.
-
+Functions for conjugating endofunctions.
 """
 
 import random
 import unittest
+
+import iterate
+import productrange
 
 
 def randperm(n):
@@ -22,6 +22,7 @@ def randperm(n):
     r = list(range(n))  # Explicitly call ist for python 3 compatibility.
     random.shuffle(r)
     return r
+
 
 def inv(perm):
     """
@@ -34,12 +35,21 @@ def inv(perm):
     return inverse
 
 
+def conjugate(perm, f):
+    """Conjugate a function f by a permutation."""
+    return iterate.compose(inv(perm), iterate.compose(f, perm))
+
+
+def randconj(f):
+    """Return a random conjugate of f."""
+    r = randperm(len(f))
+    return conjugate(r, f)
+
+
 class PermutationTests(unittest.TestCase):
 
     def testInversePermutations(self):
         """Test compose(inv(perm), perm) == perm"""
-        import iterate
-
         permlist = []
         for n in range(1, 10):
             for _ in range(1, 10*n):
@@ -49,6 +59,17 @@ class PermutationTests(unittest.TestCase):
             identity = list(range(len(perm)))
             self.assertEqual(identity, iterate.compose(perm, inv(perm)))
             self.assertEqual(identity, iterate.compose(inv(perm), perm))
+
+    def testConjugation(self):
+        """Test that conjugation is invertible, with the obvious inverse."""
+        funclist = list(productrange.endofunctions(4))
+        funclist += [iterate.randfunc(20) for _ in range(100)]
+        funclist += list(productrange.endofunctions(2))
+        for f in funclist:
+            for _ in range(20):
+                perm = randperm(len(f))
+                iperm = inv(perm)
+                self.assertEqual(list(f), conjugate(iperm, conjugate(perm, f)))
 
 
 if __name__ == '__main__':

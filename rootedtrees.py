@@ -22,6 +22,8 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves.
 """
 
+
+import math
 import unittest
 import itertools
 
@@ -32,6 +34,7 @@ import multiset
 import iterate
 import nestops
 import factorization
+import conjugates
 
 
 def successor_tree(L):
@@ -80,6 +83,32 @@ def rooted_trees(N):
         yield L
 
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
+
+
+def rooted_treecount_upto(N):
+    """
+    Returns the number of rooted tree structures on n nodes. Algorithm featured
+    without derivation in
+        Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
+        "Mathematical Constants", Cambridge, England: Cambridge University
+        Press, pp. 295-316, 2003.
+    """
+    if N == 0:
+        return [0]
+    if N == 1:
+        return [0, 1]
+    T = [0, 1]+[0]*(N-1)
+    for n in range(2, N+1):
+        for I in range(1, n):
+            s = 0
+            for d in factorization.divisors(I):
+                s += T[d]*d
+            s *= T[n-I]
+            T[n] += s
+        T[n] //= (n-1)
+    return T
+
+rooted_treecount = lambda n: rooted_treecount_upto(n)[-1]
 
 
 def partition_forests(partition):
@@ -187,17 +216,22 @@ def tree_to_func(tree, permutation=None):
     return func
 
 
-def treefunc_to_brackets(treefunc):
+def treeroot(treefunc):
+    """Returns the root of an endofunction whose structure is a rooted tree."""
+    return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
+
+
+def tree_to_brackets(tree):
     """
     Given the endofunction form of a rooted tree, return a representation of
     its structure via nested lists. This function is a novelty item, and
     shouldn't be used for anything practical.
     """
-    n = len(treefunc)
-    preim = iterate.preimage(treefunc)
-    root = [x for x in range(n) if treefunc[x] == x][0]
+    n = len(tree)
+    treefunc = tree_to_func(tree)
+    preim = iterate.attached_treenodes(treefunc)
+    root = treeroot(treefunc)
     tree = preim[root]
-    tree.remove(root)
     indset = [[x] for x in range(len(tree))]
 
     while indset:
@@ -214,32 +248,6 @@ def treefunc_to_brackets(treefunc):
     return tree
 
 
-def attached_subtree(f, node):
-    """
-    Given an endofunction f and node in range(len(f)), returns the levelpath
-    form of the rooted tree attached to element node.
-    """
-    treenodes = iterate.attached_treenodes(f)
-    leveltree = [1]
-    if not treenodes[node]:
-        return leveltree
-    level = 2
-    for x in treenodes[node]:
-        leveltree += _attached_subtree(x, level, treenodes)
-    return leveltree
-
-
-def _attached_subtree(node, level, treenodes):
-    """
-    Recursive portion of the subtree algorithm. Returns [level] of the node
-    plus level path of all attached subnodes, hence the itero-recursion.
-    """
-    leveltree = [level]
-    for x in treenodes[node]:
-        leveltree.extend(_attached_subtree(x, level+1, treenodes))
-    return leveltree
-
-
 def canonical_treeorder(tree):
     """
     Given a noncanonical (non lexicographically maximal) level sequence, return
@@ -253,30 +261,36 @@ def canonical_treeorder(tree):
     return [tree[0]]+nestops.flatten(sorted(branch_list, reverse=True))
 
 
-def rooted_treecount_upto(N):
+def _attached_subtree(node, level, treenodes):
     """
-    Returns the number of rooted tree structures on n nodes. Algorithm featured
-    without derivation in
-        Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
-        "Mathematical Constants", Cambridge, England: Cambridge University
-        Press, pp. 295-316, 2003.
+    Recursive portion of the subtree algorithm. Returns [level] of the node
+    plus level path of all attached subnodes, hence the itero-recursion.
     """
-    if N == 0:
-        return [0]
-    if N == 1:
-        return [0, 1]
-    T = [0, 1]+[0]*(N-1)
-    for n in range(2, N+1):
-        for I in range(1, n):
-            s = 0
-            for d in factorization.divisors(I):
-                s += T[d]*d
-            s *= T[n-I]
-            T[n] += s
-        T[n] //= (n-1)
-    return T
+    leveltree = [level]
+    for x in treenodes[node]:
+        leveltree.extend(_attached_subtree(x, level+1, treenodes))
+    return leveltree
 
-rooted_treecount = lambda n: rooted_treecount_upto(n)[-1]
+
+def attached_subtree(f, node):
+    """
+    Given an endofunction f and node in range(len(f)), returns the levelpath
+    form of the rooted tree attached to element node.
+    """
+    treenodes = iterate.attached_treenodes(f)
+    leveltree = [1]
+    if not treenodes[node]:
+        return leveltree
+    level = 2
+    for x in treenodes[node]:
+        leveltree += _attached_subtree(x, level, treenodes)
+    return canonical_treeorder(leveltree)
+
+
+def treefunc_to_tree(treefunc):
+    n = len(treefunc)
+    root = [x for x in range(n) if treefunc[x] == x][0]
+    return attached_subtree(treefunc, root)
 
 
 class TreeTest(unittest.TestCase):
@@ -286,6 +300,7 @@ class TreeTest(unittest.TestCase):
         """OEIS A000055: number of unlabelled rooted trees on N nodes."""
         for n, count in enumerate(self.A000055):
             self.assertEqual(count, len(list(rooted_trees(n+1))))
+            self.assertEqual(count, rooted_treecount(n+1))
 
     def testForests(self):
         """Check len(forests(N))==A000055(N+1)"""
@@ -295,9 +310,6 @@ class TreeTest(unittest.TestCase):
 
     def testDegeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
-
-        import math
-
         self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000055)):
             labelled_treecount = 0
@@ -313,27 +325,27 @@ class TreeTest(unittest.TestCase):
 
     def testTreeform(self):
         """Test the bracket representation of these rooted trees."""
-        funcforms = [
-            [0, 0, 1, 2, 3, 4, 2, 0, 7, 8],
-            [0, 0, 1, 2, 3, 4, 2, 0, 7, 7],
-            [0, 0, 1, 2, 3, 3, 3, 3, 3, 0],
+        trees = [
+            [1, 2, 3, 4, 5, 6, 4, 2, 3, 4],
+            [1, 2, 3, 4, 5, 6, 4, 2, 3, 3],
+            [1, 2, 3, 4, 5, 5, 5, 5, 5, 2],
         ]
         nestedforms = (
             [[[[[[]]], []]], [[[]]]],
             [[[[[[]]], []]], [[], []]],
             [[[[[], [], [], [], []]]], []]
         )
-        for I, tree in enumerate(funcforms):
-            self.assertEqual(nestedforms[I], treefunc_to_brackets(tree))
+        for I, tree in enumerate(trees):
+            self.assertEqual(nestedforms[I], tree_to_brackets(tree))
 
-    def testAttachedSubtrees(self):
+    def testTreefuncToTree(self):
+        """Tests attached treenodes and canonical_treeorder in one go."""
         for n in range(1, len(self.A000055)+1):
             for tree in rooted_trees(n):
-                self.assertEqual(tree, attached_subtree(tree_to_func(tree), 0))
-
-    def testTreeCounts(self):
-        A000081 = [0, 1, 1, 2, 4, 9, 20, 48, 115, 286, 719, 1842, 4766, 12486]
-        self.assertEqual(A000081, rooted_treecount_upto(len(A000081)-1))
+                treefunc = tree_to_func(tree)
+                for _ in range(10):
+                    rtree = conjugates.randconj(treefunc)
+                    self.assertEqual(tree, treefunc_to_tree(rtree))
 
 
 if __name__ == '__main__':

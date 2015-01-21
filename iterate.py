@@ -108,12 +108,12 @@ def funccycles(f):
         for it in range(n+1):
             x = f[x]
             path.append(x)
-            # If we hit an element seen in a previous path, this path will not 
+            # If we hit an element seen in a previous path, this path will not
             # contain a new cycle.
             if x in prev_els:
                 skip_el = True
                 break
-            # If an element appears in the path twice, we have already found 
+            # If an element appears in the path twice, we have already found
             # the cycle
             if x in path_els:
                 break
@@ -126,6 +126,7 @@ def funccycles(f):
         while I >= 0 and path[I] != path[-1]:
             I -= 1
         yield path[I+1:]
+
 
 limitset = lambda f: nestops.flatten(funccycles(f))
 
