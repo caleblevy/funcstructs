@@ -143,7 +143,7 @@ def forests_complex(n):
 
 def branches(tree):
     """Return each major subbranch of a tree (even chopped)"""
-    return subsequences.breakat(tree[1:], lambda node: node == tree[0]+1)
+    return subsequences.startswith(tree[1:], lambda node: node == tree[0]+1)
 
 
 def subtrees(tree):
@@ -162,7 +162,7 @@ def forests_simple(N):
     of rooted trees on N nodes, grafted together at a single root.
 
     To enumerate all collections of rooted trees on N nodes, we reverse the
-    principal and enumerate all rooted trees on N+1 nodes, chopping them at the
+    principle and enumerate all rooted trees on N+1 nodes, chopping them at the
     base. Much simpler than finding all trees corresponding to a partition.
     """
     if N == 0:

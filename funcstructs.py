@@ -30,6 +30,7 @@ import necklaces
 import rotation
 import levypartitions
 import factorization
+import iterate
 
 
 def multiset_funcstructs(mset):
@@ -40,13 +41,9 @@ def multiset_funcstructs(mset):
     mset = [tuple(m) for m in mset]
     beadsets, mults = multiset.split_set(mset)
     strands = []
-    for I, beads in enumerate(beadsets):
-        necklace_sets = list(necklaces.necklaces(beads))
-
-        strand = list(
-            itertools.combinations_with_replacement(necklace_sets, mults[I])
-        )
-
+    for mult, beads in zip(mults, beadsets):
+        necklace_set = necklaces.necklaces(beads)
+        strand = itertools.combinations_with_replacement(necklace_set, mult)
         strands.append(strand)
 
     for bundle in itertools.product(*strands):
@@ -105,7 +102,6 @@ def funcstruct_degeneracy(function_structure):
     # Finally the degeneracy of each rooted tree.
     for tree in nestops.flatten(function_structure):
         degeneracy *= rootedtrees.tree_degeneracy(tree)
-
     return degeneracy
 
 
@@ -145,11 +141,9 @@ def funcstruct_imagepath(funcstruct):
     without conversion to a particular endofunction.
     """
     forest = nestops.flatten(funcstruct)
-
     cardinalities = np.array(
         [0]+[0]*(len(nestops.flatten(forest))-2), dtype=object
     )
-
     for tree in forest:
         cardinalities += 1
         for subseq in subsequences.increasing_subsequences(tree):
@@ -169,14 +163,11 @@ class EndofunctionStructureTest(unittest.TestCase):
             ((1, 2,), ),
             ((1, 2, 2), (1, ), (1, 2, 2,))
         ]
-
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
         self.assertEqual(func, funcstruct_to_func(func_struct))
 
     def testFuncstructImagepath(self):
         """Check methods for computing structure image paths are equivalent."""
-        import iterate
-
         N = 8
         for n in range(1, N):
             for struct in funcstructs(n):

@@ -38,7 +38,7 @@ decreasing_subsequences = lambda seq: monotone_subsequences(seq, lt)
 nonincreasing_subsequences = lambda seq: monotone_subsequences(seq, le)
 
 
-def breakat(seq, cond):
+def startswith(seq, cond):
     """
     Given a sequence seq and boolean function of a single input cond, returns a
     generator of subsequences such that a new subsequence begins if and only if
@@ -48,9 +48,6 @@ def breakat(seq, cond):
     if not seq:
         return
     subseq = [seq[0]]
-    if len(seq) == 1:
-        yield subseq
-        return
     for ind, el in enumerate(seq[1:]):
         if cond(el):
             yield subseq
@@ -60,7 +57,33 @@ def breakat(seq, cond):
     yield subseq
 
 
+def endswith(seq, cond):
+    """
+    Return a generator returning subsequences of seq each ending with an
+    element satisfying the boolean lambda function cond.
+    """
+    if not seq:
+        return
+    subseq = []
+    for ind, el in enumerate(seq):
+        subseq.append(el)
+        if cond(el):
+            yield subseq
+            subseq = []
+    if not cond(el):
+        yield subseq
+
+
 class SubsequenceTest(unittest.TestCase):
+    seqs = [
+        [1, 2, 3, 3, 2, 3, 1, 2, 1, 1, 2, 2, 1, 2],
+        [2, 2, 3, 3, 4, 2],
+        [1],
+        [4, 3, 2, 1],
+        [4, 3, 2, 1, 2, 3, 4],
+        [4, 4, 4, 1, 1],
+        [1, 1, 1, 1]
+    ]
 
     def testMonotoneSubsequences(self):
         seq = [1, 2, 3, 4, 3, 3, 2, 3, 4, 5, 4, 5, 3, 3, 2, 3, 4, 5, 6, 5, 5,
@@ -92,19 +115,10 @@ class SubsequenceTest(unittest.TestCase):
         # Test the end isn't double counted.
         self.assertSequenceEqual([inc2], list(increasing_subsequences(inc2)))
 
-    def testBreakpointSequences(self):
-        testat = lambda seq: breakat(seq, lambda x: x == 1)
-        seqs = [
-            [1, 2, 3, 3, 2, 3, 1, 2, 1, 1, 2, 2, 1, 2],
-            [2, 2, 3, 3, 4, 2],
-            [1],
-            [4, 3, 2, 1],
-            [4, 3, 2, 1, 2, 3, 4],
-            [4, 4, 4, 1, 1],
-            [1, 1, 1, 1]
-        ]
+    def testSubsequencesStartingwith(self):
+        teststart = lambda seq: startswith(seq, lambda x: x == 1)
 
-        subseqs = [
+        startseqs = [
             [[1, 2, 3, 3, 2, 3], [1, 2], [1], [1, 2, 2], [1, 2]],
             [[2, 2, 3, 3, 4, 2]],
             [[1]],
@@ -114,8 +128,24 @@ class SubsequenceTest(unittest.TestCase):
             [[1], [1], [1], [1]]
         ]
 
-        for seq, subseq in zip(seqs, subseqs):
-            self.assertSequenceEqual(subseq, list(testat(seq)))
+        for seq, subseq in zip(self.seqs, startseqs):
+            self.assertSequenceEqual(subseq, list(teststart(seq)))
+
+    def testSubsequencesEndingwith(self):
+        testend = lambda seq: endswith(seq, lambda x: x == 1)
+
+        endseqs = [
+            [[1], [2, 3, 3, 2, 3, 1], [2, 1], [1], [2, 2, 1], [2]],
+            [[2, 2, 3, 3, 4, 2]],
+            [[1]],
+            [[4, 3, 2, 1]],
+            [[4, 3, 2, 1], [2, 3, 4]],
+            [[4, 4, 4, 1], [1]],
+            [[1], [1], [1], [1]]
+        ]
+
+        for seq, subseq in zip(self.seqs, endseqs):
+            self.assertSequenceEqual(subseq, list(testend(seq)))
 
 
 if __name__ == '__main__':
