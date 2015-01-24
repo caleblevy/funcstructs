@@ -41,6 +41,10 @@ def parse_ranges(begin, end, step):
     return begin, end, step
 
 
+def expand_ranges(begin, end, step):
+    return [range(I, J, K) for I, J, K in zip(begin, end, step)]
+
+
 def product_range(begin, end=None, step=None):
     """
     Nice wrapper for itertools.product. Give it a tuple of starts, stops and
@@ -56,26 +60,73 @@ def product_range(begin, end=None, step=None):
         for I1 in range(r1, s1, t1):
           for I2 in range(r2, s2, t2):
             ...
-              for I in range(rn, sn, tn):
+              for In in range(rn, sn, tn):
                 yield tuple([I1, I2, ..., In])
     """
     begin, end, step = parse_ranges(begin, end, step)
-    return product(*[range(I, J, K) for I, J, K in zip(begin, end, step)])
+    return product(*expand_ranges(begin, end, step))
 
 endofunctions = lambda n: product_range([n]*n)
+
+
+def rev_range(begin, end=None, step=None):
+    """
+    Reverse iteration order for product_range. If begin, end and step are as
+    for product_range, then
+
+        for tup in rev_range(begin, end, step):
+            yield tup
+
+    is equivalent to:
+
+        for In in range(rn, sn, tn):
+          ...
+            for I2 in range(r2, s2, t2):
+              for I1 in range(r1, s1, t1):
+                yield tuple([I1, I2, ..., In])
+
+    Note that set(rev_range(**inputs)) == set(product_range(**inputs))"""
+    begin, end, step = parse_ranges(begin, end, step)
+    if not all(expand_ranges(begin, end, step)):
+        # Generalization: range(0) == [].
+        return
+    V = list(begin)
+    go = True
+    while go:
+        yield V
+        V[0] += step[0]
+        # If (>=) <=> (if not <)
+        if abs(V[0]) >= abs(end[0]):
+            V[0] = begin[0]
+            go = False
+            for I in range(1, len(end)):
+                V[I] += step[I]
+                if abs(V[I]) < abs(end[I]):
+                    go = True
+                    break
+                V[I] = begin[I]
+
+
+def rev_tuples(begin, end, step):
+    for V in rev_range(begin, end, step):
+        yield tuple(V)
 
 
 class ProductrangeTest(unittest.TestCase):
 
     def testProductRange(self):
-        begins = [None,   0,      1,      [1]*4,   [3]*4,  (1, 2, 3, 3)]
-        ends = [[4]*4,    [4]*4,  [7]*3,  [10]*4,  [6]*4,  (2, 4, 8, 10)]
-        steps = [1,       None,   2,       3,      None,   (1, 1, 2, 2)]
+        begins = [[1], None,   0,      1,      [1]*4,   [3]*4,  (1, 2, 3, 3)]
+        ends = [[0],   [4]*4,  [4]*4,  [7]*3,  [10]*4,  [6]*4,  (2, 4, 8, 10)]
+        steps = [None, 1,      None,   2,      3,       None,   (1, 1, 2, 2)]
+        counts = [0,   4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
 
-        counts = [4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
+        begins.extend([(1, 2, 3), (1, 2, 3)])
+        ends.extend([(-9, 9, 9),  (9, -9, 9)])
+        steps.extend([(-3, 3, 3), (3, -3, 3)])
+        counts.extend([4*3*2,     4*3*2])
         for c, b, e, s in zip(counts, begins, ends, steps):
             self.assertEqual(c, len(list(product_range(b, e, s))))
-            self.assertEqual(prod(e), len(list(product_range(e))))
+            self.assertEqual(c, len(list(rev_range(b, e, s))))
 
 
 if __name__ == '__main__':

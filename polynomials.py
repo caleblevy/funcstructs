@@ -13,6 +13,7 @@ import numpy as np
 import unittest
 
 from multiset import split_set, nCk
+import productrange
 
 
 # MSP == Monomial Symmetric Polynomial
@@ -88,13 +89,9 @@ def msp_iterative(x, powers):
     V = [1]*l
     T[tuple(V)] = 1
 
-    shape = tuple([I-1 for I in shape])
-
     # The powers use up sum(multiplcities) of the original x.
     for K in range(n-sum(d)+1):
-        # Begin the forward march
-        go = True
-        while go:
+        for V in productrange.rev_range(1, shape):
             ind = tuple(V)
             # The recursion itself
             for J in range(l):
@@ -102,20 +99,7 @@ def msp_iterative(x, powers):
                 ind_last[J] -= 1
                 ind_last = tuple(ind_last)
                 T[ind] += x[(K-1)+(sum(V)-l)]**y[J]*T[ind_last]
-
-            # Counting voodoo. Could be replaced with itertools.product, but
-            # then we would have type conversions.
-            V[0] = V[0] + 1
-            if V[0] > shape[0]:
-                V[0] = 1
-                go = False
-                for I in range(1, l):
-                    V[I] = V[I] + 1
-                    if V[I] <= shape[I]:
-                        go = True
-                        break
-                    V[I] = 1
-    return T[shape]
+    return T[tuple((I-1 for I in shape))]
 
 monomial_symmetric_polynomial = msp_iterative
 
