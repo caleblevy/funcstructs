@@ -47,8 +47,9 @@ def startswith(seq, cond):
     """
     if not seq:
         return
-    subseq = [seq[0]]
-    for ind, el in enumerate(seq[1:]):
+    seq = iter(seq)
+    subseq = [next(seq)]
+    for el in seq:
         if cond(el):
             yield subseq
             subseq = [el]
@@ -64,8 +65,9 @@ def endswith(seq, cond):
     """
     if not seq:
         return
+    seq = iter(seq)
     subseq = []
-    for ind, el in enumerate(seq):
+    for el in seq:
         subseq.append(el)
         if cond(el):
             yield subseq
@@ -79,6 +81,7 @@ class SubsequenceTest(unittest.TestCase):
         [1, 2, 3, 3, 2, 3, 1, 2, 1, 1, 2, 2, 1, 2],
         [2, 2, 3, 3, 4, 2],
         [1],
+        [2],
         [4, 3, 2, 1],
         [4, 3, 2, 1, 2, 3, 4],
         [4, 4, 4, 1, 1],
@@ -122,6 +125,7 @@ class SubsequenceTest(unittest.TestCase):
             [[1, 2, 3, 3, 2, 3], [1, 2], [1], [1, 2, 2], [1, 2]],
             [[2, 2, 3, 3, 4, 2]],
             [[1]],
+            [[2]],
             [[4, 3, 2], [1]],
             [[4, 3, 2], [1, 2, 3, 4]],
             [[4, 4, 4], [1], [1]],
@@ -130,7 +134,7 @@ class SubsequenceTest(unittest.TestCase):
 
         for seq, subseq in zip(self.seqs, startseqs):
             self.assertSequenceEqual(subseq, list(teststart(seq)))
-
+        # print list(teststart(xrange(10)))
     def testSubsequencesEndingwith(self):
         testend = lambda seq: endswith(seq, lambda x: x == 1)
 
@@ -138,6 +142,7 @@ class SubsequenceTest(unittest.TestCase):
             [[1], [2, 3, 3, 2, 3, 1], [2, 1], [1], [2, 2, 1], [2]],
             [[2, 2, 3, 3, 4, 2]],
             [[1]],
+            [[2]],
             [[4, 3, 2, 1]],
             [[4, 3, 2, 1], [2, 3, 4]],
             [[4, 4, 4, 1], [1]],
