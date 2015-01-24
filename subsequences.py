@@ -6,6 +6,7 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 from operator import gt, ge, le, lt
+import itertools
 import unittest
 
 
@@ -47,10 +48,9 @@ def startswith(seq, cond):
     """
     if not seq:
         return
-    seq = iter(seq)
-    subseq = [next(seq)]
+    subseq = []
     for el in seq:
-        if cond(el):
+        if cond(el) and subseq:
             yield subseq
             subseq = [el]
         else:
@@ -65,7 +65,6 @@ def endswith(seq, cond):
     """
     if not seq:
         return
-    seq = iter(seq)
     subseq = []
     for el in seq:
         subseq.append(el)
@@ -134,7 +133,7 @@ class SubsequenceTest(unittest.TestCase):
 
         for seq, subseq in zip(self.seqs, startseqs):
             self.assertSequenceEqual(subseq, list(teststart(seq)))
-        # print list(teststart(xrange(10)))
+
     def testSubsequencesEndingwith(self):
         testend = lambda seq: endswith(seq, lambda x: x == 1)
 
