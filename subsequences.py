@@ -22,14 +22,16 @@ def monotone_subsequences(seq, comparison):
     """
     if not seq:
         return
-    subseq = [seq[0]]
-    term_prev = seq[0]
-    for term in seq[1:]:
-        if comparison(term, term_prev):
-            subseq.append(term)
-        else:
-            yield subseq
+    subseq = []
+    for term in seq:
+        if not subseq:
             subseq = [term]
+        else:
+            if comparison(term, term_prev):
+                subseq.append(term)
+            else:
+                yield subseq
+                subseq = [term]
         term_prev = term
     yield subseq
 
