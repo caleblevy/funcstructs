@@ -86,22 +86,18 @@ def msp_iterative(x, powers):
     # Contains 1, possibly 2 more dimensions than necessary.
     T = np.ndarray(shape, object)
     T[:] = 0
-    V = [1]*l
-    T[tuple(V)] = 1
+    T[(1,)*l] = 1
 
     # The powers use up sum(multiplcities) of the original x.
     for K in range(n-sum(d)+1):
-        for V in productrange.rev_range(1, shape):
-            ind = tuple(V)
-            # The recursion itself
+        for ind in productrange.product_range(1, shape):
             for J in range(l):
-                ind_last = V[:]
+                ind_last = list(ind)
                 ind_last[J] -= 1
                 ind_last = tuple(ind_last)
-                T[ind] += x[(K-1)+(sum(V)-l)]**y[J]*T[ind_last]
-    return T[tuple((I-1 for I in shape))]
+                T[ind] += x[(K-1)+(sum(ind)-l)]**y[J]*T[ind_last]
 
-monomial_symmetric_polynomial = msp_iterative
+    return T[tuple((I-1 for I in shape))]
 
 
 def poly_multiply(coeffs1, coeffs2):
@@ -163,9 +159,9 @@ class PolynomialTest(unittest.TestCase):
                 recmon = [msp_recursive(x, [1]*I) for I in range(1, n+1)]
                 self.assertSequenceEqual(foilmon, recmon)
 
-        vecs = [[5, 5, 5]]
-        powers = [[3, 3, 2]]
-        counts = [1171875]
+        vecs = [[5, 5, 5], [1, 2, 3, 4, 5, 6, 7, 8]]
+        powers = [[3, 3, 2], [4, 4, 3, 3, 2]]
+        counts = [1171875, 139100509734480]
         for vec, power, count in zip(vecs, powers, counts):
             self.assertEqual(count, msp_iterative(vec, power))
             self.assertEqual(count, msp_recursive(vec, power))
