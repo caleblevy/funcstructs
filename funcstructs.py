@@ -110,7 +110,7 @@ def _treeform_of_noncyclic_nodes(function_structure):
     func = []
     for tree in nestops.flatten(function_structure):
         l = len(tree)
-        tree_perm = list(range(tree_start, tree_start+l))
+        tree_perm = range(tree_start, tree_start+l)
         func_tree = rootedtrees.tree_to_func(tree, permutation=tree_perm)
         func.extend(func_tree)
         tree_start += l

@@ -41,10 +41,6 @@ def parse_ranges(begin, end, step):
     return begin, end, step
 
 
-def expand_ranges(begin, end, step):
-    return [range(I, J, K) for I, J, K in zip(begin, end, step)]
-
-
 def product_range(begin, end=None, step=None):
     """
     Nice wrapper for itertools.product. Give it a tuple of starts, stops and
@@ -64,9 +60,32 @@ def product_range(begin, end=None, step=None):
                 yield tuple([I1, I2, ..., In])
     """
     begin, end, step = parse_ranges(begin, end, step)
-    return product(*expand_ranges(begin, end, step))
+    return product(*[range(I, J, K) for I, J, K in zip(begin, end, step)])
 
 endofunctions = lambda n: product_range([n]*n)
+
+
+def sign(num):
+    return num//abs(num)
+
+
+def rangelen(start, stop=None, step=None):
+    if stop is None:
+        start, stop = stop, start
+    if start is None:
+        start = 0
+    if step is None:
+        step = 1
+
+    l = (stop - start)
+    if l == 0:
+        return 0
+    if sign(l) != sign(step):
+        return 0
+    if step*(l//step) == l:
+        return l//step
+    else:
+        return l//step+1
 
 
 def rev_range(begin, end=None, step=None):
@@ -87,32 +106,37 @@ def rev_range(begin, end=None, step=None):
 
     Note that set(rev_range(**inputs)) == set(product_range(**inputs))"""
     begin, end, step = parse_ranges(begin, end, step)
-    if not all(expand_ranges(begin, end, step)):
-        # Generalization: range(0) == [].
+    if not all([rangelen(I, J, K) for I, J, K in zip(begin, end, step)]):
         return
+    end = [abs(I) for I in end]
+    l = len(end)
     V = list(begin)
     go = True
     while go:
         yield V
         V[0] += step[0]
         # If (>=) <=> (if not <)
-        if abs(V[0]) >= abs(end[0]):
+        if abs(V[0]) >= end[0]:
             V[0] = begin[0]
             go = False
-            for I in range(1, len(end)):
+            for I in range(1, l):
                 V[I] += step[I]
-                if abs(V[I]) < abs(end[I]):
+                if abs(V[I]) < end[I]:
                     go = True
                     break
                 V[I] = begin[I]
 
 
-def rev_tuples(begin, end, step):
-    for V in rev_range(begin, end, step):
-        yield tuple(V)
-
-
 class ProductrangeTest(unittest.TestCase):
+
+    def testRangelen(self):
+        ranges = [
+            [0], [1], [1, 2], [-1, 2], [2, -1], [-1], [0, -1, 1],
+            [0, -1, -1], [0, 100, 10], [0, 100, 101], [0, 101, 10],
+            [2], [-10, -20, -2], [-10, -21, -2], [2**128+1, 2**128+178, 45]
+        ]
+        for r in ranges:
+            self.assertEqual(len(range(*r)), rangelen(*r))
 
     def testProductRange(self):
         begins = [[1], None,   0,      1,      [1]*4,   [3]*4,  (1, 2, 3, 3)]

@@ -198,7 +198,7 @@ def tree_to_func(tree, permutation=None):
     """
     n = len(tree)
     if permutation is None:
-        permutation = list(range(n))
+        permutation = range(n)
     height = max(tree)
     func = [0]*n
     func[0] = permutation[0]
