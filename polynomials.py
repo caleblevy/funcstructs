@@ -81,7 +81,7 @@ def msp_iterative(x, powers):
     n = len(x)
     y, d = split_set(powers)
     l = len(y)
-    shape = tuple([I+2 for I in d])
+    shape = tuple(I+2 for I in d)
 
     # Contains 1, possibly 2 more dimensions than necessary.
     T = np.ndarray(shape, object)
@@ -91,13 +91,13 @@ def msp_iterative(x, powers):
     # The powers use up sum(multiplcities) of the original x.
     for K in range(n-sum(d)+1):
         for ind in productrange.product_range(1, shape):
+            fac = x[K+sum(ind)-l-1]
             for J in range(l):
-                ind_last = list(ind)
-                ind_last[J] -= 1
-                ind_last = tuple(ind_last)
-                T[ind] += x[(K-1)+(sum(ind)-l)]**y[J]*T[ind_last]
+                ind_prev = list(ind)
+                ind_prev[J] -= 1
+                T[ind] += fac**y[J]*T[tuple(ind_prev)]
 
-    return T[tuple((I-1 for I in shape))]
+    return T[tuple(I-1 for I in shape)]
 
 
 def poly_multiply(coeffs1, coeffs2):
