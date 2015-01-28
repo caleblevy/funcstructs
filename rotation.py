@@ -24,15 +24,19 @@ import collections
 import factorization
 
 def periodicity_seed(necklace):
+    """
+    A faster way of finding the periodicity of a list that avoids work duplication by not repeatedly comparting the first elements of a list.
+    """
     necklace = list(necklace)
     n = len(necklace)
     if n in [0, 1]:
         return n
-    l = 1
-    while l != n:
+    l = p = 1
+    while p != n:
         while not factorization.isdivisor(l, n):
             l += 1
-        seed = necklace[:l]
+        p = l
+        seed = necklace[:p]
         stopit = False
         for repstart in range(l, n, l):
             for ind, val in enumerate(seed):
@@ -42,6 +46,8 @@ def periodicity_seed(necklace):
                     break
             if stopit:
                 break
+        else:
+            break
     return len(seed)
 
 
@@ -61,7 +67,7 @@ def periodicity_rotation(cycle):
         if orig == cycle:
             return period
 
-periodicity = periodicity_rotation
+periodicity = periodicity_seed
 
 
 def cycle_degeneracy(cycle):
@@ -122,9 +128,6 @@ class RotationTests(unittest.TestCase):
 
     def testPeriodicities(self):
         for period, lst in zip(self.periods, self.lists):
-            print 
-            # print lst
-            # print periodicity_seed(lst)
             self.assertEqual(period, periodicity_rotation(lst))
             self.assertEqual(period, periodicity_seed(lst))
 
