@@ -23,47 +23,26 @@ import collections
 
 import factorization
 
-
-def _patternbreak_index(seed, necklace, start=1):
-    """
-    When testing for the candidacy of a seed, we test it in sequencial bins of
-    width len(seed), and at the first instance of a disagreeing bin, we return
-    that index, since the seed must at least contain everythin up to that
-    index.
-    """
-    l = len(seed)
-    n = len(necklace)
-    for I in range(start, n//l+1):
-        if seed != necklace[I*l:(I+1)*l]:
-            return l*I
-    return n
-
-
 def periodicity_seed(necklace):
-    """
-    An arguably faster way of finding the periodicity of a list. Starting with
-    the first element, any sublist from which a necklace is built must have at
-    least as many elements as there are between the next repetition of the
-    first element. This logic repeats until there is a break.
-    """
     necklace = list(necklace)
-    seed = [necklace[0]]
     n = len(necklace)
-    break_ind = 0
-    while True:
-        break_ind = _patternbreak_index(seed, necklace)
-        if break_ind == len(necklace):
-            return len(seed)
-        l = len(seed)
-        seed.extend(necklace[l: break_ind])
-        next_terms = []
-        for I in range(break_ind, n-l):
-            if seed == necklace[I:I+l]:
-                seed.extend(next_terms)
+    if n in [0, 1]:
+        return n
+    l = 1
+    while l != n:
+        while not factorization.isdivisor(l, n):
+            l += 1
+        seed = necklace[:l]
+        stopit = False
+        for repstart in range(l, n, l):
+            for ind, val in enumerate(seed):
+                l += 1
+                if val != necklace[repstart + ind]:
+                    stopit = True
+                    break
+            if stopit:
                 break
-            next_terms.append(necklace[I])
-        if len(seed) == l:
-            return n
+    return len(seed)
 
 
 def periodicity_rotation(cycle):
@@ -143,6 +122,9 @@ class RotationTests(unittest.TestCase):
 
     def testPeriodicities(self):
         for period, lst in zip(self.periods, self.lists):
+            print 
+            # print lst
+            # print periodicity_seed(lst)
             self.assertEqual(period, periodicity_rotation(lst))
             self.assertEqual(period, periodicity_seed(lst))
 
