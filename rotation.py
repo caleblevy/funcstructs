@@ -23,9 +23,11 @@ import collections
 
 import factorization
 
+
 def periodicity_seed(necklace):
     """
-    A faster way of finding the periodicity of a list that avoids work duplication by not repeatedly comparting the first elements of a list.
+    A faster way of finding the periodicity of a list that avoids work
+    duplication by not repeatedly comparting the first elements of a list.
     """
     necklace = list(necklace)
     n = len(necklace)
