@@ -37,20 +37,20 @@ import factorization
 import conjugates
 
 
-def successor_tree(L):
+def successor_tree(tree):
     """Given a tree L, returns the successor."""
-    N = len(L)
-    p = N-1
-    while L[p] == L[1]:
+    n = len(tree)
+    p = n-1
+    while tree[p] == tree[1]:
         p -= 1
     q = p-1
-    while L[q] >= L[p]:
+    while tree[q] >= tree[p]:
         q -= 1
-    for I in range(p, N):
-        L[I] = L[I-(p-q)]
+    for I in range(p, n):
+        tree[I] = tree[I-(p-q)]
 
 
-def rooted_trees(N):
+def rooted_trees(n):
     """
     Takes an integer N as input and outputs a generator object enumerating all
     isomorphic unlabeled rooted trees on N nodes.
@@ -68,19 +68,19 @@ def rooted_trees(N):
         T. Beyer and S. M. Hedetniemi. "Constant time generation of rooted
         trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
     """
-    if N == 0:
+    if n == 0:
         return
-    elif N == 1:
-        yield [1, ]
+    elif n == 1:
+        yield [1]
         return
-    elif N == 2:
+    elif n == 2:
         yield [1, 2]
         return
-    L = [I+1 for I in range(N)]
-    yield L
-    while L[1] != L[2]:
-        successor_tree(L)
-        yield L
+    tree = [I+1 for I in range(n)]
+    yield tree
+    while tree[1] != tree[2]:
+        successor_tree(tree)
+        yield tree
 
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
 
@@ -294,24 +294,24 @@ def treefunc_to_tree(treefunc):
 
 
 class TreeTest(unittest.TestCase):
-    A000055 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
+    A000081 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
 
     def testTrees(self):
-        """OEIS A000055: number of unlabelled rooted trees on N nodes."""
-        for n, count in enumerate(self.A000055):
+        """OEIS A000081: number of unlabelled rooted trees on N nodes."""
+        for n, count in enumerate(self.A000081):
             self.assertEqual(count, len(list(rooted_trees(n+1))))
             self.assertEqual(count, rooted_treecount(n+1))
 
     def testForests(self):
-        """Check len(forests(N))==A000055(N+1)"""
-        for n, count in enumerate(self.A000055[1:]):
+        """Check len(forests(N))==A000081(N+1)"""
+        for n, count in enumerate(self.A000081[1:]):
             self.assertEqual(count, len(set(forests_simple(n+1))))
             self.assertEqual(count, len(set(forests_complex(n+1))))
 
     def testDegeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         self.assertEqual(1, tree_degeneracy(tuple()))
-        for n in range(1, len(self.A000055)):
+        for n in range(1, len(self.A000081)):
             labelled_treecount = 0
             for tree in rooted_trees(n):
                 labelled_treecount += math.factorial(n)//tree_degeneracy(tree)
@@ -340,7 +340,7 @@ class TreeTest(unittest.TestCase):
 
     def testTreefuncToTree(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
-        for n in range(1, len(self.A000055)+1):
+        for n in range(1, len(self.A000081)+1):
             for tree in rooted_trees(n):
                 treefunc = tree_to_func(tree)
                 for _ in range(10):

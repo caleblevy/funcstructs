@@ -50,17 +50,20 @@ int main(int argc, char *argv[])
 
     if(n == 1) {
         printtree(tree, n);
+        printf("There is 1 tree on 1 node.\n");
         return 0;
     } else if(n == 2) {
         printtree(tree, n);
+        printf("There is 1 tree on 2 nodes.\n");
         return 0;
     }
-    
+    long count = 1;
     printtree(tree, n);
     while(tree[1] != tree[2]) {
         successortree(tree, n);
-        // printtree(tree, n);
+        printtree(tree, n);
+        count++;
     }
-
+    printf("There are %ld trees on %d nodes.\n", count, n);
     return 0;
 }
