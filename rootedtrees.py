@@ -37,6 +37,11 @@ import factorization
 import conjugates
 
 
+class RootedTrees(object):
+    """Represents the class of unlabelled rooted trees on n nodes."""
+    pass
+
+
 def successor_tree(tree):
     """Given a tree L, returns the successor."""
     n = len(tree)
