@@ -101,7 +101,7 @@ def fixed_lex_partitions(n, L):
             return
         k -= 1
         partition[L-j-k] += 1
-        partition[L-j-k+1: L], j = _min_part(s, j+k-1)
+        partition[L-j-k+1:], j = _min_part(s, j+k-1)
 
 
 def partition_numbers_upto(N):
