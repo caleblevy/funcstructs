@@ -1,44 +1,64 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
-void printtree(int *tree, int len);
-int *firsttree(int n);
-void successortree(int *tree, int n);
+struct RootedTree {
+    int node_count;
+    int *level_sequence;
+};
 
-void printtree(int *tree, int len)
+
+struct RootedTree *first_tree(int n)
 {
-    printf("[");
+    struct RootedTree *tree = malloc(sizeof(struct RootedTree));
+    assert(tree != NULL);
 
-    for(int i = 0; i < len-1; i++) {
-        printf("%d, ", tree[i]);
+    tree->node_count = n;
+
+    // initialize the first rooted tree at range(n)
+    tree->level_sequence = malloc(n);
+    for(int i = 0; i < n; i++)
+    {
+        tree->level_sequence[i] = i+1;
     }
 
-    printf("%d]\n", tree[len-1]);
-}
-
-int *first_tree(int n)
-{
-    int *tree = malloc(n);
-    for(int i = 0; i < n; i++){
-        tree[i] = i+1;
-    }
-    
     return tree;
 }
 
-void next_tree(int *tree, int n) {
-    int p = n-1;
-    while(tree[p] == tree[1]) {
+
+void print_tree(struct RootedTree *tree)
+{
+    printf("[");
+
+    for(int i = 0; i < tree->node_count-1; i++)
+    {
+        printf("%d, ", tree->level_sequence[i]);
+    }
+
+    printf("%d]\n", tree->level_sequence[tree->node_count-1]);
+}
+
+
+void next_tree(struct RootedTree *tree) 
+{
+    int p = tree->node_count-1;
+    while(tree->level_sequence[p] == tree->level_sequence[1])
+    {
         p--;
     }
+
     int q = p-1;
-    while(tree[q] >= tree[p]) {
+    while(tree->level_sequence[q] >= tree->level_sequence[p])
+    {
         q--;
     }
-    for(int i = p; i < n; i++) {
-        tree[i] = tree[i-(p-q)];
+
+    for(int i = p; i < tree->node_count; i++) 
+    {
+        tree->level_sequence[i] = tree->level_sequence[i-(p-q)];
     }
 }
+
 
 void enumerate_trees(int n, int printout)
 {
@@ -46,27 +66,29 @@ void enumerate_trees(int n, int printout)
         printf("ERROR: A tree requires at least one node.\n");
         return;
     }
-    if(printout) printf("Producing rooted trees on %d nodes\n", n);
+    if(printout) printf("Enumerating rooted trees on %d nodes\n", n);
+    printf("-----------------------------------\n");
 
-    int *tree = first_tree(n);
+    struct RootedTree *tree = first_tree(n);
 
     if(n == 1) {
-        if(printout) printtree(tree, n);
+        if(printout) print_tree(tree);
         printf("There is 1 tree on 1 node.\n");
     } else if(n == 2) {
-        if(printout) printtree(tree, n);
+        if(printout) print_tree(tree);
         printf("There is 1 tree on 2 nodes.\n");
     } else {
         long count = 0;
-        for(; tree[1] != tree[2]; next_tree(tree, n)) {
-            if(printout) printtree(tree, n);
+        for(; tree->level_sequence[1] != tree->level_sequence[2]; next_tree(tree))
+        {
+            if(printout) print_tree(tree);
             count++;
         }
         count++;
-        if(printout) printtree(tree, n);
+        if(printout) print_tree(tree);
         printf("There are %ld trees on %d nodes.\n", count, n);
     }
-    free(tree);
+
     return;
 }
 
@@ -85,6 +107,7 @@ int main(int argc, char *argv[])
         }
     }
     enumerate_trees(n, printout);
+    // print_tree(first_tree(n));
 
     return 0;
 }
