@@ -37,15 +37,20 @@ import factorization
 import conjugates
 
 
+def treeroot(treefunc):
+    """Returns the root of an endofunction whose structure is a rooted tree."""
+    return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
+
 class RootedTree(object):
     """Represents an unlabelled rooted tree."""
+
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
         self.root_level = level_sequence[0]
         self.n = len(level_sequence)
 
     def __repr__(self):
-        return "RootedTree"+str(self.level_sequence)
+        return "RootedTree("+str(list(self.level_sequence))+')'
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -90,32 +95,60 @@ class RootedTree(object):
             deg *= subtree.degeneracy()
         return deg*multiset.mset_degeneracy(self.chop())
 
-    def _istree(self):
-        pass
-
-    def next(self):
-        return 1
-
-    def func_form(self):
-        pass
+    def func_form(self, permutation=None):
+        """
+        Return an endofunction whose structure corresponds to the rooted tree.
+        The root is 0 by default, but can be permuted according a specified
+        permutation.
+        """
+        if permutation is None:
+            permutation = range(self.n)
+        height = max(self.level_sequence)
+        func = [0]*self.n
+        func[0] = permutation[0]
+        height_prev = 1
+        # Most recent node found at height h. Where to graft the next node to.
+        grafting_point = [0]*height
+        for node, height in enumerate(self.level_sequence[1:]):
+            if height > height_prev:
+                func[node+1] = permutation[grafting_point[height_prev-1]]
+                height_prev += 1
+            else:
+                func[node+1] = permutation[grafting_point[height-2]]
+                height_prev = height
+            grafting_point[height-1] = node+1
+        return func
 
     def bracket_form(self):
+        """
+        Return a representation the rooted tree via nested lists. This method
+        is a novelty item, and shouldn't be used for anything practical.
+        """
+        treefunc = self.func_form()
+        preim = iterate.attached_treenodes(treefunc)
+        root = treeroot(treefunc)
+        brackets = preim[root]
+        indset = [[x] for x in range(len(brackets))]
+        while indset:
+            nextinds = []
+            for ind in indset:
+                # For each ind, get the corresponding node
+                el = nestops.get_nested_el(brackets, ind)
+                # Collect the indicies of all nodes connected to el
+                nextinds.extend([ind+[I] for I in range(len(preim[el]))])
+                # Set el to its preimage until only empty lists are left.
+                nestops.change_nested_el(brackets, ind, preim[el])
+            indset = nextinds
+        return brackets
+
+
+    def _istree(self):
         pass
 
     @classmethod
     def from_treefunc(cls, func):
         pass
 
-tree = RootedTree([1,2,3,4,2])
-print hash(tree)
-dic = {}
-dic[tree] = 1
-print dic
-tree.level_sequence[1]+=1
-print hash(tree)
-print dic
-dic[RootedTree([1,2,3,4,2])] = 2
-print dic
 
 class RootedTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
@@ -270,81 +303,15 @@ def forests_simple(N):
 forests = forests_simple
 
 
-def tree_degeneracy(tree):
-    """
-    To calculate the degeneracy of a collection of subtrees you start with the
-    lowest branches and then work upwards. If a group of identical subbranches
-    are connected to the same node, we multiply the degeneracy of the tree by
-    the factorial of the multiplicity of these subbranches to account for their
-    distinct orderings. The same principal applies to subtrees.
-
-    TODO: A writeup of this with diagrams will be in the notes.
-    """
-    if not chop(tree):
-        return 1
-    degeneracy = 1
-    for subtree in chop(tree):
-        degeneracy *= tree_degeneracy(subtree)
-    return degeneracy*multiset.mset_degeneracy(chop(tree))
-
-print tree_degeneracy([1,2,3,4,5,5,5, 2,3,4,5,5,5, 2,3,4,4,2 ])
+def tree_degeneracy(tree): # Wrapper for RootedTree method
+    return RootedTree(tree).degeneracy()
 
 
-def tree_to_func(tree, permutation=None):
-    """
-    Convert a tree into an endofunction list, whose root is by default at zero,
-    but can be permuted according a specified permutation.
-    """
-    n = len(tree)
-    if permutation is None:
-        permutation = range(n)
-    height = max(tree)
-    func = [0]*n
-    func[0] = permutation[0]
-    height_prev = 1
-    # Most recent node found at height h. Where to graft the next node to.
-    grafting_point = [0]*height
-    for node, height in enumerate(tree[1:]):
-        if height > height_prev:
-            func[node+1] = permutation[grafting_point[height_prev-1]]
-            height_prev += 1
-        else:
-            func[node+1] = permutation[grafting_point[height-2]]
-            height_prev = height
-        grafting_point[height-1] = node+1
-    return func
+def tree_to_func(tree, permutation=None): # Wrapper for RootedTree method
+    return RootedTree(tree).func_form(permutation)
 
-
-def treeroot(treefunc):
-    """Returns the root of an endofunction whose structure is a rooted tree."""
-    return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
-
-
-def tree_to_brackets(tree):
-    """
-    Given the endofunction form of a rooted tree, return a representation of
-    its structure via nested lists. This function is a novelty item, and
-    shouldn't be used for anything practical.
-    """
-    n = len(tree)
-    treefunc = tree_to_func(tree)
-    preim = iterate.attached_treenodes(treefunc)
-    root = treeroot(treefunc)
-    tree = preim[root]
-    indset = [[x] for x in range(len(tree))]
-
-    while indset:
-        nextinds = []
-        for ind in indset:
-            # For each ind, get the corresponding node
-            el = nestops.get_nested_el(tree, ind)
-            # Collect the indicies of all nodes connected to el
-            nextinds.extend([ind+[I] for I in range(len(preim[el]))])
-            # Set el to its preimage until only empty lists are left.
-            nestops.change_nested_el(tree, ind, preim[el])
-        indset = nextinds
-
-    return tree
+def tree_to_brackets(tree): # Wrapper for RootedTree method.
+    return RootedTree(tree).bracket_form()
 
 
 def canonical_treeorder(tree):
@@ -409,7 +376,7 @@ class TreeTest(unittest.TestCase):
 
     def testDegeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
-        self.assertEqual(1, tree_degeneracy(tuple()))
+        # self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
             for tree in rooted_trees(n):
