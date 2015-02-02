@@ -48,6 +48,22 @@ class UnlabelledRootedTree(object):
     def __len__(self):
         return len(self.level_sequence)
 
+    def func_form(self):
+        pass
+
+    def bracket_form(self):
+        pass
+
+    def chop(self):
+        pass
+
+    def subtrees(self):
+        pass
+
+    @classmethod
+    def from_treefunc(self):
+        pass
+
 
 class RootedTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
