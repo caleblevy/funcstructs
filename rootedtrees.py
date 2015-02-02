@@ -37,6 +37,18 @@ import factorization
 import conjugates
 
 
+class UnlabelledRootedTree(object):
+    """Represents an unlabelled rooted tree."""
+    def __init__(self, level_sequence):
+        self.level_sequence = level_sequence
+
+    def _istree(self):
+        pass
+
+    def __len__(self):
+        return len(self.level_sequence)
+
+
 class RootedTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
@@ -77,7 +89,6 @@ class RootedTrees(object):
                     tree[I] = tree[I-(p-q)]
                 yield tree
 
-
     def _calculate_len(self):
         """
         Returns the number of rooted tree structures on n nodes. Algorithm
@@ -100,14 +111,14 @@ class RootedTrees(object):
     def __len__(self):
         """
         Hook for python len function.
-        
+
         NOTE: For n >= 47, len(RootedTrees(n)) is greater than C long, and thus
         gives rise to an index overflow error. Use self._calculate_len instead.
         """
         if self._memoized_len is None:
             self._memoized_len = self._calculate_len()
         return self._memoized_len
-        
+
 
 def rooted_trees(n):
     """
@@ -115,8 +126,9 @@ def rooted_trees(n):
     from rooted_trees to RootedTrees in other modules.
     """
     return RootedTrees(n)
-    
+
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
+
 
 def rooted_treecount(n):
     """
