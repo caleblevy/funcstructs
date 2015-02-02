@@ -42,71 +42,81 @@ class RootedTrees(object):
 
     def __init__(self, node_count):
         self.n = node_count
-
-    def __next__(self):
-        pass
+        self._memoized_len = None
 
     def __iter__(self):
-        self.tree = [I+1 for I in range(self.n)]
-        if len(self.tree) > 2:
-            while self.tree[1] != self.tree[2]:
-                successor_tree(tree)
+        """
+        Takes an integer N as input and outputs a generator object enumerating
+        all isomorphic unlabeled rooted trees on N nodes.
+
+        The basic idea of the algorithm is to represent a tree by its level
+        sequence: list each vertice's height above the root, where vertex v+1
+        is connected either to vertex v or the previous node at some lower
+        level.
+
+        Choosing the lexicographically greatest level sequence gives a
+        canonical representation for each rooted tree. We start with the
+        tallest rooted tree given by T=range(1,N+1) and then go downward,
+        lexicographically, until we are flat so that T=[1]+[2]*(N-1).
+
+        Algorithm and description provided in:
+            T. Beyer and S. M. Hedetniemi. "Constant time generation of rooted
+            trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
+        """
+        tree = [I+1 for I in range(self.n)]
+        yield tree
+        if self.n > 2:
+            while tree[1] != tree[2]:
+                p = self.n-1
+                while tree[p] == tree[1]:
+                    p -= 1
+                q = p-1
+                while tree[q] >= tree[p]:
+                    q -= 1
+                for I in range(p, self.n):
+                    tree[I] = tree[I-(p-q)]
                 yield tree
 
+    def _calculate_len(self):
+        """
+        Returns the number of rooted tree structures on n nodes. Algorithm
+        featured without derivation in
+            Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
+            "Mathematical Constants", Cambridge, England: Cambridge University
+            Press, pp. 295-316, 2003.
+        """
+        T = [0, 1] + [0]*(self.n - 1)
+        for n in range(2, self.n + 1):
+            for i in range(1, self.n):
+                s = 0
+                for d in factorization.divisors(i):
+                    s += T[d]*d
+                s *= T[n-i]
+                T[n] += s
+            T[n] //= n-1
+        return T[-1]
 
-def successor_tree(tree):
-    """Given a tree L, returns the successor."""
-    n = len(tree)
-    p = n-1
-    while tree[p] == tree[1]:
-        p -= 1
-    q = p-1
-    while tree[q] >= tree[p]:
-        q -= 1
-    for I in range(p, n):
-        tree[I] = tree[I-(p-q)]
+    def __len__(self):
+        """Official call for number of rooted trees."""
+        if self._memoized_len is None:
+            self._memoized_len = self._calculate_len()
+        return self._memoized_len
 
 
 def rooted_trees(n):
-    """
-    Takes an integer N as input and outputs a generator object enumerating all
-    isomorphic unlabeled rooted trees on N nodes.
-
-    The basic idea of the algorithm is to represent a tree by its level
-    sequence: list each vertice's height above the root, where vertex v+1 is
-    connected either to vertex v or the previous node at some lower level.
-
-    Choosing the lexicographically greatest level sequence gives a canonical
-    representation for each rooted tree. We start with the tallest rooted tree
-    given by T=range(1,N+1) and then go downward, lexicographically, until we
-    are flat so that T=[1]+[2]*(N-1).
-
-    Algorithm and description provided in:
-        T. Beyer and S. M. Hedetniemi. "Constant time generation of rooted
-        trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
-    """
-    tree = [I+1 for I in range(n)]
-    yield tree
-    if len(tree) > 2:
-        while tree[1] != tree[2]:
-            successor_tree(tree)
-            yield tree
+    return RootedTrees(n)
 
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
 
 
 def rooted_treecount_upto(N):
     """
-    Returns the number of rooted tree structures on n nodes. Algorithm featured
-    without derivation in
+    Returns the number of rooted tree structures on n nodes. Algorithm
+    featured without derivation in
         Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
         "Mathematical Constants", Cambridge, England: Cambridge University
         Press, pp. 295-316, 2003.
     """
-    if N == 0:
-        return [0]
-    if N == 1:
-        return [0, 1]
     T = [0, 1]+[0]*(N-1)
     for n in range(2, N+1):
         for I in range(1, n):
