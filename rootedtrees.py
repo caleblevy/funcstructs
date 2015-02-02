@@ -77,6 +77,7 @@ class RootedTrees(object):
                     tree[I] = tree[I-(p-q)]
                 yield tree
 
+
     def _calculate_len(self):
         """
         Returns the number of rooted tree structures on n nodes. Algorithm
@@ -97,38 +98,34 @@ class RootedTrees(object):
         return T[-1]
 
     def __len__(self):
-        """Official call for number of rooted trees."""
+        """
+        Hook for python len function.
+        
+        NOTE: For n >= 47, len(RootedTrees(n)) is greater than C long, and thus
+        gives rise to an index overflow error. Use self._calculate_len instead.
+        """
         if self._memoized_len is None:
             self._memoized_len = self._calculate_len()
         return self._memoized_len
-
+        
 
 def rooted_trees(n):
+    """
+    This function serves as a placeholder until I update the function call name
+    from rooted_trees to RootedTrees in other modules.
+    """
     return RootedTrees(n)
-
+    
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
 
-
-def rooted_treecount_upto(N):
+def rooted_treecount(n):
     """
-    Returns the number of rooted tree structures on n nodes. Algorithm
-    featured without derivation in
-        Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
-        "Mathematical Constants", Cambridge, England: Cambridge University
-        Press, pp. 295-316, 2003.
+    This function serves as a placeholder until I update the function call name
+    from rooted_treecount_upto to len(RootedTrees(n) in other modules.
     """
-    T = [0, 1]+[0]*(N-1)
-    for n in range(2, N+1):
-        for I in range(1, n):
-            s = 0
-            for d in factorization.divisors(I):
-                s += T[d]*d
-            s *= T[n-I]
-            T[n] += s
-        T[n] //= (n-1)
-    return T
+    return len(RootedTrees(n))
 
-rooted_treecount = lambda n: rooted_treecount_upto(n)[-1]
+rooted_treecount = lambda n: len(RootedTrees(n))
 
 
 def partition_forests(partition):
