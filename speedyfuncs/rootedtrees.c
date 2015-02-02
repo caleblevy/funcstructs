@@ -2,15 +2,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
-struct RootedTree {
+typedef struct RootedTree {
     int node_count;
     int *level_sequence;
-};
+} RootedTree;
 
 
-struct RootedTree *first_tree(int n)
+RootedTree *first_tree(int n)
 {
-    struct RootedTree *tree = malloc(sizeof(struct RootedTree));
+    RootedTree *tree = malloc(sizeof(RootedTree));
     assert(tree != NULL);
 
     tree->node_count = n;
@@ -25,7 +25,7 @@ struct RootedTree *first_tree(int n)
 }
 
 
-void print_tree(struct RootedTree *tree)
+void print_tree(RootedTree *tree)
 {
     printf("[");
     for(int i = 0; i < tree->node_count-1; i++) {
@@ -35,7 +35,7 @@ void print_tree(struct RootedTree *tree)
 }
 
 
-void next_tree(struct RootedTree *tree) 
+void next_tree(RootedTree *tree) 
 {
     int p = tree->node_count-1;
     while(tree->level_sequence[p] == tree->level_sequence[1]) {
