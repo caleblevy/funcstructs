@@ -39,7 +39,19 @@ import conjugates
 
 class RootedTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
-    pass
+
+    def __init__(self, node_count):
+        self.n = node_count
+
+    def __next__(self):
+        pass
+
+    def __iter__(self):
+        self.tree = [I+1 for I in range(self.n)]
+        if len(self.tree) > 2:
+            while self.tree[1] != self.tree[2]:
+                successor_tree(tree)
+                yield tree
 
 
 def successor_tree(tree):
@@ -73,19 +85,12 @@ def rooted_trees(n):
         T. Beyer and S. M. Hedetniemi. "Constant time generation of rooted
         trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
     """
-    if n == 0:
-        return
-    elif n == 1:
-        yield [1]
-        return
-    elif n == 2:
-        yield [1, 2]
-        return
     tree = [I+1 for I in range(n)]
     yield tree
-    while tree[1] != tree[2]:
-        successor_tree(tree)
-        yield tree
+    if len(tree) > 2:
+        while tree[1] != tree[2]:
+            successor_tree(tree)
+            yield tree
 
 tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
 
