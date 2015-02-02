@@ -37,16 +37,64 @@ import factorization
 import conjugates
 
 
-class UnlabelledRootedTree(object):
+class RootedTree(object):
     """Represents an unlabelled rooted tree."""
     def __init__(self, level_sequence):
-        self.level_sequence = level_sequence
+        self.level_sequence = tuple(level_sequence)
+        self.root_level = level_sequence[0]
+        self.n = len(level_sequence)
+
+    def __repr__(self):
+        return "RootedTree"+str(self.level_sequence)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.level_sequence == other.level_sequence
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(tuple(self.level_sequence))
+
+    def __len__(self):
+        return self.n
+
+    def branches(self):
+        """Return each major subbranch of a tree (even chopped)"""
+        rootcheck = lambda node: node == self.root_level + 1
+        return subsequences.startswith(self.level_sequence[1:], rootcheck)
+
+    def subtrees(self):
+        for branch in self.branches():
+            yield self.__class__([node-1 for node in branch])
+
+    def chop(self):
+        """Generates the canonical subtrees of the input tree's root node."""
+        return tuple(subtree for subtree in self.subtrees())
+
+    def degeneracy(self, call_level=1):
+        """
+        To calculate the degeneracy of a collection of subtrees you start with
+        the lowest branches and then work upwards. If a group of identical
+        subbranches are connected to the same node, we multiply the degeneracy
+        of the tree by the factorial of the multiplicity of these subbranches
+        to account for their distinct orderings. The same principal applies to
+        subtrees.
+
+        TODO: A writeup of this with diagrams will be in the notes.
+        """
+        if not self.chop():
+            return 1
+        deg = 1
+        for subtree in self.chop():
+            deg *= subtree.degeneracy()
+        return deg*multiset.mset_degeneracy(self.chop())
 
     def _istree(self):
         pass
 
-    def __len__(self):
-        return len(self.level_sequence)
+    def next(self):
+        return 1
 
     def func_form(self):
         pass
@@ -54,16 +102,20 @@ class UnlabelledRootedTree(object):
     def bracket_form(self):
         pass
 
-    def chop(self):
-        pass
-
-    def subtrees(self):
-        pass
-
     @classmethod
-    def from_treefunc(self):
+    def from_treefunc(cls, func):
         pass
 
+tree = RootedTree([1,2,3,4,2])
+print hash(tree)
+dic = {}
+dic[tree] = 1
+print dic
+tree.level_sequence[1]+=1
+print hash(tree)
+print dic
+dic[RootedTree([1,2,3,4,2])] = 2
+print dic
 
 class RootedTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
@@ -234,6 +286,8 @@ def tree_degeneracy(tree):
     for subtree in chop(tree):
         degeneracy *= tree_degeneracy(subtree)
     return degeneracy*multiset.mset_degeneracy(chop(tree))
+
+print tree_degeneracy([1,2,3,4,5,5,5, 2,3,4,5,5,5, 2,3,4,4,2 ])
 
 
 def tree_to_func(tree, permutation=None):
