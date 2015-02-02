@@ -67,19 +67,21 @@ void enumerate_trees(int n, int printout)
     if(n == 1) {
         if(printout) print_tree(tree);
         printf("There is 1 tree on 1 node.\n");
+        return;
     } else if(n == 2) {
         if(printout) print_tree(tree);
         printf("There is 1 tree on 2 nodes.\n");
-    } else {
-        long count = 0;
-        for(; tree->level_sequence[1] != tree->level_sequence[2]; next_tree(tree)) {
-            if(printout) print_tree(tree);
-            count++;
-        }
-        count++;
-        if(printout) print_tree(tree);
-        printf("There are %ld trees on %d nodes.\n", count, n);
+        return;
     }
+
+    long count = 0;
+    for(; tree->level_sequence[1] != tree->level_sequence[2]; next_tree(tree)) {
+        if(printout) print_tree(tree);
+        count++;
+    }
+    count++;
+    if(printout) print_tree(tree);
+    printf("There are %ld trees on %d nodes.\n", count, n);
 
     return;
 }
