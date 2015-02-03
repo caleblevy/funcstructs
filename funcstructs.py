@@ -159,9 +159,11 @@ class EndofunctionStructureTest(unittest.TestCase):
 
     def testFuncstructToFunc(self):
         func_struct = [
-            (rootedtrees.RootedTree([1, 2, 3]), rootedtrees.RootedTree([1, 2, 2])),
+            (rootedtrees.RootedTree([1, 2, 3]),
+                rootedtrees.RootedTree([1, 2, 2])),
             (rootedtrees.RootedTree([1, 2]), ),
-            (rootedtrees.RootedTree([1, 2, 2]), rootedtrees.RootedTree([1]), rootedtrees.RootedTree([1, 2, 2]))
+            (rootedtrees.RootedTree([1, 2, 2]),
+                rootedtrees.RootedTree([1]), rootedtrees.RootedTree([1, 2, 2]))
         ]
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
         self.assertEqual(func, funcstruct_to_func(func_struct))

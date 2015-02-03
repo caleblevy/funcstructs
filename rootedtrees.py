@@ -148,7 +148,6 @@ class RootedTree(object):
             indset = nextinds
         return brackets
 
-
     def _istree(self):
         pass
 
@@ -333,7 +332,7 @@ def attached_subtree(f, node):
 def treefunc_to_tree(treefunc):
     n = len(treefunc)
     root = [x for x in range(n) if treefunc[x] == x][0]
-    return attached_subtree(treefunc, root)
+    return RootedTree(attached_subtree(treefunc, root))
 
 
 class TreeTest(unittest.TestCase):
@@ -388,7 +387,7 @@ class TreeTest(unittest.TestCase):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = conjugates.randconj(treefunc)
-                    self.assertSequenceEqual(list(tree), treefunc_to_tree(rtreefunc))
+                    self.assertSequenceEqual(tree, treefunc_to_tree(rtreefunc))
 
 
 if __name__ == '__main__':
