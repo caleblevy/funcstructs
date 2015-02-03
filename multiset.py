@@ -19,16 +19,20 @@ from collections import MutableSet, Set, Hashable, Iterable
 from operator import itemgetter
 
 class basemultiset(Set):
-    """ Base class for multiset and frozenmultiset. Is not mutable and not hashable, so there's 
-    no reason to use this instead of either multiset or frozenmultiset.
+    """
+    Base class for multiset and frozenmultiset. Is not mutable and not
+    hashable, so there's no reason to use this instead of either multiset or
+    frozenmultiset.
     """
     ## Basic object methods
 
     def __init__(self, iterable=None):
-        """ Create a new basemultiset.  If iterable isn't given, is None or is empty then the 
-        set starts empty.  If iterable is a map, then it is assumed to be a map from elements
-        to the number of times they should appear in the multiset.  Otherwise each element 
-        from iterable will be added to the multiset however many times it appears.
+        """
+        Create a new basemultiset. If iterable isn't given, is None or is empty
+        then the set starts empty. If iterable is a map, then it is assumed to
+        be a map from elements to the number of times they should appear in the
+        multiset. Otherwise each element from iterable will be added to the
+        multiset however many times it appears.
 
         This runs in O(len(iterable))
 
@@ -42,11 +46,12 @@ class basemultiset(Set):
         if iterable:
             for elem in iterable:
                 self.__inc(elem)
-    
+
     def __repr__(self):
-        """ The string representation is a call to the constructor given a tuple 
+        """
+        The string representation is a call to the constructor given a tuple 
         containing all of the elements.
-        
+
         This runs in whatever tuple(self) does, I'm assuming O(len(self))
 
         >>> ms = basemultiset()
@@ -65,7 +70,8 @@ class basemultiset(Set):
             return format.format(class_name=self.__class__.__name__, tuple=tuple(self))
     
     def __str__(self):
-        """ The printable string appears just like a set, except that each element 
+        """
+        The printable string appears just like a set, except that each element
         is raised to the power of the multiplicity if it is greater than 1.
 
         This runs in O(self.num_unique_elements())
@@ -98,8 +104,10 @@ class basemultiset(Set):
     ## Internal methods
 
     def __inc(self, elem, count=1):
-        """ Increment the multiplicity of elem by count (if count <0 then decrement). 
-        
+        """
+        Increment the multiplicity of elem by count (if count <0 then
+        decrement).
+
         This runs in O(1) time
         """
         old_count = self.multiplicity(elem)
@@ -130,9 +138,10 @@ class basemultiset(Set):
         return self.__dict.keys()
 
     def multiplicity(self, elem):
-        """ Return the multiplicity of elem.  If elem is not in the set no Error is
-        raised, instead 0 is returned. 
-        
+        """
+        Return the multiplicity of elem. If elem is not in the set no Error is
+        raised, instead 0 is returned.
+
         This runs in O(1) time
 
         >>> ms = basemultiset('abracadabra')
@@ -165,8 +174,9 @@ class basemultiset(Set):
 
     @classmethod
     def _from_map(cls, map):
-        """ Creates a multiset from a dict of elem->count.  Each key in the dict 
-        is added if the value is > 0.
+        """
+        Creates a multiset from a dict of elem->count. Each key in the dict is
+        added if the value is > 0.
 
         This runs in O(len(map))
         
@@ -255,7 +265,7 @@ class basemultiset(Set):
         False
         """
         return self.multiplicity(elem)
-    
+
     ## implementing Iterable (inherited from Set) methods
 
     def __iter__(self):
@@ -294,7 +304,7 @@ class basemultiset(Set):
 
     def __and__(self, other):
         """ Intersection is the minimum of corresponding counts. 
-        
+
         This runs in O(l + n) where:
             n is self.num_unique_elements()
             if other is a multiset:
@@ -361,7 +371,7 @@ class basemultiset(Set):
         This runs in O(m + n) where:
             n is self.num_unique_elements()
             m is len(other)
-        
+
         TODO write unit tests for add
         """
         if not isinstance(other, Iterable):
@@ -370,7 +380,7 @@ class basemultiset(Set):
         for elem in other:
             out.__inc(elem)
         return out
-    
+
     def __sub__(self, other):
         """ Difference between the sets.
         other can be any iterable.
