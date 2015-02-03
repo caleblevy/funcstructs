@@ -64,6 +64,9 @@ class RootedTree(object):
     def __len__(self):
         return self.n
 
+    def __iter__(self):
+        return iter(self.level_sequence)
+
     def branches(self):
         """Return each major subbranch of a tree (even chopped)"""
         rootcheck = lambda node: node == self.root_level + 1
@@ -177,7 +180,7 @@ class RootedTrees(object):
             trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
         """
         tree = [I+1 for I in range(self.n)]
-        yield tree
+        yield RootedTree(tree)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -188,7 +191,7 @@ class RootedTrees(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield tree
+                yield RootedTree(tree)
 
     def _calculate_len(self):
         """
@@ -221,26 +224,6 @@ class RootedTrees(object):
         return self._memoized_len
 
 
-def rooted_trees(n):
-    """
-    This function serves as a placeholder until I update the function call name
-    from rooted_trees to RootedTrees in other modules.
-    """
-    return RootedTrees(n)
-
-tree_tuples = lambda n: (tuple(tree) for tree in rooted_trees(n))
-
-
-def rooted_treecount(n):
-    """
-    This function serves as a placeholder until I update the function call name
-    from rooted_treecount_upto to len(RootedTrees(n) in other modules.
-    """
-    return len(RootedTrees(n))
-
-rooted_treecount = lambda n: len(RootedTrees(n))
-
-
 def partition_forests(partition):
     """
     Generates the forests formed from rooted trees with sizes specified by
@@ -248,7 +231,7 @@ def partition_forests(partition):
     """
     y, d = multiset.split_set(partition)
     l = len(y)
-    trees = [tree_tuples(I) for I in y]
+    trees = [RootedTrees(I) for I in y]
 
     preseed = [itertools.combinations_with_replacement(trees[I], d[I])
                for I in range(l)]
@@ -297,21 +280,8 @@ def forests_simple(N):
     """
     if N == 0:
         return
-    for tree in rooted_trees(N+1):
-        yield chop(tree)
-
-forests = forests_simple
-
-
-def tree_degeneracy(tree): # Wrapper for RootedTree method
-    return RootedTree(tree).degeneracy()
-
-
-def tree_to_func(tree, permutation=None): # Wrapper for RootedTree method
-    return RootedTree(tree).func_form(permutation)
-
-def tree_to_brackets(tree): # Wrapper for RootedTree method.
-    return RootedTree(tree).bracket_form()
+    for tree in RootedTrees(N+1):
+        yield tree.chop()
 
 
 def canonical_treeorder(tree):
@@ -362,39 +332,39 @@ def treefunc_to_tree(treefunc):
 class TreeTest(unittest.TestCase):
     A000081 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
 
-    def testTrees(self):
+    def testTreeCounts(self):
         """OEIS A000081: number of unlabelled rooted trees on N nodes."""
         for n, count in enumerate(self.A000081):
-            self.assertEqual(count, len(list(rooted_trees(n+1))))
-            self.assertEqual(count, rooted_treecount(n+1))
+            self.assertEqual(count, len(list(RootedTrees(n+1))))
+            self.assertEqual(count, len(RootedTrees(n+1)))
 
-    def testForests(self):
+    def testForestCounts(self):
         """Check len(forests(N))==A000081(N+1)"""
         for n, count in enumerate(self.A000081[1:]):
             self.assertEqual(count, len(set(forests_simple(n+1))))
             self.assertEqual(count, len(set(forests_complex(n+1))))
 
-    def testDegeneracy(self):
+    def testTreeDegeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         # self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
-            for tree in rooted_trees(n):
-                labelled_treecount += math.factorial(n)//tree_degeneracy(tree)
+            for tree in RootedTrees(n):
+                labelled_treecount += math.factorial(n)//tree.degeneracy()
             self.assertEqual(n**(n-1), labelled_treecount)
 
-    def testTreeToFunc(self):
+    def testTreeFuncForm(self):
         """Make sure treetofunc correctly represents trees as endofunctions"""
-        tree = [1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3]
+        tree = RootedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = [0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12]
-        self.assertSequenceEqual(func, tree_to_func(tree))
+        self.assertSequenceEqual(func, tree.func_form())
 
-    def testTreeform(self):
+    def testTreeBracketForm(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
-            [1, 2, 3, 4, 5, 6, 4, 2, 3, 4],
-            [1, 2, 3, 4, 5, 6, 4, 2, 3, 3],
-            [1, 2, 3, 4, 5, 5, 5, 5, 5, 2],
+            RootedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 4]),
+            RootedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 3]),
+            RootedTree([1, 2, 3, 4, 5, 5, 5, 5, 5, 2]),
         ]
         nestedforms = (
             [[[[[[]]], []]], [[[]]]],
@@ -402,16 +372,16 @@ class TreeTest(unittest.TestCase):
             [[[[[], [], [], [], []]]], []]
         )
         for tree, nest in zip(trees, nestedforms):
-            self.assertSequenceEqual(nest, tree_to_brackets(tree))
+            self.assertSequenceEqual(nest, tree.bracket_form())
 
     def testTreefuncToTree(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
         for n in range(1, len(self.A000081)+1):
-            for tree in rooted_trees(n):
-                treefunc = tree_to_func(tree)
+            for tree in RootedTrees(n):
+                treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = conjugates.randconj(treefunc)
-                    self.assertSequenceEqual(tree, treefunc_to_tree(rtreefunc))
+                    self.assertSequenceEqual(list(tree), treefunc_to_tree(rtreefunc))
 
 
 if __name__ == '__main__':
