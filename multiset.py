@@ -511,3 +511,13 @@ def multichoose(iterable, k):
 			for others in multichoose(symbols, k-symbol_multiplicity):
 				result.add(symbol_set + others)
 	return result
+
+a = multiset([1,2,3])
+b = frozenmultiset([1,1,2,3])
+c = frozenmultiset([4,4,5,5,b,b])
+dic = {}
+dic[b] = 3
+dic[c] = 5
+dic[frozenmultiset([4,frozenmultiset([1,3,2,1]),4,5,b,5])] = 7
+print(dic)
+dic[a] = 4
