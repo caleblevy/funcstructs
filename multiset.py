@@ -19,7 +19,7 @@ from collections import MutableSet, Set, Hashable, Iterable
 from operator import itemgetter
 import unittest
 
-class basemultiset(Set):
+class BaseMultiset(Set):
     """
     Base class for multiset and frozenmultiset. Is not mutable and not
     hashable, so there's no reason to use this instead of either multiset or
@@ -292,7 +292,7 @@ class basemultiset(Set):
 
         TODO write test cases for __le__
         """
-        if not isinstance(other, basemultiset):
+        if not isinstance(other, self.__class__):
             if not isinstance(other, Iterable):
                 return NotImplemented
             other = self._from_iterable(other)
@@ -448,7 +448,7 @@ class basemultiset(Set):
         """
         return (self - other) | (other - self)
 
-class multiset(basemultiset, MutableSet):
+class Multiset(BaseMultiset, MutableSet):
     """ multiset is a Mutable basemultiset, thus not hashable and unusable for dict keys or in
     other sets.
 
@@ -464,7 +464,7 @@ class multiset(basemultiset, MutableSet):
         self.__dict = dict()
         self.__size = 0
 
-class frozenmultiset(basemultiset, Hashable):
+class FrozenMultiset(BaseMultiset, Hashable):
     """ frozenmultiset is a Hashable basemultiset, thus it is immutable and usable for dict keys
     """
     def __hash__(self):
@@ -515,26 +515,29 @@ def multichoose(iterable, k):
     symbol = symbols.pop()
     result = set()
     if len(symbols) == 0:
-        result.add(frozenmultiset._from_map({symbol : k}))
+        result.add(FrozenMultiset._from_map({symbol : k}))
     else:
         for symbol_multiplicity in range(k+1):
-            symbol_set = frozenmultiset._from_map({symbol : symbol_multiplicity})
+            symbol_set = FrozenMultiset._from_map({symbol : symbol_multiplicity})
             for others in multichoose(symbols, k-symbol_multiplicity):
                 result.add(symbol_set + others)
     return result
 
-class TestMultiset(unittest.TestCase):
+print multichoose('ab', 3)
+
+class MultisetTests(unittest.TestCase):
+
     def testHashability(self):
         """
         Since Multiset is mutable and FronzeMultiset is hashable, the second
         should be usable for dictionary keys and the second should raise a key
         or value error when used as a key or placed in a set.
         """
-        a = multiset([1,2,3])  # Mutable multiset.
-        b = frozenmultiset([1,1,2,3])  # prototypical frozen multiset.
+        a = Multiset([1,2,3])  # Mutable multiset.
+        b = FrozenMultiset([1, 1, 2, 3])  # prototypical frozen multiset.
 
-        c = frozenmultiset([4,4,5,5,b,b])  # make sure we can nest them
-        d = frozenmultiset([4,frozenmultiset([1,3,2,1]),4,5,b,5])
+        c = FrozenMultiset([4, 4, 5, 5, b, b])  # make sure we can nest them
+        d = FrozenMultiset([4, FrozenMultiset([1, 3, 2, 1]), 4, 5, b, 5])
         self.assertEqual(c, d) # Make sure both constructions work.
 
         dic = {}
@@ -545,8 +548,17 @@ class TestMultiset(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             dic[a] = 4
+        with self.assertRaises(TypeError):
             s = set([a])
-            t = frozenmultiset([a,1])
+        with self.assertRaises(TypeError):
+            t = FrozenMultiset([a, 1])
+        # test commutativity of multiset instantiation.
+        self.assertEqual(Multiset([4, 4, 5, 5, c]), Multiset([4, 5, d, 4, 5]))
+
+
+class MultichooseTests(unittest.TestCase):
+    pass
+
 
 if __name__ == '__main__':
     unittest.main()
