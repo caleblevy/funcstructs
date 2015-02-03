@@ -41,6 +41,7 @@ def treeroot(treefunc):
     """Returns the root of an endofunction whose structure is a rooted tree."""
     return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
 
+
 class RootedTree(object):
     """Represents an unlabelled rooted tree."""
 
@@ -57,6 +58,9 @@ class RootedTree(object):
             return self.level_sequence == other.level_sequence
         else:
             return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __hash__(self):
         return hash(tuple(self.level_sequence))
