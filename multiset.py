@@ -17,6 +17,7 @@ _version = '0.1.1'
 import heapq
 from collections import MutableSet, Set, Hashable, Iterable
 from operator import itemgetter
+import unittest
 
 class basemultiset(Set):
     """
@@ -522,12 +523,30 @@ def multichoose(iterable, k):
                 result.add(symbol_set + others)
     return result
 
-a = multiset([1,2,3])
-b = frozenmultiset([1,1,2,3])
-c = frozenmultiset([4,4,5,5,b,b])
-dic = {}
-dic[b] = 3
-dic[c] = 5
-dic[frozenmultiset([4,frozenmultiset([1,3,2,1]),4,5,b,5])] = 7
-print(dic)
-dic[a] = 4
+class TestMultiset(unittest.TestCase):
+    def testHashability(self):
+        """
+        Since Multiset is mutable and FronzeMultiset is hashable, the second
+        should be usable for dictionary keys and the second should raise a key
+        or value error when used as a key or placed in a set.
+        """
+        a = multiset([1,2,3])  # Mutable multiset.
+        b = frozenmultiset([1,1,2,3])  # prototypical frozen multiset.
+
+        c = frozenmultiset([4,4,5,5,b,b])  # make sure we can nest them
+        d = frozenmultiset([4,frozenmultiset([1,3,2,1]),4,5,b,5])
+        self.assertEqual(c, d) # Make sure both constructions work.
+
+        dic = {}
+        dic[b] = 3
+        dic[c] = 5
+        dic[d] = 7
+        self.assertEqual(len(dic), 2) # Make sure no duplicates in dictionary.
+
+        with self.assertRaises(TypeError):
+            dic[a] = 4
+            s = set([a])
+            t = frozenmultiset([a,1])
+
+if __name__ == '__main__':
+    unittest.main()
