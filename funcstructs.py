@@ -101,7 +101,7 @@ def funcstruct_degeneracy(function_structure):
         degeneracy *= rotation.cycle_degeneracy(cycle)
     # Finally the degeneracy of each rooted tree.
     for tree in nestops.flatten(function_structure):
-        degeneracy *= rootedtrees.tree_degeneracy(tree)
+        degeneracy *= tree.degeneracy()
     return degeneracy
 
 
@@ -111,7 +111,7 @@ def _treeform_of_noncyclic_nodes(function_structure):
     for tree in nestops.flatten(function_structure):
         l = len(tree)
         tree_perm = range(tree_start, tree_start+l)
-        func_tree = rootedtrees.tree_to_func(tree, permutation=tree_perm)
+        func_tree = tree.func_form(permutation=tree_perm)
         func.extend(func_tree)
         tree_start += l
     return func
@@ -159,9 +159,9 @@ class EndofunctionStructureTest(unittest.TestCase):
 
     def testFuncstructToFunc(self):
         func_struct = [
-            ((1, 2, 3,), (1, 2, 2)),
-            ((1, 2,), ),
-            ((1, 2, 2), (1, ), (1, 2, 2,))
+            (rootedtrees.RootedTree([1, 2, 3]), rootedtrees.RootedTree([1, 2, 2])),
+            (rootedtrees.RootedTree([1, 2]), ),
+            (rootedtrees.RootedTree([1, 2, 2]), rootedtrees.RootedTree([1]), rootedtrees.RootedTree([1, 2, 2]))
         ]
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
         self.assertEqual(func, funcstruct_to_func(func_struct))

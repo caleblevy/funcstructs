@@ -284,6 +284,9 @@ def forests_simple(N):
         yield tree.chop()
 
 
+forests = forests_simple
+
+
 def canonical_treeorder(tree):
     """
     Given a noncanonical (non lexicographically maximal) level sequence, return

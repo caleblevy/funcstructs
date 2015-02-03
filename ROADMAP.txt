@@ -1,44 +1,55 @@
 Early January 2015:
 
-# Modules with ACCEPTABLE NAMES from which NOTHING SHOULD BE REMOVED:
-#   - funcdists
-#   - funcstructs
-#   - rootedtrees
-#   - integerroots
-#   - necklaces
-#   - multiset
-#   - rotation (Maybe...)
-#   - polynomials (for now...)
-#
-# Modules with UNSUITABLE NAMES from which NOTHING SHOULD BE REMOVED:
-#   - primes -> should go to factor, factors, or factorization
-#   - monotones -> should be renamed to subseq, subsequence, or subsequences
-#   - nestops -> should be renamed to nesting, nests, something (Maybe...)
-#
-# Modules up for dissassembly:
-#   - iteration: acknowledged at the time of its creation as a miscillaneous
-#     generator dump, it has to go.
+    # Modules with ACCEPTABLE NAMES from which NOTHING SHOULD BE REMOVED:
+    #   - funcdists
+    #   - funcstructs
+    #   - rootedtrees
+    #   - integerroots
+    #   - necklaces
+    #   - multiset
+    #   - rotation (Maybe...)
+    #   - polynomials (for now...)
+    #
+    # Modules with UNSUITABLE NAMES from which NOTHING SHOULD BE REMOVED:
+    #   - primes -> should go to factor, factors, or factorization
+    #   - monotones -> should be renamed to subseq, subsequence, or subsequences
+    #   - nestops -> should be renamed to nesting, nests, something (Maybe...)
+    #
+    # Modules up for dissassembly:
+    #   - iteration: acknowledged at the time of its creation as a miscillaneous
+    #     generator dump, it has to go.
 
 
 January 31, 2015:
 
-Ideas that should VERY LIKELY be persued:
+    Ideas that should VERY LIKELY be persued:
 
-  - Make RootedTrees collection class
-    * __len__ will be rooted_treecount
-    * __in__ will be rooted tree check'
-    * __iter__ is the rooted_trees generator
-    * __next__ is successor tree
+    #  - Make RootedTrees collection class
+    #    * __len__ will be rooted_treecount
+        * __in__ will be rooted tree check'
+    #    * __iter__ is the rooted_trees generator
+    #    * __next__ is successor tree
 
-  - Make a RootedTree object.
-    * chop -> tree.chop()
-    * tree_to_func -> tree.func_form()
-    * canonical_treeorder -> tree.canonical_form()
-    * len(tree) -> __len__
-    * hypothetical is_tree function -> __eq__
-    * Ordering -> __cmp__, __le__, __eq__
+      - Make a RootedTree object.
+    #    * chop -> tree.chop()
+    #    * tree_to_func -> tree.func_form()
+        * canonical_treeorder -> tree.canonical_form()
+    #    * len(tree) -> __len__
+        * hypothetical is_tree function -> __eq__
+        * Ordering -> __cmp__, __le__, __eq__
 
-Ideas that should POSSIBLY be explored:
-  - Corresponding CanonicalRootedTree and CanonicalRootedTrees
-  - LabelledRootedTree/UnlabelledRootedTree
-  
+
+    Ideas that should POSSIBLY be explored:
+      - Corresponding CanonicalRootedTree and CanonicalRootedTrees
+      - LabelledRootedTree/UnlabelledRootedTree
+
+February 2, 2015:
+    Ideas that should VERY LIKELY be persued:
+      - Make my own Multiset classes based off of the bag module.
+      - Funcstruct class
+      - Endofunction class
+ 
+    Ideas that should PROBABLY be persued
+      - Forest class (derived from my custom Multiset classes)
+      - Corresponding Canonical"..." classes with sorting methods.
+      - Necklace classes.
