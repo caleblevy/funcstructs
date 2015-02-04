@@ -3,7 +3,7 @@
 #
 # Copyright © 2009 Michael Lenzen <m.lenzen@gmail.com>
 #
-""" multiset - Also known as a bag or unordered tuple.
+""" multiset - Also known as a Multiset or unordered tuple.
 
 This module provides three classes:
     basemultiset - The superclass of multiset and frozen multiset. It is both
@@ -16,6 +16,13 @@ import heapq
 from collections import MutableSet, Set, Hashable
 from operator import itemgetter
 import unittest
+from functools import reduce
+from math import factorial
+from operator import mul
+
+prod = lambda iterable: reduce(mul, iterable, 1)
+factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
+nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 
 class BaseMultiset(Set):
@@ -64,7 +71,7 @@ class BaseMultiset(Set):
         This runs in O(self.num_unique_elements())
         """
         if self._size == 0:
-            return '{}'
+            return '{class_name}()'.format(class_name=self.__class__.__name__)
         else:
             format_single = '{elem!r}'
             format_mult = '{elem!r}^{mult}'
@@ -74,12 +81,7 @@ class BaseMultiset(Set):
                     strings.append(format_mult.format(elem=elem, mult=mult))
                 else:
                     strings.append(format_single.format(elem=elem))
-            strings = tuple(strings)
-            string = '{first}'.format(first=strings[0])
-            for i in range(1,len(strings)):
-                string = '{prev}, {next}'.format(prev=string, next=strings[i])
-            string = '{{{0}}}'.format(string)
-            return string
+            return '{%s}' % ', '.join(strings)
 
     ## Internal methods
 
@@ -90,7 +92,7 @@ class BaseMultiset(Set):
         """
         if value < 0:
             raise ValueError
-        old_count = self.multiplicity(elem)
+        old_count = self.count(elem)
         if value == 0:
             if elem in self:
                 del self._dict[elem]
@@ -103,7 +105,7 @@ class BaseMultiset(Set):
 
         If count <0 then decrement.
         """
-        self._set(elem, self.multiplicity(elem) + count)
+        self._set(elem, self.count(elem) + count)
 
     ## New public methods (not overriding/implementing anything)
 
@@ -119,9 +121,9 @@ class BaseMultiset(Set):
         
         This runs in O(1) time
         """
-        return self._dict.keys()
+        return set(list(self._dict.keys()))
 
-    def multiplicity(self, elem):
+    def count(self, elem):
         """
         Return the multiplicity of elem. If elem is not in the set no Error is
         raised, instead 0 is returned.
@@ -172,7 +174,7 @@ class BaseMultiset(Set):
 
     def __contains__(self, elem):
         """Returns the multiplicity of the element. This runs in O(1)."""
-        return self.multiplicity(elem)
+        return self.count(elem)
 
     ## implementing Iterable methods
 
@@ -201,7 +203,7 @@ class BaseMultiset(Set):
         if len(self) > len(other):
             return False
         for elem in self.unique_elements():
-            if self.multiplicity(elem) > other.multiplicity(elem):
+            if self.count(elem) > other.count(elem):
                 return False
         return True
 
@@ -240,8 +242,8 @@ class BaseMultiset(Set):
             other = self._from_iterable(other)
         values = dict()
         for elem in self._dict:
-            values[elem] = min(other.multiplicity(elem),
-                               self.multiplicity(elem))
+            values[elem] = min(other.count(elem),
+                               self.count(elem))
         return self._from_map(values)
 
     def isdisjoint(self, other):
@@ -278,8 +280,8 @@ class BaseMultiset(Set):
             other = self._from_iterable(other)
         values = dict()
         for elem in self.unique_elements() | other.unique_elements():
-            values[elem] = max(self.multiplicity(elem),
-                               other.multiplicity(elem))
+            values[elem] = max(self.count(elem),
+                               other.count(elem))
         return self._from_map(values)
 
     def __add__(self, other):
@@ -303,7 +305,7 @@ class BaseMultiset(Set):
         other can be any iterable.
         For normal sets this is all s.t. x in self and x not in other. 
         For multisets this is:
-           multiplicity(x) = max(0, self.multiplicity(x)-other.multiplicity(x))
+           multiplicity(x) = max(0, self.count(x)-other.count(x))
 
         This runs in O(m + n) where:
             n is self.num_unique_elements()
@@ -327,7 +329,7 @@ class BaseMultiset(Set):
         This should run in O(m*n+l) where:
             m is the number of unique elements in self
             n is the number of unique elements in other
-            if other is a bag:
+            if other is a Multiset:
                 l is 0
             else:
                 l is the len(other)
@@ -357,6 +359,17 @@ class BaseMultiset(Set):
         TODO write unit tests for xor
         """
         return (self - other) | (other - self)
+
+    def split(self):
+        """Splits the multiset into element-multiplicity pairs."""
+        y = list(self._dict)
+        d = [self._dict[el] for el in self]
+        return y, d
+
+    def degeneracy(self):
+        """Number of different representations of the same multiset."""
+        y, d = self.split()
+        return factorial_prod(d)
 
 class Multiset(BaseMultiset, MutableSet):
     """
@@ -395,7 +408,7 @@ class Multiset(BaseMultiset, MutableSet):
 
     def __ior__(self, other):
         """
-        if isinstance(other, _basebag):
+        if isinstance(other, BaseMultiset):
             This runs in O(other.num_unique_elements())
         else:
             This runs in O(len(other))
@@ -403,13 +416,13 @@ class Multiset(BaseMultiset, MutableSet):
         if not isinstance(other, BaseMultiset):
             other = self._from_iterable(other)
         for elem, other_count in other._dict.items():
-            self_count = self.multiplicity(elem)
+            self_count = self.count(elem)
             self._set(elem, max(other_count, self_count))
         return self
 
     def __iand__(self, other):
         """
-        if isinstance(other, _basebag):
+        if isinstance(other, BaseMultiset):
             This runs in O(other.num_unique_elements())
         else:
             This runs in O(len(other))
@@ -423,7 +436,7 @@ class Multiset(BaseMultiset, MutableSet):
 
     def __ixor__(self, other):
         """
-        if isinstance(other, _basebag):
+        if isinstance(other, BaseMultiset):
             This runs in O(other.num_unique_elements())
         else:
             This runs in O(len(other))
@@ -437,7 +450,7 @@ class Multiset(BaseMultiset, MutableSet):
 
     def __isub__(self, other):
         """
-        if isinstance(it, _basebag):
+        if isinstance(it, BaseMultiset):
             This runs in O(it.num_unique_elements())
         else:
             This runs in O(len(it))
@@ -453,7 +466,7 @@ class Multiset(BaseMultiset, MutableSet):
 
     def __iadd__(self, other):
         """
-        if isinstance(it, _basebag):
+        if isinstance(it, BaseMultiset):
             This runs in O(it.num_unique_elements())
         else:
             This runs in O(len(it))
@@ -513,6 +526,10 @@ def multichoose(iterable, k):
     return result
 
 
+def compare_Multiset_string(b):
+    s = str(b)
+    return set(s.lstrip('{').rstrip('}').split(', '))
+
 class MultisetTests(unittest.TestCase):
     """
     Test properties of Multiset objects. Tests tend to be of two forms:
@@ -520,62 +537,224 @@ class MultisetTests(unittest.TestCase):
         basemultiset('abracadabra')        # create from an Iterable
     """
 
-    def testMultiplicity(self):
-        """Check that we record the correct number of elements."""
-        ms = BaseMultiset('abracadabra')
-        self.assertEqual(5, ms.multiplicity('a'))
-        self.assertEqual(0, ms.multiplicity('x'))
+    def test_init(self):
+        """Test the multiset initializer"""
+        b = BaseMultiset('abracadabra')
+        self.assertTrue(b.count('a') == 5)
+        self.assertTrue(b.count('b') == 2)
+        self.assertTrue(b.count('r') == 2)
+        self.assertTrue(b.count('c') == 1)
+        self.assertTrue(b.count('d') == 1)
+        b2 = Multiset(b)
+        self.assertTrue(b2 == b)
 
-    def testNLargest(self):
-        ms = BaseMultiset('abracadabra')
-        sorted_ms = [('a', 5), ('r', 2), ('b', 2), ('c', 1), ('d', 1)]
-        self.assertSequenceEqual(sorted_ms, ms.nlargest())
-        self.assertSequenceEqual([('a', 5), ('r', 2)], ms.nlargest(2))
-
-    def testRepresentation(self):
+    def test_repr(self):
         """Test that eval(repr(self)) == self"""
         ms = BaseMultiset()
         self.assertTrue(ms == eval(repr(ms)))
         ms = BaseMultiset('abracadabra')
         self.assertTrue(ms == eval(repr(ms)))
 
-    def testStringForm(self):
-        """Test str(self)."""
-        self.assertEqual("{}", str(BaseMultiset()))
-        ms = BaseMultiset('abracadabra')
-        str_rep = "{'a'^5, 'r'^2, 'b'^2, 'c', 'd'}"
-        self.assertEqual(str_rep, str(ms))
+    def test_str(self):
+        abra = BaseMultiset('abracadabra')
+        self.assertSequenceEqual(str(BaseMultiset()), 'BaseMultiset()')
+        self.assertTrue("'a'^5" in str(abra))
+        self.assertTrue("'b'^2" in str(abra))
+        self.assertTrue("'c'" in str(abra))
+        abra_elems = set(("'a'^5", "'b'^2", "'r'^2", "'c'", "'d'"))
+        assert compare_Multiset_string(Multiset('abracadabra')) == abra_elems
 
-    def testFromMap(self):
+    def test_count(self):
+        """Check that we record the correct number of elements."""
+        ms = BaseMultiset('abracadabra')
+        self.assertEqual(5, ms.count('a'))
+        self.assertEqual(0, ms.count('x'))
+
+    def test_nlargest(self):
+        abra = BaseMultiset('abracadabra')
+        sort_key = lambda e: (-e[1], e[0])
+        abra_counts = [('a', 5), ('b', 2), ('r', 2), ('c', 1), ('d', 1)]
+        self.assertEqual(sorted(abra.nlargest(), key=sort_key), abra_counts)
+        self.assertEqual(sorted(abra.nlargest(3), key=sort_key), abra_counts[:3])
+        self.assertEqual(BaseMultiset('abcaba').nlargest(3), [('a', 3), ('b', 2), ('c', 1)])
+
+    def test_from_map(self):
         """Check that we can form a multiset from a map."""
         frommap = BaseMultiset._from_map({'a': 1, 'b': 2})
         fromit = BaseMultiset(('a', 'b', 'b'))
         self.assertEqual(frommap, fromit)
 
-    def testCopy(self):
+    def test_copy(self):
         """Check that we can copy multisets"""
-        self.assertTrue(BaseMultiset().copy() == BaseMultiset())
+        empty = BaseMultiset()
+        self.assertTrue(empty.copy() == empty)
+        self.assertTrue(empty.copy() is not empty)
         abc = BaseMultiset('abc')
         self.assertTrue(abc.copy() == abc)
+        self.assertTrue(abc.copy() is not abc)
 
-    def testElementCount(self):
+    def test_len(self):
         """Check the number of elements in our multisets."""
         self.assertEqual(0, len(BaseMultiset()))
         self.assertEqual(3, len(BaseMultiset('abc')))
         self.assertEqual(4, len(BaseMultiset('aaba')))
 
-    def testMemberCheck(self):
+    def test_contains(self):
         """Verify that we can test if an object is a member of a multiset."""
         self.assertTrue('a' in BaseMultiset('bbac'))
         self.assertFalse('a' in BaseMultiset())
         self.assertFalse('a' in BaseMultiset('missing letter'))
 
-    def testCartesianProduct(self):
-        """Test a cartesian product of multisets"""
-        ms = BaseMultiset('aab')
+    def test_le(self):
+        self.assertTrue(BaseMultiset() <= BaseMultiset())
+        self.assertTrue(BaseMultiset() <= BaseMultiset('a'))
+        self.assertTrue(BaseMultiset('abc') <= BaseMultiset('aabbbc'))
+        self.assertFalse(BaseMultiset('abbc') <= BaseMultiset('abc'))
+        with self.assertRaises(TypeError):
+            BaseMultiset('abc') < set('abc')
+        self.assertFalse(Multiset('aabc') < Multiset('abc'))
 
-        self.assertEqual(ms * set('a'), BaseMultiset(('aa', 'aa', 'ba')))
-        self.assertEqual(ms * set(), BaseMultiset())
+    def test_and(self):
+        assert Multiset('aabc') & Multiset('aacd') == Multiset('aac')
+        assert Multiset() & Multiset('safgsd') == Multiset()
+        assert Multiset('abcc') & Multiset() == Multiset()
+        assert Multiset('abcc') & Multiset('aabd') == Multiset('ab')
+        assert Multiset('aabc') & set('abdd') == Multiset('ab')
+
+    def test_isdisjoint(self):
+        assert Multiset().isdisjoint(Multiset())
+        assert Multiset().isdisjoint(Multiset('abc'))
+        assert not Multiset('ab').isdisjoint(Multiset('ac'))
+        assert Multiset('ab').isdisjoint(Multiset('cd'))
+
+    def test_or(self):
+        assert Multiset('abcc') | Multiset() == Multiset('abcc')
+        assert Multiset('abcc') | Multiset('aabd') == Multiset('aabccd')
+        assert Multiset('aabc') | set('abdd') == Multiset('aabcd')
+
+    def test_add_op(self):
+        b1 = Multiset('abc')
+        result = b1 + Multiset('ab')
+        assert result == Multiset('aabbc')
+        assert b1 == Multiset('abc')
+        assert result is not b1
+
+
+    def test_add(self):
+        b = Multiset('abc')
+        b.add('a')
+        assert b == Multiset('aabc')
+
+
+    def test_clear(self):
+        b = Multiset('abc')
+        b.clear()
+        assert b == Multiset()
+
+
+    def test_discard(self):
+        b = Multiset('abc')
+        b.discard('a')
+        assert b == Multiset('bc')
+        b.discard('a')
+        assert b == Multiset('bc')
+
+
+    def test_sub(self):
+        assert Multiset('abc') - Multiset() == Multiset('abc')
+        assert Multiset('abbc') - Multiset('bd') == Multiset('abc')
+
+
+    def test_mul(self):
+        ms = BaseMultiset('aab')
+        assert ms * set('a') == BaseMultiset(('aa', 'aa', 'ba'))
+        assert ms * set() == BaseMultiset()
+
+
+    def test_xor(self):
+        assert Multiset('abc') ^ Multiset() == Multiset('abc')
+        assert Multiset('aabc') ^ Multiset('ab') == Multiset('ac')
+        assert Multiset('aabcc') ^ Multiset('abcde') == Multiset('acde')
+
+
+    def test_ior(self):
+        b = Multiset()
+        b |= Multiset()
+        assert b == Multiset()
+        b = Multiset('aab')
+        b |= Multiset()
+        assert b == Multiset('aab')
+        b = Multiset('aab')
+        b |= Multiset('ac')
+        assert b == Multiset('aabc')
+        b = Multiset('aab')
+        b |= set('ac')
+        assert b == Multiset('aabc')
+
+
+    def test_iand(self):
+        b = Multiset()
+        b &= Multiset()
+        assert b == Multiset()
+        b = Multiset('aab')
+        b &= Multiset()
+        assert b == Multiset()
+        b = Multiset('aab')
+        b &= Multiset('ac')
+        assert b == Multiset('a')
+        b = Multiset('aab')
+        b &= set('ac')
+        assert b == Multiset('a')
+
+
+    def test_ixor(self):
+        b = Multiset('abbc')
+        b ^= Multiset('bg')
+        assert b == Multiset('abcg')
+        b = Multiset('abbc')
+        b ^= set('bg')
+        assert b == Multiset('abcg')
+
+
+    def test_isub(self):
+        b = Multiset('aabbc')
+        b -= Multiset('bd')
+        assert b == Multiset('aabc')
+        b = Multiset('aabbc')
+        b -= set('bd')
+        assert b == Multiset('aabc')
+
+
+    def test_iadd(self):
+        b = Multiset('abc')
+        b += Multiset('cde')
+        assert b == Multiset('abccde')
+        b = Multiset('abc')
+        b += 'cde'
+        assert b == Multiset('abccde')
+
+
+    def test_hash(self):
+        Multiset_with_empty_tuple = FrozenMultiset([()])
+        assert not hash(FrozenMultiset()) == hash(Multiset_with_empty_tuple)
+        assert not hash(FrozenMultiset()) == hash(FrozenMultiset((0,)))
+        assert not hash(FrozenMultiset('a')) == hash(FrozenMultiset(('aa')))
+        assert not hash(FrozenMultiset('a')) == hash(FrozenMultiset(('aaa')))
+        assert not hash(FrozenMultiset('a')) == hash(FrozenMultiset(('aaaa')))
+        assert not hash(FrozenMultiset('a')) == hash(FrozenMultiset(('aaaaa')))
+        assert hash(FrozenMultiset('ba')) == hash(FrozenMultiset(('ab')))
+        assert hash(FrozenMultiset('badce')) == hash(FrozenMultiset(('dbeac')))
+
+
+    def test_num_unique_elems(self):
+        assert Multiset('abracadabra').num_unique_elements() == 5
+
+
+    def test_pop(self):
+        b = Multiset('a')
+        assert b.pop() == 'a'
+        with self.assertRaises(KeyError):
+            b.pop()
 
     def testHashability(self):
         """
