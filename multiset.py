@@ -6,17 +6,17 @@
 """ multiset - Also known as a bag or unordered tuple.
 
 This module provides three classes:
-    basemultiset - The superclass of multiset and frozen multiset.  It is both immutable
-        and unhashable.
+    basemultiset - The superclass of multiset and frozen multiset. It is both
+        immutable and unhashable.
     multiset - A mutable (unhashable) multiset.
     frozenmultiset - A hashable (immutable) multiset.
 """
-
 
 import heapq
 from collections import MutableSet, Set, Hashable
 from operator import itemgetter
 import unittest
+
 
 class BaseMultiset(Set):
     """
@@ -53,7 +53,8 @@ class BaseMultiset(Set):
             return '{0}()'.format(self.__class__.__name__)
         else:
             format_string = '{class_name}({tup!r})'
-            return format_string.format(class_name=self.__class__.__name__, tup=tuple(self))
+            return format_string.format(class_name=self.__class__.__name__, 
+                                        tup=tuple(self))
 
     def __str__(self):
         """
@@ -239,7 +240,8 @@ class BaseMultiset(Set):
             other = self._from_iterable(other)
         values = dict()
         for elem in self._dict:
-            values[elem] = min(other.multiplicity(elem), self.multiplicity(elem))
+            values[elem] = min(other.multiplicity(elem),
+                               self.multiplicity(elem))
         return self._from_map(values)
 
     def isdisjoint(self, other):
@@ -276,7 +278,8 @@ class BaseMultiset(Set):
             other = self._from_iterable(other)
         values = dict()
         for elem in self.unique_elements() | other.unique_elements():
-            values[elem] = max(self.multiplicity(elem), other.multiplicity(elem))
+            values[elem] = max(self.multiplicity(elem),
+                               other.multiplicity(elem))
         return self._from_map(values)
 
     def __add__(self, other):
@@ -362,7 +365,8 @@ class Multiset(BaseMultiset, MutableSet):
     """
 
     def pop(self):
-        # TODO can this be done more efficiently (no need to create an iterator)?
+        # TODO can this be done more efficiently (no need to create an 
+        # iterator)?
         it = iter(self)
         try:
             value = next(it)
@@ -503,7 +507,7 @@ def multichoose(iterable, k):
         result.add(FrozenMultiset._from_map({symbol : k}))
     else:
         for symbol_multiplicity in range(k+1):
-            symbol_set = FrozenMultiset._from_map({symbol : symbol_multiplicity})
+            symbol_set = FrozenMultiset._from_map({symbol:symbol_multiplicity})
             for others in multichoose(symbols, k-symbol_multiplicity):
                 result.add(symbol_set + others)
     return result
