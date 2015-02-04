@@ -12,10 +12,9 @@ This module provides three classes:
     frozenmultiset - A hashable (immutable) multiset.
 """
 
-_version = '0.1.1'
 
 import heapq
-from collections import MutableSet, Set, Hashable, Iterable
+from collections import MutableSet, Set, Hashable
 from operator import itemgetter
 import unittest
 
@@ -83,23 +82,27 @@ class BaseMultiset(Set):
 
     ## Internal methods
 
-    def _inc(self, elem, count=1):
-        """
-        Increment the multiplicity of elem by count (if count <0 then
-        decrement).
+    def _set(self, elem, value):
+        """Set the multiplicity of elem to count.
 
         This runs in O(1) time
         """
+        if value < 0:
+            raise ValueError
         old_count = self.multiplicity(elem)
-        new_count = max(0, old_count + count)
-        if new_count == 0:
-            try:
+        if value == 0:
+            if elem in self:
                 del self._dict[elem]
-            except KeyError:
-                pass
         else:
-            self._dict[elem] = new_count
-        self._size += new_count - old_count
+            self._dict[elem] = value
+        self._size += value - old_count
+
+    def _inc(self, elem, count=1):
+        """Increment the multiplicity of value by count.
+
+        If count <0 then decrement.
+        """
+        self._set(elem, self.multiplicity(elem) + count)
 
     ## New public methods (not overriding/implementing anything)
 
@@ -124,10 +127,7 @@ class BaseMultiset(Set):
 
         This runs in O(1) time
         """
-        try:
-            return self._dict[elem]
-        except KeyError:
-            return 0
+        return self._dict.get(elem, 0)
     
     def nlargest(self, n=None):
         """ List the n most common elements and their counts from the most
@@ -139,6 +139,10 @@ class BaseMultiset(Set):
             return sorted(self._dict.items(), key=itemgetter(1), reverse=True)
         else:
             return heapq.nlargest(n, self._dict.items(), key=itemgetter(1))
+
+    @classmethod
+    def _from_iterable(cls, it):
+        return cls(it)
 
     @classmethod
     def _from_map(cls, map):
@@ -156,52 +160,20 @@ class BaseMultiset(Set):
     def copy(self):
         "Create a shallow copy of self in O(len(self.num_unique_elements()))."
         return self._from_map(self._dict)
-
-    ## Alias methods - these methods are just names for other operations
-
-    def cardinality(self):
-        return len(self)
-
-    def underlying_set(self):
-        return unique_elements()
-
-    def cartesian_product(self, other):
-        return self * other
-
-    def join(self, other):
-        return self + other
-
-    def sum(self, other):
-        return self + other
-
-    def difference(self, other):
-        return self - other
-
-    def symmetric_difference(self, other):
-        return self ^ other
-
-    def xor(self, other):
-        return self ^ other
-
-    def intersect(self, other):
-        return self & other
-
-    def union(self, other):
-        return self | other
     
-    ## implementing Sized (inherited from Set) methods
+    ## implementing Sized methods
 
     def __len__(self):
         """ Returns the cardinality of the multiset. This runs in O(1)."""
         return self._size
 
-    ## implementing Container (inherited from Set) methods
+    ## implementing Container methods
 
     def __contains__(self, elem):
         """Returns the multiplicity of the element. This runs in O(1)."""
         return self.multiplicity(elem)
 
-    ## implementing Iterable (inherited from Set) methods
+    ## implementing Iterable methods
 
     def __iter__(self):
         """Iterate through all elements; return multiple copies if present."""
@@ -209,10 +181,7 @@ class BaseMultiset(Set):
             for i in range(count):
                 yield(elem)
 
-    ## implementing/overriding Set methods
-    ##
-    ## Also included here is __add__ even though its not overriding a Set method.
-    ## I figured it would be better to keep it with the other set operations.
+    # Comparison methods
 
     def __le__(self, other):
         """
@@ -227,15 +196,32 @@ class BaseMultiset(Set):
         TODO write test cases for __le__
         """
         if not isinstance(other, BaseMultiset):
-            if not isinstance(other, Iterable):
-                return NotImplemented
-            other = self._from_iterable(other)
+            raise TypeError("Cannot compare Multiset with another type.")
         if len(self) > len(other):
             return False
         for elem in self.unique_elements():
             if self.multiplicity(elem) > other.multiplicity(elem):
                 return False
         return True
+
+    def __lt__(self, other):
+        return self <= other and len(self) < len(other)
+
+    def __gt__(self, other):
+        return other < self
+
+    def __ge__(self, other):
+        return other <= self
+
+    def __eq__(self, other):
+        if not isinstance(other, BaseMultiset):
+            return False
+        return len(self) == len(other) and self <= other
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    # Operations - &, |, +, -, ^, * and isdisjoint
 
     def __and__(self, other):
         """ Intersection is the minimum of corresponding counts. 
@@ -250,8 +236,6 @@ class BaseMultiset(Set):
         TODO write unit tests for and
         """
         if not isinstance(other, BaseMultiset):
-            if not isinstance(other, Iterable):
-                return NotImplemented
             other = self._from_iterable(other)
         values = dict()
         for elem in self._dict:
@@ -271,11 +255,10 @@ class BaseMultiset(Set):
 
         TODO write unit tests for isdisjoint
         """
-        if not isinstance(other, BaseMultiset):
-            if not isinstance(other, Iterable):
-                return NotImplemented
-            other = self._from_iterable(other)
-        return super.isdisjoint(self.unique_elements(), other.unique_elements())
+        for value in other:
+            if value in self:
+                return False
+        return True
 
     def __or__(self, other):
         """ Union is the maximum of all elements. 
@@ -290,8 +273,6 @@ class BaseMultiset(Set):
         TODO write unit tests for or
         """
         if not isinstance(other, BaseMultiset):
-            if not isinstance(other, Iterable):
-                return NotImplemented
             other = self._from_iterable(other)
         values = dict()
         for elem in self.unique_elements() | other.unique_elements():
@@ -309,8 +290,6 @@ class BaseMultiset(Set):
 
         TODO write unit tests for add
         """
-        if not isinstance(other, Iterable):
-            return NotImplemented
         out = self.copy()
         for elem in other:
             out._inc(elem)
@@ -329,34 +308,32 @@ class BaseMultiset(Set):
 
         TODO write tests for sub
         """
-        if not isinstance(other, Iterable):
-            return NotImplemented
         out = self.copy()
         for elem in other:
-            out._inc(elem, -1)
+            try:
+                out._inc(elem, -1)
+            except ValueError:  # What is up with this.
+                pass
         return out
 
     def __mul__(self, other):
-        """ Cartesian product of the two sets.
+        """Cartesian product of the two sets.
         other can be any iterable.
         Both self and other must contain elements that can be added together.
 
         This should run in O(m*n+l) where:
             m is the number of unique elements in self
             n is the number of unique elements in other
-            if other is a multiset:
+            if other is a bag:
                 l is 0
             else:
                 l is the len(other)
-
         The +l will only really matter when other is an iterable with MANY
-        repeated elements. For example:
-            {'a'^2} * 'bbbbbbbbbbbbbbbbbbbbbbbbbb'
-        will be dominated by counting the 'b's.
+        repeated elements.
+        For example: {'a'^2} * 'bbbbbbbbbbbbbbbbbbbbbbbbbb'
+        The algorithm will be dominated by counting the 'b's
         """
         if not isinstance(other, BaseMultiset):
-            if not isinstance(other, Iterable):
-                return NotImplemented
             other = self._from_iterable(other)
         values = dict()
         for elem, count in self._dict.items():
@@ -382,18 +359,106 @@ class Multiset(BaseMultiset, MutableSet):
     """
     Multiset is a Mutable BaseMultiset, thus not hashable and unusable for dict
     keys or in other sets.
-
-    TODO write multiset add, discard and clear unit tests
     """
+
+    def pop(self):
+        # TODO can this be done more efficiently (no need to create an iterator)?
+        it = iter(self)
+        try:
+            value = next(it)
+        except StopIteration:
+            raise KeyError
+        self.discard(value)
+        return value
+
     def add(self, elem):
         self._inc(elem, 1)
-    
+
     def discard(self, elem):
+        try:
+            self.remove(elem)
+        except ValueError:
+            pass
+
+    def remove(self, elem):
         self._inc(elem, -1)
 
     def clear(self):
         self._dict = dict()
         self._size = 0
+
+    # In-place operations
+
+    def __ior__(self, other):
+        """
+        if isinstance(other, _basebag):
+            This runs in O(other.num_unique_elements())
+        else:
+            This runs in O(len(other))
+        """
+        if not isinstance(other, BaseMultiset):
+            other = self._from_iterable(other)
+        for elem, other_count in other._dict.items():
+            self_count = self.multiplicity(elem)
+            self._set(elem, max(other_count, self_count))
+        return self
+
+    def __iand__(self, other):
+        """
+        if isinstance(other, _basebag):
+            This runs in O(other.num_unique_elements())
+        else:
+            This runs in O(len(other))
+        """
+        if not isinstance(other, BaseMultiset):
+            other = self._from_iterable(other)
+        for elem, self_count in set(self._dict.items()):
+            other_count = other.count(elem)
+            self._set(elem, min(other_count, self_count))
+        return self
+
+    def __ixor__(self, other):
+        """
+        if isinstance(other, _basebag):
+            This runs in O(other.num_unique_elements())
+        else:
+            This runs in O(len(other))
+        """
+        if not isinstance(other, BaseMultiset):
+            other = self._from_iterable(other)
+        other_minus_self = other - self
+        self -= other
+        self |= other_minus_self
+        return self
+
+    def __isub__(self, other):
+        """
+        if isinstance(it, _basebag):
+            This runs in O(it.num_unique_elements())
+        else:
+            This runs in O(len(it))
+        """
+        if not isinstance(other, BaseMultiset):
+            other = self._from_iterable(other)
+        for elem, count in other._dict.items():
+            try:
+                self._inc(elem, -count)
+            except ValueError:
+                pass
+        return self
+
+    def __iadd__(self, other):
+        """
+        if isinstance(it, _basebag):
+            This runs in O(it.num_unique_elements())
+        else:
+            This runs in O(len(it))
+        """
+        if not isinstance(other, BaseMultiset):
+            other = self._from_iterable(other)
+        for elem, count in other._dict.items():
+            self._inc(elem, count)
+        return self
 
 
 class FrozenMultiset(BaseMultiset, Hashable):
