@@ -37,11 +37,11 @@ class BaseMultiset(Set):
 
         This runs in O(len(iterable))
         """
-        self.__dict = dict()
-        self.__size = 0
+        self._dict = dict()
+        self._size = 0
         if iterable:
             for elem in iterable:
-                self.__inc(elem)
+                self._inc(elem)
 
     def __repr__(self):
         """
@@ -50,7 +50,7 @@ class BaseMultiset(Set):
 
         This runs in whatever tuple(self) does, I'm assuming O(len(self))
         """
-        if self.__size == 0:
+        if self._size == 0:
             return '{0}()'.format(self.__class__.__name__)
         else:
             format_string = '{class_name}({tup!r})'
@@ -63,13 +63,13 @@ class BaseMultiset(Set):
 
         This runs in O(self.num_unique_elements())
         """
-        if self.__size == 0:
+        if self._size == 0:
             return '{}'
         else:
             format_single = '{elem!r}'
             format_mult = '{elem!r}^{mult}'
             strings = []
-            for elem, mult in self.__dict.items():
+            for elem, mult in self._dict.items():
                 if mult > 1:
                     strings.append(format_mult.format(elem=elem, mult=mult))
                 else:
@@ -83,7 +83,7 @@ class BaseMultiset(Set):
 
     ## Internal methods
 
-    def __inc(self, elem, count=1):
+    def _inc(self, elem, count=1):
         """
         Increment the multiplicity of elem by count (if count <0 then
         decrement).
@@ -94,12 +94,12 @@ class BaseMultiset(Set):
         new_count = max(0, old_count + count)
         if new_count == 0:
             try:
-                del self.__dict[elem]
+                del self._dict[elem]
             except KeyError:
                 pass
         else:
-            self.__dict[elem] = new_count
-        self.__size += new_count - old_count
+            self._dict[elem] = new_count
+        self._size += new_count - old_count
 
     ## New public methods (not overriding/implementing anything)
 
@@ -108,14 +108,14 @@ class BaseMultiset(Set):
         
         This runs in O(1) time
         """
-        return len(self.__dict)
+        return len(self._dict)
 
     def unique_elements(self):
         """ Returns a view of unique elements in this multiset. 
         
         This runs in O(1) time
         """
-        return self.__dict.keys()
+        return self._dict.keys()
 
     def multiplicity(self, elem):
         """
@@ -125,7 +125,7 @@ class BaseMultiset(Set):
         This runs in O(1) time
         """
         try:
-            return self.__dict[elem]
+            return self._dict[elem]
         except KeyError:
             return 0
     
@@ -136,9 +136,9 @@ class BaseMultiset(Set):
         Run time should be O(m log m) where m is len(self).
         """
         if n is None:
-            return sorted(self.__dict.items(), key=itemgetter(1), reverse=True)
+            return sorted(self._dict.items(), key=itemgetter(1), reverse=True)
         else:
-            return heapq.nlargest(n, self.__dict.items(), key=itemgetter(1))
+            return heapq.nlargest(n, self._dict.items(), key=itemgetter(1))
 
     @classmethod
     def _from_map(cls, map):
@@ -150,12 +150,12 @@ class BaseMultiset(Set):
         """
         out = cls()
         for elem, count in map.items():
-            out.__inc(elem, count)
+            out._inc(elem, count)
         return out
 
     def copy(self):
         "Create a shallow copy of self in O(len(self.num_unique_elements()))."
-        return self._from_map(self.__dict)
+        return self._from_map(self._dict)
 
     ## Alias methods - these methods are just names for other operations
 
@@ -193,7 +193,7 @@ class BaseMultiset(Set):
 
     def __len__(self):
         """ Returns the cardinality of the multiset. This runs in O(1)."""
-        return self.__size
+        return self._size
 
     ## implementing Container (inherited from Set) methods
 
@@ -205,7 +205,7 @@ class BaseMultiset(Set):
 
     def __iter__(self):
         """Iterate through all elements; return multiple copies if present."""
-        for elem, count in self.__dict.items():
+        for elem, count in self._dict.items():
             for i in range(count):
                 yield(elem)
 
@@ -254,7 +254,7 @@ class BaseMultiset(Set):
                 return NotImplemented
             other = self._from_iterable(other)
         values = dict()
-        for elem in self.__dict:
+        for elem in self._dict:
             values[elem] = min(other.multiplicity(elem), self.multiplicity(elem))
         return self._from_map(values)
 
@@ -313,7 +313,7 @@ class BaseMultiset(Set):
             return NotImplemented
         out = self.copy()
         for elem in other:
-            out.__inc(elem)
+            out._inc(elem)
         return out
 
     def __sub__(self, other):
@@ -333,7 +333,7 @@ class BaseMultiset(Set):
             return NotImplemented
         out = self.copy()
         for elem in other:
-            out.__inc(elem, -1)
+            out._inc(elem, -1)
         return out
 
     def __mul__(self, other):
@@ -359,8 +359,8 @@ class BaseMultiset(Set):
                 return NotImplemented
             other = self._from_iterable(other)
         values = dict()
-        for elem, count in self.__dict.items():
-            for other_elem, other_count in other.__dict.items():
+        for elem, count in self._dict.items():
+            for other_elem, other_count in other._dict.items():
                 new_elem = elem + other_elem
                 new_count = count * other_count
                 values[new_elem] = new_count
@@ -386,14 +386,14 @@ class Multiset(BaseMultiset, MutableSet):
     TODO write multiset add, discard and clear unit tests
     """
     def add(self, elem):
-        self.__inc(elem, 1)
+        self._inc(elem, 1)
     
     def discard(self, elem):
-        self.__inc(elem, -1)
+        self._inc(elem, -1)
 
     def clear(self):
-        self.__dict = dict()
-        self.__size = 0
+        self._dict = dict()
+        self._size = 0
 
 
 class FrozenMultiset(BaseMultiset, Hashable):
