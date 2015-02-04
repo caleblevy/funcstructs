@@ -36,11 +36,6 @@ class BaseMultiset(Set):
         multiset however many times it appears.
 
         This runs in O(len(iterable))
-
-        >>> basemultiset()                     # create empty set
-        basemultiset()
-        >>> basemultiset('abracadabra')        # create from an Iterable
-        basemultiset(('a', 'a', 'a', 'a', 'a', 'r', 'r', 'b', 'b', 'c', 'd'))
         """
         self.__dict = dict()
         self.__size = 0
@@ -54,35 +49,19 @@ class BaseMultiset(Set):
         containing all of the elements.
 
         This runs in whatever tuple(self) does, I'm assuming O(len(self))
-
-        >>> ms = basemultiset()
-
-        >>> ms == eval(ms.__repr__())
-        True
-        >>> ms = basemultiset('abracadabra')
-
-        >>> ms == eval(ms.__repr__())
-        True
         """
         if self.__size == 0:
             return '{0}()'.format(self.__class__.__name__)
         else:
-            format = '{class_name}({tuple!r})'
-            return format.format(class_name=self.__class__.__name__, tuple=tuple(self))
-    
+            format_string = '{class_name}({tup!r})'
+            return format_string.format(class_name=self.__class__.__name__, tup=tuple(self))
+
     def __str__(self):
         """
         The printable string appears just like a set, except that each element
         is raised to the power of the multiplicity if it is greater than 1.
 
         This runs in O(self.num_unique_elements())
-
-        >>> print(basemultiset())
-        {}
-        >>> print(basemultiset('abracadabra'))
-        {'a'^5, 'r'^2, 'b'^2, 'c', 'd'}
-        >>> basemultiset('abc').__str__() == set('abc').__str__()
-        True
         """
         if self.__size == 0:
             return '{}'
@@ -144,13 +123,6 @@ class BaseMultiset(Set):
         raised, instead 0 is returned.
 
         This runs in O(1) time
-
-        >>> ms = basemultiset('abracadabra')
-
-        >>> ms.multiplicity('a')
-        5
-        >>> ms.multiplicity('x')
-        0
         """
         try:
             return self.__dict[elem]
@@ -161,12 +133,7 @@ class BaseMultiset(Set):
         """ List the n most common elements and their counts from the most
         common to the least.  If n is None, the list all element counts.
 
-        Run time should be O(m log m) where m is len(self)
-
-        >>> basemultiset('abracadabra').nlargest()
-        [('a', 5), ('r', 2), ('b', 2), ('c', 1), ('d', 1)]
-        >>> basemultiset('abracadabra').nlargest(2)
-        [('a', 5), ('r', 2)]
+        Run time should be O(m log m) where m is len(self).
         """
         if n is None:
             return sorted(self.__dict.items(), key=itemgetter(1), reverse=True)
@@ -180,9 +147,6 @@ class BaseMultiset(Set):
         added if the value is > 0.
 
         This runs in O(len(map))
-        
-        >>> basemultiset._from_map({'a': 1, 'b': 2})
-        basemultiset(('a', 'b', 'b'))
         """
         out = cls()
         for elem, count in map.items():
@@ -190,17 +154,7 @@ class BaseMultiset(Set):
         return out
 
     def copy(self):
-        """ Create a shallow copy of self.
-
-        This runs in O(len(self.num_unique_elements()))
-        
-        >>> basemultiset().copy() == basemultiset()
-        True
-        >>> abc = basemultiset('abc')
-
-        >>> abc.copy() == abc
-        True
-        """
+        "Create a shallow copy of self in O(len(self.num_unique_elements()))."
         return self._from_map(self.__dict)
 
     ## Alias methods - these methods are just names for other operations
@@ -238,39 +192,19 @@ class BaseMultiset(Set):
     ## implementing Sized (inherited from Set) methods
 
     def __len__(self):
-        """ Returns the cardinality of the multiset. 
-
-        This runs in O(1)
-        
-        >>> len(basemultiset())
-        0
-        >>> len(basemultiset('abc'))
-        3
-        >>> len(basemultiset('aaba'))
-        4
-        """
+        """ Returns the cardinality of the multiset. This runs in O(1)."""
         return self.__size
 
     ## implementing Container (inherited from Set) methods
 
     def __contains__(self, elem):
-        """ Returns the multiplicity of the element. 
-
-        This runs in O(1)
-        
-        >>> 'a' in basemultiset('bbac')
-        True
-        >>> 'a' in basemultiset()
-        False
-        >>> 'a' in basemultiset('missing letter')
-        False
-        """
+        """Returns the multiplicity of the element. This runs in O(1)."""
         return self.multiplicity(elem)
 
     ## implementing Iterable (inherited from Set) methods
 
     def __iter__(self):
-        """ Iterate through all elements, multiple copies will be returned if they exist. """
+        """Iterate through all elements; return multiple copies if present."""
         for elem, count in self.__dict.items():
             for i in range(count):
                 yield(elem)
@@ -292,7 +226,7 @@ class BaseMultiset(Set):
 
         TODO write test cases for __le__
         """
-        if not isinstance(other, self.__class__):
+        if not isinstance(other, BaseMultiset):
             if not isinstance(other, Iterable):
                 return NotImplemented
             other = self._from_iterable(other)
@@ -315,7 +249,7 @@ class BaseMultiset(Set):
 
         TODO write unit tests for and
         """
-        if not isinstance(other, basemultiset):
+        if not isinstance(other, BaseMultiset):
             if not isinstance(other, Iterable):
                 return NotImplemented
             other = self._from_iterable(other)
@@ -337,7 +271,7 @@ class BaseMultiset(Set):
 
         TODO write unit tests for isdisjoint
         """
-        if not isinstance(other, basemultiset):
+        if not isinstance(other, BaseMultiset):
             if not isinstance(other, Iterable):
                 return NotImplemented
             other = self._from_iterable(other)
@@ -355,7 +289,7 @@ class BaseMultiset(Set):
 
         TODO write unit tests for or
         """
-        if not isinstance(other, basemultiset):
+        if not isinstance(other, BaseMultiset):
             if not isinstance(other, Iterable):
                 return NotImplemented
             other = self._from_iterable(other)
@@ -386,7 +320,8 @@ class BaseMultiset(Set):
         """ Difference between the sets.
         other can be any iterable.
         For normal sets this is all s.t. x in self and x not in other. 
-        For multisets this is multiplicity(x) = max(0, self.multiplicity(x)-other.multiplicity(x))
+        For multisets this is:
+           multiplicity(x) = max(0, self.multiplicity(x)-other.multiplicity(x))
 
         This runs in O(m + n) where:
             n is self.num_unique_elements()
@@ -413,18 +348,13 @@ class BaseMultiset(Set):
                 l is 0
             else:
                 l is the len(other)
-        The +l will only really matter when other is an iterable with MANY repeated elements
-        For example: {'a'^2} * 'bbbbbbbbbbbbbbbbbbbbbbbbbb'
-        The algorithm will be dominated by counting the 'b's
 
-        >>> ms = basemultiset('aab')
-
-        >>> ms * set('a')
-        basemultiset(('aa', 'aa', 'ba'))
-        >>> ms * set()
-        basemultiset()
+        The +l will only really matter when other is an iterable with MANY
+        repeated elements. For example:
+            {'a'^2} * 'bbbbbbbbbbbbbbbbbbbbbbbbbb'
+        will be dominated by counting the 'b's.
         """
-        if not isinstance(other, basemultiset):
+        if not isinstance(other, BaseMultiset):
             if not isinstance(other, Iterable):
                 return NotImplemented
             other = self._from_iterable(other)
@@ -449,8 +379,9 @@ class BaseMultiset(Set):
         return (self - other) | (other - self)
 
 class Multiset(BaseMultiset, MutableSet):
-    """ multiset is a Mutable basemultiset, thus not hashable and unusable for dict keys or in
-    other sets.
+    """
+    Multiset is a Mutable BaseMultiset, thus not hashable and unusable for dict
+    keys or in other sets.
 
     TODO write multiset add, discard and clear unit tests
     """
@@ -464,20 +395,28 @@ class Multiset(BaseMultiset, MutableSet):
         self.__dict = dict()
         self.__size = 0
 
+
 class FrozenMultiset(BaseMultiset, Hashable):
-    """ frozenmultiset is a Hashable basemultiset, thus it is immutable and usable for dict keys
     """
+    FrozenMultiset is a Hashable BaseMultiset, thus it is immutable and usable
+    for dict keys.
+    """
+
     def __hash__(self):
-        """ Use the hash funtion inherited from somewhere.  For now this is from Set,
-        I'm not sure that it works for collections with multiple elements.
+        """ 
+        Use the hash funtion inherited from somewhere. For now this is from
+        Set, I'm not sure that it works for collections with multiple elements.
 
         TODO write unit tests for hash
         """
         return self._hash()
-    
+
+
 def multichoose(iterable, k):
-    """ Returns a set of all possible multisets of length k on unique elements from iterable.
-    The number of sets returned is C(n+k-1, k) where:
+    """
+    Returns a set of all possible multisets of length k on unique elements from
+    iterable. The number of sets returned is C(n+k-1, k) where:
+
         C is the binomial coefficient function
         n is the number of unique elements in iterable
         k is the cardinality of the resulting multisets
@@ -486,25 +425,6 @@ def multichoose(iterable, k):
     DO NOT run this on big inputs.
 
     see http://en.wikipedia.org/wiki/Multiset#Multiset_coefficients
-
-    >>> multichoose((), 1)
-    set()
-    >>> multichoose('a', 1)
-    {frozenmultiset(('a',))}
-    >>> multichoose('a', 2)
-    {frozenmultiset(('a', 'a'))}
-    >>> result = multichoose('ab', 3)
-
-    >>> len(result)
-    4
-    >>> frozenmultiset(('a', 'a', 'a')) in result
-    True
-    >>> frozenmultiset(('a', 'a', 'b')) in result
-    True
-    >>> frozenmultiset(('a', 'b', 'b')) in result
-    True
-    >>> frozenmultiset(('b', 'b', 'b')) in result
-    True
     """
     # if iterable is empty there are no multisets
     if not iterable:
@@ -523,9 +443,70 @@ def multichoose(iterable, k):
                 result.add(symbol_set + others)
     return result
 
-print multichoose('ab', 3)
 
 class MultisetTests(unittest.TestCase):
+    """
+    Test properties of Multiset objects. Tests tend to be of two forms:
+        basemultiset()                     # create empty set
+        basemultiset('abracadabra')        # create from an Iterable
+    """
+
+    def testMultiplicity(self):
+        """Check that we record the correct number of elements."""
+        ms = BaseMultiset('abracadabra')
+        self.assertEqual(5, ms.multiplicity('a'))
+        self.assertEqual(0, ms.multiplicity('x'))
+
+    def testNLargest(self):
+        ms = BaseMultiset('abracadabra')
+        sorted_ms = [('a', 5), ('r', 2), ('b', 2), ('c', 1), ('d', 1)]
+        self.assertSequenceEqual(sorted_ms, ms.nlargest())
+        self.assertSequenceEqual([('a', 5), ('r', 2)], ms.nlargest(2))
+
+    def testRepresentation(self):
+        """Test that eval(repr(self)) == self"""
+        ms = BaseMultiset()
+        self.assertTrue(ms == eval(repr(ms)))
+        ms = BaseMultiset('abracadabra')
+        self.assertTrue(ms == eval(repr(ms)))
+
+    def testStringForm(self):
+        """Test str(self)."""
+        self.assertEqual("{}", str(BaseMultiset()))
+        ms = BaseMultiset('abracadabra')
+        str_rep = "{'a'^5, 'r'^2, 'b'^2, 'c', 'd'}"
+        self.assertEqual(str_rep, str(ms))
+
+    def testFromMap(self):
+        """Check that we can form a multiset from a map."""
+        frommap = BaseMultiset._from_map({'a': 1, 'b': 2})
+        fromit = BaseMultiset(('a', 'b', 'b'))
+        self.assertEqual(frommap, fromit)
+
+    def testCopy(self):
+        """Check that we can copy multisets"""
+        self.assertTrue(BaseMultiset().copy() == BaseMultiset())
+        abc = BaseMultiset('abc')
+        self.assertTrue(abc.copy() == abc)
+
+    def testElementCount(self):
+        """Check the number of elements in our multisets."""
+        self.assertEqual(0, len(BaseMultiset()))
+        self.assertEqual(3, len(BaseMultiset('abc')))
+        self.assertEqual(4, len(BaseMultiset('aaba')))
+
+    def testMemberCheck(self):
+        """Verify that we can test if an object is a member of a multiset."""
+        self.assertTrue('a' in BaseMultiset('bbac'))
+        self.assertFalse('a' in BaseMultiset())
+        self.assertFalse('a' in BaseMultiset('missing letter'))
+
+    def testCartesianProduct(self):
+        """Test a cartesian product of multisets"""
+        ms = BaseMultiset('aab')
+
+        self.assertEqual(ms * set('a'), BaseMultiset(('aa', 'aa', 'ba')))
+        self.assertEqual(ms * set(), BaseMultiset())
 
     def testHashability(self):
         """
@@ -552,12 +533,25 @@ class MultisetTests(unittest.TestCase):
             s = set([a])
         with self.assertRaises(TypeError):
             t = FrozenMultiset([a, 1])
+        with self.assertRaises(TypeError):
+            w = Multiset([a,1])
         # test commutativity of multiset instantiation.
         self.assertEqual(Multiset([4, 4, 5, 5, c]), Multiset([4, 5, d, 4, 5]))
 
+    def testMultichoose(self):
+        """Test multiset enumeration."""
+        self.assertEqual(set(), multichoose((), 1))  # test the empty case
+        self.assertEqual({FrozenMultiset(('a',))}, multichoose('a', 1))
+        self.assertEqual({FrozenMultiset(('a', 'a'))}, multichoose('a', 2))
 
-class MultichooseTests(unittest.TestCase):
-    pass
+        result = multichoose('ab', 3)
+        self.assertEqual(4, len(result))
+        self.assertTrue(FrozenMultiset(('a', 'a', 'a')) in result)
+        self.assertTrue(FrozenMultiset(('a', 'a', 'b')) in result)
+        self.assertTrue(FrozenMultiset(('a', 'b', 'b')) in result)
+        self.assertTrue(FrozenMultiset(('b', 'b', 'b')) in result)
+
+        self.assertTrue(multichoose('ab',3) == multichoose('ba',3)) # commuting
 
 
 if __name__ == '__main__':
