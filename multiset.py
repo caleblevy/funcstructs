@@ -12,30 +12,42 @@ elements of a set, and counting ways to represent them assuming certain
 properties are equivalent.
 """
 
+import bags
 from functools import reduce
 from math import factorial
 from operator import mul
+import unittest
 
 prod = lambda iterable: reduce(mul, iterable, 1)
 factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 
-def split_set(partition):
-    """Splits a multiset of hashable items into elements and multiplicities."""
-    y = list(set(partition))
-    d = [partition.count(y[I]) for I in range(len(y))]
-    return y, d
+class Multiset(bags.frozenbag):
+    def split(self):
+        """Splits the multiset into element-multiplicity pairs."""
+        y = list(self._dict)
+        d = [self._dict[el] for el in self._dict]
+        return y, d
 
+    def degeneracy(self):
+        """Number of different representations of the same multiset."""
+        y, d = self.split()
+        return factorial_prod(d)
 
-def mset_degeneracy(mset):
-    """Number of different representations of the same multiset."""
-    y, d = split_set(mset)
-    return factorial_prod(d)
+class MultisetTests(unittest.TestCase):
 
+    def testSplitSet(self):
+        """Test that we can split the multiset into elements and counts"""
+        abra = Multiset("abracadabra")
+        y, d = abra.split()
+        for el in y:
+            self.assertEqual(abra.count(el), d[y.index(el)])
 
-def get(S):
-    """ Get a random element from a set (or any iterable). """
-    for x in S:
-        return x
-    raise ValueError("Cannot retrieve an item from the empty set")
+    def testMultisetDegeneracy(self):
+        abra = Multiset("abracadabra")
+        self.assertEqual(120*2*2, abra.degeneracy())
+
+if __name__ == '__main__':
+    unittest.main()
+

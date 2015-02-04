@@ -16,13 +16,6 @@ import heapq
 from collections import MutableSet, Set, Hashable
 from operator import itemgetter
 import unittest
-from functools import reduce
-from math import factorial
-from operator import mul
-
-prod = lambda iterable: reduce(mul, iterable, 1)
-factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
-nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 
 class _basebag(Set):
@@ -360,17 +353,6 @@ class _basebag(Set):
         """
         return (self - other) | (other - self)
 
-    def split(self):
-        """Splits the multiset into element-multiplicity pairs."""
-        y = list(self._dict)
-        d = [self._dict[el] for el in self]
-        return y, d
-
-    def degeneracy(self):
-        """Number of different representations of the same multiset."""
-        y, d = self.split()
-        return factorial_prod(d)
-
 class bag(_basebag, MutableSet):
     """
     bag is a Mutable _basebag, thus not hashable and unusable for dict
@@ -530,7 +512,7 @@ def compare_bag_string(b):
     s = str(b)
     return set(s.lstrip('{').rstrip('}').split(', '))
 
-class bagTests(unittest.TestCase):
+class BagTests(unittest.TestCase):
     """
     Test properties of bag objects. Tests tend to be of two forms:
         basemultiset()                     # create empty set
