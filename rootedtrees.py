@@ -155,6 +155,33 @@ class RootedTree(object):
     def from_treefunc(cls, func):
         pass
 
+class CanonicalRootedTree(RootedTree):
+    def canonical_treeorder(tree):
+        """
+        Given a noncanonical (non lexicographically maximal) level sequence, return
+        the canonical representation of the equivalent tree.
+        """
+        if not list(branches(tree)):
+            return tree
+        branch_list = []
+        for branch in branches(tree):
+            branch_list.append(canonical_treeorder(branch))
+        return [tree[0]]+nestops.flatten(sorted(branch_list, reverse=True))
+
+    @classmethod
+    def from_tree(cls, tree):
+        if not tree.branches():
+            return tree
+        subbranches = []
+        for branch in tree.branches():
+            subbranches.appen
+    def __init__(self, lev):
+        RootedTree.__init__(self, [i+1 for i in lev])
+
+
+
+
+
 
 class RootedTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
@@ -327,6 +354,13 @@ class TreeTest(unittest.TestCase):
             for tree in RootedTrees(n):
                 labelled_treecount += math.factorial(n)//tree.degeneracy()
             self.assertEqual(n**(n-1), labelled_treecount)
+
+        """Prove ordering of the subtrees does not matter"""
+        lev = [1,2,3,4,2,3,4,5,3,4,3,4,4,3,4,5,2,2,3]
+        a = RootedTree(lev)
+        b = RootedTree(canonical_treeorder(lev))
+        self.assertTrue(a != b)
+        self.assertTrue(a.degeneracy() == b.degeneracy())
 
     def testTreeFuncForm(self):
         """Make sure treetofunc correctly represents trees as endofunctions"""

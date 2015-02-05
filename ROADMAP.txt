@@ -22,34 +22,54 @@ Early January 2015:
 
 January 31, 2015:
 
-    Ideas that should VERY LIKELY be persued:
-
-    #  - Make RootedTrees collection class
-    #    * __len__ will be rooted_treecount
-        * __in__ will be rooted tree check'
-    #    * __iter__ is the rooted_trees generator
-    #    * __next__ is successor tree
-
-      - Make a RootedTree object.
-    #    * chop -> tree.chop()
-    #    * tree_to_func -> tree.func_form()
-        * canonical_treeorder -> tree.canonical_form()
-    #    * len(tree) -> __len__
-        * hypothetical is_tree function -> __eq__
-        * Ordering -> __cmp__, __le__, __eq__
-
-
-    Ideas that should POSSIBLY be explored:
-      - Corresponding CanonicalRootedTree and CanonicalRootedTrees
-      - LabelledRootedTree/UnlabelledRootedTree
+    # Ideas that should VERY LIKELY be persued:
+    #   - Make RootedTrees collection class
+    #     * __len__ will be rooted_treecount
+    #     * __in__ will be rooted tree check'
+    #     * __iter__ is the rooted_trees generator
+    #     * __next__ is successor tree
+    #   - Make a RootedTree object.
+    #     * chop -> tree.chop()
+    #     * tree_to_func -> tree.func_form()
+    #     * canonical_treeorder -> tree.canonical_form()
+    #     * len(tree) -> __len__
+    #     * hypothetical is_tree function -> __eq__
+    #     * Ordering -> __cmp__, __le__, __eq__
+    #
+    # Ideas that should POSSIBLY be explored:
+    #   - Corresponding CanonicalRootedTree and CanonicalRootedTrees
+    #   - LabelledRootedTree/UnlabelledRootedTree
 
 February 2, 2015:
-    Ideas that should VERY LIKELY be persued:
-      - Make my own Multiset classes based off of the bag module.
-      - Funcstruct class
-      - Endofunction class
- 
-    Ideas that should PROBABLY be persued
-      - Forest class (derived from my custom Multiset classes)
-      - Corresponding Canonical"..." classes with sorting methods.
-      - Necklace classes.
+    # Ideas that should VERY LIKELY be persued:
+    #   - Make my own Multiset classes based off of the bag module.
+    #   - Funcstruct class
+    #   - Endofunction class
+    #
+    # Ideas that should PROBABLY be persued
+    #   - Forest class (derived from my custom Multiset classes)
+    #   - Corresponding Canonical"..." classes with sorting methods.
+    #   - Necklace classes.
+
+February 4, 2015:
+
+Trees:
+  - Want to make forest class
+  - Using this, add a splice method to produce a tree
+  - Add a sort method to RootedTree to enable...
+  - Making a Canonical Rooted Tree
+  - Make a forest enumerator class
+
+Print:
+  - Give that class string print.
+  - Update multiset __repr__ to reflect __str__ (forget abour eval(repr(m))==m)
+
+Necklaces:
+  - Make a Necklace (Cycle?)class
+  - Make Necklace enumerator (len gets wrapped in as necklace_count)
+  - Give it a class method: From multiset (or it takes a multiset...)
+
+Funcstructs and Endofunctions
+  - Make Multiset.partitions return multiset of multisets (for enumeration)
+  - Make Funcstruct class and Endofunction class
+  - Make Funcstruct enumerator class (classmethod from func)

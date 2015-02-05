@@ -40,8 +40,6 @@ class Multiset(bags.frozenbag):
     def partitions(self):
         """Yield partitions of a multiset, each one being a multiset of multisets."""
         return multiset_partitions(list(self))
-        # for mpart in multiset_partitions(list(self)):
-        #     yield self.__class__(self.__class__(part) for part in mpart)
 
 
 class MultisetTests(unittest.TestCase):
