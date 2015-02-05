@@ -26,6 +26,7 @@ themselves.
 import math
 import unittest
 import itertools
+import functools
 
 from PADS.IntegerPartitions import partitions
 
@@ -41,13 +42,13 @@ def treeroot(treefunc):
     """Returns the root of an endofunction whose structure is a rooted tree."""
     return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
 
-
+@functools.total_ordering
 class RootedTree(object):
     """Represents an unlabelled rooted tree."""
 
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
-        self.root_level = level_sequence[0]
+        self.root_level = self.level_sequence[0]
         self.n = len(level_sequence)
 
     def __repr__(self):
@@ -62,6 +63,12 @@ class RootedTree(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __le__(self, other):
+        if isinstance(other, self.__class__):
+            return self.level_sequence <= other.level_sequence
+        else:
+            raise ValueError("Cannot compare tree with type %s"%type(other))
+
     def __hash__(self):
         return hash(tuple(self.level_sequence))
 
@@ -73,12 +80,13 @@ class RootedTree(object):
 
     def branches(self):
         """Return each major subbranch of a tree (even chopped)"""
-        rootcheck = lambda node: node == self.root_level + 1
-        return subsequences.startswith(self.level_sequence[1:], rootcheck)
+        isroot = lambda node: node == self.root_level + 1
+        for branch in subsequences.startswith(self.level_sequence[1:], isroot):
+            yield RootedTree(branch)
 
     def subtrees(self):
         for branch in self.branches():
-            yield self.__class__([node-1 for node in branch])
+            yield RootedTree([node-1 for node in branch])
 
     def chop(self):
         """Generates the canonical subtrees of the input tree's root node."""
@@ -148,39 +156,30 @@ class RootedTree(object):
             indset = nextinds
         return brackets
 
-    def _istree(self):
-        pass
+    def canonical_form(self):
+        """
+        Given a noncanonical (non lexicographically maximal) level sequence,
+        return the canonical representation of the equivalent tree.
+        """
+        if not self.branches():
+            return self
+        branch_list = []
+        for branch in self.branches():
+            branch_list.append(branch.canonical_form())
+        return RootedTree([self.level_sequence[0]]+nestops.flatten(sorted(branch_list, reverse=True)))
 
     @classmethod
     def from_treefunc(cls, func):
         pass
 
-class CanonicalRootedTree(RootedTree):
-    def canonical_treeorder(tree):
-        """
-        Given a noncanonical (non lexicographically maximal) level sequence, return
-        the canonical representation of the equivalent tree.
-        """
-        if not list(branches(tree)):
-            return tree
-        branch_list = []
-        for branch in branches(tree):
-            branch_list.append(canonical_treeorder(branch))
-        return [tree[0]]+nestops.flatten(sorted(branch_list, reverse=True))
-
-    @classmethod
-    def from_tree(cls, tree):
-        if not tree.branches():
-            return tree
-        subbranches = []
-        for branch in tree.branches():
-            subbranches.appen
-    def __init__(self, lev):
-        RootedTree.__init__(self, [i+1 for i in lev])
+a= RootedTree([1, 2, 3, 4, 3, 4, 5, 2, 2, 3, 4, 4, 4, 3, 4, 4, 4, 4])
+print list(a.branches())
+print list(a.canonical_form().branches())
 
 
-
-
+class DominantTree(RootedTree):
+    def __init__(self, level_sequence):
+        RootedTree.__init__(self)
 
 
 class RootedTrees(object):
@@ -254,21 +253,6 @@ class RootedTrees(object):
         return self._memoized_len
 
 
-def branches(tree):
-    """Return each major subbranch of a tree (even chopped)"""
-    return subsequences.startswith(tree[1:], lambda node: node == tree[0]+1)
-
-
-def subtrees(tree):
-    for branch in branches(tree):
-        yield [node-1 for node in branch]
-
-
-def chop(tree):
-    """Generates the canonical subtrees of the input tree's root node."""
-    return tuple(tuple(subtree) for subtree in subtrees(tree))
-
-
 def forests_simple(N):
     """
     Any rooted tree on N+1 nodes can be identically described by a collection
@@ -292,12 +276,7 @@ def canonical_treeorder(tree):
     Given a noncanonical (non lexicographically maximal) level sequence, return
     the canonical representation of the equivalent tree.
     """
-    if not list(branches(tree)):
-        return tree
-    branch_list = []
-    for branch in branches(tree):
-        branch_list.append(canonical_treeorder(branch))
-    return [tree[0]]+nestops.flatten(sorted(branch_list, reverse=True))
+    return RootedTree(tree).canonical_form()
 
 
 def _attached_subtree(node, level, treenodes):
