@@ -27,7 +27,7 @@ are precisely the necklaces whose beads are the rooted trees.
 """
 
 from factorization import divisors, totient
-from multiset import split_set, nCk
+import multiset
 from fractions import gcd, Fraction
 from functools import reduce
 
@@ -90,7 +90,7 @@ def partition_necklace_count_by_period(partition):
         # "factor" is simply the multinomial coefficient corresponding to that
         # subset of the multiplicity partition.
         for I in range(k):
-            beads[factor-1] *= nCk(n, partition[I]*factor//w)
+            beads[factor-1] *= multiset.nCk(n, partition[I]*factor//w)
             n -= partition[I]*factor//w
 
         # Subtact off the number of necklaces whose period subdivides our
@@ -112,7 +112,7 @@ def necklace_count_by_period(beads):
     Returns a list whose kth element is the number of necklaces corresponding
     to the input set of beads with k+1 distinct rotations.
     """
-    _, partition = split_set(beads)
+    _, partition = multiset.Multiset(beads).split()
     return partition_necklace_count_by_period(partition)
 
 
@@ -169,7 +169,7 @@ def necklaces(items):
     if not items:
         return
     items = sorted(items)
-    y, d = split_set(items)
+    y, d = multiset.Multiset(items).split()
     for necklace in partition_necklaces(d):
         # Explicitly make a tuple, since we must form the list of all necklaces
         # in memory when constructing endofunction structures.

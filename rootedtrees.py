@@ -82,7 +82,7 @@ class RootedTree(object):
 
     def chop(self):
         """Generates the canonical subtrees of the input tree's root node."""
-        return tuple(subtree for subtree in self.subtrees())
+        return multiset.Multiset(subtree for subtree in self.subtrees())
 
     def degeneracy(self, call_level=1):
         """
@@ -100,7 +100,7 @@ class RootedTree(object):
         deg = 1
         for subtree in self.chop():
             deg *= subtree.degeneracy()
-        return deg*multiset.mset_degeneracy(self.chop())
+        return deg*self.chop().degeneracy()
 
     def func_form(self, permutation=None):
         """
@@ -227,36 +227,6 @@ class RootedTrees(object):
         return self._memoized_len
 
 
-def partition_forests(partition):
-    """
-    Generates the forests formed from rooted trees with sizes specified by
-    partitions
-    """
-    y, d = multiset.split_set(partition)
-    l = len(y)
-    trees = [RootedTrees(I) for I in y]
-
-    preseed = [itertools.combinations_with_replacement(trees[I], d[I])
-               for I in range(l)]
-
-    seeds = [list(seed) for seed in preseed]
-    for forest in itertools.product(*seeds):
-        yield tuple(nestops.flatten(forest))
-
-
-def forests_complex(n):
-    """
-    For a given partition of N elements, we can make combinations of trees on
-    each of the node groups of that partition. Iterating over all partitions
-    gives us all collections of rooted trees on N nodes.
-    """
-    if n == 0:
-        return
-    for partition in partitions(n):
-        for forest in partition_forests(partition):
-            yield forest
-
-
 def branches(tree):
     """Return each major subbranch of a tree (even chopped)"""
     return subsequences.startswith(tree[1:], lambda node: node == tree[0]+1)
@@ -348,7 +318,6 @@ class TreeTest(unittest.TestCase):
         """Check len(forests(N))==A000081(N+1)"""
         for n, count in enumerate(self.A000081[1:]):
             self.assertEqual(count, len(set(forests_simple(n+1))))
-            self.assertEqual(count, len(set(forests_complex(n+1))))
 
     def testTreeDegeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""

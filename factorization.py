@@ -14,7 +14,7 @@ from math import ceil
 import fractions
 import unittest
 
-from multiset import prod, split_set
+import multiset
 from productrange import product_range
 
 
@@ -43,11 +43,11 @@ def divisorGen(n):
         "What is the best way to get all the divisors of a number" at
         http://stackoverflow.com/a/171784.
     """
-    factors, powers = split_set(prime_factorization(n))
+    factors, powers = multiset.Multiset(prime_factorization(n)).split()
     # Since the factors are prime, every unique partition of powers represents
     # a different divisor.
     for power_combo in product_range([m+1 for m in powers]):
-        yield prod([factors[I]**p for I, p in enumerate(power_combo)])
+        yield multiset.prod([factors[I]**p for I, p in enumerate(power_combo)])
 
 
 divisor_list = lambda n: list(divisorGen(n))
@@ -78,7 +78,7 @@ def isdivisor(d, n):
 
 def phi_product(n):
     """Return the totient using the fancy prime formula."""
-    return int(n*prod((1-fractions.Fraction(1, p) for p in prime_divisors(n))))
+    return int(n*multiset.prod((1-fractions.Fraction(1, p) for p in prime_divisors(n))))
 
 
 def phi_sum(n):

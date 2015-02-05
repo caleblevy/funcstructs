@@ -18,6 +18,8 @@ from math import factorial
 from operator import mul
 import unittest
 
+from sympy.utilities.iterables import multiset_partitions
+
 prod = lambda iterable: reduce(mul, iterable, 1)
 factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
@@ -27,13 +29,20 @@ class Multiset(bags.frozenbag):
     def split(self):
         """Splits the multiset into element-multiplicity pairs."""
         y = list(self._dict)
-        d = [self._dict[el] for el in self._dict]
+        d = [self._dict[el] for el in y]
         return y, d
 
     def degeneracy(self):
         """Number of different representations of the same multiset."""
         y, d = self.split()
         return factorial_prod(d)
+
+    def partitions(self):
+        """Yield partitions of a multiset, each one being a multiset of multisets."""
+        return multiset_partitions(list(self))
+        # for mpart in multiset_partitions(list(self)):
+        #     yield self.__class__(self.__class__(part) for part in mpart)
+
 
 class MultisetTests(unittest.TestCase):
 

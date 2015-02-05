@@ -19,7 +19,6 @@ import math
 import fractions
 import itertools
 
-from sympy.utilities.iterables import multiset_partitions
 import numpy as np
 
 import multiset
@@ -39,7 +38,7 @@ def multiset_funcstructs(mset):
     cycles correspond to the multisets.
     """
     mset = [tuple(m) for m in mset]
-    beadsets, mults = multiset.split_set(mset)
+    beadsets, mults = multiset.Multiset(mset).split()
     strands = []
     for mult, beads in zip(mults, beadsets):
         necklace_set = necklaces.necklaces(beads)
@@ -56,8 +55,8 @@ def funcstructs(n):
     all conjugacy classes in End(S)
     """
     for forest in rootedtrees.forests(n):
-        for mset in multiset_partitions(forest):
-            for funcstruct in multiset_funcstructs(mset):
+        for mpart in forest.partitions():
+            for funcstruct in multiset_funcstructs(mpart):
                 yield funcstruct
 
 
@@ -95,7 +94,7 @@ def funcstruct_degeneracy(function_structure):
     if not function_structure:
         return 1
     # First the degeneracy from the permutations of arrangements of cycles
-    degeneracy = multiset.mset_degeneracy(function_structure)
+    degeneracy = multiset.Multiset(function_structure).degeneracy()
     # Then account for the periodcity of each cycle
     for cycle in function_structure:
         degeneracy *= rotation.cycle_degeneracy(cycle)
