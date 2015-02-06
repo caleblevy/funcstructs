@@ -26,6 +26,17 @@ nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 
 class Multiset(bags.frozenbag):
+
+    def __repr__(self):
+        """Override repr with my preferred format."""
+        if self._size == 0:
+            return self.__class__.__name__+"({})"
+        elements = super(bags.frozenbag, self).__str__()
+        return self.__class__.__name__+"("+elements+")"
+
+    def __str__(self):
+        return repr(self)
+
     def split(self):
         """Splits the multiset into element-multiplicity pairs."""
         y = list(self._dict)
@@ -38,7 +49,9 @@ class Multiset(bags.frozenbag):
         return factorial_prod(d)
 
     def partitions(self):
-        """Yield partitions of a multiset, each one being a multiset of multisets."""
+        """
+        Yield partitions of a multiset, each one being a multiset of multisets.
+        """
         return multiset_partitions(list(self))
 
 

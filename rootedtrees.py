@@ -52,7 +52,7 @@ class RootedTree(object):
         self.n = len(level_sequence)
 
     def __repr__(self):
-        return "RootedTree("+str(list(self.level_sequence))+')'
+        return self.__class__.__name__ + "("+str(list(self.level_sequence))+')'
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -61,7 +61,7 @@ class RootedTree(object):
             return False
 
     def __ne__(self, other):
-        return not self.__eq__(other)
+        return not (self == other)
 
     def __le__(self, other):
         if isinstance(other, self.__class__):
@@ -168,22 +168,25 @@ class RootedTree(object):
             branch_list.append(branch._canonical_form())
         return RootedTree([self.level_sequence[0]]+nestops.flatten(sorted(branch_list, reverse=True)))
 
+    def canonical_form(self):
+        return DominantTree(self.level_sequence)
+
     @classmethod
     def from_treefunc(cls, func):
-        pass
+        return cls(func)
 
 # a= RootedTree([1, 2, 3, 4, 3, 4, 5, 2, 2, 3, 4, 4, 4, 3, 4, 4, 4, 4])
-# print list(a.branches())
-# print list(a._canonical_form().branches())
 
 
 class DominantTree(RootedTree):
     def __init__(self, level_sequence):
-        RootedTree.__init__(self, level_sequence)
-        self.level_sequence = []
-a = DominantTree([1,2,3])
-print a
-print hash(a)
+        canonical_level_sequence = RootedTree(level_sequence)._canonical_form()
+        RootedTree.__init__(self, canonical_level_sequence)
+
+a = DominantTree([1,2,3,4,3,4,4,5,3,4,4,5,6,7,8,3,4,5,6,7,7,7,8,8,9,8])
+print RootedTree.from_treefunc([1,2,3,2,3,4])
+print DominantTree.from_treefunc([1,2,3,2,3,4])
+
 
 
 class RootedTrees(object):
