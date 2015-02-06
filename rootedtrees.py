@@ -42,6 +42,16 @@ def treeroot(treefunc):
     """Returns the root of an endofunction whose structure is a rooted tree."""
     return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
 
+def _attached_subtree(node, level, treenodes):
+    """
+    Recursive portion of the subtree algorithm. Returns [level] of the node
+    plus level path of all attached subnodes, hence the itero-recursion.
+    """
+    leveltree = [level]
+    for x in treenodes[node]:
+        leveltree.extend(_attached_subtree(x, level+1, treenodes))
+    return leveltree
+
 @functools.total_ordering
 class RootedTree(object):
     """Represents an unlabelled rooted tree."""
@@ -172,6 +182,19 @@ class RootedTree(object):
         return DominantTree(self.level_sequence)
 
     @classmethod
+    def attached_subtree(cls, f, node):
+        """
+        Given an endofunction f and node in range(len(f)), returns the levelpath
+        form of the rooted tree attached to element node.
+        """
+        treenodes = iterate.attached_treenodes(f)
+        level_sequence = [1]
+        level = 2
+        for x in treenodes[node]:
+            level_sequence += _attached_subtree(x, level, treenodes)
+        return cls(level_sequence)
+
+    @classmethod
     def from_treefunc(cls, func):
         return cls(func)
 
@@ -286,30 +309,12 @@ def canonical_treeorder(tree):
     return RootedTree(tree)._canonical_form()
 
 
-def _attached_subtree(node, level, treenodes):
-    """
-    Recursive portion of the subtree algorithm. Returns [level] of the node
-    plus level path of all attached subnodes, hence the itero-recursion.
-    """
-    leveltree = [level]
-    for x in treenodes[node]:
-        leveltree.extend(_attached_subtree(x, level+1, treenodes))
-    return leveltree
-
-
 def attached_subtree(f, node):
     """
     Given an endofunction f and node in range(len(f)), returns the levelpath
     form of the rooted tree attached to element node.
     """
-    treenodes = iterate.attached_treenodes(f)
-    leveltree = [1]
-    if not treenodes[node]:
-        return leveltree
-    level = 2
-    for x in treenodes[node]:
-        leveltree += _attached_subtree(x, level, treenodes)
-    return canonical_treeorder(leveltree)
+    return DominantTree.attached_subtree(f, node)
 
 
 def treefunc_to_tree(treefunc):
