@@ -195,8 +195,10 @@ class RootedTree(object):
         return cls(level_sequence)
 
     @classmethod
-    def from_treefunc(cls, func):
-        return cls(func)
+    def from_treefunc(cls, treefunc):
+        n = len(treefunc)
+        root = treeroot(treefunc)
+        return cls.attached_subtree(treefunc, root)
 
 # a= RootedTree([1, 2, 3, 4, 3, 4, 5, 2, 2, 3, 4, 4, 4, 3, 4, 4, 4, 4])
 
@@ -207,8 +209,6 @@ class DominantTree(RootedTree):
         RootedTree.__init__(self, canonical_level_sequence)
 
 a = DominantTree([1,2,3,4,3,4,4,5,3,4,4,5,6,7,8,3,4,5,6,7,7,7,8,8,9,8])
-print RootedTree.from_treefunc([1,2,3,2,3,4])
-print DominantTree.from_treefunc([1,2,3,2,3,4])
 
 
 
@@ -318,9 +318,7 @@ def attached_subtree(f, node):
 
 
 def treefunc_to_tree(treefunc):
-    n = len(treefunc)
-    root = [x for x in range(n) if treefunc[x] == x][0]
-    return RootedTree(attached_subtree(treefunc, root))
+    return DominantTree.from_treefunc(treefunc)
 
 
 class TreeTest(unittest.TestCase):
@@ -381,7 +379,7 @@ class TreeTest(unittest.TestCase):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = conjugates.randconj(treefunc)
-                    self.assertSequenceEqual(tree, treefunc_to_tree(rtreefunc))
+                    self.assertSequenceEqual(tree, RootedTree(treefunc_to_tree(rtreefunc)))
 
 
 if __name__ == '__main__':
