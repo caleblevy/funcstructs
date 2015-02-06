@@ -168,8 +168,7 @@ class RootedTree(object):
 
     def _canonical_form(self):
         """
-        Given a noncanonical (non lexicographically maximal) level sequence,
-        return the canonical representation of the equivalent tree.
+        Return the lexicographically dominant RootedTree corresponding to self.
         """
         if not self.branches():
             return self
@@ -179,6 +178,7 @@ class RootedTree(object):
         return RootedTree([self.level_sequence[0]]+nestops.flatten(sorted(branch_list, reverse=True)))
 
     def canonical_form(self):
+        """Return a dominant tree type."""
         return DominantTree(self.level_sequence)
 
     @classmethod
@@ -200,16 +200,11 @@ class RootedTree(object):
         root = treeroot(treefunc)
         return cls.attached_subtree(treefunc, root)
 
-# a= RootedTree([1, 2, 3, 4, 3, 4, 5, 2, 2, 3, 4, 4, 4, 3, 4, 4, 4, 4])
-
 
 class DominantTree(RootedTree):
     def __init__(self, level_sequence):
         canonical_level_sequence = RootedTree(level_sequence)._canonical_form()
         RootedTree.__init__(self, canonical_level_sequence)
-
-a = DominantTree([1,2,3,4,3,4,4,5,3,4,4,5,6,7,8,3,4,5,6,7,7,7,8,8,9,8])
-
 
 
 class RootedTrees(object):
@@ -297,28 +292,7 @@ def forests_simple(N):
     for tree in RootedTrees(N+1):
         yield tree.chop()
 
-
 forests = forests_simple
-
-
-def canonical_treeorder(tree):
-    """
-    Given a noncanonical (non lexicographically maximal) level sequence, return
-    the canonical representation of the equivalent tree.
-    """
-    return RootedTree(tree)._canonical_form()
-
-
-def attached_subtree(f, node):
-    """
-    Given an endofunction f and node in range(len(f)), returns the levelpath
-    form of the rooted tree attached to element node.
-    """
-    return DominantTree.attached_subtree(f, node)
-
-
-def treefunc_to_tree(treefunc):
-    return DominantTree.from_treefunc(treefunc)
 
 
 class TreeTest(unittest.TestCase):
@@ -347,7 +321,7 @@ class TreeTest(unittest.TestCase):
         """Prove ordering of the subtrees does not matter"""
         lev = [1,2,3,4,2,3,4,5,3,4,3,4,4,3,4,5,2,2,3]
         a = RootedTree(lev)
-        b = RootedTree(canonical_treeorder(lev))
+        b = RootedTree(lev)._canonical_form()
         self.assertTrue(a != b)
         self.assertTrue(a.degeneracy() == b.degeneracy())
 
@@ -379,7 +353,7 @@ class TreeTest(unittest.TestCase):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = conjugates.randconj(treefunc)
-                    self.assertSequenceEqual(tree, RootedTree(treefunc_to_tree(rtreefunc)))
+                    self.assertSequenceEqual(DominantTree(tree), DominantTree.from_treefunc(rtreefunc))
 
 
 if __name__ == '__main__':
