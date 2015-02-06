@@ -70,7 +70,7 @@ class RootedTree(object):
             raise ValueError("Cannot compare tree with type %s"%type(other))
 
     def __hash__(self):
-        return hash(tuple(self.level_sequence))
+        return hash(self.level_sequence)
 
     def __len__(self):
         return self.n
@@ -156,7 +156,7 @@ class RootedTree(object):
             indset = nextinds
         return brackets
 
-    def canonical_form(self):
+    def _canonical_form(self):
         """
         Given a noncanonical (non lexicographically maximal) level sequence,
         return the canonical representation of the equivalent tree.
@@ -165,21 +165,25 @@ class RootedTree(object):
             return self
         branch_list = []
         for branch in self.branches():
-            branch_list.append(branch.canonical_form())
+            branch_list.append(branch._canonical_form())
         return RootedTree([self.level_sequence[0]]+nestops.flatten(sorted(branch_list, reverse=True)))
 
     @classmethod
     def from_treefunc(cls, func):
         pass
 
-a= RootedTree([1, 2, 3, 4, 3, 4, 5, 2, 2, 3, 4, 4, 4, 3, 4, 4, 4, 4])
-print list(a.branches())
-print list(a.canonical_form().branches())
+# a= RootedTree([1, 2, 3, 4, 3, 4, 5, 2, 2, 3, 4, 4, 4, 3, 4, 4, 4, 4])
+# print list(a.branches())
+# print list(a._canonical_form().branches())
 
 
 class DominantTree(RootedTree):
     def __init__(self, level_sequence):
-        RootedTree.__init__(self)
+        RootedTree.__init__(self, level_sequence)
+        self.level_sequence = []
+a = DominantTree([1,2,3])
+print a
+print hash(a)
 
 
 class RootedTrees(object):
@@ -276,7 +280,7 @@ def canonical_treeorder(tree):
     Given a noncanonical (non lexicographically maximal) level sequence, return
     the canonical representation of the equivalent tree.
     """
-    return RootedTree(tree).canonical_form()
+    return RootedTree(tree)._canonical_form()
 
 
 def _attached_subtree(node, level, treenodes):
