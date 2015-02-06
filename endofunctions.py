@@ -17,6 +17,7 @@ class Endofunction(object):
     def __init__(self, func):
         self.func = tuple(func)
         self.n = len(self.func)
+        self._preim = None
 
     def __hash__(self):
         return hash(self.func)
@@ -35,7 +36,6 @@ class Endofunction(object):
         funcstring += ''.join(mapvals)
         funcstring += str(self.n-1)+"->"+str(self.func[-1])+'])'
         return funcstring
-        
 
     def __iter__(self):
         return iter(self.func)
@@ -53,7 +53,10 @@ class Endofunction(object):
         return self.__class__(self.func[x] for x in other)
 
     def iterate(self, n):
-        """Iteration by self-composing, inspired by exponentiation by squaring."""
+        """
+        Efficiently iterate by self-composing, inspired by exponentiation by
+        squaring.
+        """
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
         f = self
@@ -64,19 +67,39 @@ class Endofunction(object):
             f = f.compose(f)
         return f_iter
 
-    def imagepath(self):
-        cardinalities = [len(set(f))]
-        f_iter = self
-        card_prev = self.n
-        for it in range(1, self.n-1):
-            f_iter = f_iter.compose(self)
-            card = let(set(f_iter))
+    def imageset(self):
+        """Return all elements in the image of self."""
+        return set(self._func)
+
+    def preim(self):
+        """
+        Given an endofunction f defined on S=range(len(f)), returns the
+        preimage of f. If g=preimage(f), we have
+
+            g[y]=[x for x in S if f[x]==y],
+
+        or mathematically:
+
+            f^-1(y)={x in S: f(x)=y}.
+
+        Note the particularly close correspondence between python's list
+        comprehensions and mathematical set-builder notation.
+        """
+        if self._preim is None:
+            self._preim = [set() for _ in range(self.n)]
+            for x in range(self.n):
+                self._preim[self.func[x]].add(x)
+        return self._preim
+
 
 f = Endofunction([0,0,1,2,3,4,5,6,7,8,9])
 g1 = f.iterate(2)
 print f
 print g1
-
+print f.preim()
+print g1.preim()
+print f.preim2()
+print g1.preim2()
 class TransformationMonoid(object):
     """Set of all endofunctions."""
     def __iter__(self):

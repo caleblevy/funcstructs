@@ -73,3 +73,9 @@ Funcstructs and Endofunctions
   - Make Multiset.partitions return multiset of multisets (for enumeration)
   - Make Funcstruct class and Endofunction class
   - Make Funcstruct enumerator class (classmethod from func)
+
+
+February 5, 2015:
+  - Replace RootedTree.bracket_form with RootedTree.set_form, and make it 
+    nested frozensets as I had originally intended.
+  - Replace O(n^2) preimage with O(n) set based preimage.
