@@ -16,8 +16,15 @@ class Endofunction(object):
     def __init__(self, func):
         self._func = tuple(func)
         self._n = len(self._func)
+        """
+        The following are implemented as properties of the function; these are
+        not things you 'do' to the endofunction; these are properties that they
+        have.
+        """
         self._preim = None
         self._cycles = None
+        self._limitset = None
+        self._descendants = None
 
     def __hash__(self):
         return hash(self._func)
@@ -61,7 +68,7 @@ class Endofunction(object):
         """Return all elements in the image of self."""
         return set(self._func)
 
-    def preim(self):
+    def _calculate_preimage(self):
         """
         Given an endofunction f defined on S=range(len(f)), returns the
         preimage of f. If g=preimage(f), we have
@@ -75,12 +82,18 @@ class Endofunction(object):
         Note the particularly close correspondence between python's list
         comprehensions and mathematical set-builder notation.
         """
+        preim = [set() for _ in range(self._n)]
+        for x in range(self._n):
+            preim[self._func[x]].add(x)
+        return preim
+
+    @property
+    def preimage(self):
         if self._preim is None:
-            self._preim = [set() for _ in range(self._n)]
-            for x in range(self._n):
-                self._preim[self[x]].add(x)
+            self._preim = self._calculate_preimage()
         return self._preim
 
+    @property
     def imagepath(self):
         """
         Give it a list such that all([I in range(len(f)) for I in f]) and this
@@ -115,10 +128,10 @@ class Endofunction(object):
             f = f(f)
         return f_iter
 
-    def _compute_cycles(self):
+    def _enumerate_cycles(self):
         """
-        Returns the cycle decomposition of an endofunction f. Should take O(len(f))
-        time.
+        Returns self's cycle decomposition. Since lookup in sets is O(1), this
+        algorithm should take O(self._n) time.
         """
         if self._n == 1:
             yield [0]
@@ -150,27 +163,55 @@ class Endofunction(object):
                 I -= 1
             yield path[I+1:]
 
+    def _calculate_cycles(self):
+        return list(tuple(cycle) for cycle in self._enumerate_cycles())
+
+    @property
     def cycles(self):
         if self._cycles is None:
-            self._cycles = list(tuple(cycle) for cycle in self._compute_cycles())
+            self._cycles = self._calculate_cycles()
         return self._cycles
+
+    @property
+    def limitset(self):
+        if self._limitset is None:
+            self._limitset = list(itertoos.chain.from_iter(self.cycles))
+        return self._limitset
+
+    def _calculate_attached_nodes(self):
+        """
+        Returns subsets of the preimages of each element which are not in
+        cycles.
+        """
+        descendants = self.preimage
+        for inv_image in descendants:
+            for x in inv_image:
+                if x in self.limitset:
+                    inv_image.remove(x)
+        return descendants
+
+    @property
+    def attached_nodes(self):
+        if self._descendants is None:
+            self._descendants = self._calculate_attached_nodes
+        return self._descendants
 
 f = Endofunction([1,2,3,0,5,6,4])
 print f
-print f.cycles()
+print f.cycles
 a = f.iterate(3)
 print a
-print a.cycles()
+print a.cycles
 a = f.iterate(4)
 print a
-print a.cycles()
+print a.cycles
 a = f.iterate(12)
 print a
 
 print a == f
 print a == Endofunction(range(7))
 print a._cycles
-print a.cycles()
+print a.cycles
 
 
 
