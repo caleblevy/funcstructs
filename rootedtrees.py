@@ -38,6 +38,7 @@ import factorization
 import conjugates
 
 
+
 def treeroot(treefunc):
     """Returns the root of an endofunction whose structure is a rooted tree."""
     return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
