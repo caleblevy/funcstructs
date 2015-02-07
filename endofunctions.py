@@ -4,6 +4,7 @@
 # The terms of use, license and copyright information for the code and ideas
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
+
 import random
 import unittest
 import itertools
@@ -179,7 +180,7 @@ class Endofunction(object):
             self._limitset = list(itertools.chain.from_iterable(self.cycles))
         return self._limitset
 
-    def _calculate_attached_nodes(self):
+    def _calculate_attached_treenodes(self):
         """
         Returns subsets of the preimages of each element which are not in
         cycles.
@@ -192,33 +193,14 @@ class Endofunction(object):
         return descendants
 
     @property
-    def attached_nodes(self):
+    def attached_treenodes(self):
         if self._descendants is None:
-            self._descendants = self._calculate_attached_nodes()
+            self._descendants = self._calculate_attached_treenodes()
         return self._descendants
 
     @classmethod
     def randfunc(cls, n):
         return cls(random.randrange(n) for I in range(n))
-
-f = Endofunction([1,2,3,0,5,6,4])
-print f
-print f.cycles
-a = f.iterate(3)
-print a
-print a.cycles
-a = f.iterate(4)
-print a
-print a.cycles
-a = f.iterate(12)
-print a
-
-print a == f
-print a == Endofunction(range(7))
-print a._cycles
-print a.cycles
-
-
 
 
 class TransformationMonoid(object):
@@ -236,12 +218,17 @@ class TransformationMonoid(object):
         pass
         # return self.n < other.n
 
-def testImagepathOf(f):
-    return Endofunction(f).imagepath
 
 class EndofunctionTests(unittest.TestCase):
 
-    def testImagepath(self):
+    def test_iterate(self):
+        sigma = Endofunction([1, 2 ,3, 0, 5, 6, 4]) # Perm (0,1,2,3)(4,5,6)
+        identity = Endofunction(range(7)).cycles
+        for I in range(1, 11): # Order of cycle is 12
+            self.assertNotEqual(identity, sigma.iterate(I).cycles)
+        self.assertItemsEqual(identity, sigma.iterate(12).cycles)
+
+    def test_imagepath(self):
         """Check various special and degenerate cases, with right index"""
         self.assertEqual([1], Endofunction([0]).imagepath)
         self.assertEqual([1], Endofunction([0, 0]).imagepath)
@@ -272,28 +259,28 @@ class EndofunctionTests(unittest.TestCase):
     funcs += list(productrange.endofunctions(4))
     funcs = list(map(Endofunction, funcs))
 
-    def testCyclesAreCyclic(self):
+    def test_cycles_are_cyclic(self):
         """Make sure funccylces actually returns cycles."""
         for f in self.funcs:
             for cycle in f.cycles:
                 for ind, el in enumerate(cycle):
                     self.assertEqual(cycle[(ind+1) % len(cycle)], f[el])
 
-    def testCyclesAreUnique(self):
+    def test_cycles_are_unique(self):
         """Ensure funccycles returns no duplicates."""
         for f in self.funcs:
             self.assertEqual(len(f.cycles), len(set(f.cycles)))
 
-    def testCyclesAreComplete(self):
+    def test_cycles_are_complete(self):
         """Ensure funccycles returns every cycle."""
         for f in self.funcs:
             self.assertEqual(f.imagepath[-1], len(f.limitset))
 
-    def testTreenodesAreNotCyclic(self):
+    def test_attached_treenodes_are_not_cyclic(self):
         """Make sure attached_treenodes returns nodes not in cycles.."""
         for f in self.funcs:
             lim = f.limitset
-            descendents = f.attached_nodes
+            descendents = f.attached_treenodes
             for preim in descendents:
                 for x in preim:
                     self.assertTrue(x not in lim)
