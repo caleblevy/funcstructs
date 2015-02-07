@@ -7,6 +7,7 @@
 import random
 import unittest
 import itertools
+import productrange
 
 class Endofunction(object):
     """
@@ -175,7 +176,7 @@ class Endofunction(object):
     @property
     def limitset(self):
         if self._limitset is None:
-            self._limitset = list(itertoos.chain.from_iter(self.cycles))
+            self._limitset = list(itertools.chain.from_iterable(self.cycles))
         return self._limitset
 
     def _calculate_attached_nodes(self):
@@ -183,18 +184,22 @@ class Endofunction(object):
         Returns subsets of the preimages of each element which are not in
         cycles.
         """
-        descendants = self.preimage
-        for inv_image in descendants:
-            for x in inv_image:
-                if x in self.limitset:
-                    inv_image.remove(x)
+        descendants = [set() for _ in range(self._n)]
+        for inv_image in self.preimage:
+            for x, fi in enumerate(inv_image):
+                if fi not in self.limitset:
+                    descendants[x].add(fi)
         return descendants
 
     @property
     def attached_nodes(self):
         if self._descendants is None:
-            self._descendants = self._calculate_attached_nodes
+            self._descendants = self._calculate_attached_nodes()
         return self._descendants
+
+    @classmethod
+    def randfunc(cls, n):
+        return cls(random.randrange(n) for I in range(n))
 
 f = Endofunction([1,2,3,0,5,6,4])
 print f
@@ -230,4 +235,70 @@ class TransformationMonoid(object):
     def __le__(self, other):
         pass
         # return self.n < other.n
+
+def testImagepathOf(f):
+    return Endofunction(f).imagepath
+
+class EndofunctionTests(unittest.TestCase):
+
+    def testImagepath(self):
+        """Check various special and degenerate cases, with right index"""
+        self.assertEqual([1], Endofunction([0]).imagepath)
+        self.assertEqual([1], Endofunction([0, 0]).imagepath)
+        self.assertEqual([1], Endofunction([1, 1]).imagepath)
+        self.assertEqual([2], Endofunction([0, 1]).imagepath)
+        self.assertEqual([2], Endofunction([1, 0]).imagepath)
+        node_count = [2, 3, 5, 15]
+        for n in node_count:
+            tower = Endofunction([0] + list(range(n-1)))
+            cycle = Endofunction([n-1] + list(range(n-1)))
+            fixed = Endofunction(list(range(n)))
+            degen = Endofunction([0]*n)
+            self.assertEqual(list(range(n)[:0:-1]), tower.imagepath)
+            self.assertEqual([n]*(n-1), cycle.imagepath)
+            self.assertEqual([n]*(n-1), fixed.imagepath)
+            self.assertEqual([1]*(n-1), degen.imagepath)
+
+    # Cycle tests
+    funcs = [
+        [1, 0],
+        [9, 5, 7, 6, 2, 0, 9, 5, 7, 6, 2],
+        [7, 2, 2, 3, 4, 3, 9, 2, 2, 10, 10, 11, 12, 5]
+    ]
+    # Use magic number for python3 compatibility
+    funcs += list([Endofunction.randfunc(20) for I in range(100)])
+    funcs += list(productrange.endofunctions(1))
+    funcs += list(productrange.endofunctions(3))
+    funcs += list(productrange.endofunctions(4))
+    funcs = list(map(Endofunction, funcs))
+
+    def testCyclesAreCyclic(self):
+        """Make sure funccylces actually returns cycles."""
+        for f in self.funcs:
+            for cycle in f.cycles:
+                for ind, el in enumerate(cycle):
+                    self.assertEqual(cycle[(ind+1) % len(cycle)], f[el])
+
+    def testCyclesAreUnique(self):
+        """Ensure funccycles returns no duplicates."""
+        for f in self.funcs:
+            self.assertEqual(len(f.cycles), len(set(f.cycles)))
+
+    def testCyclesAreComplete(self):
+        """Ensure funccycles returns every cycle."""
+        for f in self.funcs:
+            self.assertEqual(f.imagepath[-1], len(f.limitset))
+
+    def testTreenodesAreNotCyclic(self):
+        """Make sure attached_treenodes returns nodes not in cycles.."""
+        for f in self.funcs:
+            lim = f.limitset
+            descendents = f.attached_nodes
+            for preim in descendents:
+                for x in preim:
+                    self.assertTrue(x not in lim)
+
+if __name__ == '__main__':
+    unittest.main()
+
     
