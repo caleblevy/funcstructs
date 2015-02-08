@@ -195,7 +195,7 @@ class Endofunction(object):
             self._descendants = self._calculate_attached_treenodes()
         return self._descendants
 
-    def attached_leveltree(self, node, level=1):
+    def attached_level_sequence(self, node, level=1):
         """
         Given an element of self's domain, return a level sequence of the
         rooted tree formed from the graph of all noncyclic nodes whose paths
@@ -209,7 +209,7 @@ class Endofunction(object):
         """
         level_sequence = [level]
         for x in self.attached_treenodes[node]:
-            level_sequence += self.attached_leveltree(x, level+1)
+            level_sequence += self.attached_level_sequence(x, level+1)
         return level_sequence
 
     @classmethod

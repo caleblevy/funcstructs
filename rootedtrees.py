@@ -32,20 +32,14 @@ from PADS.IntegerPartitions import partitions
 
 import subsequences
 import multiset
-import iterate
 import nestops
 import factorization
 import conjugates
 import endofunctions
 
 
-def treeroot(treefunc):
-    """Returns the root of an endofunction whose structure is a rooted tree."""
-    return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
-
-
 @functools.total_ordering
-class UnlabeledTree(object):
+class RootedTree(object):
     """Represents an unlabelled rooted tree."""
 
     def __init__(self, level_sequence):
@@ -84,11 +78,11 @@ class UnlabeledTree(object):
         """Return each major subbranch of a tree (even chopped)"""
         isroot = lambda node: node == self.root_node + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
-            yield UnlabeledTree(branch)
+            yield RootedTree(branch)
 
     def subtrees(self):
         for branch in self.branches():
-            yield UnlabeledTree([node-1 for node in branch])
+            yield RootedTree([node-1 for node in branch])
 
     def chop(self):
         """Generates the canonical subtrees of the input tree's root node."""
@@ -142,8 +136,9 @@ class UnlabeledTree(object):
         is a novelty item, and shouldn't be used for anything practical.
         """
         treefunc = self.func_form()
-        preim = iterate.attached_treenodes(treefunc)
-        root = treeroot(treefunc)
+        preim = [list(im) for im in treefunc.attached_treenodes]
+        """Returns the root of an endofunction whose structure is a rooted tree."""
+        root = list(treefunc.cycles)[0][0]
         brackets = preim[root]
         indset = [[x] for x in range(len(brackets))]
         while indset:
@@ -160,7 +155,7 @@ class UnlabeledTree(object):
 
     def dominant_level_sequence(self):
         """
-        Return the lexicographically dominant RootedTree corresponding to self.
+        Return the lexicographically dominant rooted tree corresponding to self.
         """
         if not self.branches():
             return self.level_sequence
@@ -172,31 +167,12 @@ class UnlabeledTree(object):
 
     def canonical_form(self):
         """Return a dominant tree type."""
-        return RootedTree(self.level_sequence)
-
-    @classmethod
-    def attached_subtree(cls, f, node):
-        """
-        Given an endofunction f and node in range(len(f)), returns the
-        levelpath form of the rooted tree attached to element node.
-        """
-        treenodes = iterate.attached_treenodes(f)
-        level_sequence = [1]
-        level = 2
-        for x in treenodes[node]:
-            level_sequence += _attached_subtree(x, level, treenodes)
-        return cls(level_sequence)
-
-    @classmethod
-    def from_treefunc(cls, treefunc):
-        n = len(treefunc)
-        root = treeroot(treefunc)
-        return cls.attached_subtree(treefunc, root)
+        return DominantTree(self.level_sequence)
 
 
-class RootedTree(UnlabeledTree):
+class DominantTree(RootedTree):
     def __init__(self, seq):
-        UnlabeledTree.__init__(self, UnlabeledTree(seq).dominant_level_sequence())
+        RootedTree.__init__(self, RootedTree(seq).dominant_level_sequence())
 
 
 class RootedTrees(object):
@@ -226,7 +202,7 @@ class RootedTrees(object):
             trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
         """
         tree = [I+1 for I in range(self.n)]
-        yield UnlabeledTree(tree)
+        yield RootedTree(tree)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -237,7 +213,7 @@ class RootedTrees(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield UnlabeledTree(tree)
+                yield RootedTree(tree)
 
     def _calculate_len(self):
         """
@@ -312,8 +288,8 @@ class TreeTest(unittest.TestCase):
 
         """Prove ordering of the subtrees does not matter"""
         lev = [1,2,3,4,2,3,4,5,3,4,3,4,4,3,4,5,2,2,3]
-        a = UnlabeledTree(lev)
-        b = UnlabeledTree(lev).canonical_form()
+        a = RootedTree(lev)
+        b = RootedTree(lev).canonical_form()
         self.assertTrue(a != b)
         self.assertTrue(a.degeneracy() == b.degeneracy())
 
@@ -338,14 +314,14 @@ class TreeTest(unittest.TestCase):
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.bracket_form())
 
-    def testTreefuncToTree(self):
-        """Tests attached treenodes and canonical_treeorder in one go."""
-        for n in range(1, len(self.A000081)+1):
-            for tree in RootedTrees(n):
-                treefunc = tree.func_form()
-                for _ in range(10):
-                    rtreefunc = conjugates.randconj(treefunc)
-                    self.assertSequenceEqual(tree, RootedTree.from_treefunc(rtreefunc))
+    # def testTreefuncToTree(self):
+    #     """Tests attached treenodes and canonical_treeorder in one go."""
+    #     for n in range(1, len(self.A000081)+1):
+    #         for tree in RootedTrees(n):
+    #             treefunc = tree.func_form()
+    #             for _ in range(10):
+    #                 rtreefunc = conjugates.randconj(treefunc)
+    #                 self.assertSequenceEqual(tree, RootedTree.from_treefunc(rtreefunc))
 
 
 if __name__ == '__main__':
