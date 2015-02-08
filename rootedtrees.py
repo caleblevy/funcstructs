@@ -166,12 +166,16 @@ class RootedTree(object):
 
     def canonical_form(self):
         """Return a dominant tree type."""
-        return DominantTree(self.level_sequence)
+        return RootedTree(self.dominant_level_sequence())
 
 
-class DominantTree(RootedTree):
-    def __init__(self, seq):
-        RootedTree.__init__(self, RootedTree(seq).dominant_level_sequence())
+def treefunc_to_dominant_tree(treefunc):
+    """Test if a function has a tree structure and if so return it."""
+    cycles = list(treefunc.cycles)
+    if len(cycles) != 1 or len(cycles[0]) != 1:
+        raise ValueError("Function structure is not a rooted tree.")
+    root = cycles[0][0]
+    return RootedTree(treefunc.attached_level_sequence(root)).canonical_form()
 
 
 class RootedTrees(object):
@@ -320,7 +324,7 @@ class TreeTest(unittest.TestCase):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
-                    self.assertSequenceEqual(DominantTree(tree), DominantTree(rtreefunc.attached_level_sequence(list(rtreefunc.cycles)[0][0])))
+                    self.assertSequenceEqual(tree, treefunc_to_dominant_tree(rtreefunc))
 
 
 if __name__ == '__main__':
