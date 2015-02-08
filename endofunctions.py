@@ -225,7 +225,7 @@ class Endofunction(object):
     def randconj(self):
         """Return a random conjugate of f."""
         r = randperm(self._n)
-        return r.conj(f)
+        return r.conj(self)
 
 
 def randfunc(n):

@@ -34,7 +34,6 @@ import subsequences
 import multiset
 import nestops
 import factorization
-import conjugates
 import endofunctions
 
 
@@ -314,14 +313,14 @@ class TreeTest(unittest.TestCase):
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.bracket_form())
 
-    # def testTreefuncToTree(self):
-    #     """Tests attached treenodes and canonical_treeorder in one go."""
-    #     for n in range(1, len(self.A000081)+1):
-    #         for tree in RootedTrees(n):
-    #             treefunc = tree.func_form()
-    #             for _ in range(10):
-    #                 rtreefunc = conjugates.randconj(treefunc)
-    #                 self.assertSequenceEqual(tree, RootedTree.from_treefunc(rtreefunc))
+    def testTreefuncToTree(self):
+        """Tests attached treenodes and canonical_treeorder in one go."""
+        for n in range(1, len(self.A000081)+1):
+            for tree in RootedTrees(n):
+                treefunc = tree.func_form()
+                for _ in range(10):
+                    rtreefunc = treefunc.randconj()
+                    self.assertSequenceEqual(DominantTree(tree), DominantTree(rtreefunc.attached_level_sequence(list(rtreefunc.cycles)[0][0])))
 
 
 if __name__ == '__main__':
