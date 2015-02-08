@@ -62,7 +62,7 @@ class Endofunction(object):
 
     def __call__(self, other):
         """If f(x)=self and g(x)=other return f(g(x))."""
-        return self.__class__(self[x] for x in other)
+        return Endofunction(self[x] for x in other)
 
     @property
     def domain(self):
@@ -215,6 +215,11 @@ class Endofunction(object):
             level_sequence += self.attached_level_sequence(x, level+1)
         return level_sequence
 
+    def randconj(self):
+        """Return a random conjugate of f."""
+        r = randperm(self._n)
+        return r.conj(f)
+
 
 def randfunc(n):
     return Endofunction(random.randrange(n) for I in range(n))
@@ -233,11 +238,9 @@ def cycles_to_funclist(cycles):
 class SymmetricFunction(Endofunction):
     def __init__(self, func):
         func = tuple(func)
-
         if hasattr(func[0], '__iter__'):
             # If it is a cycle decomposition, change to function.
             func = cycles_to_funclist(func)
-
         Endofunction.__init__(self, func)
         if not self._n == len(set(self._func)):
             raise ValueError("This function is not invertible.")
@@ -251,7 +254,7 @@ class SymmetricFunction(Endofunction):
 
     def __mul__(self, other):
         """Multiply notation for symmetric group."""
-        pass
+        return SymmetricFunction(self(other))
 
     @property
     def inverse(self):
@@ -270,11 +273,12 @@ class SymmetricFunction(Endofunction):
         return self.inverse(func(self))
 
 
-s =  SymmetricFunction([(0,1,2,3),(4,5,6)])
-print s.cycles
-print (s**-1).cycles
-print s(s**-1)
-t = SymmetricFunction([(1,2,3),(4,5)])
+def randperm(n):
+    """Returns a random permutation of range(n)."""
+    r = list(range(n))  # Explicitly call ist for python 3 compatibility.
+    random.shuffle(r)
+    return SymmetricFunction(r)
+
 
 class TransformationMonoid(object):
     """Set of all endofunctions."""
@@ -293,6 +297,8 @@ class TransformationMonoid(object):
 
 
 class EndofunctionTests(unittest.TestCase):
+
+    # Imagepath Tests
 
     def test_iterate(self):
         sigma = Endofunction([1, 2 ,3, 0, 5, 6, 4]) # Perm (0,1,2,3)(4,5,6)
@@ -320,12 +326,12 @@ class EndofunctionTests(unittest.TestCase):
             self.assertEqual([1]*(n-1), degen.imagepath)
 
     # Cycle tests
+
     funcs = [
         [1, 0],
         [9, 5, 7, 6, 2, 0, 9, 5, 7, 6, 2],
         [7, 2, 2, 3, 4, 3, 9, 2, 2, 10, 10, 11, 12, 5]
     ]
-    # Use magic number for python3 compatibility
     funcs += list([randfunc(20) for I in range(100)])
     funcs += list(productrange.endofunctions(1))
     funcs += list(productrange.endofunctions(3))
@@ -358,7 +364,32 @@ class EndofunctionTests(unittest.TestCase):
                 for x in preim:
                     self.assertTrue(x not in lim)
 
+    # Permutation Tests
+
+    def test_inverse(self):
+        """Test compose(inv(perm), perm) == perm"""
+        permlist = []
+        for n in range(1, 10):
+            for _ in range(1, 10*n):
+                permlist.append(randperm(n))
+
+        for perm in permlist:
+            e = SymmetricFunction(range(len(perm)))
+            self.assertEqual(e, perm * perm.inverse)
+            self.assertEqual(e, perm.inverse * perm)
+            self.assertEqual(perm, perm.inverse.inverse)
+
+    def testConjugation(self):
+        """Test that conjugation is invertible, with the obvious inverse."""
+        funclist = list(productrange.endofunctions(4))
+        funclist += [randfunc(20) for _ in range(100)]
+        funclist += list(productrange.endofunctions(2))
+        funclist = list(map(Endofunction, funclist))
+        for f in funclist:
+            for _ in range(20):
+                perm = randperm(len(f))
+                self.assertEqual(f, perm.inverse.conj(perm.conj(f)))
+
+
 if __name__ == '__main__':
     unittest.main()
-
-    
