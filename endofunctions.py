@@ -31,6 +31,9 @@ class Endofunction(object):
     def __hash__(self):
         return hash(self._func)
 
+    def __len__(self):
+        return self._n
+
     def __repr__(self):
         return self.__class__.__name__+'('+str(list(self._func))+')'
 
@@ -115,7 +118,7 @@ class Endofunction(object):
             card_prev = card
         return cardinalities
 
-    def iterate(self, n):
+    def __pow__(self, n):
         """Iterate by self-composing, inspired by exponentiation by squaring."""
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
@@ -127,7 +130,7 @@ class Endofunction(object):
             f = f(f)
         return f_iter
 
-    def _enumerate_cycles(self):
+    def enumerate_cycles(self):
         """
         Returns self's cycle decomposition. Since lookup in sets is O(1), this
         algorithm should take O(len(self.domain)) time.
@@ -163,7 +166,7 @@ class Endofunction(object):
             yield path[I+1:]
 
     def _calculate_cycles(self):
-        return set(tuple(cycle) for cycle in self._enumerate_cycles())
+        return set(tuple(cycle) for cycle in self.enumerate_cycles())
 
     @property
     def cycles(self):
@@ -212,10 +215,66 @@ class Endofunction(object):
             level_sequence += self.attached_level_sequence(x, level+1)
         return level_sequence
 
-    @classmethod
-    def randfunc(cls, n):
-        return cls(random.randrange(n) for I in range(n))
 
+def randfunc(n):
+    return Endofunction(random.randrange(n) for I in range(n))
+
+
+def cycles_to_funclist(cycles):
+    """Convert cycle decomposition into endofunction"""
+    funclist = [0] * len(list(itertools.chain.from_iterable(cycles)))
+    for cycle in cycles:
+        for i, el in enumerate(cycle[:-1]):
+            funclist[el] = cycle[i+1]
+        funclist[cycle[-1]] = cycle[0]
+    return funclist
+
+
+class SymmetricFunction(Endofunction):
+    def __init__(self, func):
+        func = tuple(func)
+
+        if hasattr(func[0], '__iter__'):
+            # If it is a cycle decomposition, change to function.
+            func = cycles_to_funclist(func)
+
+        Endofunction.__init__(self, func)
+        if not self._n == len(set(self._func)):
+            raise ValueError("This function is not invertible.")
+
+    def __pow__(self, n):
+        """Symmetric functions allow us to take inverses."""
+        if n >= 0:
+            return Endofunction.__pow__(self, n)
+        else:
+            return Endofunction.__pow__(self.inverse, -n)
+
+    def __mul__(self, other):
+        """Multiply notation for symmetric group."""
+        pass
+
+    @property
+    def inverse(self):
+        """
+        Returns the inverse of a permutation of range(n). Code taken directly
+        from: "Inverting permutations in Python" at
+        http://stackoverflow.com/a/9185908.
+        """
+        inv = [0] * len(self)
+        for i, p in enumerate(self):
+            inv[p] = i
+        return self.__class__(inv)
+
+    def conj(self, func):
+        """Conjugate a function f by a permutation."""
+        return self.inverse(func(self))
+
+
+s =  SymmetricFunction([(0,1,2,3),(4,5,6)])
+print s.cycles
+print (s**-1).cycles
+print s(s**-1)
+t = SymmetricFunction([(1,2,3),(4,5)])
 
 class TransformationMonoid(object):
     """Set of all endofunctions."""
@@ -239,8 +298,8 @@ class EndofunctionTests(unittest.TestCase):
         sigma = Endofunction([1, 2 ,3, 0, 5, 6, 4]) # Perm (0,1,2,3)(4,5,6)
         identity = Endofunction(range(7)).cycles
         for I in range(1, 11): # Order of cycle is 12
-            self.assertNotEqual(identity, sigma.iterate(I).cycles)
-        self.assertItemsEqual(identity, sigma.iterate(12).cycles)
+            self.assertNotEqual(identity, (sigma**I).cycles)
+        self.assertItemsEqual(identity, (sigma**12).cycles)
 
     def test_imagepath(self):
         """Check various special and degenerate cases, with right index"""
@@ -267,7 +326,7 @@ class EndofunctionTests(unittest.TestCase):
         [7, 2, 2, 3, 4, 3, 9, 2, 2, 10, 10, 11, 12, 5]
     ]
     # Use magic number for python3 compatibility
-    funcs += list([Endofunction.randfunc(20) for I in range(100)])
+    funcs += list([randfunc(20) for I in range(100)])
     funcs += list(productrange.endofunctions(1))
     funcs += list(productrange.endofunctions(3))
     funcs += list(productrange.endofunctions(4))
