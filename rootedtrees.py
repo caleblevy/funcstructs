@@ -43,7 +43,6 @@ class RootedTree(object):
 
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
-        self.root_node = self.level_sequence[0]
         self.n = len(level_sequence)
 
     def __repr__(self):
@@ -73,9 +72,16 @@ class RootedTree(object):
     def __iter__(self):
         return iter(self.level_sequence)
 
+    def __bool__(self):
+        return bool(self.level_sequence)
+
+    __nonzero__ = __bool__
+
     def branches(self):
         """Return each major subbranch of a tree (even chopped)"""
-        isroot = lambda node: node == self.root_node + 1
+        if not self:
+            return
+        isroot = lambda node: node == self.level_sequence[0] + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
             yield RootedTree(branch)
 
@@ -112,9 +118,9 @@ class RootedTree(object):
         permutation.
         """
         if permutation is None:
-            permutation = range(self.n)
-        height = max(self.level_sequence)
-        func = [0]*self.n
+            permutation = range(len(self))
+        height = max(self)
+        func = [0]*len(self)
         func[0] = permutation[0]
         height_prev = 1
         # Most recent node found at height h. Where to graft the next node to.
@@ -134,23 +140,9 @@ class RootedTree(object):
         Return a representation the rooted tree via nested lists. This method
         is a novelty item, and shouldn't be used for anything practical.
         """
-        treefunc = self.func_form()
-        preim = [list(im) for im in treefunc.attached_treenodes]
-        """Returns the root of an endofunction whose structure is a rooted tree."""
-        root = list(treefunc.cycles)[0][0]
-        brackets = preim[root]
-        indset = [[x] for x in range(len(brackets))]
-        while indset:
-            nextinds = []
-            for ind in indset:
-                # For each ind, get the corresponding node
-                el = nestops.get_nested_el(brackets, ind)
-                # Collect the indicies of all nodes connected to el
-                nextinds.extend([ind+[I] for I in range(len(preim[el]))])
-                # Set el to its preimage until only empty lists are left.
-                nestops.change_nested_el(brackets, ind, preim[el])
-            indset = nextinds
-        return brackets
+        if not self:
+            return []
+        return [subtree.bracket_form() for subtree in self.subtrees()]
 
     def dominant_level_sequence(self):
         """
@@ -162,7 +154,7 @@ class RootedTree(object):
         for branch in self.branches():
             branch_list.append(branch.dominant_level_sequence())
         branch_list.sort(reverse=True)
-        return [self.root_node] + nestops.flatten(branch_list)
+        return [self.level_sequence[0]] + nestops.flatten(branch_list)
 
     def canonical_form(self):
         """Return a dominant tree type."""
@@ -176,6 +168,13 @@ def treefunc_to_dominant_tree(treefunc):
         raise ValueError("Function structure is not a rooted tree.")
     root = cycles[0][0]
     return RootedTree(treefunc.attached_level_sequence(root)).canonical_form()
+
+a = RootedTree([1,2,3,4,5,5,4,5, 2,3,4,5,4,5,5])
+b = a.canonical_form()
+print b
+print a.degeneracy()
+print b.degeneracy()
+print a.bracket_form()
 
 
 class RootedTrees(object):
@@ -324,7 +323,7 @@ class TreeTest(unittest.TestCase):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
-                    self.assertSequenceEqual(tree, treefunc_to_dominant_tree(rtreefunc))
+                    self.assertEqual(tree, treefunc_to_dominant_tree(rtreefunc))
 
 
 if __name__ == '__main__':

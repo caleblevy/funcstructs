@@ -25,6 +25,7 @@ class Endofunction(object):
     def __init__(self, func):
         self._func = tuple(func)
         self._n = len(self._func)
+        self._descendants = None
 
     def __hash__(self):
         return hash(self._func)
@@ -172,12 +173,14 @@ class Endofunction(object):
         Returns subsets of the preimages of each element which are not in
         cycles.
         """
-        descendants = [set() for _ in range(len(self))]
-        for x, inv_image in enumerate(self.preimage):
-            for f in inv_image:
-                if f not in self.limitset:
-                    descendants[x].add(f)
-        return descendants
+        if self._descendants is None:
+            descendants = [set() for _ in range(len(self))]
+            for x, inv_image in enumerate(self.preimage):
+                for f in inv_image:
+                    if f not in self.limitset:
+                        descendants[x].add(f)
+            self._descendants = descendants
+        return self._descendants
 
     def attached_level_sequence(self, node, level=1):
         """
