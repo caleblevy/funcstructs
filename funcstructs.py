@@ -29,7 +29,7 @@ import necklaces
 import rotation
 import levypartitions
 import factorization
-import iterate
+import endofunctions
 
 
 def multiset_funcstructs(mset):
@@ -172,7 +172,7 @@ class EndofunctionStructureTest(unittest.TestCase):
         N = 8
         for n in range(1, N):
             for struct in funcstructs(n):
-                im = iterate.imagepath(funcstruct_to_func(struct))
+                im = endofunctions.Endofunction(funcstruct_to_func(struct)).imagepath
                 imstruct = funcstruct_imagepath(struct)
                 np.testing.assert_array_equal(im, imstruct)
 

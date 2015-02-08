@@ -12,7 +12,7 @@ from functools import reduce
 import numpy as np
 import unittest
 
-from multiset import split_set, nCk
+import multiset
 import productrange
 
 
@@ -20,7 +20,7 @@ import productrange
 def msp_recursive(x, powers):
     # Wrapper for _recursive_monomial_alg which separates the multiset powers
     # into elements with degeneracies, and returns the value of the function.
-    y, d = split_set(powers)
+    y, d = multiset.Multiset(powers).split()
     return _recursive_monomial_alg(x, d, y)
 
 
@@ -79,7 +79,7 @@ def msp_iterative(x, powers):
     many dimensions. Inputs may be symbolic, or anything you like.
     """
     n = len(x)
-    y, d = split_set(powers)
+    y, d = multiset.Multiset(powers).split()
     l = len(y)
     shape = tuple(I+2 for I in d)
 
@@ -139,7 +139,7 @@ class PolynomialTest(unittest.TestCase):
         N = 20
         """Check binomial coefficients."""
         for n in range(N+1):
-            binomial_coeffs = [nCk(n, k) for k in range(n+1)]
+            binomial_coeffs = [multiset.nCk(n, k) for k in range(n+1)]
             self.assertSequenceEqual(binomial_coeffs, FOIL([-1]*n))
 
     def testMonomialSymmetricPolynomial(self):
