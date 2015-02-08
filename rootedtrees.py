@@ -43,18 +43,9 @@ def treeroot(treefunc):
     """Returns the root of an endofunction whose structure is a rooted tree."""
     return [x for x in range(len(treefunc)) if treefunc[x] == x][0]
 
-def _attached_subtree(node, level, treenodes):
-    """
-    Recursive portion of the subtree algorithm. Returns [level] of the node
-    plus level path of all attached subnodes, hence the itero-recursion.
-    """
-    leveltree = [level]
-    for x in treenodes[node]:
-        leveltree.extend(_attached_subtree(x, level+1, treenodes))
-    return leveltree
 
 @functools.total_ordering
-class RootedTree(object):
+class UnlabeledTree(object):
     """Represents an unlabelled rooted tree."""
 
     def __init__(self, level_sequence):
@@ -93,11 +84,11 @@ class RootedTree(object):
         """Return each major subbranch of a tree (even chopped)"""
         isroot = lambda node: node == self.root_node + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
-            yield RootedTree(branch)
+            yield UnlabeledTree(branch)
 
     def subtrees(self):
         for branch in self.branches():
-            yield RootedTree([node-1 for node in branch])
+            yield UnlabeledTree([node-1 for node in branch])
 
     def chop(self):
         """Generates the canonical subtrees of the input tree's root node."""
@@ -143,7 +134,7 @@ class RootedTree(object):
                 func[node+1] = permutation[grafting_point[height-2]]
                 height_prev = height
             grafting_point[height-1] = node+1
-        return func
+        return endofunctions.Endofunction(func)
 
     def bracket_form(self):
         """
@@ -167,27 +158,27 @@ class RootedTree(object):
             indset = nextinds
         return brackets
 
-    def _canonical_form(self):
+    def dominant_level_sequence(self):
         """
         Return the lexicographically dominant RootedTree corresponding to self.
         """
         if not self.branches():
-            return self
+            return self.level_sequence
         branch_list = []
         for branch in self.branches():
-            branch_list.append(branch._canonical_form())
+            branch_list.append(branch.dominant_level_sequence())
         branch_list.sort(reverse=True)
-        return RootedTree([self.root_node] + nestops.flatten(branch_list))
+        return [self.root_node] + nestops.flatten(branch_list)
 
     def canonical_form(self):
         """Return a dominant tree type."""
-        return DominantTree(self.level_sequence)
+        return RootedTree(self.level_sequence)
 
     @classmethod
     def attached_subtree(cls, f, node):
         """
-        Given an endofunction f and node in range(len(f)), returns the levelpath
-        form of the rooted tree attached to element node.
+        Given an endofunction f and node in range(len(f)), returns the
+        levelpath form of the rooted tree attached to element node.
         """
         treenodes = iterate.attached_treenodes(f)
         level_sequence = [1]
@@ -203,10 +194,9 @@ class RootedTree(object):
         return cls.attached_subtree(treefunc, root)
 
 
-class DominantTree(RootedTree):
-    def __init__(self, level_sequence):
-        canonical_level_sequence = RootedTree(level_sequence)._canonical_form()
-        RootedTree.__init__(self, canonical_level_sequence)
+class RootedTree(UnlabeledTree):
+    def __init__(self, seq):
+        UnlabeledTree.__init__(self, UnlabeledTree(seq).dominant_level_sequence())
 
 
 class RootedTrees(object):
@@ -236,7 +226,7 @@ class RootedTrees(object):
             trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
         """
         tree = [I+1 for I in range(self.n)]
-        yield RootedTree(tree)
+        yield UnlabeledTree(tree)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -247,7 +237,7 @@ class RootedTrees(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield RootedTree(tree)
+                yield UnlabeledTree(tree)
 
     def _calculate_len(self):
         """
@@ -322,16 +312,16 @@ class TreeTest(unittest.TestCase):
 
         """Prove ordering of the subtrees does not matter"""
         lev = [1,2,3,4,2,3,4,5,3,4,3,4,4,3,4,5,2,2,3]
-        a = RootedTree(lev)
-        b = RootedTree(lev)._canonical_form()
+        a = UnlabeledTree(lev)
+        b = UnlabeledTree(lev).canonical_form()
         self.assertTrue(a != b)
         self.assertTrue(a.degeneracy() == b.degeneracy())
 
     def testTreeFuncForm(self):
         """Make sure treetofunc correctly represents trees as endofunctions"""
         tree = RootedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
-        func = [0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12]
-        self.assertSequenceEqual(func, tree.func_form())
+        func = endofunctions.Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
+        self.assertEqual(func, tree.func_form())
 
     def testTreeBracketForm(self):
         """Test the bracket representation of these rooted trees."""
@@ -355,7 +345,7 @@ class TreeTest(unittest.TestCase):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = conjugates.randconj(treefunc)
-                    self.assertSequenceEqual(DominantTree(tree), DominantTree.from_treefunc(rtreefunc))
+                    self.assertSequenceEqual(tree, RootedTree.from_treefunc(rtreefunc))
 
 
 if __name__ == '__main__':
