@@ -62,7 +62,7 @@ class Endofunction(object):
 
     def __call__(self, other):
         """If f(x)=self and g(x)=other return f(g(x))."""
-        return Endofunction(self[x] for x in other)
+        return Endofunction([self[x] for x in other])
 
     @property
     def domain(self):
@@ -222,7 +222,7 @@ class Endofunction(object):
 
 
 def randfunc(n):
-    return Endofunction(random.randrange(n) for I in range(n))
+    return Endofunction([random.randrange(n) for I in range(n)])
 
 
 def cycles_to_funclist(cycles):
@@ -379,7 +379,7 @@ class EndofunctionTests(unittest.TestCase):
             self.assertEqual(e, perm.inverse * perm)
             self.assertEqual(perm, perm.inverse.inverse)
 
-    def testConjugation(self):
+    def test_conjugation(self):
         """Test that conjugation is invertible, with the obvious inverse."""
         funclist = list(productrange.endofunctions(4))
         funclist += [randfunc(20) for _ in range(100)]
