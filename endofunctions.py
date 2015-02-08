@@ -116,10 +116,7 @@ class Endofunction(object):
         return cardinalities
 
     def iterate(self, n):
-        """
-        Efficiently iterate by self-composing, inspired by exponentiation by
-        squaring.
-        """
+        """Iterate by self-composing, inspired by exponentiation by squaring."""
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
         f = self
@@ -133,7 +130,7 @@ class Endofunction(object):
     def _enumerate_cycles(self):
         """
         Returns self's cycle decomposition. Since lookup in sets is O(1), this
-        algorithm should take O(self._n) time.
+        algorithm should take O(len(self.domain)) time.
         """
         if self._n == 1:
             yield [0]
@@ -166,7 +163,7 @@ class Endofunction(object):
             yield path[I+1:]
 
     def _calculate_cycles(self):
-        return list(tuple(cycle) for cycle in self._enumerate_cycles())
+        return set(tuple(cycle) for cycle in self._enumerate_cycles())
 
     @property
     def cycles(self):
@@ -177,7 +174,7 @@ class Endofunction(object):
     @property
     def limitset(self):
         if self._limitset is None:
-            self._limitset = list(itertools.chain.from_iterable(self.cycles))
+            self._limitset = set(itertools.chain.from_iterable(self.cycles))
         return self._limitset
 
     def _calculate_attached_treenodes(self):
@@ -186,10 +183,10 @@ class Endofunction(object):
         cycles.
         """
         descendants = [set() for _ in range(self._n)]
-        for inv_image in self.preimage:
-            for x, fi in enumerate(inv_image):
-                if fi not in self.limitset:
-                    descendants[x].add(fi)
+        for x, inv_image in enumerate(self.preimage):
+            for f in inv_image:
+                if f not in self.limitset:
+                    descendants[x].add(f)
         return descendants
 
     @property
@@ -197,6 +194,23 @@ class Endofunction(object):
         if self._descendants is None:
             self._descendants = self._calculate_attached_treenodes()
         return self._descendants
+
+    def attached_leveltree(self, node, level=1):
+        """
+        Given an element of self's domain, return a level sequence of the
+        rooted tree formed from the graph of all noncyclic nodes whose paths
+        iteration paths pass through node.
+
+        At each call it builds the level sequence with first element at the
+        current level and appends the level sequences of the attached subtrees
+        of each noncyclic element in the preimage the the node, with the
+        subtrees' level sequences starting one level higher than the current
+        node.
+        """
+        level_sequence = [level]
+        for x in self.attached_treenodes[node]:
+            level_sequence += self.attached_leveltree(x, level+1)
+        return level_sequence
 
     @classmethod
     def randfunc(cls, n):

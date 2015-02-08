@@ -36,7 +36,7 @@ import iterate
 import nestops
 import factorization
 import conjugates
-
+import endofunctions
 
 
 def treeroot(treefunc):
@@ -59,7 +59,7 @@ class RootedTree(object):
 
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
-        self.root_level = self.level_sequence[0]
+        self.root_node = self.level_sequence[0]
         self.n = len(level_sequence)
 
     def __repr__(self):
@@ -91,7 +91,7 @@ class RootedTree(object):
 
     def branches(self):
         """Return each major subbranch of a tree (even chopped)"""
-        isroot = lambda node: node == self.root_level + 1
+        isroot = lambda node: node == self.root_node + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
             yield RootedTree(branch)
 
@@ -176,7 +176,8 @@ class RootedTree(object):
         branch_list = []
         for branch in self.branches():
             branch_list.append(branch._canonical_form())
-        return RootedTree([self.level_sequence[0]]+nestops.flatten(sorted(branch_list, reverse=True)))
+        branch_list.sort(reverse=True)
+        return RootedTree([self.root_node] + nestops.flatten(branch_list))
 
     def canonical_form(self):
         """Return a dominant tree type."""
