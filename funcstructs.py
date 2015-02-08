@@ -82,6 +82,16 @@ def funcstruct_count(n):
         tot += multiset.prod(product_terms)
     return int(tot)
 
+class Funcstruct(object):
+    def degeneracy(self):
+        pass
+
+    def func_form(self):
+        pass
+
+    def imagepath(self):
+        pass
+
 
 def funcstruct_degeneracy(function_structure):
     """
