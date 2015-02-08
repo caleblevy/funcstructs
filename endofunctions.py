@@ -5,10 +5,17 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
+"""
+A collection of utilities returning certain information about and kinds of
+images of sets under functions: preimages, cardinalities of iterate images,
+cycle decompositions and limitsets.
+"""
+
 import random
 import unittest
 import itertools
 import productrange
+
 
 class Endofunction(object):
     """
