@@ -25,15 +25,6 @@ class Endofunction(object):
     def __init__(self, func):
         self._func = tuple(func)
         self._n = len(self._func)
-        """
-        The following are implemented as properties of the function; these are
-        not things you 'do' to the endofunction; these are properties that they
-        have.
-        """
-        self._preim = None
-        self._cycles = None
-        self._limitset = None
-        self._descendants = None
 
     def __hash__(self):
         return hash(self._func)
@@ -73,14 +64,15 @@ class Endofunction(object):
 
     @property
     def domain(self):
-        return set(range(self._n))
+        return set(range(len(self)))
 
     @property
     def imageset(self):
         """Return all elements in the image of self."""
         return set(self._func)
 
-    def _calculate_preimage(self):
+    @property
+    def preimage(self):
         """
         Given an endofunction f defined on S=range(len(f)), returns the
         preimage of f. If g=preimage(f), we have
@@ -94,16 +86,10 @@ class Endofunction(object):
         Note the particularly close correspondence between python's list
         comprehensions and mathematical set-builder notation.
         """
-        preim = [set() for _ in range(self._n)]
-        for x in range(self._n):
-            preim[self._func[x]].add(x)
+        preim = [set() for _ in range(len(self))]
+        for x in range(len(self)):
+            preim[self[x]].add(x)
         return preim
-
-    @property
-    def preimage(self):
-        if self._preim is None:
-            self._preim = self._calculate_preimage()
-        return self._preim
 
     @property
     def imagepath(self):
@@ -113,14 +99,14 @@ class Endofunction(object):
         """
         cardinalities = [len(self.imageset)]
         f = self
-        card_prev = self._n
-        for it in range(1, self._n-1):
+        card_prev = len(self)
+        for it in range(1, len(self)-1):
             f = f(self)
             card = len(f.imageset)
             cardinalities.append(card)
             # Save some time; if we have reached the fixed set, return.
             if card == card_prev:
-                cardinalities.extend([card]*(self._n-2-it))
+                cardinalities.extend([card]*(len(self)-2-it))
                 break
             card_prev = card
         return cardinalities
@@ -130,7 +116,7 @@ class Endofunction(object):
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
         f = self
-        f_iter = self.__class__(range(self._n))
+        f_iter = self.__class__(range(len(self)))
         for it in component_iterates:
             if it == '1':
                 f_iter = f_iter(f)
@@ -142,16 +128,16 @@ class Endofunction(object):
         Returns self's cycle decomposition. Since lookup in sets is O(1), this
         algorithm should take O(len(self.domain)) time.
         """
-        if self._n == 1:
+        if len(self) == 1:
             yield [0]
             return
         # If we run  elements for total of O(len(f)) time.
         prev_els = set()
-        for x in range(self._n):
+        for x in self.domain:
             skip_el = False
             path = [x]
             path_els = set(path)
-            for it in range(self._n+1):
+            for it in range(len(self)+1):
                 x = self[x]
                 path.append(x)
                 # If we hit an element seen in a previous path, this path will
@@ -172,38 +158,26 @@ class Endofunction(object):
                 I -= 1
             yield path[I+1:]
 
-    def _calculate_cycles(self):
+    @property
+    def cycles(self):
         return set(tuple(cycle) for cycle in self.enumerate_cycles())
 
     @property
-    def cycles(self):
-        if self._cycles is None:
-            self._cycles = self._calculate_cycles()
-        return self._cycles
+    def limitset(self):
+        return set(itertools.chain.from_iterable(self.cycles))
 
     @property
-    def limitset(self):
-        if self._limitset is None:
-            self._limitset = set(itertools.chain.from_iterable(self.cycles))
-        return self._limitset
-
-    def _calculate_attached_treenodes(self):
+    def attached_treenodes(self):
         """
         Returns subsets of the preimages of each element which are not in
         cycles.
         """
-        descendants = [set() for _ in range(self._n)]
+        descendants = [set() for _ in range(len(self))]
         for x, inv_image in enumerate(self.preimage):
             for f in inv_image:
                 if f not in self.limitset:
                     descendants[x].add(f)
         return descendants
-
-    @property
-    def attached_treenodes(self):
-        if self._descendants is None:
-            self._descendants = self._calculate_attached_treenodes()
-        return self._descendants
 
     def attached_level_sequence(self, node, level=1):
         """
@@ -224,7 +198,7 @@ class Endofunction(object):
 
     def randconj(self):
         """Return a random conjugate of f."""
-        r = randperm(self._n)
+        r = randperm(len(self))
         return r.conj(self)
 
 
