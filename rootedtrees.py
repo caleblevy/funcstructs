@@ -36,9 +36,36 @@ import nestops
 import factorization
 import endofunctions
 
+class RootedTree(object):
+
+    def __init__(self, subtrees=None):
+        # there is no root; this is totally structureless.
+        if subtrees is None:
+            self.subtrees = multiset.Multiset()
+        subtrees = multiset.Multiset(subtrees)
+        for subtree in subtrees.unique_elements():
+            if not isinstance(subtree, RootedTree):
+                raise ValueError("Subtrees must be rooted trees")
+        self.subtrees = subtrees
+
+    def __hash__(self):
+        return hash(self.subtrees)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.subtrees == other.subtrees
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __repr__(self):
+        if not self.subtrees:
+            return ''
+        return "Tree( "+str(self.subtrees)+" )"
 
 @functools.total_ordering
-class RootedTree(object):
+class OrderedTree(object):
     """Represents an unlabelled rooted tree."""
 
     def __init__(self, level_sequence):
@@ -83,11 +110,11 @@ class RootedTree(object):
             return
         isroot = lambda node: node == self.level_sequence[0] + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
-            yield RootedTree(branch)
+            yield OrderedTree(branch)
 
     def subtrees(self):
         for branch in self.branches():
-            yield RootedTree([node-1 for node in branch])
+            yield OrderedTree([node-1 for node in branch])
 
     def chop(self):
         """Generates the canonical subtrees of the input tree's root node."""
@@ -144,6 +171,11 @@ class RootedTree(object):
             return []
         return [subtree.bracket_form() for subtree in self.subtrees()]
 
+    def unordered(self):
+        if not self:
+            return RootedTree()
+        return RootedTree(subtree.unordered() for subtree in self.subtrees())
+
     def dominant_level_sequence(self):
         """
         Return the lexicographically dominant rooted tree corresponding to self.
@@ -158,7 +190,7 @@ class RootedTree(object):
 
     def canonical_form(self):
         """Return a dominant tree type."""
-        return RootedTree(self.dominant_level_sequence())
+        return OrderedTree(self.dominant_level_sequence())
 
 
 def treefunc_to_dominant_tree(treefunc):
@@ -167,17 +199,14 @@ def treefunc_to_dominant_tree(treefunc):
     if len(cycles) != 1 or len(cycles[0]) != 1:
         raise ValueError("Function structure is not a rooted tree.")
     root = cycles[0][0]
-    return RootedTree(treefunc.attached_level_sequence(root)).canonical_form()
+    return OrderedTree(treefunc.attached_level_sequence(root)).canonical_form()
 
-a = RootedTree([1,2,3,4,5,5,4,5, 2,3,4,5,4,5,5])
-b = a.canonical_form()
-print b
-print a.degeneracy()
-print b.degeneracy()
-print a.bracket_form()
+a = RootedTree()
+b = OrderedTree([1,2,3,4,5,4,5,5,2,3,2,3,4,4,5,6])
+print b.unordered()
 
 
-class RootedTrees(object):
+class OrderedTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, node_count):
@@ -204,7 +233,7 @@ class RootedTrees(object):
             trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
         """
         tree = [I+1 for I in range(self.n)]
-        yield RootedTree(tree)
+        yield OrderedTree(tree)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -215,7 +244,7 @@ class RootedTrees(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield RootedTree(tree)
+                yield OrderedTree(tree)
 
     def _calculate_len(self):
         """
@@ -240,7 +269,7 @@ class RootedTrees(object):
         """
         Hook for python len function.
 
-        NOTE: For n >= 47, len(RootedTrees(n)) is greater than C long, and thus
+        NOTE: For n >= 47, len(OrderedTrees(n)) is greater than C long, and thus
         gives rise to an index overflow error. Use self._calculate_len instead.
         """
         if self._memoized_len is None:
@@ -259,7 +288,7 @@ def forests_simple(N):
     """
     if N == 0:
         return
-    for tree in RootedTrees(N+1):
+    for tree in OrderedTrees(N+1):
         yield tree.chop()
 
 forests = forests_simple
@@ -271,8 +300,8 @@ class TreeTest(unittest.TestCase):
     def testTreeCounts(self):
         """OEIS A000081: number of unlabelled rooted trees on N nodes."""
         for n, count in enumerate(self.A000081):
-            self.assertEqual(count, len(list(RootedTrees(n+1))))
-            self.assertEqual(count, len(RootedTrees(n+1)))
+            self.assertEqual(count, len(list(OrderedTrees(n+1))))
+            self.assertEqual(count, len(OrderedTrees(n+1)))
 
     def testForestCounts(self):
         """Check len(forests(N))==A000081(N+1)"""
@@ -284,29 +313,29 @@ class TreeTest(unittest.TestCase):
         # self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
-            for tree in RootedTrees(n):
+            for tree in OrderedTrees(n):
                 labelled_treecount += math.factorial(n)//tree.degeneracy()
             self.assertEqual(n**(n-1), labelled_treecount)
 
         """Prove ordering of the subtrees does not matter"""
         lev = [1,2,3,4,2,3,4,5,3,4,3,4,4,3,4,5,2,2,3]
-        a = RootedTree(lev)
-        b = RootedTree(lev).canonical_form()
+        a = OrderedTree(lev)
+        b = OrderedTree(lev).canonical_form()
         self.assertTrue(a != b)
         self.assertTrue(a.degeneracy() == b.degeneracy())
 
     def testTreeFuncForm(self):
         """Make sure treetofunc correctly represents trees as endofunctions"""
-        tree = RootedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
+        tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = endofunctions.Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
         self.assertEqual(func, tree.func_form())
 
     def testTreeBracketForm(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
-            RootedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 4]),
-            RootedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 3]),
-            RootedTree([1, 2, 3, 4, 5, 5, 5, 5, 5, 2]),
+            OrderedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 4]),
+            OrderedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 3]),
+            OrderedTree([1, 2, 3, 4, 5, 5, 5, 5, 5, 2]),
         ]
         nestedforms = (
             [[[[[[]]], []]], [[[]]]],
@@ -319,7 +348,7 @@ class TreeTest(unittest.TestCase):
     def testTreefuncToTree(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
         for n in range(1, len(self.A000081)+1):
-            for tree in RootedTrees(n):
+            for tree in OrderedTrees(n):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()

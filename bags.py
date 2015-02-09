@@ -39,8 +39,12 @@ class _basebag(Set):
         self._dict = dict()
         self._size = 0
         if iterable:
-            for elem in iterable:
-                self._inc(elem)
+            if isinstance(iterable, _basebag):
+                for elem, count in iterable._dict.items():
+                    self._inc(elem, count)
+            else:
+                for value in iterable:
+                    self._inc(value)
 
     def __repr__(self):
         """
