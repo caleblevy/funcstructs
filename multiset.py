@@ -74,8 +74,9 @@ class Multiset(collections.Set, collections.Hashable):
             return format.format(class_name=self.__class__.__name__, tuple=tuple(self))
 
     def __str__(self):
-        """The printable string appears just like a set, except that each element
-        is raised to the power of the multiplicity if it is greater than 1.
+        """The printable string appears just like a set, except that each
+        element is raised to the power of the multiplicity if it is greater
+        than 1.
 
         This runs in O(self.num_unique_elements())
         """
@@ -86,6 +87,13 @@ class Multiset(collections.Set, collections.Hashable):
             format_mult = '{elem!r}^{mult}'
             strings = []
             for elem, mult in self._dict.items():
+                # Hack to make multisets print with parentheses.
+                if isinstance(elem, self.__class__):
+                    mstring = str(elem)
+                    if mult > 1:
+                        mstring += '^%s'%str(mult)
+                    strings.append(mstring)
+                    continue
                 if mult > 1:
                     strings.append(format_mult.format(elem=elem, mult=mult))
                 else:
@@ -248,6 +256,12 @@ class Multiset(collections.Set, collections.Hashable):
     def __hash__(self):
         return self._hash()
 
+    # Truthiness methods
+    def __bool__(self):
+        return self._size
+
+    __nonzero__ = __bool__
+
     def split(self):
         """Splits the multiset into element-multiplicity pairs."""
         y = list(self._dict)
@@ -265,11 +279,20 @@ class Multiset(collections.Set, collections.Hashable):
         """
         return multiset_partitions(list(self))
 
+a = Multiset([1,1,1,2,3])
+b = Multiset([1,1,2,2,a,a,3])
+print b
+if b:
+    print b
+if Multiset():
+    print False
+
 def compare_Multiset_string(b):
     s = str(b)
     return set(s.lstrip('{').rstrip('}').split(', '))
 
-class BagTests(unittest.TestCase):
+
+class MultisetTests(unittest.TestCase):
     """
     Test properties of Multiset objects. Tests tend to be of two forms:
         basemultiset()                     # create empty set

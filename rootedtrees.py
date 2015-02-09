@@ -61,8 +61,8 @@ class RootedTree(object):
 
     def __repr__(self):
         if not self.subtrees:
-            return ''
-        return "Tree( "+str(self.subtrees)+" )"
+            return '{}'
+        return str(self.subtrees)
 
 @functools.total_ordering
 class OrderedTree(object):
@@ -204,6 +204,8 @@ def treefunc_to_dominant_tree(treefunc):
 a = RootedTree()
 b = OrderedTree([1,2,3,4,5,4,5,5,2,3,2,3,4,4,5,6])
 print b.unordered()
+print OrderedTree(range(1,5)).unordered()
+print OrderedTree([1,2,3,4,5,4,5,5,2,3,4,5,5,4,5]).unordered()
 
 
 class OrderedTrees(object):
