@@ -36,6 +36,7 @@ import nestops
 import factorization
 import endofunctions
 
+
 class RootedTree(object):
 
     def __init__(self, subtrees=None):
@@ -49,7 +50,7 @@ class RootedTree(object):
         self.subtrees = subtrees
 
     def __hash__(self):
-        return hash(self.subtrees)
+        return hash(len(self.subtrees))
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -59,13 +60,33 @@ class RootedTree(object):
     def __ne__(self, other):
         return not self == other
 
+    def _str_long(self):
+        if not self.subtrees:
+            return "{}"
+        else:
+            return '{'+', '.join([subtree._str() for subtree in self.subtrees])+'}'
+
+    def _str(self):
+        if not self.subtrees:
+            return '{}'
+        else:
+            strings = []
+            for subtree, mult in self.subtrees._dict.items():
+            # Hack to make multisets print with parentheses.
+                tree_string = subtree._str()
+                if mult > 1:
+                    tree_string += '^%s'%str(mult)
+                strings.append(tree_string)
+            return '{%s}' % ', '.join(strings)
+
     def __str__(self):
-        return "RootedTree(%s)"%repr(self)
+        return "RootedTree(%s)"%self._str()
 
     def __repr__(self):
         if not self.subtrees:
-            return '{}'
-        return str(self.subtrees)
+            return 'RootedTree()'
+        return "RootedTree([%s])"%repr(self.subtrees)[10:-2]
+
 
 @functools.total_ordering
 class OrderedTree(object):
@@ -196,7 +217,7 @@ class OrderedTree(object):
         return OrderedTree(self.dominant_level_sequence())
 
 
-def treefunc_to_dominant_tree(treefunc):
+def treefunc_to_tree(treefunc):
     """Test if a function has a tree structure and if so return it."""
     cycles = list(treefunc.cycles)
     if len(cycles) != 1 or len(cycles[0]) != 1:
@@ -204,14 +225,13 @@ def treefunc_to_dominant_tree(treefunc):
     root = cycles[0][0]
     return OrderedTree(treefunc.attached_level_sequence(root)).canonical_form()
 
-a = RootedTree()
-b = OrderedTree([1,2,3,4,5,4,5,5,2,3,2,3,4,4,5,6])
-print b.unordered()
-print OrderedTree(range(1,5)).unordered()
-print OrderedTree([1,2,3,4,5,4,5,5,2,3,4,5,5,4,5]).unordered()
+
+def unordered_tree(level_sequence):
+    """Return the unordered tree corresponding to the given level sequence."""
+    return OrderedTree(level_sequence).unordered()
 
 
-class OrderedTrees(object):
+class DominantTrees(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, node_count):
@@ -274,7 +294,7 @@ class OrderedTrees(object):
         """
         Hook for python len function.
 
-        NOTE: For n >= 47, len(OrderedTrees(n)) is greater than C long, and thus
+        NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long, and thus
         gives rise to an index overflow error. Use self._calculate_len instead.
         """
         if self._memoized_len is None:
@@ -282,7 +302,7 @@ class OrderedTrees(object):
         return self._memoized_len
 
 
-def forests_simple(N):
+def forests(N):
     """
     Any rooted tree on N+1 nodes can be identically described by a collection
     of rooted trees on N nodes, grafted together at a single root.
@@ -293,49 +313,49 @@ def forests_simple(N):
     """
     if N == 0:
         return
-    for tree in OrderedTrees(N+1):
+    for tree in DominantTrees(N+1):
         yield tree.chop()
 
-forests = forests_simple
+
+def RootedTrees(n):
+    for tree in DominantTrees(n+1):
+        yield unordered_tree(tree).subtrees
 
 
-class TreeTest(unittest.TestCase):
+class TreeTests(unittest.TestCase):
+
+    # Test dominant tree properties.
+
     A000081 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
 
-    def testTreeCounts(self):
+    def test_tree_counts(self):
         """OEIS A000081: number of unlabelled rooted trees on N nodes."""
         for n, count in enumerate(self.A000081):
-            self.assertEqual(count, len(list(OrderedTrees(n+1))))
-            self.assertEqual(count, len(OrderedTrees(n+1)))
+            self.assertEqual(count, len(list(DominantTrees(n+1))))
+            self.assertEqual(count, len(DominantTrees(n+1)))
 
-    def testForestCounts(self):
+    def test_forest_counts(self):
         """Check len(forests(N))==A000081(N+1)"""
         for n, count in enumerate(self.A000081[1:]):
-            self.assertEqual(count, len(set(forests_simple(n+1))))
+            self.assertEqual(count, len(set(forests(n+1))))
+            self.assertEqual(count, len(set(RootedTrees(n+1))))
 
-    def testTreeDegeneracy(self):
+    def test_dominant_tree_degeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         # self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
-            for tree in OrderedTrees(n):
+            for tree in DominantTrees(n):
                 labelled_treecount += math.factorial(n)//tree.degeneracy()
             self.assertEqual(n**(n-1), labelled_treecount)
 
-        """Prove ordering of the subtrees does not matter"""
-        lev = [1,2,3,4,2,3,4,5,3,4,3,4,4,3,4,5,2,2,3]
-        a = OrderedTree(lev)
-        b = OrderedTree(lev).canonical_form()
-        self.assertTrue(a != b)
-        self.assertTrue(a.degeneracy() == b.degeneracy())
-
-    def testTreeFuncForm(self):
+    def test_ordered_tree_func_form(self):
         """Make sure treetofunc correctly represents trees as endofunctions"""
         tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = endofunctions.Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
         self.assertEqual(func, tree.func_form())
 
-    def testTreeBracketForm(self):
+    def test_ordered_tree_bracket_form(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
             OrderedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 4]),
@@ -350,14 +370,28 @@ class TreeTest(unittest.TestCase):
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.bracket_form())
 
-    def testTreefuncToTree(self):
+    def test_treefunc_to_dominant_tree(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
         for n in range(1, len(self.A000081)+1):
-            for tree in OrderedTrees(n):
+            for tree in DominantTrees(n):
                 treefunc = tree.func_form()
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
-                    self.assertEqual(tree, treefunc_to_dominant_tree(rtreefunc))
+                    self.assertEqual(tree, treefunc_to_tree(rtreefunc))
+
+    def test_rooted_tree_strings(self):
+        T1 = unordered_tree(range(1,5))
+        T2 = unordered_tree([1,2,3,4,5,5,4,5,5,2,3,4,5,5,4,5,5])
+        self.assertEqual(str(T1), "RootedTree({{{{}}}})")
+        self.assertEqual(str(T2), "RootedTree({{{{{}^2}^2}}^2})")
+
+    def test_rooted_tree_repr(self):
+        T1 = unordered_tree(range(1,5))
+        T2 = unordered_tree([1,2,3,4,5,5,4,5,5,2,3,4,5,5,4,5,5])
+        T3 = unordered_tree([1,2,3,4,5,4,5,5,2,3,2,3,4,4,5,6])
+        self.assertEqual(T1, eval(repr(T1)))
+        self.assertEqual(T2, eval(repr(T2)))
+        self.assertEqual(T3, eval(repr(T3)))
 
 
 if __name__ == '__main__':
