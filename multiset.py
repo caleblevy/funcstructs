@@ -28,8 +28,8 @@ nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 class Multiset(collections.Set, collections.Hashable):
     """
-    Multiset - Also known as a Multiset or unordered tuple. Multiset is Hashable,
-    thus it is immutable and usable for dict keys.
+    Multiset - Also known as a Multiset or unordered tuple. Multiset is
+    Hashable, thus it is immutable and usable for dict keys.
     """
 
     ## Basic object methods
@@ -279,13 +279,6 @@ class Multiset(collections.Set, collections.Hashable):
         """
         return multiset_partitions(list(self))
 
-a = Multiset([1,1,1,2,3])
-b = Multiset([1,1,2,2,a,a,3])
-print b
-if b:
-    print b
-if Multiset():
-    print False
 
 def compare_Multiset_string(b):
     s = str(b)

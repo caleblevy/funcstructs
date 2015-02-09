@@ -46,7 +46,7 @@ class RootedTree(object):
         subtrees = multiset.Multiset(subtrees)
         for subtree in subtrees.unique_elements():
             if not isinstance(subtree, RootedTree):
-                raise ValueError("Subtrees must be rooted trees")
+                raise ValueError("Subtrees must be rooted trees.")
         self.subtrees = subtrees
 
     def __hash__(self):
@@ -71,20 +71,20 @@ class RootedTree(object):
         else:
             strings = []
             for subtree, mult in self.subtrees._dict.items():
-            # Hack to make multisets print with parentheses.
+                # Hack to make tree print with multiplicity exponents.
                 tree_string = subtree._str()
                 if mult > 1:
-                    tree_string += '^%s'%str(mult)
+                    tree_string += '^%s' % str(mult)
                 strings.append(tree_string)
             return '{%s}' % ', '.join(strings)
 
     def __str__(self):
-        return "RootedTree(%s)"%self._str()
+        return "RootedTree(%s)" % self._str()
 
     def __repr__(self):
         if not self:
             return 'RootedTree()'
-        return "RootedTree([%s])"%repr(self.subtrees)[10:-2]
+        return "RootedTree([%s])" % repr(self.subtrees)[10:-2]
 
     def degeneracy(self):
         """Return #(nodes)!/#(labellings)"""
@@ -120,7 +120,7 @@ class OrderedTree(object):
         if isinstance(other, self.__class__):
             return self.level_sequence <= other.level_sequence
         else:
-            raise ValueError("Cannot compare tree with type %s"%type(other))
+            raise ValueError("Cannot compare tree with type %s" % type(other))
 
     def __hash__(self):
         return hash(self.level_sequence)
@@ -210,7 +210,8 @@ class OrderedTree(object):
 
     def dominant_level_sequence(self):
         """
-        Return the lexicographically dominant rooted tree corresponding to self.
+        Return the lexicographically dominant rooted tree corresponding to
+        self.
         """
         if not self.branches():
             return self.level_sequence
@@ -223,6 +224,10 @@ class OrderedTree(object):
     def canonical_form(self):
         """Return a dominant tree type."""
         return OrderedTree(self.dominant_level_sequence())
+
+
+class DominantTree(OrderedTree):
+    pass
 
 
 def treefunc_to_tree(treefunc):
@@ -302,8 +307,9 @@ class DominantTrees(object):
         """
         Hook for python len function.
 
-        NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long, and thus
-        gives rise to an index overflow error. Use self._calculate_len instead.
+        NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long, and
+        thus gives rise to an index overflow error. Use self._calculate_len
+        instead.
         """
         if self._memoized_len is None:
             self._memoized_len = self._calculate_len()
@@ -393,16 +399,16 @@ class TreeTests(unittest.TestCase):
                     self.assertEqual(tree, treefunc_to_tree(rtreefunc))
 
     def test_rooted_tree_strings(self):
-        T1 = unordered_tree(range(1,5))
-        T2 = unordered_tree([1,2,3,4,5,5,4,5,5,2,3,4,5,5,4,5,5])
-        self.assertEqual(str(T1), "RootedTree({{{{}}}})")
-        self.assertEqual(str(T2), "RootedTree({{{{{}^2}^2}}^2})")
+        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T2 = unordered_tree(range(1, 5))
+        self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
+        self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
     def test_rooted_tree_repr(self):
-        T1 = unordered_tree(range(1,5))
-        T2 = unordered_tree([1,2,3,4,5,5,4,5,5,2,3,4,5,5,4,5,5])
-        T3 = unordered_tree([1,2,3,4,5,4,5,5,2,3,2,3,4,4,5,6])
-        self.assertEqual(T1, eval(repr(T1)))
+        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T2 = unordered_tree(range(1, 5))
+        T3 = unordered_tree([1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6])
+        self.assertEqual(T, eval(repr(T)))
         self.assertEqual(T2, eval(repr(T2)))
         self.assertEqual(T3, eval(repr(T3)))
 
