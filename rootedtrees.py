@@ -59,6 +59,9 @@ class RootedTree(object):
     def __ne__(self, other):
         return not self == other
 
+    def __str__(self):
+        return "RootedTree(%s)"%repr(self)
+
     def __repr__(self):
         if not self.subtrees:
             return '{}'
