@@ -60,14 +60,13 @@ class RootedTree(object):
     def __ne__(self, other):
         return not self == other
 
-    def _str_long(self):
-        if not self.subtrees:
-            return "{}"
-        else:
-            return '{'+', '.join([subtree._str() for subtree in self.subtrees])+'}'
+    def __bool__(self):
+        if self.subtrees:
+            return True
+        return False
 
     def _str(self):
-        if not self.subtrees:
+        if not self:
             return '{}'
         else:
             strings = []
@@ -83,9 +82,18 @@ class RootedTree(object):
         return "RootedTree(%s)"%self._str()
 
     def __repr__(self):
-        if not self.subtrees:
+        if not self:
             return 'RootedTree()'
         return "RootedTree([%s])"%repr(self.subtrees)[10:-2]
+
+    def degeneracy(self):
+        """Return #(nodes)!/#(labellings)"""
+        if not self:
+            return 1
+        deg = self.subtrees.degeneracy()
+        for subtree in self.subtrees:
+            deg *= subtree.degeneracy()
+        return deg
 
 
 @functools.total_ordering
@@ -345,14 +353,19 @@ class TreeTests(unittest.TestCase):
         # self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
+            rooted_treecount = 0
+            nfac = math.factorial(n)
             for tree in DominantTrees(n):
-                labelled_treecount += math.factorial(n)//tree.degeneracy()
+                labelled_treecount += nfac//tree.degeneracy()
+                rooted_treecount += nfac//tree.unordered().degeneracy()
             self.assertEqual(n**(n-1), labelled_treecount)
+            self.assertEqual(n**(n-1), rooted_treecount)
 
     def test_ordered_tree_func_form(self):
         """Make sure treetofunc correctly represents trees as endofunctions"""
         tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
-        func = endofunctions.Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
+        func = endofunctions.Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9,
+                                           0, 12])
         self.assertEqual(func, tree.func_form())
 
     def test_ordered_tree_bracket_form(self):
