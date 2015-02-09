@@ -22,7 +22,6 @@ import itertools
 import numpy as np
 
 import multiset
-import nestops
 import rootedtrees
 import subsequences
 import necklaces
@@ -30,6 +29,10 @@ import rotation
 import levypartitions
 import factorization
 import endofunctions
+
+def flatten(lol):
+    """Flatten a list of lists."""
+    return list(itertools.chain.from_iterable(lol))
 
 
 def multiset_funcstructs(mset):
@@ -46,7 +49,7 @@ def multiset_funcstructs(mset):
         strands.append(strand)
 
     for bundle in itertools.product(*strands):
-        yield nestops.flatten(bundle)
+        yield flatten(bundle)
 
 
 def funcstructs(n):
@@ -109,7 +112,7 @@ def funcstruct_degeneracy(function_structure):
     for cycle in function_structure:
         degeneracy *= rotation.cycle_degeneracy(cycle)
     # Finally the degeneracy of each rooted tree.
-    for tree in nestops.flatten(function_structure):
+    for tree in flatten(function_structure):
         degeneracy *= tree.degeneracy()
     return degeneracy
 
@@ -117,7 +120,7 @@ def funcstruct_degeneracy(function_structure):
 def _treeform_of_noncyclic_nodes(function_structure):
     tree_start = 0
     func = []
-    for tree in nestops.flatten(function_structure):
+    for tree in flatten(function_structure):
         l = len(tree)
         tree_perm = range(tree_start, tree_start+l)
         func_tree = tree.func_form(permutation=tree_perm)
@@ -135,7 +138,7 @@ def funcstruct_to_func(function_structure):
     cycle_start = 0
     for cycle in function_structure:
         node_ind = node_next = 0
-        cycle_len = len(nestops.flatten(cycle))
+        cycle_len = len(flatten(cycle))
         for tree in cycle:
             node_next += len(tree)
             func[cycle_start+node_ind] = cycle_start + (node_next % cycle_len)
@@ -149,9 +152,9 @@ def funcstruct_imagepath(funcstruct):
     Given an endofunction structure funcstruct, compute the image path directly
     without conversion to a particular endofunction.
     """
-    forest = nestops.flatten(funcstruct)
+    forest = flatten(funcstruct)
     cardinalities = np.array(
-        [0]+[0]*(len(nestops.flatten(forest))-2), dtype=object
+        [0]+[0]*(len(flatten(forest))-2), dtype=object
     )
     for tree in forest:
         cardinalities += 1
@@ -168,11 +171,11 @@ class EndofunctionStructureTest(unittest.TestCase):
 
     def testFuncstructToFunc(self):
         func_struct = [
-            (rootedtrees.RootedTree([1, 2, 3]),
-                rootedtrees.RootedTree([1, 2, 2])),
-            (rootedtrees.RootedTree([1, 2]), ),
-            (rootedtrees.RootedTree([1, 2, 2]),
-                rootedtrees.RootedTree([1]), rootedtrees.RootedTree([1, 2, 2]))
+            (rootedtrees.DominantTree([1, 2, 3]),
+                rootedtrees.DominantTree([1, 2, 2])),
+            (rootedtrees.DominantTree([1, 2]), ),
+            (rootedtrees.DominantTree([1, 2, 2]),
+                rootedtrees.DominantTree([1]), rootedtrees.DominantTree([1, 2, 2]))
         ]
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
         self.assertEqual(func, funcstruct_to_func(func_struct))

@@ -34,13 +34,6 @@ class Multiset(collections.Set, collections.Hashable):
 
     ## Basic object methods
 
-    """
-    Base class for multiset and frozenmultiset. Is not mutable and not
-    hashable, so there's no reason to use this instead of either multiset or
-    frozenmultiset.
-    """
-    ## Basic object methods
-
     def __init__(self, iterable=None):
         """
         Create a new basemultiset. If iterable isn't given, is None or is empty

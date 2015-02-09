@@ -28,13 +28,14 @@ import unittest
 import itertools
 import functools
 
-from PADS.IntegerPartitions import partitions
-
 import subsequences
 import multiset
-import nestops
 import factorization
 import endofunctions
+
+def flatten(lol):
+    """Flatten a list of lists."""
+    return list(itertools.chain.from_iterable(lol))
 
 
 class RootedTree(object):
@@ -108,7 +109,7 @@ class OrderedTree(object):
         return self.__class__.__name__ + "("+str(list(self.level_sequence))+')'
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
+        if isinstance(other, OrderedTree):
             return self.level_sequence == other.level_sequence
         else:
             return False
@@ -117,7 +118,7 @@ class OrderedTree(object):
         return not (self == other)
 
     def __le__(self, other):
-        if isinstance(other, self.__class__):
+        if isinstance(other, OrderedTree):
             return self.level_sequence <= other.level_sequence
         else:
             raise ValueError("Cannot compare tree with type %s" % type(other))
@@ -142,33 +143,15 @@ class OrderedTree(object):
             return
         isroot = lambda node: node == self.level_sequence[0] + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
-            yield OrderedTree(branch)
+            yield self.__class__(branch)
 
     def subtrees(self):
         for branch in self.branches():
-            yield OrderedTree([node-1 for node in branch])
+            yield self.__class__([node-1 for node in branch])
 
     def chop(self):
         """Generates the canonical subtrees of the input tree's root node."""
         return multiset.Multiset(subtree for subtree in self.subtrees())
-
-    def degeneracy(self, call_level=1):
-        """
-        To calculate the degeneracy of a collection of subtrees you start with
-        the lowest branches and then work upwards. If a group of identical
-        subbranches are connected to the same node, we multiply the degeneracy
-        of the tree by the factorial of the multiplicity of these subbranches
-        to account for their distinct orderings. The same principal applies to
-        subtrees.
-
-        TODO: A writeup of this with diagrams will be in the notes.
-        """
-        if not self.chop():
-            return 1
-        deg = 1
-        for subtree in self.chop():
-            deg *= subtree.degeneracy()
-        return deg*self.chop().degeneracy()
 
     def func_form(self, permutation=None):
         """
@@ -208,7 +191,7 @@ class OrderedTree(object):
             return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
-    def dominant_level_sequence(self):
+    def dominant_sequence(self):
         """
         Return the lexicographically dominant rooted tree corresponding to
         self.
@@ -217,17 +200,50 @@ class OrderedTree(object):
             return self.level_sequence
         branch_list = []
         for branch in self.branches():
-            branch_list.append(branch.dominant_level_sequence())
+            branch_list.append(branch.dominant_sequence())
         branch_list.sort(reverse=True)
-        return [self.level_sequence[0]] + nestops.flatten(branch_list)
+        return [self.level_sequence[0]] + flatten(branch_list)
 
     def canonical_form(self):
         """Return a dominant tree type."""
-        return OrderedTree(self.dominant_level_sequence())
+        return OrderedTree(self.dominant_sequence())
 
 
 class DominantTree(OrderedTree):
-    pass
+    def __init__(self, level_sequence, **kwargs):
+        if len(kwargs) not in [0, 1]:
+            raise ValueError("Dominant tree takes one iterable input.")
+        if kwargs:
+            if '__skip_initial_sorting' in kwargs:
+                init_check =  kwargs['__skip_initial_sorting']
+            else:
+                raise ValueError("Dominant tree takes one iterable input.")
+        else:
+            init_check = False
+
+        if init_check is not True:
+            level_sequence = OrderedTree(level_sequence).dominant_sequence()
+
+        OrderedTree.__init__(self, level_sequence)
+
+
+    def degeneracy(self):
+        """
+        To calculate the degeneracy of a collection of subtrees you start with
+        the lowest branches and then work upwards. If a group of identical
+        subbranches are connected to the same node, we multiply the degeneracy
+        of the tree by the factorial of the multiplicity of these subbranches
+        to account for their distinct orderings. The same principal applies to
+        subtrees.
+
+        TODO: A writeup of this with diagrams will be in the notes.
+        """
+        if not self.chop():
+            return 1
+        deg = 1
+        for subtree in self.chop():
+            deg *= subtree.degeneracy()
+        return deg*self.chop().degeneracy()
 
 
 def treefunc_to_tree(treefunc):
@@ -271,7 +287,7 @@ class DominantTrees(object):
             trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
         """
         tree = [I+1 for I in range(self.n)]
-        yield OrderedTree(tree)
+        yield DominantTree(tree, __skip_initial_sorting=True)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -282,7 +298,7 @@ class DominantTrees(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield OrderedTree(tree)
+                yield DominantTree(tree, __skip_initial_sorting=True)
 
     def _calculate_len(self):
         """
