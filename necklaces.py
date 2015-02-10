@@ -53,13 +53,14 @@ def periodicity(beads):
         seed.extend(beads[len(seed):p])
         stop = False
         for rep in range(l, n, l):
-            for ind, val in enumerate(seed):
+            for i, val in enumerate(seed):
                 l += 1
-                if val != beads[rep + ind]:
+                if val != beads[rep + i]:
                     stop = True
                     break
             if stop:
                 break
+        # for-else loop break
         else:
             break
     return len(seed)
@@ -69,8 +70,33 @@ class Necklace(object):
     """An equivalence class of all lists equivalent under rotation."""
 
     def __init__(self, beads):
-        self.beads = Lyndon.SmallestRotation(beads)
-        self.period = Necklace.periodicity(beads)
+        self.beads = tuple(Lyndon.SmallestRotation(beads))
+        self.period = periodicity(beads)
+
+    def __repr__(self):
+        return self.__class__.__name__+'('+str(self.beads)+')'
+
+    def __hash__(self):
+        return hash(self.beads)
+
+    def __len__(self):
+        return len(self.beads)
+
+    def __eq__(self, other):
+        if isinstance(other, Necklace):
+            return self.beads == other.beads
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __contains__(self, other):
+        try:
+            return self == Necklace(other)
+        except:
+            return False
+
+
 
 # We may canonically represent a multiset with an unordered partition
 # corresponding to the multiplicities of the elements. It is simpler to
