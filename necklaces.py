@@ -26,17 +26,13 @@ n. Thus the ways of connecting a collection of rooted trees together in a cycle
 are precisely the necklaces whose beads are the rooted trees.
 """
 
-import factorization
-from factorization import divisors, totient
-import multiset
-import collections
-from fractions import gcd, Fraction
-from functools import reduce
 
-from PADS import Lyndon
-
-from math import factorial
+import fractions
+import functools
 import unittest
+
+import factorization
+import multiset
 
 
 def periodicity(strand):
@@ -72,61 +68,15 @@ class Necklace(object):
     """An equivalence class of all lists equivalent under rotation."""
 
     def __init__(self, strand):
-        """Initialize the necklace. Items in the necklace must be hashable (immutable). Conceptually """
-        self.strand = collections.deque(strand)
-        for strand in strands:
-            if not isinstance(bead, collections.Hashable):
-                raise TypeError("Necklaces require hashable elements.")
-        self.period = periodicity(strand)
-
-    def __repr__(self):
-        return self.__class__.__name__+'('+str(self.beads)+')'
-
-    def __hash__(self):
-        return hash(self.beads)
-
-    def __len__(self):
-        return len(self.beads)
-
-    def __eq__(self, other):
-        if isinstance(other, Necklace):
-            return self.beads == other.beads
-        return False
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __contains__(self, other):
-        try:
-            return self == Necklace(other)
-        except:
-            return False
+        """Initialize the necklace. Items in the necklace must be hashable
+        (immutable), otherwise the equivalence class could change dynamically.
+        """
 
 
 # We may canonically represent a multiset with an unordered partition
 # corresponding to the multiplicities of the elements. It is simpler to
 # enumerate necklaces on a canonical partition and then match those to
 # necklaces formed from the beads.
-
-def necklace_count_totient(partition):
-    """ A common formula, found on Wikipedia, giving the number of necklaces
-    corresponding to a given partition of multiplicities. """
-
-    k = len(partition)
-    n = sum(partition)
-    w = reduce(gcd, partition)
-
-    factors = divisors(w)
-    m = len(factors)
-    beads = [0]*m
-
-    for I in range(m):
-        beads[I] = Fraction(totient(factors[I]) * factorial(n//factors[I]), n)
-        for J in range(k):
-            beads[I] /= factorial(partition[J]//factors[I])
-
-    return int(sum(beads))
-
 
 def partition_necklace_count_by_period(partition):
     """ Given a partition of multiplicities, returns the number of necklaces on
@@ -142,10 +92,10 @@ def partition_necklace_count_by_period(partition):
 
     k = len(partition)
     N = sum(partition)
-    w = reduce(gcd, partition)
+    w = functools.reduce(fractions.gcd, partition)
     p0 = N//w
 
-    factors = divisors(w)
+    factors = factorization.divisors(w)
     beads = [0]*factors[-1]
 
     # Find the multiplicity of each period
@@ -162,7 +112,7 @@ def partition_necklace_count_by_period(partition):
         # Subtact off the number of necklaces whose period subdivides our
         # divisor of w, to make sure beads[factor-1] give the EXACTLY the
         # number of necklaces with period k.
-        subdivisors = divisors(factor)
+        subdivisors = factorization.divisors(factor)
         if subdivisors[-1] != 1:
             for subfactor in subdivisors[:-1]:
                 beads[factor-1] -= subfactor*p0*beads[subfactor-1]
@@ -187,8 +137,8 @@ necklace_count = lambda items: sum(necklace_count_by_period(items))
 
 
 def partition_necklaces(partition):
-    """ Wrapper for partition necklaces, which takes a partition of
-    multiplicities and enumerates canonical necklaces on that partition. """
+    """Wrapper for partition necklaces, which takes a partition of
+    multiplicities and enumerates canonical necklaces on that partition."""
 
     partition = list(partition)
     a = [0]*sum(partition)
@@ -245,7 +195,6 @@ class NecklaceTests(unittest.TestCase):
         color_partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
         color_cardinalities = [70, 51330759480000, 600873126148801]
         for cp, cc in zip(color_partitions, color_cardinalities):
-            self.assertEqual(cc, necklace_count_totient(cp))
             self.assertEqual(cc, sum(partition_necklace_count_by_period(cp)))
 
     def testNecklaces(self):
@@ -269,13 +218,6 @@ class NecklaceTests(unittest.TestCase):
             for d in factorization.divisors(n):
                 periods.append(d)
                 lists.append(([0]+[1]*(d-1))*(n//d))
-
-        s1 = [0, 0, 0, 2]
-        s2 = s1*3 + [1, 1, 1, 4]
-        s3 = s2*2 + [1, 1, 1, 5]
-        s4 = s3*3 + [1, 1, 1, 6]
-        lists.append(s4*4)
-        periods.append(112)
 
         t1 = [(1, 2), ]*3+[(1, 1)]
         t2 = t1*3 + [(1, 4, 3)]*3 + [(1, )]
