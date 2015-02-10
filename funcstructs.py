@@ -30,6 +30,7 @@ import levypartitions
 import factorization
 import endofunctions
 
+
 def flatten(lol):
     """Flatten a list of lists."""
     return list(itertools.chain.from_iterable(lol))
@@ -153,9 +154,7 @@ def funcstruct_imagepath(funcstruct):
     without conversion to a particular endofunction.
     """
     forest = flatten(funcstruct)
-    cardinalities = np.array(
-        [0]+[0]*(len(flatten(forest))-2), dtype=object
-    )
+    cardinalities = np.array([0]+[0]*(len(flatten(forest))-2), dtype=object)
     for tree in forest:
         cardinalities += 1
         for subseq in subsequences.increasing_subsequences(tree):

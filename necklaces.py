@@ -26,14 +26,51 @@ n. Thus the ways of connecting a collection of rooted trees together in a cycle
 are precisely the necklaces whose beads are the rooted trees.
 """
 
+import factorization
 from factorization import divisors, totient
 import multiset
 from fractions import gcd, Fraction
 from functools import reduce
 
+from PADS import Lyndon
+
 from math import factorial
 import unittest
 
+
+def periodicity(beads):
+    """Find the "periodicity" of a list; i.e. the number of its distinct cyclic
+    rotations."""
+    n = len(beads)
+    if n in [0, 1]:
+        return n
+    seed = []
+    l = p = 1
+    while p != n:
+        while not factorization.isdivisor(l, n):
+            l += 1
+        p = l
+        seed.extend(beads[len(seed):p])
+        stop = False
+        for rep in range(l, n, l):
+            for ind, val in enumerate(seed):
+                l += 1
+                if val != beads[rep + ind]:
+                    stop = True
+                    break
+            if stop:
+                break
+        else:
+            break
+    return len(seed)
+
+
+class Necklace(object):
+    """An equivalence class of all lists equivalent under rotation."""
+
+    def __init__(self, beads):
+        self.beads = Lyndon.SmallestRotation(beads)
+        self.period = Necklace.periodicity(beads)
 
 # We may canonically represent a multiset with an unordered partition
 # corresponding to the multiplicities of the elements. It is simpler to
@@ -196,6 +233,42 @@ class NecklaceTests(unittest.TestCase):
             for necklace in necklaces(beadset):
                 count += 1
             self.assertEqual(necklace_count(beadset), count)
+
+    def test_periodicities(self):
+        periods = []
+        lists = []
+
+        N = 20
+        for n in range(1, N+1):
+            for d in factorization.divisors(n):
+                periods.append(d)
+                lists.append(([0]+[1]*(d-1))*(n//d))
+
+        s1 = [0, 0, 0, 2]
+        s2 = s1*3 + [1, 1, 1, 4]
+        s3 = s2*2 + [1, 1, 1, 5]
+        s4 = s3*3 + [1, 1, 1, 6]
+        lists.append(s4*4)
+        periods.append(112)
+
+        t1 = [(1, 2), ]*3+[(1, 1)]
+        t2 = t1*3 + [(1, 4, 3)]*3 + [(1, )]
+        t3 = t2*2 + [(2, )]*3 + [(1, 4, 3)]
+        t4 = t3*3 + [(3, )]*3+[(1, 2)]
+        lists.append(t4*4)
+        periods.append(112)
+
+        lists.extend([[(1, 2), (1, 2)], [(1, 2), (1, )]])
+        periods.extend([1, 2])
+
+        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, )])
+        periods.append(5)
+
+        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, 2)])
+        periods.append(5)
+
+        for period, lst in zip(periods, lists):
+            self.assertEqual(period, periodicity(lst))
 
 
 if __name__ == '__main__':

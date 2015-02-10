@@ -207,7 +207,7 @@ class OrderedTree(object):
 
     def canonical_form(self):
         """Return a dominant tree type."""
-        return OrderedTree(self.dominant_sequence())
+        return DominantTrees.DominantTree(self.dominant_sequence())
 
 
 def treefunc_to_tree(treefunc):
@@ -331,6 +331,9 @@ def forests(N):
     for tree in DominantTrees(N+1):
         yield tree.chop()
 
+print forests(4) == forests(5)
+print forests(5) == forests(5)
+
 
 def RootedTrees(n):
     for tree in DominantTrees(n+1):
@@ -355,9 +358,8 @@ class TreeTests(unittest.TestCase):
             self.assertEqual(count, len(set(forests(n+1))))
             self.assertEqual(count, len(set(RootedTrees(n+1))))
 
-    def test_dominant_tree_degeneracy(self):
+    def test_tree_degeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
-        # self.assertEqual(1, tree_degeneracy(tuple()))
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
             rooted_treecount = 0
@@ -368,14 +370,14 @@ class TreeTests(unittest.TestCase):
             self.assertEqual(n**(n-1), labelled_treecount)
             self.assertEqual(n**(n-1), rooted_treecount)
 
-    def test_ordered_tree_func_form(self):
+    def test_func_form(self):
         """Make sure treetofunc correctly represents trees as endofunctions"""
         tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = endofunctions.Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9,
                                            0, 12])
         self.assertEqual(func, tree.func_form())
 
-    def test_ordered_tree_bracket_form(self):
+    def test_bracket_form(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
             OrderedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 4]),
