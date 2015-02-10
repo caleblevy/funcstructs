@@ -82,7 +82,7 @@ def phi_product(n):
 
 
 def phi_sum(n):
-    """Return the totient using its definition. Code taken directly from
+    """ Return the totient using its definition. Code taken directly from
         "Computing Eulers Totient Function" at
         http://stackoverflow.com/a/18114286
     """

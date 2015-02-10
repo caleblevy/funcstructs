@@ -11,15 +11,13 @@ import unittest
 
 
 def monotone_subsequences(seq, comparison):
-    """
-    Given an iterable seq and a comparsion function, returns a generator of the
-    subsequences of seq such that comparison(seq[I],seq[I+1]) holds for
+    """ Given an iterable seq and a comparsion function, returns a generator of
+    the subsequences of seq such that comparison(seq[I],seq[I+1]) holds for
     0<=I<=len(seq)-1.
 
     For example, if comparison is >=, then this returns nondecreasing
     subsequences, while comparison of > returns increasing. Equivalent to
-    sympy's runs() method.
-    """
+    sympy's runs() method. """
     if not seq:
         return
     subseq = []
@@ -42,12 +40,10 @@ nonincreasing_subsequences = lambda seq: monotone_subsequences(seq, le)
 
 
 def startswith(seq, cond):
-    """
-    Given a sequence seq and boolean function of a single input cond, returns a
-    generator of subsequences such that a new subsequence begins if and only if
-    cond is true for the first element in the subsequence. If cond is never
-    true, returns the original sequence.
-    """
+    """ Given a sequence seq and boolean function of a single input cond,
+    returns a generator of subsequences such that a new subsequence begins if
+    and only if cond is true for the first element in the subsequence. If cond
+    is never true, returns the original sequence. """
     if not seq:
         return
     subseq = []
@@ -61,10 +57,8 @@ def startswith(seq, cond):
 
 
 def endswith(seq, cond):
-    """
-    Return a generator returning subsequences of seq each ending with an
-    element satisfying the boolean lambda function cond.
-    """
+    """ Return a generator returning subsequences of seq each ending with an
+    element satisfying the boolean lambda function cond. """
     if not seq:
         return
     subseq = []
@@ -93,22 +87,14 @@ class SubsequenceTest(unittest.TestCase):
         seq = [1, 2, 3, 4, 3, 3, 2, 3, 4, 5, 4, 5, 3, 3, 2, 3, 4, 5, 6, 5, 5,
                5, 5]
 
-        inc = [
-            [1, 2, 3, 4], [3], [3], [2, 3, 4, 5], [4, 5], [3], [3],
-            [2, 3, 4, 5, 6], [5], [5], [5], [5]
-        ]
-        nondec = [
-            [1, 2, 3, 4], [3, 3], [2, 3, 4, 5], [4, 5], [3, 3],
-            [2, 3, 4, 5, 6], [5, 5, 5, 5]
-        ]
-        dec = [
-            [1], [2], [3], [4, 3], [3, 2], [3], [4], [5, 4], [5, 3], [3, 2],
-            [3], [4], [5], [6, 5], [5], [5], [5]
-        ]
-        noninc = [
-            [1], [2], [3], [4, 3, 3, 2], [3], [4], [5, 4], [5, 3, 3, 2], [3],
-            [4], [5], [6, 5, 5, 5, 5]
-        ]
+        inc = [[1, 2, 3, 4], [3], [3], [2, 3, 4, 5], [4, 5], [3], [3],
+               [2, 3, 4, 5, 6], [5], [5], [5], [5]]
+        nondec = [[1, 2, 3, 4], [3, 3], [2, 3, 4, 5], [4, 5], [3, 3],
+                  [2, 3, 4, 5, 6], [5, 5, 5, 5]]
+        dec = [[1], [2], [3], [4, 3], [3, 2], [3], [4], [5, 4], [5, 3], [3, 2],
+               [3], [4], [5], [6, 5], [5], [5], [5]]
+        noninc = [[1], [2], [3], [4, 3, 3, 2], [3], [4], [5, 4], [5, 3, 3, 2],
+                  [3], [4], [5], [6, 5, 5, 5, 5]]
 
         self.assertSequenceEqual(inc, list(increasing_subsequences(seq)))
         self.assertSequenceEqual(nondec, list(nondecreasing_subsequences(seq)))

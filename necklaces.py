@@ -29,6 +29,7 @@ are precisely the necklaces whose beads are the rooted trees.
 import factorization
 from factorization import divisors, totient
 import multiset
+import collections
 from fractions import gcd, Fraction
 from functools import reduce
 
@@ -38,10 +39,11 @@ from math import factorial
 import unittest
 
 
-def periodicity(beads):
-    """Find the "periodicity" of a list; i.e. the number of its distinct cyclic
-    rotations."""
-    n = len(beads)
+def periodicity(strand):
+    """ Find the "periodicity" of a list; i.e. the number of its distinct
+    cyclic rotations. Algorithm proposed by Meng Wang (wangmeng@berkeley.edu)
+    runs in O(len(strand)). """
+    n = len(strand)
     if n in [0, 1]:
         return n
     seed = []
@@ -50,12 +52,12 @@ def periodicity(beads):
         while not factorization.isdivisor(l, n):
             l += 1
         p = l
-        seed.extend(beads[len(seed):p])
+        seed.extend(strand[len(seed):p])
         stop = False
         for rep in range(l, n, l):
             for i, val in enumerate(seed):
                 l += 1
-                if val != beads[rep + i]:
+                if val != strand[rep + i]:
                     stop = True
                     break
             if stop:
@@ -69,9 +71,13 @@ def periodicity(beads):
 class Necklace(object):
     """An equivalence class of all lists equivalent under rotation."""
 
-    def __init__(self, beads):
-        self.beads = tuple(Lyndon.SmallestRotation(beads))
-        self.period = periodicity(beads)
+    def __init__(self, strand):
+        """Initialize the necklace. Items in the necklace must be hashable (immutable). Conceptually """
+        self.strand = collections.deque(strand)
+        for strand in strands:
+            if not isinstance(bead, collections.Hashable):
+                raise TypeError("Necklaces require hashable elements.")
+        self.period = periodicity(strand)
 
     def __repr__(self):
         return self.__class__.__name__+'('+str(self.beads)+')'
@@ -97,17 +103,15 @@ class Necklace(object):
             return False
 
 
-
 # We may canonically represent a multiset with an unordered partition
 # corresponding to the multiplicities of the elements. It is simpler to
 # enumerate necklaces on a canonical partition and then match those to
 # necklaces formed from the beads.
 
 def necklace_count_totient(partition):
-    """
-    A common formula, found on Wikipedia, giving the number of necklaces
-    corresponding to a given partition of multiplicities.
-    """
+    """ A common formula, found on Wikipedia, giving the number of necklaces
+    corresponding to a given partition of multiplicities. """
+
     k = len(partition)
     n = sum(partition)
     w = reduce(gcd, partition)
@@ -125,8 +129,7 @@ def necklace_count_totient(partition):
 
 
 def partition_necklace_count_by_period(partition):
-    """
-    Given a partition of multiplicities, returns the number of necklaces on
+    """ Given a partition of multiplicities, returns the number of necklaces on
     this partition of beads of each possible period of the necklace. To do
     this, we start with the smallest divisor of the gcd of all the
     multiplicities, and find all necklaces with period less than or equal to
@@ -135,8 +138,8 @@ def partition_necklace_count_by_period(partition):
     Before normalizing by the period of the necklace (to account for its
     distinct rotations) we subtract the number of necklaces with each period
     which is a subdivisor of our given period, to ensure we give the number of
-    necklaces with exactly period k.
-    """
+    necklaces with exactly period k. """
+
     k = len(partition)
     N = sum(partition)
     w = reduce(gcd, partition)
@@ -171,10 +174,8 @@ def partition_necklace_count_by_period(partition):
 
 
 def necklace_count_by_period(beads):
-    """
-    Returns a list whose kth element is the number of necklaces corresponding
-    to the input set of beads with k+1 distinct rotations.
-    """
+    """ Returns a list whose kth element is the number of necklaces
+    corresponding to the input set of beads with k+1 distinct rotations. """
     _, partition = multiset.Multiset(beads).split()
     return partition_necklace_count_by_period(partition)
 
@@ -186,10 +187,9 @@ necklace_count = lambda items: sum(necklace_count_by_period(items))
 
 
 def partition_necklaces(partition):
-    """
-    Wrapper for partition necklaces, which takes a partition of multiplicities
-    and enumerates canonical necklaces on that partition.
-    """
+    """ Wrapper for partition necklaces, which takes a partition of
+    multiplicities and enumerates canonical necklaces on that partition. """
+
     partition = list(partition)
     a = [0]*sum(partition)
     partition[0] -= 1
@@ -198,10 +198,11 @@ def partition_necklaces(partition):
 
 
 def _partition_necklaces(a, partition, t, p, k):
-    """
-    This function is a result of refactoring of Sage's _simple_fixed_content
-    algorithm, featured in Sage at https://github.com/sagemath/sage.git,
-    located in src/sage/combinat/neckalce.py as of December 23, 2014.
+    """ This function is a result of refactoring of Sage's
+    _simple_fixed_content algorithm, featured in Sage at
+    https://github.com/sagemath/sage.git, located in
+    src/sage/combinat/neckalce.py as of December 23, 2014.
+
 
     The original code was written by Mike Hansen <mhansen@gmail.com> in 2007,
     who based his algorithm on
@@ -225,10 +226,9 @@ def _partition_necklaces(a, partition, t, p, k):
 
 
 def necklaces(items):
-    """
-    Given a set of items (called beads) returns all necklaces which can be made
-    with those beads.
-    """
+    """ Given a set of items (called beads) returns all necklaces which can be
+    made with those beads. """
+
     if not items:
         return
     items = sorted(items)

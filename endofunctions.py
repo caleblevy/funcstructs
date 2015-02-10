@@ -5,11 +5,10 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""
-A collection of utilities returning certain information about and kinds of
+""" A collection of utilities returning certain information about and kinds of
 images of sets under functions: preimages, cardinalities of iterate images,
-cycle decompositions and limitsets.
-"""
+cycle decompositions and limitsets. """
+
 
 import random
 import unittest
@@ -18,10 +17,9 @@ import productrange
 
 
 class Endofunction(object):
-    """
-    Implementation of an endofunction object: a map from set(range(N)) to
-    itself.
-    """
+    """ Implementation of an endofunction object: a map from set(range(N)) to
+    itself. """
+
     def __init__(self, func):
         self._func = tuple(func)
         self._n = len(self._func)
@@ -74,19 +72,13 @@ class Endofunction(object):
 
     @property
     def preimage(self):
-        """
-        Given an endofunction f defined on S=range(len(f)), returns the
+        """ Given an endofunction f defined on S=range(len(f)), returns the
         preimage of f. If g=preimage(f), we have
-
             g[y]=[x for x in S if f[x]==y],
-
         or mathematically:
-
             f^-1(y)={x in S: f(x)=y}.
-
         Note the particularly close correspondence between python's list
-        comprehensions and mathematical set-builder notation.
-        """
+        comprehensions and mathematical set-builder notation. """
         preim = [set() for _ in range(len(self))]
         for x in range(len(self)):
             preim[self[x]].add(x)
@@ -113,7 +105,8 @@ class Endofunction(object):
         return cardinalities
 
     def __pow__(self, n):
-        """Iterate by self-composing, inspired by exponentiation by squaring."""
+        """ Iterate by self-composing, inspired by exponentiation by squaring.
+        """
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
         f = self
@@ -125,10 +118,9 @@ class Endofunction(object):
         return f_iter
 
     def enumerate_cycles(self):
-        """
-        Returns self's cycle decomposition. Since lookup in sets is O(1), this
-        algorithm should take O(len(self.domain)) time.
-        """
+        """ Returns self's cycle decomposition. Since lookup in sets is O(1),
+        this algorithm should take O(len(self.domain)) time. """
+
         if len(self) == 1:
             yield [0]
             return
@@ -169,10 +161,8 @@ class Endofunction(object):
 
     @property
     def attached_treenodes(self):
-        """
-        Returns subsets of the preimages of each element which are not in
-        cycles.
-        """
+        """ Returns subsets of the preimages of each element which are not in
+        cycles. """
         if self._descendants is None:
             descendants = [set() for _ in range(len(self))]
             for x, inv_image in enumerate(self.preimage):
@@ -183,8 +173,7 @@ class Endofunction(object):
         return self._descendants
 
     def attached_level_sequence(self, node, level=1):
-        """
-        Given an element of self's domain, return a level sequence of the
+        """ Given an element of self's domain, return a level sequence of the
         rooted tree formed from the graph of all noncyclic nodes whose paths
         iteration paths pass through node.
 
@@ -192,8 +181,7 @@ class Endofunction(object):
         current level and appends the level sequences of the attached subtrees
         of each noncyclic element in the preimage the the node, with the
         subtrees' level sequences starting one level higher than the current
-        node.
-        """
+        node. """
         level_sequence = [level]
         for x in self.attached_treenodes[node]:
             level_sequence += self.attached_level_sequence(x, level+1)
@@ -242,11 +230,9 @@ class SymmetricFunction(Endofunction):
 
     @property
     def inverse(self):
-        """
-        Returns the inverse of a permutation of range(n). Code taken directly
-        from: "Inverting permutations in Python" at
-        http://stackoverflow.com/a/9185908.
-        """
+        """ Returns the inverse of a permutation of range(n). Code taken
+        directly from: "Inverting permutations in Python" at
+        http://stackoverflow.com/a/9185908. """
         inv = [0] * len(self)
         for i, p in enumerate(self):
             inv[p] = i

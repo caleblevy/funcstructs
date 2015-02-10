@@ -37,10 +37,8 @@ def flatten(lol):
 
 
 def multiset_funcstructs(mset):
-    """
-    Given a multiset of rooted trees, return all endofunction structures whose
-    cycles correspond to the multisets.
-    """
+    """Given a multiset of rooted trees, return all endofunction structures
+    whose cycles correspond to the multisets."""
     mset = [tuple(m) for m in mset]
     beadsets, mults = multiset.Multiset(mset).split()
     strands = []
@@ -54,10 +52,8 @@ def multiset_funcstructs(mset):
 
 
 def funcstructs(n):
-    """
-    An enumeration of endofunction structures on n elements. Equalivalent to
-    all conjugacy classes in End(S)
-    """
+    """An enumeration of endofunction structures on n elements. Equalivalent to
+    all conjugacy classes in End(S)."""
     for forest in rootedtrees.forests(n):
         for mpart in forest.partitions():
             for funcstruct in multiset_funcstructs(mpart):
@@ -65,14 +61,12 @@ def funcstructs(n):
 
 
 def funcstruct_count(n):
-    """
-    Count the number of endofunction structures on n nodes. Iterates over the
-    tuple representation of partitions using the formula featured in
+    """Count the number of endofunction structures on n nodes. Iterates over
+    the tuple representation of partitions using the formula featured in
         De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
         Combinatorial Theory, Volume 12, 1972.
 
-    See the papers directory for the original reference.
-    """
+    See the papers directory for the original reference."""
     tot = 0
     for b in levypartitions.tuple_partitions(n):
         product_terms = []
@@ -98,13 +92,12 @@ class Funcstruct(object):
 
 
 def funcstruct_degeneracy(function_structure):
-    """
-    The number of equivalent representations of a labelling of an endofunction
-    with unlabelled structure funcstruct.
+    """ The number of equivalent representations of a labelling of an
+    endofunction with unlabelled structure funcstruct.
 
     The size of the conjugacy class of funcstruct is
-    n!/funcstruct_degeneracy(funcstruct)
-    """
+    n!/funcstruct_degeneracy(funcstruct) """
+
     if not function_structure:
         return 1
     # First the degeneracy from the permutations of arrangements of cycles
@@ -131,10 +124,8 @@ def _treeform_of_noncyclic_nodes(function_structure):
 
 
 def funcstruct_to_func(function_structure):
-    """
-    Convert function structure to canonical form by filling in numbers from 0
-    to n-1 on the cycles and trees.
-    """
+    """ Convert function structure to canonical form by filling in numbers from
+    0 to n-1 on the cycles and trees. """
     func = _treeform_of_noncyclic_nodes(function_structure)
     cycle_start = 0
     for cycle in function_structure:
@@ -149,10 +140,8 @@ def funcstruct_to_func(function_structure):
 
 
 def funcstruct_imagepath(funcstruct):
-    """
-    Given an endofunction structure funcstruct, compute the image path directly
-    without conversion to a particular endofunction.
-    """
+    """ Given an endofunction structure funcstruct, compute the image path
+    directly without conversion to a particular endofunction. """
     forest = flatten(funcstruct)
     cardinalities = np.array([0]+[0]*(len(flatten(forest))-2), dtype=object)
     for tree in forest:

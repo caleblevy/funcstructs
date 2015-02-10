@@ -6,10 +6,9 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 
-"""
-Further modules for enumerating and counting partitions, mostly derived by
-myself.
-"""
+""" Further modules for enumerating and counting partitions, mostly derived by
+myself. """
+
 
 
 import unittest
@@ -21,12 +20,10 @@ import integerroots
 
 
 def tuple_partitions(n):
-    """
-    Every partition on N may be represented in the form as a tuple of numbers
-    (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N.
+    """ Every partition on N may be represented in the form as a tuple of
+    numbers (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N. This
+    program outputs every partition of n in a tuple format. """
 
-    This program outputs every partition of n in a tuple format.
-    """
     for part in partitions(n):
         b = [0]*n
         for p in part:
@@ -35,17 +32,14 @@ def tuple_partitions(n):
 
 
 def _min_part(n, L):
-    """
-    Helper function for fixed_lex_partitions. Returns a tuple containing:
+    """ Helper function for fixed_lex_partitions. Returns a tuple containing:
         1) The output of minimal_partition(n,L)
         2) #(Occurances of 1 in this partition)+1.
 
     The second output is returned so as to avoid calling the count() method of
     the list corresponding to the partition, since this information is
     necessarily contained in the process of its creation. It is needed by
-    fixed_lexed_partitions for the index on which to decrement.
-    """
-
+    fixed_lexed_partitions for the index on which to decrement. """
     binsize = n//L
     overstuffed = n - L*binsize
     regular = L - overstuffed
@@ -54,23 +48,18 @@ def _min_part(n, L):
 
 
 def minimal_partition(n, L):
-    """
-    A wrapper for _min_partition. Given integers n > 0 and L <= n, returns the
-    lexicographically smallest unordered integer partition of n into L nonzero
-    parts.
-    """
+    """A wrapper for _min_partition. Given integers n > 0 and L <= n, returns
+    the lexicographically smallest unordered integer partition of n into L
+    nonzero parts."""
     min_part, _ = _min_part(n, L)
     return min_part
 
 
 def fixed_lex_partitions(n, L):
-    """
-    Integer partitions of n into L parts, in lexicographic order. This
+    """Integer partitions of n into L parts, in lexicographic order. This
     algorithm was derived and implemented by Caleb C. Levy in 2014. Its form
     was taken from David Eppstein's equivalent generator for fixed length
-    partitions in colex order.
-    """
-
+    partitions in colex order."""
     if L == 0:
         if n == 0:
             yield []
@@ -105,13 +94,10 @@ def fixed_lex_partitions(n, L):
 
 
 def partition_numbers_upto(N):
-    """
-    Uses Euler's Pentagonal Number Theorem to count partition number using the
-    previous terms. The sum is taken over O(sqrt(n)) terms on each pass, so the
-    algorithm runs in O(n**3/2)
-
-    See the Knoch paper in papers folder for a proof of the theorem.
-    """
+    """ Uses Euler's Pentagonal Number Theorem to count partition number using
+    the previous terms. The sum is taken over O(sqrt(n)) terms on each pass, so
+    the algorithm runs in O(n**3/2). See the Knoch paper in papers folder for a
+    proof of the theorem. """
     if N == 0:
         return [1]
     P = [1]+[0]*N

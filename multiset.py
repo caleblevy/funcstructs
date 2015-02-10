@@ -164,9 +164,8 @@ class Multiset(collections.Set, collections.Hashable):
 
     @classmethod
     def _from_map(cls, map_):
-        """
-        Creates a multiset from a dict of elem->count. Each key in the dict is
-        added if the value is > 0.
+        """ Creates a multiset from a dict of elem->count. Each key in the dict
+        is added if the value is > 0.
 
         This runs in O(len(map))
         """
@@ -194,7 +193,7 @@ class Multiset(collections.Set, collections.Hashable):
     ## implementing Container methods
 
     def __contains__(self, value):
-        """Returns the multiplicity of the element.
+        """ Returns the multiplicity of the element.
 
         This runs in O(1)
         """
@@ -211,7 +210,7 @@ class Multiset(collections.Set, collections.Hashable):
     # Comparison methods
 
     def __le__(self, other):
-        """Tests if self <= other where other is another multiset
+        """ Tests if self <= other where other is another multiset
 
         This runs in O(l + n) where:
             n is self.num_unique_elements()
@@ -251,25 +250,24 @@ class Multiset(collections.Set, collections.Hashable):
 
     # Truthiness methods
     def __bool__(self):
-        return self._size
+        return bool(self._size)
 
     __nonzero__ = __bool__
 
     def split(self):
-        """Splits the multiset into element-multiplicity pairs."""
+        """ Splits the multiset into element-multiplicity pairs. """
         y = list(self._dict)
         d = [self._dict[el] for el in y]
         return y, d
 
     def degeneracy(self):
-        """Number of different representations of the same multiset."""
+        """ Number of different representations of the same multiset. """
         y, d = self.split()
         return factorial_prod(d)
 
     def partitions(self):
-        """
-        Yield partitions of a multiset, each one being a multiset of multisets.
-        """
+        """ Yield partitions of a multiset, each one being a multiset of
+        multisets. """
         return multiset_partitions(list(self))
 
 

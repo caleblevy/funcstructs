@@ -5,11 +5,10 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""
-A rooted tree is a connected digraph with a single cycle such that every node's
-outdegree and every cycle's length is exactly one. Alternatively, it is a tree
-with a designated "root" node, where every path ends with the root. They are
-equivalent to filesystems consisting entirely of folders with no symbolic
+"""A rooted tree is a connected digraph with a single cycle such that every
+node's outdegree and every cycle's length is exactly one. Alternatively, it is
+a tree with a designated "root" node, where every path ends with the root. They
+are equivalent to filesystems consisting entirely of folders with no symbolic
 links. An unlabelled rooted tree is the equivalence class of a given directory
 where folders in each subdirectory may be rearranged in any desired order
 (alphabetical, reverse-alphabetical, date added, or any other permutation). A
@@ -19,8 +18,7 @@ Any endofunction structure may be represented as a forest of trees, grouped
 together in multisets corresponding to cycle decompositions of the final set
 (the subset of its domain on which it is invertible). The orderings of the
 trees in the multisets correspond to necklaces whose beads are the trees
-themselves.
-"""
+themselves."""
 
 
 import math
@@ -38,7 +36,7 @@ def flatten(lol):
     """Flatten a list of lists."""
     return list(itertools.chain.from_iterable(lol))
 
-
+@functools.total_ordering
 class RootedTree(object):
 
     def __init__(self, subtrees=None):
@@ -79,6 +77,8 @@ class RootedTree(object):
                     tree_string += '^%s' % str(mult)
                 strings.append(tree_string)
             return '{%s}' % ', '.join(strings)
+    # Make unsortable.
+    __lt__ = None
 
     def __str__(self):
         return "RootedTree(%s)" % self._str()
@@ -116,11 +116,11 @@ class OrderedTree(object):
             return False
 
     def __ne__(self, other):
-        return not (self == other)
+        return not self == other
 
-    def __le__(self, other):
+    def __lt__(self, other):
         if isinstance(other, OrderedTree):
-            return self.level_sequence <= other.level_sequence
+            return self.level_sequence < other.level_sequence
         else:
             raise ValueError("Cannot compare tree with type %s" % type(other))
 
@@ -139,7 +139,7 @@ class OrderedTree(object):
     __nonzero__ = __bool__
 
     def branches(self):
-        """Return each major subbranch of a tree (even chopped)"""
+        """ Return each major subbranch of a tree (even chopped). """
         if not self:
             return
         isroot = lambda node: node == self.level_sequence[0] + 1
@@ -151,15 +151,14 @@ class OrderedTree(object):
             yield self.__class__([node-1 for node in branch])
 
     def chop(self):
-        """Generates the canonical subtrees of the input tree's root node."""
+        """ Generates the canonical subtrees of the input tree's root node. """
         return multiset.Multiset(subtree for subtree in self.subtrees())
 
     def func_form(self, permutation=None):
-        """
-        Return an endofunction whose structure corresponds to the rooted tree.
-        The root is 0 by default, but can be permuted according a specified
-        permutation.
-        """
+        """ Return an endofunction whose structure corresponds to the rooted
+        tree. The root is 0 by default, but can be permuted according a
+        specified permutation. """
+
         if permutation is None:
             permutation = range(len(self))
         height = max(self)
@@ -193,10 +192,8 @@ class OrderedTree(object):
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
     def dominant_sequence(self):
-        """
-        Return the lexicographically dominant rooted tree corresponding to
-        self.
-        """
+        """ Return the lexicographically dominant rooted tree corresponding to
+        self. """
         if not self.branches():
             return self.level_sequence
         branch_list = []
@@ -229,16 +226,14 @@ class DominantTrees(object):
     class DominantTree(OrderedTree):
 
         def degeneracy(self):
-            """
-            To calculate the degeneracy of a collection of subtrees you start
-            with the lowest branches and then work upwards. If a group of
+            """ To calculate the degeneracy of a collection of subtrees you
+            start with the lowest branches and then work upwards. If a group of
             identical subbranches are connected to the same node, we multiply
             the degeneracy of the tree by the factorial of the multiplicity of
             these subbranches to account for their distinct orderings. The same
             principal applies to subtrees.
 
-            TODO: A writeup of this with diagrams will be in the notes.
-            """
+            TODO: A writeup of this with diagrams will be in the notes. """
             if not self.chop():
                 return 1
             deg = 1
@@ -253,9 +248,8 @@ class DominantTrees(object):
         self._memoized_len = None
 
     def __iter__(self):
-        """
-        Takes an integer N as input and outputs a generator object enumerating
-        all isomorphic unlabeled rooted trees on N nodes.
+        """Takes an integer N as input and outputs a generator object
+        enumerating all isomorphic unlabeled rooted trees on N nodes.
 
         The basic idea of the algorithm is to represent a tree by its level
         sequence: list each vertice's height above the root, where vertex v+1
@@ -286,8 +280,7 @@ class DominantTrees(object):
                 yield self.DominantTree(tree)
 
     def _calculate_len(self):
-        """
-        Returns the number of rooted tree structures on n nodes. Algorithm
+        """Returns the number of rooted tree structures on n nodes. Algorithm
         featured without derivation in
             Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
             "Mathematical Constants", Cambridge, England: Cambridge University
@@ -305,34 +298,26 @@ class DominantTrees(object):
         return T[-1]
 
     def __len__(self):
-        """
-        Hook for python len function.
+        """ NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long,
+        and thus gives rise to an index overflow error. Use self._calculate_len
+        instead. """
 
-        NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long, and
-        thus gives rise to an index overflow error. Use self._calculate_len
-        instead.
-        """
         if self._memoized_len is None:
             self._memoized_len = self._calculate_len()
         return self._memoized_len
 
 
 def forests(N):
-    """
-    Any rooted tree on N+1 nodes can be identically described by a collection
-    of rooted trees on N nodes, grafted together at a single root.
+    """ Any rooted tree on N+1 nodes can be identically described by a
+    collection of rooted trees on N nodes, grafted together at a single root.
 
     To enumerate all collections of rooted trees on N nodes, we reverse the
     principle and enumerate all rooted trees on N+1 nodes, chopping them at the
-    base. Much simpler than finding all trees corresponding to a partition.
-    """
+    base. Much simpler than finding all trees corresponding to a partition. """
     if N == 0:
         return
     for tree in DominantTrees(N+1):
         yield tree.chop()
-
-print forests(4) == forests(5)
-print forests(5) == forests(5)
 
 
 def RootedTrees(n):

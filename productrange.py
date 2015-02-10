@@ -6,10 +6,8 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 
-"""
-Functions for iterating over dynamically nested loops; i.e. iterating over
-cartesian products of finite sets, with variable dimensionality.
-"""
+""" Functions for iterating over dynamically nested loops; i.e. iterating over
+cartesian products of finite sets, with variable dimensionality. """
 
 
 import unittest
@@ -21,11 +19,10 @@ isiterable = lambda obj: hasattr(obj, '__iter__')
 
 
 def parse_ranges(begin, end, step):
-    """
-    If begin == end == None then begin is treated as end and step is set by
+    """ If begin == end == None then begin is treated as end and step is set by
     default to 1 and begin to 0. If begin and step are integers they are
-    transformed into begin = [begin]*len(end) and step = [step]*len(end).
-    """
+    transformed into begin = [begin]*len(end) and step = [step]*len(end). """
+
     if end is None:
         begin, end = end, begin
     # If start is not iterable, it is either an int or none.
@@ -42,11 +39,10 @@ def parse_ranges(begin, end, step):
 
 
 def product_range(begin, end=None, step=None):
-    """
-    Nice wrapper for itertools.product. Give it a tuple of starts, stops and
-    increments and it will return the nested for loop coresponding to them.
-    I.E. if begin = (r1, r2, ..., rn), end = (s1, s2, ..., sn) and step =
-    (t1, t2, ..., tn) then
+    """ Nice wrapper for itertools.product. Give it a tuple of starts, stops
+    and increments and it will return the nested for loop coresponding to them.
+    I.E. if begin = (r1, r2, ..., rn), end = (s1, s2, ..., sn) and step = (t1,
+    t2, ..., tn) then
 
         for tup in product_range(begin, end, step):
             yield tup
@@ -89,9 +85,8 @@ def rangelen(start, stop=None, step=None):
 
 
 def rev_range(begin, end=None, step=None):
-    """
-    Reverse iteration order for product_range. If begin, end and step are as
-    for product_range, then
+    """ Reverse iteration order for product_range. If begin, end and step are
+    as for product_range, then
 
         for tup in rev_range(begin, end, step):
             yield tup
