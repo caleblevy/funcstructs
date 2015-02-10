@@ -29,6 +29,7 @@ are precisely the necklaces whose beads are the rooted trees.
 
 import fractions
 import functools
+import collections
 import unittest
 
 import factorization
@@ -69,8 +70,49 @@ class Necklace(object):
 
     def __init__(self, strand):
         """Initialize the necklace. Items in the necklace must be hashable
-        (immutable), otherwise the equivalence class could change dynamically.
-        """
+        (immutable), otherwise the equivalence class could change
+        dynamically."""
+        period = periodicity(strand)
+        self.period = period
+        self.reps = len(strand)//period
+        self.seed = collections.deque(strand[:period])
+        self.beads = multiset.Multiset(strand)
+        self.strand = list(strand)
+
+    def __repr__(self):
+        return "Necklace(%s)"%str(self.strand)
+
+    def __len__(self):
+        return self.period * self.reps
+
+    def __hash__(self):
+        """If n1==n2, hash is equal, but quite degenerate."""
+        return hash(tuple([self.beads, self.period]))
+
+    def __eq__(self, other):
+        """For now we check for equality by "brute force" rotation, as D.
+        Eppstein's normalization algorithm produces unpredictable output for
+        items with ill-defined orderability."""
+        if isinstance(other, self.__class__):
+            if self.reps == other.reps:
+                if self.period == other.period:
+                    if self.beads == other.beads:
+                        for I in range(self.period):
+                            if self.seed == other.seed:
+                                return True
+                            other.seed.rotate()
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    __lt__ = None
+
+    def __contains__(self, other):
+        try:
+            return self == self.__class__(other)
+        except:
+            return False
 
 
 # We may canonically represent a multiset with an unordered partition
@@ -196,6 +238,37 @@ class NecklaceTests(unittest.TestCase):
         color_cardinalities = [70, 51330759480000, 600873126148801]
         for cp, cc in zip(color_partitions, color_cardinalities):
             self.assertEqual(cc, sum(partition_necklace_count_by_period(cp)))
+
+    def test_necklace_init(self):
+        n = Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3])
+        self.assertEqual(n.period, 3)
+        self.assertEqual(n.reps, 4)
+        self.assertEqual(n.seed, collections.deque([1, 2, 3]))
+        self.assertEqual(n.beads, multiset.Multiset([1, 2, 3]*4))
+
+    def test_necklace_equality(self):
+        n = Necklace([1, 2, 3, 1, 2, 3])
+        nshort = Necklace([1, 2, 3])
+        nlong = Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3])
+        nrot = Necklace([3, 1, 2, 3, 1, 2])
+        ntype = Necklace(tuple([2, 3, 1, 2, 3, 1]))
+
+        self.assertNotEqual(n, nshort)
+        self.assertNotEqual(n, nlong)
+        self.assertEqual(n, nrot)
+        self.assertEqual(n, ntype)
+
+    def test_necklace_containement(self):
+        n = Necklace([1, 2, 3, 1, 2, 3])
+        self.assertFalse(n in n)
+        self.assertTrue(tuple([3, 1, 2, 3, 1, 2]) in n)
+
+    def test_necklace_hash(self):
+        self.assertEqual(hash(Necklace([1, 2, 3])), hash(Necklace([3, 1, 2])))
+
+    def test_necklace_repr(self):
+        n = Necklace([1, 2, 3, 1, 2, 3])
+        self.assertTrue(n == eval(repr(n)))
 
     def testNecklaces(self):
         beadsets = [

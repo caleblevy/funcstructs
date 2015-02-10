@@ -36,7 +36,7 @@ def flatten(lol):
     """Flatten a list of lists."""
     return list(itertools.chain.from_iterable(lol))
 
-@functools.total_ordering
+
 class RootedTree(object):
 
     def __init__(self, subtrees=None):
@@ -100,7 +100,7 @@ class RootedTree(object):
 
 @functools.total_ordering
 class OrderedTree(object):
-    """Represents an unlabelled rooted tree."""
+    """Represents an unlabelled ordered rooted tree."""
 
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
@@ -147,11 +147,12 @@ class OrderedTree(object):
             yield self.__class__(branch)
 
     def subtrees(self):
+        """Generate the main subtrees of self in order."""
         for branch in self.branches():
             yield self.__class__([node-1 for node in branch])
 
     def chop(self):
-        """ Generates the canonical subtrees of the input tree's root node. """
+        """ Return a multiset of the input tree's main sub branches. """
         return multiset.Multiset(subtree for subtree in self.subtrees())
 
     def func_form(self, permutation=None):
