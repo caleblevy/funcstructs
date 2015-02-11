@@ -35,15 +35,14 @@ class Multiset(collections.Set, collections.Hashable):
     ## Basic object methods
 
     def __init__(self, iterable=None):
-        """
-        Create a new basemultiset. If iterable isn't given, is None or is empty
-        then the set starts empty. If iterable is a map, then it is assumed to
-        be a map from elements to the number of times they should appear in the
-        multiset. Otherwise each element from iterable will be added to the
+        """ Create a new Multiset. 
+
+        If iterable isn't given, is None or is empty then the set is empty. If
+        iterable is another multiset, then the returned set is a shallow copy
+        of iterable. Otherwise each element from iterable will be added to the
         multiset however many times it appears.
 
-        This runs in O(len(iterable))
-        """
+        This runs in O(len(iterable)). """
         self._dict = dict()
         self._size = 0
         if iterable:
@@ -58,13 +57,12 @@ class Multiset(collections.Set, collections.Hashable):
         """The string representation is a call to the constructor given a tuple
         containing all of the elements.
 
-        This runs in whatever tuple(self) does, I'm assuming O(len(self))
-        """
+        This runs in whatever tuple(self) does, I'm assuming O(len(self)). """
         if self._size == 0:
             return '{0}()'.format(self.__class__.__name__)
-        else:
-            format = '{class_name}({tuple!r})'
-            return format.format(class_name=self.__class__.__name__, tuple=tuple(self))
+
+        format_str = '{cls}({tup!r})'
+        return format_str.format(cls=self.__class__.__name__, tup=tuple(self))
 
     def __str__(self):
         """The printable string appears just like a set, except that each
@@ -136,7 +134,8 @@ class Multiset(collections.Set, collections.Hashable):
     def count(self, value):
         """Return the number of value present in this Multiset.
 
-        If value is not in the Multiset no Error is raised, instead 0 is returned.
+        If value is not in the Multiset no Error is raised, instead 0 is
+        returned.
 
         This runs in O(1) time
 
@@ -308,7 +307,8 @@ class MultisetTests(unittest.TestCase):
         self.assertTrue("'b'^2" in str(abra))
         self.assertTrue("'c'" in str(abra))
         abra_elems = set(("'a'^5", "'b'^2", "'r'^2", "'c'", "'d'"))
-        assert compare_Multiset_string(Multiset('abracadabra')) == abra_elems
+        self.assertEqual(compare_Multiset_string(Multiset('abracadabra')),
+                         abra_elems)
 
     def test_count(self):
         """Check that we record the correct number of elements."""
@@ -321,8 +321,10 @@ class MultisetTests(unittest.TestCase):
         sort_key = lambda e: (-e[1], e[0])
         abra_counts = [('a', 5), ('b', 2), ('r', 2), ('c', 1), ('d', 1)]
         self.assertEqual(sorted(abra.nlargest(), key=sort_key), abra_counts)
-        self.assertEqual(sorted(abra.nlargest(3), key=sort_key), abra_counts[:3])
-        self.assertEqual(Multiset('abcaba').nlargest(3), [('a', 3), ('b', 2), ('c', 1)])
+        self.assertEqual(sorted(abra.nlargest(3), key=sort_key), 
+                         abra_counts[:3])
+        self.assertEqual(Multiset('abcaba').nlargest(3),
+                         [('a', 3), ('b', 2), ('c', 1)])
 
     def test_from_map(self):
         """Check that we can form a multiset from a map."""
