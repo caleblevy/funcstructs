@@ -36,6 +36,8 @@ import factorization
 import multiset
 
 
+
+
 def periodicity(strand):
     """ Find the "periodicity" of a list; i.e. the number of its distinct
     cyclic rotations. Algorithm proposed by Meng Wang (wangmeng@berkeley.edu)
@@ -141,6 +143,11 @@ class NecklaceGroup(object):
         self.beads = multiset.Multiset(beads)
         self.elems, self.partition = self.beads.split()
 
+    def __repr__(self):
+        return self.__class__.__name__+'('+repr(self.beads)+')'
+
+    def __str__(self):
+        return 'Necklaces('+str(self.beads)+')'
 
     def count_by_period(self):
         """ Returns a list whose kth element is the number of necklaces
@@ -210,27 +217,55 @@ class NecklaceGroup(object):
             # necklaces in memory when constructing endofunction structures.
             yield Necklace([self.elems[I] for I in strand])
 
+print(NecklaceGroup([1,1,2,2,3]))
+for I in NecklaceGroup([1,1,1,1,1,1,2,2,3]):
+    print(I)
+print(len(NecklaceGroup([4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6])))
+print(set([tuple(I) for I in NecklaceGroup([4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6])._necklaces()]))
+
+
+class PeriodicityTest(unittest.TestCase):
+
+    def test_periodicities(self):
+        """Test periodicities of various lists"""
+        periods = []
+        lists = []
+        N = 20
+        for n in range(1, N+1):
+            for d in factorization.divisors(n):
+                periods.append(d)
+                lists.append(([0]+[1]*(d-1))*(n//d))
+
+        t1 = [(1, 2), ]*3+[(1, 1)]
+        t2 = t1*3 + [(1, 4, 3)]*3 + [(1, )]
+        t3 = t2*2 + [(2, )]*3 + [(1, 4, 3)]
+        t4 = t3*3 + [(3, )]*3+[(1, 2)]
+        lists.append(t4*4)
+        periods.append(112)
+
+        lists.extend([[(1, 2), (1, 2)], [(1, 2), (1, )]])
+        periods.extend([1, 2])
+
+        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, )])
+        periods.append(5)
+
+        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, 2)])
+        periods.append(5)
+
+        for period, lst in zip(periods, lists):
+            self.assertEqual(period, periodicity(lst))
+
 
 class NecklaceTests(unittest.TestCase):
 
-    def testNecklaceCounts(self):
-        cp1 = [1]*3 + [2]*3 + [3]*2
-        cp2 = [1]*4 + [2]*4 + [3]*4 + [4]*3 + [5]*3 + [6]*2 + [7] + [8]
-        cp3 = [1]*24 + [2]*36
-        # color_partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
-        color_partitions = [cp1, cp2, cp3]
-        color_cardinalities = [70, 51330759480000, 600873126148801]
-        for cp, cc in zip(color_partitions, color_cardinalities):
-            self.assertEqual(cc, len(NecklaceGroup(cp)))
-
-    def test_necklace_init(self):
+    def test_init(self):
         n = Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3])
         self.assertEqual(n.period, 3)
         self.assertEqual(n.reps, 4)
         self.assertEqual(n.seed, collections.deque([1, 2, 3]))
         self.assertEqual(n.beads, multiset.Multiset([1, 2, 3]*4))
 
-    def test_necklace_equality(self):
+    def test_equality(self):
         n = Necklace([1, 2, 3, 1, 2, 3])
         nshort = Necklace([1, 2, 3])
         nlong = Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3])
@@ -242,15 +277,15 @@ class NecklaceTests(unittest.TestCase):
         self.assertEqual(n, nrot)
         self.assertEqual(n, ntype)
 
-    def test_necklace_containement(self):
+    def test_containement(self):
         n = Necklace([1, 2, 3, 1, 2, 3])
         self.assertFalse(n in n)
         self.assertTrue(tuple([3, 1, 2, 3, 1, 2]) in n)
 
-    def test_necklace_hash(self):
+    def test_hash(self):
         self.assertEqual(hash(Necklace([1, 2, 3])), hash(Necklace([3, 1, 2])))
 
-    def test_necklace_repr(self):
+    def test_repr(self):
         n = Necklace([1, 2, 3, 1, 2, 3])
         self.assertTrue(n == eval(repr(n)))
 
@@ -276,46 +311,26 @@ class NecklaceTests(unittest.TestCase):
         self.assertEqual(2, len(dic))
 
 
-    def testNecklaces(self):
-        beadsets = [
-            [4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6],
-            [4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6],
-            [0]
-        ]
+class NecklaceEnumerationTests(unittest.TestCase):
+
+    def test_counts(self):
+        cp1 = [1]*3 + [2]*3 + [3]*2
+        cp2 = [1]*4 + [2]*4 + [3]*4 + [4]*3 + [5]*3 + [6]*2 + [7] + [8]
+        cp3 = [1]*24 + [2]*36
+        # color_partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
+        color_partitions = [cp1, cp2, cp3]
+        color_cardinalities = [70, 51330759480000, 600873126148801]
+        for cp, cc in zip(color_partitions, color_cardinalities):
+            self.assertEqual(cc, len(NecklaceGroup(cp)))
+
+    def test_enumeration(self):
+        beadsets = [[4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6], [4, 4, 5, 5, 2, 2, 2,
+                     2, 2, 2, 6, 6, 6], [0]]
         for beadset in beadsets:
             count = 0
             for necklace in NecklaceGroup(beadset):
                 count += 1
             self.assertEqual(len(NecklaceGroup(beadset)), count)
-
-    def test_periodicities(self):
-        periods = []
-        lists = []
-
-        N = 20
-        for n in range(1, N+1):
-            for d in factorization.divisors(n):
-                periods.append(d)
-                lists.append(([0]+[1]*(d-1))*(n//d))
-
-        t1 = [(1, 2), ]*3+[(1, 1)]
-        t2 = t1*3 + [(1, 4, 3)]*3 + [(1, )]
-        t3 = t2*2 + [(2, )]*3 + [(1, 4, 3)]
-        t4 = t3*3 + [(3, )]*3+[(1, 2)]
-        lists.append(t4*4)
-        periods.append(112)
-
-        lists.extend([[(1, 2), (1, 2)], [(1, 2), (1, )]])
-        periods.extend([1, 2])
-
-        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, )])
-        periods.append(5)
-
-        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, 2)])
-        periods.append(5)
-
-        for period, lst in zip(periods, lists):
-            self.assertEqual(period, periodicity(lst))
 
 
 if __name__ == '__main__':
