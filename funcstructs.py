@@ -25,7 +25,6 @@ import multiset
 import rootedtrees
 import subsequences
 import necklaces
-import rotation
 import levypartitions
 import factorization
 import endofunctions
@@ -43,12 +42,12 @@ def multiset_funcstructs(mset):
     beadsets, mults = multiset.Multiset(mset).split()
     strands = []
     for mult, beads in zip(mults, beadsets):
-        necklace_set = necklaces.necklaces(beads)
+        necklace_set = necklaces.NecklaceGroup(beads)
         strand = itertools.combinations_with_replacement(necklace_set, mult)
         strands.append(strand)
 
     for bundle in itertools.product(*strands):
-        yield flatten(bundle)
+        yield multiset.Multiset(flatten(bundle))
 
 
 def funcstructs(n):
@@ -80,6 +79,7 @@ def funcstruct_count(n):
         tot += multiset.prod(product_terms)
     return int(tot)
 
+
 class Funcstruct(object):
     def degeneracy(self):
         pass
@@ -104,10 +104,10 @@ def funcstruct_degeneracy(function_structure):
     degeneracy = multiset.Multiset(function_structure).degeneracy()
     # Then account for the periodcity of each cycle
     for cycle in function_structure:
-        degeneracy *= rotation.cycle_degeneracy(cycle)
-    # Finally the degeneracy of each rooted tree.
-    for tree in flatten(function_structure):
-        degeneracy *= tree.degeneracy()
+        degeneracy *= cycle.degeneracy()
+        # Finally the degeneracy of each rooted tree.
+        for tree in cycle:
+            degeneracy *= tree.degeneracy()
     return degeneracy
 
 
