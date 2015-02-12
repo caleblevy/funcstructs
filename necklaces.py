@@ -61,7 +61,6 @@ def periodicity(strand):
                     break
             if stop:
                 break
-        # for-else loop break
         else:
             break
     return len(seed)
@@ -78,13 +77,12 @@ class Necklace(object):
         self.period = periodicity(strand)
 
     def __repr__(self):
-        return "Necklace(%s)"%str(self.strand)
+        return "Necklace(%s)" % str(self.strand)
 
     def __len__(self):
         return len(self.strand)
 
     def __hash__(self):
-        """If n1==n2, hash is equal, but quite degenerate."""
         return hash(self.strand)
 
     def __eq__(self, other):
@@ -93,6 +91,7 @@ class Necklace(object):
         items with ill-defined orderability."""
         if isinstance(other, self.__class__):
             return self.strand == other.strand
+        return False
 
     def __ne__(self, other):
         return not self == other
@@ -103,14 +102,20 @@ class Necklace(object):
         except:
             return False
 
+    def __iter__(self):
+        return iter(self.strand)
+
+    def degeneracy(self):
+        return len(self)//self.period
+
 
 def _partition_necklaces(a, partition, t, p, k):
-    """ This function is a result of refactoring of Sage's
-    _simple_fixed_content algorithm, featured in src/sage/combinat/neckalce.py
-    as of December 23, 2014. The original code was written by Mike Hansen
-    <mhansen@gmail.com> in 2007, who based his algorithm on Sawada, Joe. "A
-    fast algorithm to generate necklaces with fixed content", Theoretical
-    Computer Science archive Volume 301 , Issue 1-3, May 2003. """
+    """ This function is a result of refactoring of Sage's simple fixed content
+    algorithm, featured in src/sage/combinat/neckalce.py as of December 23,
+    2014. The original code was written by Mike Hansen <mhansen@gmail.com> in
+    2007, who based his algorithm on Sawada, Joe. "A fast algorithm to generate
+    necklaces with fixed content", Theoretical Computer Science archive Volume
+    301 , Issue 1-3, May 2003. """
     n = len(a)
     if t > n and not(n % p):
         yield a
@@ -126,6 +131,7 @@ def _partition_necklaces(a, partition, t, p, k):
 
 
 class NecklaceGroup(object):
+
     def __init__(self, beads):
         """Form a generator of all necklaces with beads of a given multiset."""
         self.beads = multiset.Multiset(beads)
@@ -139,43 +145,35 @@ class NecklaceGroup(object):
 
     def count_by_period(self):
         """ Returns a list whose kth element is the number of necklaces
-        corresponding to the input set of beads with k+1 distinct rotations.
-
-        To do this, we start with the smallest divisor of the gcd of all the
-        multiplicities, and find all necklaces with period less than or equal
-        to this divisor.
-
-        Before normalizing by the period of the necklace (to account for its
-        distinct rotations) we subtract the number of necklaces with each
-        period which is a subdivisor of our given period, to ensure we give the
-        number of necklaces with exactly period k. """
+        corresponding to the input set of beads with k distinct rotations. """
         k = len(self.partition)
         N = sum(self.partition)
+        # Each period must be a divisor of the gcd of the multiplicities.
         w = functools.reduce(fractions.gcd, self.partition)
         p0 = N//w
         factors = factorization.divisors(w)
-        beads = [0]*factors[-1]
-        # Find the multiplicity of each period
+        mults = [0] * (factors[-1] + 1)
+        # Find the multiplicity of each period.
         for factor in factors:
-            n = period = factor*p0
-            beads[factor-1] = 1
+            n = period = p0 * factor
+            mults[factor] = 1
             # The number of character permutations which are periodic in at
-            # most "factor" is simply the multinomial coefficient corresponding
+            # MOST "factor" is simply the multinomial coefficient corresponding
             # to that subset of the multiplicity partition.
             for I in range(k):
-                beads[factor-1] *= multiset.nCk(n, self.partition[I]*factor//w)
-                n -= self.partition[I]*factor//w
+                mults[factor] *= multiset.nCk(n, self.partition[I]*factor//w)
+                n -= self.partition[I] * factor//w
             # Subtact off the number of necklaces whose period subdivides our
-            # divisor of w, to make sure beads[factor-1] give the EXACTLY the
-            # number of necklaces with period k.
+            # divisor of w, to make sure beads[factor] give the EXACTLY the
+            # number of necklaces with period factor.
             subdivisors = factorization.divisors(factor)
             if subdivisors[-1] != 1:
                 for subfactor in subdivisors[:-1]:
-                    beads[factor-1] -= subfactor*p0*beads[subfactor-1]
+                    mults[factor] -= subfactor * p0 * mults[subfactor]
             # Finally, normalize by the period, the number of distinct
-            # rotations of any member of beads[k].
-            beads[factor-1] //= period
-        return beads
+            # rotations of any member of mults[factor].
+            mults[factor] //= period
+        return mults
 
     def cardinality(self):
         """Return the number of necklaces formed from the given multiset of
@@ -184,7 +182,6 @@ class NecklaceGroup(object):
 
     def __len__(self):
         return self.cardinality()
-
 
     def _necklaces(self):
         """Wrapper for partition necklaces, which takes a partition of
@@ -204,6 +201,14 @@ class NecklaceGroup(object):
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
             yield Necklace([self.elems[I] for I in strand])
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.beads == other.beads
+        return False
+
+    def __ne__(self, other):
+        return not self == other
 
 
 class PeriodicityTest(unittest.TestCase):
@@ -225,14 +230,11 @@ class PeriodicityTest(unittest.TestCase):
         lists.append(t4*4)
         periods.append(112)
 
-        lists.extend([[(1, 2), (1, 2)], [(1, 2), (1, )]])
-        periods.extend([1, 2])
-
-        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, )])
-        periods.append(5)
-
-        lists.append([(1, 2), (1, ), (1, 2), (1, ), (1, 2)])
-        periods.append(5)
+        lists.extend([[(1, 2), (1, 2)], 
+                      [(1, 2), (1, )],
+                      [(1, 2), (1, ), (1, 2), (1, ), (1, )],
+                      [(1, 2), (1, ), (1, 2), (1, ), (1, 2)]])
+        periods.extend([1, 2, 5, 5])
 
         for period, lst in zip(periods, lists):
             self.assertEqual(period, periodicity(lst))
@@ -298,8 +300,8 @@ class NecklaceEnumerationTests(unittest.TestCase):
             self.assertEqual(cc, len(NecklaceGroup(cp)))
 
     def test_enumeration(self):
-        beadsets = [[4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6], [4, 4, 5, 5, 2, 2, 2,
-                     2, 2, 2, 6, 6, 6], [0]]
+        beadsets = [[4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6],
+                    [4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6], [0]]
         for beadset in beadsets:
             count = 0
             necklaces = set()
