@@ -32,10 +32,10 @@ import functools
 import collections
 import unittest
 
+from PADS import Lyndon
+
 import factorization
 import multiset
-
-
 
 
 def periodicity(strand):
@@ -66,6 +66,7 @@ def periodicity(strand):
             break
     return len(seed)
 
+
 class Necklace(object):
     """An equivalence class of all lists equivalent under rotation."""
 
@@ -73,41 +74,28 @@ class Necklace(object):
         """Initialize the necklace. Items in the necklace must be hashable
         (immutable), otherwise the equivalence class could change
         dynamically."""
-        period = periodicity(strand)
-        self.period = period
-        self.reps = len(strand)//period
-        self.seed = collections.deque(strand[:period])
-        self.beads = multiset.Multiset(strand)
-        self.strand = list(strand)
+        self.strand = tuple(Lyndon.SmallestRotation(strand))
+        self.period = periodicity(strand)
 
     def __repr__(self):
         return "Necklace(%s)"%str(self.strand)
 
     def __len__(self):
-        return self.period * self.reps
+        return len(self.strand)
 
     def __hash__(self):
         """If n1==n2, hash is equal, but quite degenerate."""
-        return hash(tuple([self.beads, self.period]))
+        return hash(self.strand)
 
     def __eq__(self, other):
         """For now we check for equality by "brute force" rotation, as D.
         Eppstein's normalization algorithm produces unpredictable output for
         items with ill-defined orderability."""
         if isinstance(other, self.__class__):
-            if self.reps == other.reps:
-                if self.period == other.period:
-                    if self.beads == other.beads:
-                        for I in range(self.period):
-                            if self.seed == other.seed:
-                                return True
-                            other.seed.rotate()
-        return False
+            return self.strand == other.strand
 
     def __ne__(self, other):
         return not self == other
-
-    __lt__ = None
 
     def __contains__(self, other):
         try:
@@ -217,12 +205,6 @@ class NecklaceGroup(object):
             # necklaces in memory when constructing endofunction structures.
             yield Necklace([self.elems[I] for I in strand])
 
-print(NecklaceGroup([1,1,2,2,3]))
-for I in NecklaceGroup([1,1,1,1,1,1,2,2,3]):
-    print(I)
-print(len(NecklaceGroup([4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6])))
-print(set([tuple(I) for I in NecklaceGroup([4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6])._necklaces()]))
-
 
 class PeriodicityTest(unittest.TestCase):
 
@@ -258,13 +240,6 @@ class PeriodicityTest(unittest.TestCase):
 
 class NecklaceTests(unittest.TestCase):
 
-    def test_init(self):
-        n = Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3])
-        self.assertEqual(n.period, 3)
-        self.assertEqual(n.reps, 4)
-        self.assertEqual(n.seed, collections.deque([1, 2, 3]))
-        self.assertEqual(n.beads, multiset.Multiset([1, 2, 3]*4))
-
     def test_equality(self):
         n = Necklace([1, 2, 3, 1, 2, 3])
         nshort = Necklace([1, 2, 3])
@@ -293,7 +268,6 @@ class NecklaceTests(unittest.TestCase):
         dic = {}
         neck = Necklace([1, 2, 3, 1, 2, 3])
         dic[neck] = 1
-        neck.seed.rotate(1)
         dic[neck] += 1
         self.assertEqual(1, len(dic))
         self.assertEqual(dic[neck], 2)
@@ -328,9 +302,12 @@ class NecklaceEnumerationTests(unittest.TestCase):
                      2, 2, 2, 6, 6, 6], [0]]
         for beadset in beadsets:
             count = 0
+            necklaces = set()
             for necklace in NecklaceGroup(beadset):
                 count += 1
-            self.assertEqual(len(NecklaceGroup(beadset)), count)
+                necklaces.add(necklace)
+                necklaces.add(necklace)
+            self.assertEqual(len(necklaces), count)
 
 
 if __name__ == '__main__':

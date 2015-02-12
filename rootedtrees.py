@@ -221,7 +221,7 @@ def unordered_tree(level_sequence):
     """Return the unordered tree corresponding to the given level sequence."""
     return OrderedTree(level_sequence).unordered()
 
-
+print unordered_tree([1,2,3,4,5,5,2,3,4,5,2,3,4,5,5,5,2,3,4,5])
 class DominantTrees(object):
 
     class DominantTree(OrderedTree):
