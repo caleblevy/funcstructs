@@ -35,15 +35,91 @@ def flatten(lol):
     return list(itertools.chain.from_iterable(lol))
 
 
+class Funcstruct(object):
+
+    def __init__(self, cycles):
+        self.cycles = multiset.Multiset(cycles)
+        self._n = len(flatten(flatten(list(cycles))))
+
+    def degeneracy(self):
+        """ The number of equivalent representations of a labelling of an
+        endofunction with unlabelled structure funcstruct.
+
+        The size of the conjugacy class of funcstruct is
+        n!/funcstruct_degeneracy(funcstruct) """
+
+        if not self.cycles:
+            return 1
+        # First the degeneracy from the permutations of arrangements of cycles
+        degeneracy = cycles.degeneracy()
+        # Then account for the periodcity of each cycle
+        for cycle in function_structure:
+            degeneracy *= cycle.degeneracy()
+            # Finally the degeneracy of each rooted tree.
+            for tree in cycle:
+                degeneracy *= tree.degeneracy()
+        return degeneracy
+
+    def _treeform_of_noncyclic_nodes(self):
+        tree_start = 0
+        func = []
+        print flatten(self.cycles)
+        for tree in flatten(self.cycles):
+            l = len(tree)
+            tree_perm = range(tree_start, tree_start+l)
+            func_tree = tree.func_form(permutation=tree_perm)
+            func.extend(func_tree)
+            tree_start += l
+        return func
+
+    def func_form(self):
+        """ Convert function structure to canonical form by filling in numbers from
+        0 to n-1 on the cycles and trees. """
+        cycles = list(self.cycles)
+        tree_start = 0
+        func = []
+        for tree in flatten(cycles):
+            l = len(tree)
+            tree_perm = range(tree_start, tree_start+l)
+            func_tree = tree.func_form(permutation=tree_perm)
+            func.extend(func_tree)
+            tree_start += l
+
+        cycle_start = 0
+        for cycle in cycles:
+            print cycle
+            node_ind = node_next = 0
+            print flatten(cycle)
+            cycle_len = len(flatten(cycle))
+            for tree in cycle:
+                node_next += len(tree)
+                func[cycle_start+node_ind] = cycle_start + (node_next % cycle_len)
+                node_ind += len(tree)
+            cycle_start += cycle_len
+        return func
+
+    def imagepath(self):
+        """ Given an endofunction structure funcstruct, compute the image path
+        directly without conversion to a particular endofunction. """
+        cardinalities = np.array([0]+[0]*(self._n-2), dtype=object)
+        for tree in flatten(self.cycles):
+            cardinalities += 1
+            for subseq in subsequences.increasing_subsequences(tree):
+                k = len(subseq) - 1
+                k -= 1 if subseq[0] is 1 else 0
+                if k > 0:
+                    # Microoptimization: memoize the calls to range
+                    cardinalities[:k] += range(k, 0, -1)
+        return cardinalities
+
+
 def multiset_funcstructs(mset):
     """Given a multiset of rooted trees, return all endofunction structures
     whose cycles correspond to the multisets."""
-    mset = [tuple(m) for m in mset]
-    beadsets, mults = multiset.Multiset(mset).split()
     strands = []
-    for mult, beads in zip(mults, beadsets):
+    for beads in mset.unique_elements():
         necklace_set = necklaces.NecklaceGroup(beads)
-        strand = itertools.combinations_with_replacement(necklace_set, mult)
+        strand = itertools.combinations_with_replacement(necklace_set, mset.count(beads))
         strands.append(strand)
 
     for bundle in itertools.product(*strands):
@@ -80,93 +156,16 @@ def funcstruct_count(n):
     return int(tot)
 
 
-class Funcstruct(object):
-    def degeneracy(self):
-        pass
-
-    def func_form(self):
-        pass
-
-    def imagepath(self):
-        pass
-
-
-def funcstruct_degeneracy(function_structure):
-    """ The number of equivalent representations of a labelling of an
-    endofunction with unlabelled structure funcstruct.
-
-    The size of the conjugacy class of funcstruct is
-    n!/funcstruct_degeneracy(funcstruct) """
-
-    if not function_structure:
-        return 1
-    # First the degeneracy from the permutations of arrangements of cycles
-    degeneracy = multiset.Multiset(function_structure).degeneracy()
-    # Then account for the periodcity of each cycle
-    for cycle in function_structure:
-        degeneracy *= cycle.degeneracy()
-        # Finally the degeneracy of each rooted tree.
-        for tree in cycle:
-            degeneracy *= tree.degeneracy()
-    return degeneracy
-
-
-def _treeform_of_noncyclic_nodes(function_structure):
-    tree_start = 0
-    func = []
-    for tree in flatten(function_structure):
-        l = len(tree)
-        tree_perm = range(tree_start, tree_start+l)
-        func_tree = tree.func_form(permutation=tree_perm)
-        func.extend(func_tree)
-        tree_start += l
-    return func
-
-
-def funcstruct_to_func(function_structure):
-    """ Convert function structure to canonical form by filling in numbers from
-    0 to n-1 on the cycles and trees. """
-    func = _treeform_of_noncyclic_nodes(function_structure)
-    cycle_start = 0
-    for cycle in function_structure:
-        node_ind = node_next = 0
-        cycle_len = len(flatten(cycle))
-        for tree in cycle:
-            node_next += len(tree)
-            func[cycle_start+node_ind] = cycle_start + (node_next % cycle_len)
-            node_ind += len(tree)
-        cycle_start += cycle_len
-    return func
-
-
-def funcstruct_imagepath(funcstruct):
-    """ Given an endofunction structure funcstruct, compute the image path
-    directly without conversion to a particular endofunction. """
-    forest = flatten(funcstruct)
-    cardinalities = np.array([0]+[0]*(len(flatten(forest))-2), dtype=object)
-    for tree in forest:
-        cardinalities += 1
-        for subseq in subsequences.increasing_subsequences(tree):
-            k = len(subseq) - 1
-            k -= 1 if subseq[0] is 1 else 0
-            if k > 0:
-                # Microoptimization: memoize the calls to range
-                cardinalities[:k] += range(k, 0, -1)
-    return cardinalities
-
-
 class EndofunctionStructureTest(unittest.TestCase):
 
     def testFuncstructToFunc(self):
-        func_struct = [
-            (rootedtrees.DominantTrees.DominantTree([1, 2, 3]),
-                rootedtrees.DominantTrees.DominantTree([1, 2, 2])),
-            (rootedtrees.DominantTrees.DominantTree([1, 2]), ),
-            (rootedtrees.DominantTrees.DominantTree([1, 2, 2]),
-                rootedtrees.DominantTrees.DominantTree([1]), rootedtrees.DominantTrees.DominantTree([1, 2, 2]))
-        ]
+        struct = Funcstruct([
+            necklaces.Necklace((rootedtrees.DominantTrees.DominantTree([1, 2, 3]), rootedtrees.DominantTrees.DominantTree([1, 2, 2]))),
+            necklaces.Necklace((rootedtrees.DominantTrees.DominantTree([1, 2]), ), ),
+            necklaces.Necklace((rootedtrees.DominantTrees.DominantTree([1, 2, 2]), rootedtrees.DominantTrees.DominantTree([1]), rootedtrees.DominantTrees.DominantTree([1, 2, 2])))
+        ])
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
-        self.assertEqual(func, funcstruct_to_func(func_struct))
+        self.assertEqual(func, struct.func_form())
 
     def testFuncstructImagepath(self):
         """Check methods for computing structure image paths are equivalent."""

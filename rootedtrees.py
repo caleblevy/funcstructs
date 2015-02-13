@@ -104,7 +104,6 @@ class OrderedTree(object):
 
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
-        self.n = len(level_sequence)
 
     def __repr__(self):
         return self.__class__.__name__ + "("+str(list(self.level_sequence))+')'
@@ -128,7 +127,7 @@ class OrderedTree(object):
         return hash(self.level_sequence)
 
     def __len__(self):
-        return self.n
+        return len(self.level_sequence)
 
     def __iter__(self):
         return iter(self.level_sequence)
@@ -206,20 +205,6 @@ class OrderedTree(object):
     def canonical_form(self):
         """Return a dominant tree type."""
         return DominantTrees.DominantTree(self.dominant_sequence())
-
-
-def treefunc_to_tree(treefunc):
-    """Test if a function has a tree structure and if so return it."""
-    cycles = list(treefunc.cycles)
-    if len(cycles) != 1 or len(cycles[0]) != 1:
-        raise ValueError("Function structure is not a rooted tree.")
-    root = cycles[0][0]
-    return OrderedTree(treefunc.attached_level_sequence(root)).canonical_form()
-
-
-def unordered_tree(level_sequence):
-    """Return the unordered tree corresponding to the given level sequence."""
-    return OrderedTree(level_sequence).unordered()
 
 
 class DominantTrees(object):
@@ -306,6 +291,24 @@ class DominantTrees(object):
         if self._memoized_len is None:
             self._memoized_len = self._calculate_len()
         return self._memoized_len
+
+
+def unordered_tree(level_sequence):
+    """Return the unordered tree corresponding to the given level sequence."""
+    return OrderedTree(level_sequence).unordered()
+
+
+def dominant_tree(level_sequence):
+    return OrderedTree(level_sequence).canonical_form()
+
+
+def treefunc_to_tree(treefunc):
+    """Test if a function has a tree structure and if so return it."""
+    cycles = list(treefunc.cycles)
+    if len(cycles) != 1 or len(cycles[0]) != 1:
+        raise ValueError("Function structure is not a rooted tree.")
+    root = cycles[0][0]
+    return treefunc.attached_tree(root)
 
 
 def forests(N):

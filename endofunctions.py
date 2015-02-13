@@ -13,6 +13,7 @@ cycle decompositions and limitsets. """
 import random
 import unittest
 import itertools
+
 import productrange
 
 
@@ -186,6 +187,10 @@ class Endofunction(object):
         for x in self.attached_treenodes[node]:
             level_sequence += self.attached_level_sequence(x, level+1)
         return level_sequence
+
+    def attached_tree(self, node):
+        from rootedtrees import dominant_tree
+        return dominant_tree(self.attached_level_sequence(node))
 
     def randconj(self):
         """Return a random conjugate of f."""

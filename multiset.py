@@ -267,7 +267,8 @@ class Multiset(collections.Set, collections.Hashable):
     def partitions(self):
         """ Yield partitions of a multiset, each one being a multiset of
         multisets. """
-        return multiset_partitions(list(self))
+        for mpart in multiset_partitions(list(self)):
+            yield self.__class__(self.__class__(m) for m in mpart)
 
 
 def compare_Multiset_string(b):
