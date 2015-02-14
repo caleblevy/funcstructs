@@ -173,7 +173,7 @@ class Endofunction(object):
             self._descendants = descendants
         return self._descendants
 
-    def attached_level_sequence(self, node, level=1):
+    def _attached_level_sequence(self, node, level=1):
         """ Given an element of self's domain, return a level sequence of the
         rooted tree formed from the graph of all noncyclic nodes whose paths
         iteration paths pass through node.
@@ -185,17 +185,37 @@ class Endofunction(object):
         node. """
         level_sequence = [level]
         for x in self.attached_treenodes[node]:
-            level_sequence += self.attached_level_sequence(x, level+1)
+            level_sequence += self._attached_level_sequence(x, level+1)
         return level_sequence
-
-    def attached_tree(self, node):
-        from rootedtrees import dominant_tree
-        return dominant_tree(self.attached_level_sequence(node))
 
     def randconj(self):
         """Return a random conjugate of f."""
         r = randperm(len(self))
         return r.conj(self)
+
+    @classmethod
+    def from_tree(cls, tree, permutation=None):
+        """ Return an endofunction whose structure corresponds to the rooted
+        tree. The root is 0 by default, but can be permuted according a
+        specified permutation. """
+
+        if permutation is None:
+            permutation = range(len(tree))
+        height = max(tree)
+        func = [0]*len(tree)
+        func[0] = permutation[0]
+        height_prev = 1
+        # Most recent node found at height h. Where to graft the next node to.
+        grafting_point = [0]*height
+        for node, height in enumerate(tree.level_sequence[1:]):
+            if height > height_prev:
+                func[node+1] = permutation[grafting_point[height_prev-1]]
+                height_prev += 1
+            else:
+                func[node+1] = permutation[grafting_point[height-2]]
+                height_prev = height
+            grafting_point[height-1] = node+1
+        return cls(func)
 
 
 def randfunc(n):
@@ -364,6 +384,13 @@ class EndofunctionTests(unittest.TestCase):
             for _ in range(20):
                 perm = randperm(len(f))
                 self.assertEqual(f, perm.inverse.conj(perm.conj(f)))
+
+    def test_from_tree(self):
+        """Make sure treetofunc correctly represents trees as endofunctions"""
+        from rootedtrees import OrderedTree
+        tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
+        func = Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
+        self.assertEqual(func, Endofunction.from_tree(tree))
 
 
 if __name__ == '__main__':

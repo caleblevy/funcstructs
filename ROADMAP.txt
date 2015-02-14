@@ -52,30 +52,30 @@ February 2, 2015:
     #   - Necklace classes.
 
 February 4, 2015:
-
-Trees:
-  - Want to make forest class
-  - Using this, add a splice method to produce a tree
-  - Add a sort method to RootedTree to enable...
-  - Making a Canonical Rooted Tree
-  - Make a forest enumerator class
-
-Print:
-  - Give that class string print.
-  - Update multiset __repr__ to reflect __str__ (forget abour eval(repr(m))==m)
-
-Necklaces:
-  - Make a Necklace (Cycle?)class
-  - Make Necklace enumerator (len gets wrapped in as necklace_count)
-  - Give it a class method: From multiset (or it takes a multiset...)
-
-Funcstructs and Endofunctions
-  - Make Multiset.partitions return multiset of multisets (for enumeration)
-  - Make Funcstruct class and Endofunction class
-  - Make Funcstruct enumerator class (classmethod from func)
+    #
+    # Trees:
+    #   - Want to make forest class
+    #   - Using this, add a splice method to produce a tree
+    #   - Add a sort method to RootedTree to enable...
+    #   - Making a Canonical Rooted Tree
+    #   - Make a forest enumerator class
+    #
+    # Print:
+    #   - Give that class string print.
+    #   - Update multiset __repr__ to reflect __str__
+    #
+    # Necklaces:
+    #   - Make a Necklace (Cycle?)class
+    #   - Make Necklace enumerator (len gets wrapped in as necklace_count)
+    #   - Give it a class method: From multiset (or it takes a multiset...)
+    #
+    # Funcstructs and Endofunctions
+    #   - Make Multiset.partitions return multiset of multisets
+    #   - Make Funcstruct class and Endofunction class
+    #   - Make Funcstruct enumerator class (classmethod from func)
 
 
 February 5, 2015:
-  - Replace RootedTree.bracket_form with RootedTree.set_form, and make it 
-    nested frozensets as I had originally intended.
-  - Replace O(n^2) preimage with O(n) set based preimage.
+    # - Replace RootedTree.bracket_form with RootedTree.set_form, and make it
+    #   nested frozensets as I had originally intended.
+    # - Replace O(n^2) preimage with O(n) set based preimage.

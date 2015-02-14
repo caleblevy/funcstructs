@@ -14,10 +14,10 @@ Most of these algorithms were derived by Caleb Levy in February 2014. For more
 information contact caleb.levy@berkeley.edu.
 """
 
-import unittest
 import math
 import fractions
 import itertools
+import unittest
 
 import numpy as np
 
@@ -51,45 +51,32 @@ class Funcstruct(object):
         if not self.cycles:
             return 1
         # First the degeneracy from the permutations of arrangements of cycles
-        degeneracy = cycles.degeneracy()
+        degeneracy = self.cycles.degeneracy()
         # Then account for the periodcity of each cycle
-        for cycle in function_structure:
+        for cycle in self.cycles:
             degeneracy *= cycle.degeneracy()
             # Finally the degeneracy of each rooted tree.
             for tree in cycle:
                 degeneracy *= tree.degeneracy()
         return degeneracy
 
-    def _treeform_of_noncyclic_nodes(self):
-        tree_start = 0
-        func = []
-        print flatten(self.cycles)
-        for tree in flatten(self.cycles):
-            l = len(tree)
-            tree_perm = range(tree_start, tree_start+l)
-            func_tree = tree.func_form(permutation=tree_perm)
-            func.extend(func_tree)
-            tree_start += l
-        return func
-
     def func_form(self):
         """ Convert function structure to canonical form by filling in numbers from
         0 to n-1 on the cycles and trees. """
+        # Find the tree form of non-cyclic nodes
         cycles = list(self.cycles)
         tree_start = 0
         func = []
         for tree in flatten(cycles):
             l = len(tree)
             tree_perm = range(tree_start, tree_start+l)
-            func_tree = tree.func_form(permutation=tree_perm)
+            func_tree = endofunctions.Endofunction.from_tree(tree, permutation=tree_perm)
             func.extend(func_tree)
             tree_start += l
-
+        # Permute the cyclic nodes to form the cycle decomposition
         cycle_start = 0
         for cycle in cycles:
-            print cycle
             node_ind = node_next = 0
-            print flatten(cycle)
             cycle_len = len(flatten(cycle))
             for tree in cycle:
                 node_next += len(tree)
@@ -123,7 +110,7 @@ def multiset_funcstructs(mset):
         strands.append(strand)
 
     for bundle in itertools.product(*strands):
-        yield multiset.Multiset(flatten(bundle))
+        yield Funcstruct(flatten(bundle))
 
 
 def funcstructs(n):

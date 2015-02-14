@@ -86,8 +86,8 @@ def iterdist_funcstruct(n):
     M = np.zeros((n, n-1), dtype=object)
     nfac = factorial(n)
     for struct in funcstructs.funcstructs(n):
-        mult = nfac//funcstructs.funcstruct_degeneracy(struct)
-        im = funcstructs.funcstruct_imagepath(struct)
+        mult = nfac//struct.degeneracy()
+        im = struct.imagepath()
         for it, card in enumerate(im):
             M[card-1, it] += mult
     return M

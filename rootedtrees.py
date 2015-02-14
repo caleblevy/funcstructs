@@ -29,7 +29,6 @@ import functools
 import subsequences
 import multiset
 import factorization
-import endofunctions
 
 
 def flatten(lol):
@@ -154,29 +153,6 @@ class OrderedTree(object):
         """ Return a multiset of the input tree's main sub branches. """
         return multiset.Multiset(subtree for subtree in self.subtrees())
 
-    def func_form(self, permutation=None):
-        """ Return an endofunction whose structure corresponds to the rooted
-        tree. The root is 0 by default, but can be permuted according a
-        specified permutation. """
-
-        if permutation is None:
-            permutation = range(len(self))
-        height = max(self)
-        func = [0]*len(self)
-        func[0] = permutation[0]
-        height_prev = 1
-        # Most recent node found at height h. Where to graft the next node to.
-        grafting_point = [0]*height
-        for node, height in enumerate(self.level_sequence[1:]):
-            if height > height_prev:
-                func[node+1] = permutation[grafting_point[height_prev-1]]
-                height_prev += 1
-            else:
-                func[node+1] = permutation[grafting_point[height-2]]
-                height_prev = height
-            grafting_point[height-1] = node+1
-        return endofunctions.Endofunction(func)
-
     def bracket_form(self):
         """
         Return a representation the rooted tree via nested lists. This method
@@ -205,6 +181,19 @@ class OrderedTree(object):
     def canonical_form(self):
         """Return a dominant tree type."""
         return DominantTrees.DominantTree(self.dominant_sequence())
+
+    @classmethod
+    def attached_tree(cls, func, node):
+        return cls(func._attached_level_sequence(node)).canonical_form()
+
+    @classmethod
+    def from_func(cls, func):
+        """Test if a function has a tree structure and if so return it."""
+        cycles = list(func.cycles)
+        if len(cycles) != 1 or len(cycles[0]) != 1:
+            raise ValueError("Function structure is not a rooted tree.")
+        root = cycles[0][0]
+        return cls.attached_tree(func, root)
 
 
 class DominantTrees(object):
@@ -299,16 +288,8 @@ def unordered_tree(level_sequence):
 
 
 def dominant_tree(level_sequence):
+    """Return the dominant form of a level sequence."""
     return OrderedTree(level_sequence).canonical_form()
-
-
-def treefunc_to_tree(treefunc):
-    """Test if a function has a tree structure and if so return it."""
-    cycles = list(treefunc.cycles)
-    if len(cycles) != 1 or len(cycles[0]) != 1:
-        raise ValueError("Function structure is not a rooted tree.")
-    root = cycles[0][0]
-    return treefunc.attached_tree(root)
 
 
 def forests(N):
@@ -330,6 +311,22 @@ def RootedTrees(n):
 
 
 class TreeTests(unittest.TestCase):
+
+    # UnorderedTree tests
+
+    def test_rooted_tree_strings(self):
+        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T2 = unordered_tree(range(1, 5))
+        self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
+        self.assertEqual(str(T2), "RootedTree({{{{}}}})")
+
+    def test_rooted_tree_repr(self):
+        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T2 = unordered_tree(range(1, 5))
+        T3 = unordered_tree([1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6])
+        self.assertEqual(T, eval(repr(T)))
+        self.assertEqual(T2, eval(repr(T2)))
+        self.assertEqual(T3, eval(repr(T3)))
 
     # Test dominant tree properties.
 
@@ -359,13 +356,6 @@ class TreeTests(unittest.TestCase):
             self.assertEqual(n**(n-1), labelled_treecount)
             self.assertEqual(n**(n-1), rooted_treecount)
 
-    def test_func_form(self):
-        """Make sure treetofunc correctly represents trees as endofunctions"""
-        tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
-        func = endofunctions.Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9,
-                                           0, 12])
-        self.assertEqual(func, tree.func_form())
-
     def test_bracket_form(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
@@ -381,28 +371,15 @@ class TreeTests(unittest.TestCase):
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.bracket_form())
 
-    def test_treefunc_to_dominant_tree(self):
+    def test_from_treefunc(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
+        from endofunctions import Endofunction
         for n in range(1, len(self.A000081)+1):
             for tree in DominantTrees(n):
-                treefunc = tree.func_form()
+                treefunc = Endofunction.from_tree(tree)
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
-                    self.assertEqual(tree, treefunc_to_tree(rtreefunc))
-
-    def test_rooted_tree_strings(self):
-        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        T2 = unordered_tree(range(1, 5))
-        self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
-        self.assertEqual(str(T2), "RootedTree({{{{}}}})")
-
-    def test_rooted_tree_repr(self):
-        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        T2 = unordered_tree(range(1, 5))
-        T3 = unordered_tree([1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6])
-        self.assertEqual(T, eval(repr(T)))
-        self.assertEqual(T2, eval(repr(T2)))
-        self.assertEqual(T3, eval(repr(T3)))
+                    self.assertEqual(tree, OrderedTree.from_func(rtreefunc))
 
 
 if __name__ == '__main__':
