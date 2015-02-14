@@ -5,7 +5,7 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""A rooted tree is a connected digraph with a single cycle such that every
+""" A rooted tree is a connected digraph with a single cycle such that every
 node's outdegree and every cycle's length is exactly one. Alternatively, it is
 a tree with a designated "root" node, where every path ends with the root. They
 are equivalent to filesystems consisting entirely of folders with no symbolic
@@ -18,7 +18,8 @@ Any endofunction structure may be represented as a forest of trees, grouped
 together in multisets corresponding to cycle decompositions of the final set
 (the subset of its domain on which it is invertible). The orderings of the
 trees in the multisets correspond to necklaces whose beads are the trees
-themselves."""
+themselves. """
+
 
 
 import math
@@ -98,17 +99,14 @@ class RootedTree(object):
 
 
 @functools.total_ordering
-class OrderedTree(object):
+class LevelTree(object):
     """Represents an unlabelled ordered rooted tree."""
-
-    def __init__(self, level_sequence):
-        self.level_sequence = tuple(level_sequence)
 
     def __repr__(self):
         return self.__class__.__name__ + "("+str(list(self.level_sequence))+')'
 
     def __eq__(self, other):
-        if isinstance(other, OrderedTree):
+        if isinstance(other, LevelTree):
             return self.level_sequence == other.level_sequence
         else:
             return False
@@ -117,7 +115,7 @@ class OrderedTree(object):
         return not self == other
 
     def __lt__(self, other):
-        if isinstance(other, OrderedTree):
+        if isinstance(other, LevelTree):
             return self.level_sequence < other.level_sequence
         else:
             raise ValueError("Cannot compare tree with type %s" % type(other))
@@ -136,22 +134,18 @@ class OrderedTree(object):
 
     __nonzero__ = __bool__
 
-    def branches(self):
+    def branch_sequences(self):
         """ Return each major subbranch of a tree (even chopped). """
         if not self:
             return
         isroot = lambda node: node == self.level_sequence[0] + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
-            yield self.__class__(branch)
+            yield branch
 
-    def subtrees(self):
+    def subtree_sequences(self):
         """Generate the main subtrees of self in order."""
-        for branch in self.branches():
-            yield self.__class__([node-1 for node in branch])
-
-    def chop(self):
-        """ Return a multiset of the input tree's main sub branches. """
-        return multiset.Multiset(subtree for subtree in self.subtrees())
+        for branch_sequence in self.branch_sequences():
+            yield [node-1 for node in branch_sequence]
 
     def bracket_form(self):
         """
@@ -167,24 +161,9 @@ class OrderedTree(object):
             return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
-    def dominant_sequence(self):
-        """ Return the lexicographically dominant rooted tree corresponding to
-        self. """
-        if not self.branches():
-            return self.level_sequence
-        branch_list = []
-        for branch in self.branches():
-            branch_list.append(branch.dominant_sequence())
-        branch_list.sort(reverse=True)
-        return [self.level_sequence[0]] + flatten(branch_list)
-
-    def canonical_form(self):
-        """Return a dominant tree type."""
-        return DominantTrees.DominantTree(self.dominant_sequence())
-
     @classmethod
     def attached_tree(cls, func, node):
-        return cls(func._attached_level_sequence(node)).canonical_form()
+        return cls(func._attached_level_sequence(node))
 
     @classmethod
     def from_func(cls, func):
@@ -196,31 +175,90 @@ class OrderedTree(object):
         return cls.attached_tree(func, root)
 
 
+class OrderedTree(LevelTree):
+
+    def __init__(self, level_sequence):
+        self.level_sequence = tuple(level_sequence)
+
+    def branches(self):
+        for branch in self.branch_sequences():
+            yield self.__class__(branch)
+
+    def subtrees(self):
+        for subtree in self.subtree_sequences():
+            yield self.__class__(subtree)
+
+    def _dominant_sequence(self):
+        """ Return the lexicographically dominant rooted tree corresponding to
+        self. """
+        if not self.branches():
+            return self.level_sequence
+        branch_list = []
+        for branch in self.branches():
+            branch_list.append(branch._dominant_sequence())
+        branch_list.sort(reverse=True)
+        return tuple([self.level_sequence[0]] + flatten(branch_list))
+
+    def canonical_form(self):
+        """Return a dominant tree type."""
+        return DominantTree(self)
+
+
+def dominant_sequence(level_sequence):
+    return OrderedTree(level_sequence)._dominant_sequence()
+
+
+class DominantTree(LevelTree):
+
+    """Return the dominant form of a level sequence."""
+
+    def __init__(self, level_sequence, preordered=False):
+        if preordered:
+            self.level_sequence = tuple(level_sequence)
+        elif isinstance(level_sequence, self.__class__):
+            self.level_sequence = level_sequence.level_sequence
+        else:
+            self.level_sequence = dominant_sequence(level_sequence)
+
+    def branches(self):
+        for branch in self.branch_sequences():
+            yield self.__class__(branch, preordered=True)
+
+    def subtrees(self):
+        for subtree in self.subtree_sequences():
+            # Subtrees of a dominant tree are by definition dominant, so no
+            # need to check.
+            yield self.__class__(subtree, preordered=True)
+
+    def chop(self):
+        """ Return a multiset of the input tree's main sub branches. """
+        return multiset.Multiset(subtree for subtree in self.subtrees())
+
+    def degeneracy(self):
+        """ To calculate the degeneracy of a collection of subtrees you
+        start with the lowest branches and then work upwards. If a group of
+        identical subbranches are connected to the same node, we multiply
+        the degeneracy of the tree by the factorial of the multiplicity of
+        these subbranches to account for their distinct orderings. The same
+        principal applies to subtrees.
+
+        TODO: A writeup of this with diagrams will be in the notes. """
+        logs = self.chop()
+        if not logs:
+            return 1
+        deg = 1
+        for subtree in logs:
+            deg *= subtree.degeneracy()
+        return deg*logs.degeneracy()
+
+
 class DominantTrees(object):
-
-    class DominantTree(OrderedTree):
-
-        def degeneracy(self):
-            """ To calculate the degeneracy of a collection of subtrees you
-            start with the lowest branches and then work upwards. If a group of
-            identical subbranches are connected to the same node, we multiply
-            the degeneracy of the tree by the factorial of the multiplicity of
-            these subbranches to account for their distinct orderings. The same
-            principal applies to subtrees.
-
-            TODO: A writeup of this with diagrams will be in the notes. """
-            if not self.chop():
-                return 1
-            deg = 1
-            for subtree in self.chop():
-                deg *= subtree.degeneracy()
-            return deg*self.chop().degeneracy()
 
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, node_count):
         self.n = node_count
-        self._memoized_len = None
+        self._len = None
 
     def __iter__(self):
         """Takes an integer N as input and outputs a generator object
@@ -241,7 +279,7 @@ class DominantTrees(object):
             trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
         """
         tree = [I+1 for I in range(self.n)]
-        yield self.DominantTree(tree)
+        yield DominantTree(tree, preordered=True)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -252,9 +290,9 @@ class DominantTrees(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield self.DominantTree(tree)
+                yield DominantTree(tree, preordered=True)
 
-    def _calculate_len(self):
+    def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm
         featured without derivation in
             Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
@@ -274,22 +312,17 @@ class DominantTrees(object):
 
     def __len__(self):
         """ NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long,
-        and thus gives rise to an index overflow error. Use self._calculate_len
+        and thus gives rise to an index overflow error. Use self.cardinality
         instead. """
 
-        if self._memoized_len is None:
-            self._memoized_len = self._calculate_len()
-        return self._memoized_len
+        if self._len is None:
+            self._len = self.cardinality()
+        return self._len
 
 
 def unordered_tree(level_sequence):
     """Return the unordered tree corresponding to the given level sequence."""
     return OrderedTree(level_sequence).unordered()
-
-
-def dominant_tree(level_sequence):
-    """Return the dominant form of a level sequence."""
-    return OrderedTree(level_sequence).canonical_form()
 
 
 def forests(N):
@@ -320,13 +353,17 @@ class TreeTests(unittest.TestCase):
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
-    def test_rooted_tree_repr(self):
-        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        T2 = unordered_tree(range(1, 5))
-        T3 = unordered_tree([1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6])
-        self.assertEqual(T, eval(repr(T)))
-        self.assertEqual(T2, eval(repr(T2)))
-        self.assertEqual(T3, eval(repr(T3)))
+    def test_tree_repr(self):
+        TreeSeqs = [[1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5],
+                    [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
+                    range(1, 5)]
+        for seq in TreeSeqs:
+            T_unordered = unordered_tree(seq)
+            T_ordered = OrderedTree(seq)
+            T_dominant = DominantTree(seq)
+            self.assertEqual(T_unordered, eval(repr(T_unordered)))
+            self.assertEqual(T_ordered, eval(repr(T_ordered)))
+            self.assertEqual(T_dominant, eval(repr(T_dominant)))
 
     # Test dominant tree properties.
 
@@ -335,7 +372,11 @@ class TreeTests(unittest.TestCase):
     def test_tree_counts(self):
         """OEIS A000081: number of unlabelled rooted trees on N nodes."""
         for n, count in enumerate(self.A000081):
-            self.assertEqual(count, len(list(DominantTrees(n+1))))
+            trees = set()
+            for tree in DominantTrees(n+1):
+                trees.add(tree)
+                trees.add(tree)
+            self.assertEqual(count, len(trees))
             self.assertEqual(count, len(DominantTrees(n+1)))
 
     def test_forest_counts(self):
@@ -379,7 +420,7 @@ class TreeTests(unittest.TestCase):
                 treefunc = Endofunction.from_tree(tree)
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
-                    self.assertEqual(tree, OrderedTree.from_func(rtreefunc))
+                    self.assertEqual(tree, DominantTree.from_func(rtreefunc))
 
 
 if __name__ == '__main__':

@@ -159,8 +159,8 @@ class EndofunctionStructureTest(unittest.TestCase):
         N = 8
         for n in range(1, N):
             for struct in funcstructs(n):
-                im = endofunctions.Endofunction(funcstruct_to_func(struct)).imagepath
-                imstruct = funcstruct_imagepath(struct)
+                im = endofunctions.Endofunction(struct.func_form()).imagepath
+                imstruct = struct.imagepath()
                 np.testing.assert_array_equal(im, imstruct)
 
     def testFuncstructCounts(self):
@@ -180,7 +180,7 @@ class EndofunctionStructureTest(unittest.TestCase):
             nfac = math.factorial(n)
             func_count = 0
             for funcstruct in funcstructs(n):
-                func_count += nfac//funcstruct_degeneracy(funcstruct)
+                func_count += nfac//funcstruct.degeneracy()
             self.assertEqual(n**n, func_count)
 
 

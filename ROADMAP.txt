@@ -79,3 +79,17 @@ February 5, 2015:
     # - Replace RootedTree.bracket_form with RootedTree.set_form, and make it
     #   nested frozensets as I had originally intended.
     # - Replace O(n^2) preimage with O(n) set based preimage.
+
+February 13 2015:
+- Derive OrderedTree and DominantTree from the same BaseOrderedTree class.
+- Make iterdist_brute and iterdist_funcstruct into methods of their respective
+  TransformationMonoid and Funcstructs enumerator classes.
+- Update project directory structure.
+- Separate unit tests into their own subdirectory.
+- Add necklace emumeration paper to papers.
+
+
+Maybe:
+  - Make RootedTree class sortable.
+  - Resolve path dependancy issues for PADS to work in python3.
+
