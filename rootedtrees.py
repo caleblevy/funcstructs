@@ -205,12 +205,16 @@ class OrderedTree(LevelTree):
 
 
 def dominant_sequence(level_sequence):
+    """Return the dominant form of a level sequence."""
     return OrderedTree(level_sequence)._dominant_sequence()
 
 
-class DominantTree(LevelTree):
+def unordered_tree(level_sequence):
+    """Return the unordered tree corresponding to the given level sequence."""
+    return OrderedTree(level_sequence).unordered()
 
-    """Return the dominant form of a level sequence."""
+
+class DominantTree(LevelTree):
 
     def __init__(self, level_sequence, preordered=False):
         if preordered:
@@ -252,7 +256,7 @@ class DominantTree(LevelTree):
         return deg*logs.degeneracy()
 
 
-class DominantTrees(object):
+class SequenceEnumerator(object):
 
     """Represents the class of unlabelled rooted trees on n nodes."""
 
@@ -260,8 +264,24 @@ class DominantTrees(object):
         self.n = node_count
         self._len = None
 
+    def __hash__(self):
+        return hash(self.n)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.n == other.n
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    __le__ = None
+
+    def __repr__(self):
+        return self.__class__.__name__+'('+str(self.n)+')'
+
     def __iter__(self):
-        """Takes an integer N as input and outputs a generator object
+        """ Takes an integer N as input and outputs a generator object
         enumerating all isomorphic unlabeled rooted trees on N nodes.
 
         The basic idea of the algorithm is to represent a tree by its level
@@ -274,12 +294,11 @@ class DominantTrees(object):
         tallest rooted tree given by T=range(1,N+1) and then go downward,
         lexicographically, until we are flat so that T=[1]+[2]*(N-1).
 
-        Algorithm and description provided in:
-            T. Beyer and S. M. Hedetniemi. "Constant time generation of rooted
-            trees." Siam Journal of Computation, Vol. 9, No. 4. November 1980.
-        """
+        Algorithm and description provided in: T. Beyer and S. M. Hedetniemi.
+        "Constant time generation of rooted trees." Siam Journal of
+        Computation, Vol. 9, No. 4. November 1980. """
         tree = [I+1 for I in range(self.n)]
-        yield DominantTree(tree, preordered=True)
+        yield tree
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -290,15 +309,13 @@ class DominantTrees(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield DominantTree(tree, preordered=True)
+                yield tree
 
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm
-        featured without derivation in
-            Finch, S. R. "Otter's Tree Enumeration Constants." Section 5.6 in
-            "Mathematical Constants", Cambridge, England: Cambridge University
-            Press, pp. 295-316, 2003.
-        """
+        featured without derivation in Finch, S. R. "Otter's Tree Enumeration
+        Constants." Section 5.6 in "Mathematical Constants", Cambridge,
+        England: Cambridge University Press, pp. 295-316, 2003. """
         T = [0, 1] + [0]*(self.n - 1)
         for n in range(2, self.n + 1):
             for i in range(1, self.n):
@@ -314,15 +331,19 @@ class DominantTrees(object):
         """ NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long,
         and thus gives rise to an index overflow error. Use self.cardinality
         instead. """
-
         if self._len is None:
             self._len = self.cardinality()
         return self._len
 
+class DominantTrees(SequenceEnumerator):
+    def __iter__(self):
+        for tree in super(self.__class__, self).__iter__():
+            yield DominantTree(tree, preordered=True)
 
-def unordered_tree(level_sequence):
-    """Return the unordered tree corresponding to the given level sequence."""
-    return OrderedTree(level_sequence).unordered()
+class RootedTrees(SequenceEnumerator):
+    def __iter__(self):
+        for tree in super(self.__class__, self).__iter__():
+            yield unordered_tree(tree)
 
 
 def forests(N):

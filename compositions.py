@@ -70,6 +70,28 @@ def compositions_simple(n):
 compositions = compositions_simple  # best by test.
 
 
+def weak_compositions(n, k):
+    """Enumerates the length k lists of non-negative integers summing to n.
+    Taken directly from http://dandrake.livejournal.com/83095.html."""
+    if n < 0 or k < 0:
+        return
+    elif k == 0:
+        # the empty sum, by convention, is zero, so only return something if
+        # n is zero
+        if n == 0:
+            yield []
+        return
+    elif k == 1:
+        yield [n]
+        return
+    else:
+        # For each first integer i in range(n+1), list all compositions
+        # on n-i nodes, of length at most k-1.
+        for i in range(n+1):
+            for comp in weak_compositions(n-i, k-1):
+                yield [i] + comp
+
+
 class CompositionTest(unittest.TestCase):
 
     def testCompositionCounts(self):

@@ -47,7 +47,6 @@ class Funcstruct(object):
 
         The size of the conjugacy class of funcstruct is
         n!/funcstruct_degeneracy(funcstruct) """
-
         if not self.cycles:
             return 1
         # First the degeneracy from the permutations of arrangements of cycles
@@ -61,8 +60,8 @@ class Funcstruct(object):
         return degeneracy
 
     def func_form(self):
-        """ Convert function structure to canonical form by filling in numbers from
-        0 to n-1 on the cycles and trees. """
+        """ Convert function structure to canonical form by filling in numbers
+        from 0 to n-1 on the cycles and trees. """
         # Find the tree form of non-cyclic nodes
         cycles = list(self.cycles)
         tree_start = 0
@@ -85,6 +84,7 @@ class Funcstruct(object):
             cycle_start += cycle_len
         return func
 
+    @property
     def imagepath(self):
         """ Given an endofunction structure funcstruct, compute the image path
         directly without conversion to a particular endofunction. """
@@ -113,43 +113,62 @@ def multiset_funcstructs(mset):
         yield Funcstruct(flatten(bundle))
 
 
-def funcstructs(n):
-    """An enumeration of endofunction structures on n elements. Equalivalent to
-    all conjugacy classes in End(S)."""
-    for forest in rootedtrees.forests(n):
-        for mpart in forest.partitions():
-            for funcstruct in multiset_funcstructs(mpart):
-                yield funcstruct
+class Funcstructs(object):
+    def __init__(self, node_count):
+        self.n = node_count
 
+    def __repr__(self):
+        return type(self).__name__+'('+str(n)+')'
 
-def funcstruct_count(n):
-    """Count the number of endofunction structures on n nodes. Iterates over
-    the tuple representation of partitions using the formula featured in
-        De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
-        Combinatorial Theory, Volume 12, 1972.
+    def __hash__(self):
+        return hash(self.n)
 
-    See the papers directory for the original reference."""
-    tot = 0
-    for b in levypartitions.tuple_partitions(n):
-        product_terms = []
-        for I in range(1, len(b)+1):
-            s = 0
-            for J in factorization.divisors(I):
-                s += J*b[J-1]
-            s **= b[I-1]
-            s *= fractions.Fraction(I, 1)**(-b[I-1])/math.factorial(b[I-1])
-            product_terms.append(s)
-        tot += multiset.prod(product_terms)
-    return int(tot)
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.n == other.n
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __iter__(self):
+        """An enumeration of endofunction structures on n elements. Equalivalent to
+        all conjugacy classes in End(S)."""
+        for forest in rootedtrees.forests(self.n):
+            for mpart in forest.partitions():
+                for funcstruct in multiset_funcstructs(mpart):
+                    yield funcstruct
+
+    def cardinality(self):
+        """Count the number of endofunction structures on n nodes. Iterates
+        over the tuple representation of partitions using the formula featured
+        in De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
+        Combinatorial Theory, Volume 12, 1972. See the papers directory for the
+        original reference."""
+        tot = 0
+        for b in levypartitions.tuple_partitions(self.n):
+            product_terms = []
+            for I in range(1, len(b)+1):
+                s = 0
+                for J in factorization.divisors(I):
+                    s += J*b[J-1]
+                s **= b[I-1]
+                s *= fractions.Fraction(I, 1)**(-b[I-1])/math.factorial(b[I-1])
+                product_terms.append(s)
+            tot += multiset.prod(product_terms)
+        return int(tot)
+
+    def __len__(self):
+        return self.cardinality()
 
 
 class EndofunctionStructureTest(unittest.TestCase):
 
     def testFuncstructToFunc(self):
         struct = Funcstruct([
-            necklaces.Necklace((rootedtrees.DominantTrees.DominantTree([1, 2, 3]), rootedtrees.DominantTrees.DominantTree([1, 2, 2]))),
-            necklaces.Necklace((rootedtrees.DominantTrees.DominantTree([1, 2]), ), ),
-            necklaces.Necklace((rootedtrees.DominantTrees.DominantTree([1, 2, 2]), rootedtrees.DominantTrees.DominantTree([1]), rootedtrees.DominantTrees.DominantTree([1, 2, 2])))
+            necklaces.Necklace((rootedtrees.DominantTree([1, 2, 3]), rootedtrees.DominantTree([1, 2, 2]))),
+            necklaces.Necklace((rootedtrees.DominantTree([1, 2]), ), ),
+            necklaces.Necklace((rootedtrees.DominantTree([1, 2, 2]), rootedtrees.DominantTree([1]), rootedtrees.DominantTree([1, 2, 2])))
         ])
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
         self.assertEqual(func, struct.func_form())
@@ -158,20 +177,17 @@ class EndofunctionStructureTest(unittest.TestCase):
         """Check methods for computing structure image paths are equivalent."""
         N = 8
         for n in range(1, N):
-            for struct in funcstructs(n):
+            for struct in Funcstructs(n):
                 im = endofunctions.Endofunction(struct.func_form()).imagepath
-                imstruct = struct.imagepath()
+                imstruct = struct.imagepath
                 np.testing.assert_array_equal(im, imstruct)
 
     def testFuncstructCounts(self):
         """OEIS A001372: Number of self-mapping patterns."""
         A001372 = [1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
         for n, num in enumerate(A001372):
-            struct_count = 0
-            for struct in funcstructs(n+1):
-                struct_count += 1
-            self.assertEqual(num, struct_count)
-            self.assertEqual(num, funcstruct_count(n+1))
+            self.assertEqual(num, len(set(Funcstructs(n+1))))
+            self.assertEqual(num, len(Funcstructs(n+1)))
 
     def testFuncstructDegeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
