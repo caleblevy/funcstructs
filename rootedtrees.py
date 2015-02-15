@@ -219,7 +219,7 @@ class DominantTree(LevelTree):
     def __init__(self, level_sequence, preordered=False):
         if preordered:
             self.level_sequence = tuple(level_sequence)
-        elif isinstance(level_sequence, self.__class__):
+        elif isinstance(level_sequence, type(self)):
             self.level_sequence = level_sequence.level_sequence
         else:
             self.level_sequence = dominant_sequence(level_sequence)
@@ -261,6 +261,8 @@ class TreeEnumerator(object):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, node_count):
+        if node_count < 1:
+            raise ValueError("Every tree requires at least one node.")
         self.n = node_count
         self._len = None
 
@@ -467,6 +469,10 @@ class TreeTests(unittest.TestCase):
             forests = ForestEnumerator(n)
             self.assertEqual(trees, eval(repr(trees)))
             self.assertEqual(forests, eval(repr(forests)))
+        partitions = [[4, 4, 3], [4, 3, 4], [2, 2, 2, 6]]
+        for partition in partitions:
+            pforests = PartitionForests(partition)
+            self.assertEqual(pforests, eval(repr(pforests)))
 
     def test_equality(self):
         node_counts = [4, 5, 6, 10]

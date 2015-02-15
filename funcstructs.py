@@ -27,6 +27,7 @@ import subsequences
 import necklaces
 import levypartitions
 import factorization
+import compositions
 import endofunctions
 
 
@@ -98,7 +99,7 @@ class Funcstruct(object):
                 func[cycle_start+node_ind] = cycle_start + (node_next % cycle_len)
                 node_ind += len(tree)
             cycle_start += cycle_len
-        return func
+        return endofunctions.Endofunction(func)
 
     @property
     def imagepath(self):
@@ -114,6 +115,16 @@ class Funcstruct(object):
                     # Microoptimization: memoize the calls to range
                     cardinalities[:k] += range(k, 0, -1)
         return cardinalities
+
+    @classmethod
+    def from_func(cls, f):
+        struct = []
+        for cycle in f.cycles:
+            strand = []
+            for el in cycle:
+                strand.append(rootedtrees.DominantTree.attached_tree(f, el))
+            struct.append(necklaces.Necklace(strand))
+        return cls(struct)
 
 
 def multiset_partition_funcstructs(mpart):
@@ -187,8 +198,7 @@ class FuncstructTests(unittest.TestCase):
             Necklace([Tree([1, 2])]),
             Necklace([Tree([1, 2, 2]), Tree([1]), Tree([1, 2, 2])])
         ])
-        func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
-        self.assertEqual(func, struct.func_form())
+        self.assertEqual(struct, Funcstruct.from_func(struct.func_form()))
 
     def testFuncstructImagepath(self):
         """Check methods for computing structure image paths are equivalent."""
@@ -208,13 +218,13 @@ class FuncstructTests(unittest.TestCase):
 
     def testFuncstructDegeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
-        N = 8
-        for n in range(1, N):
-            nfac = math.factorial(n)
+        n = 8
+        for i in range(1, n):
+            fac = math.factorial(i)
             func_count = 0
-            for funcstruct in funcstructs(n):
-                func_count += nfac//funcstruct.degeneracy()
-            self.assertEqual(n**n, func_count)
+            for struct in FuncstructEnumerator(i):
+                func_count += fac//struct.degeneracy
+            self.assertEqual(i**i, func_count)
 
 
 if __name__ == '__main__':

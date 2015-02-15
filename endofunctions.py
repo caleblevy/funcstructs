@@ -277,18 +277,39 @@ def randperm(n):
 
 class TransformationMonoid(object):
     """Set of all endofunctions."""
+
+    def __init__(self, set_size):
+        if set_size < 1:
+            raise ValueError("Set must have at least one element.")
+        self.n = set_size
+
+    def __hash__(self):
+        return hash(self.n)
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.n == other.n
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    __lt__ = None
+
     def __iter__(self):
-        pass
-        # for func in productrange return Endofunction(self)
+        for func in productrange.product_range([self.n] * self.n):
+            yield Endofunction(func)
+
     def __len__(self):
-        pass
-        # return n**n
+        return self.n ** self.n
+
     def __contains__(self, other):
-        pass
-        # if funccheck return true
-    def __le__(self, other):
-        pass
-        # return self.n < other.n
+        if isinstance(other, Endofunction):
+            return self.n == other._n
+        return False
+
+    def __repr__(self):
+        return self.__class__.__name__+'('+str(self.n)+')'
 
 
 class EndofunctionTests(unittest.TestCase):
@@ -323,15 +344,14 @@ class EndofunctionTests(unittest.TestCase):
     # Cycle tests
 
     funcs = [
-        [1, 0],
-        [9, 5, 7, 6, 2, 0, 9, 5, 7, 6, 2],
-        [7, 2, 2, 3, 4, 3, 9, 2, 2, 10, 10, 11, 12, 5]
+        Endofunction([1, 0]),
+        Endofunction([9, 5, 7, 6, 2, 0, 9, 5, 7, 6, 2]),
+        Endofunction([7, 2, 2, 3, 4, 3, 9, 2, 2, 10, 10, 11, 12, 5])
     ]
-    funcs += list([randfunc(20) for I in range(100)])
-    funcs += list(productrange.endofunctions(1))
-    funcs += list(productrange.endofunctions(3))
-    funcs += list(productrange.endofunctions(4))
-    funcs = list(map(Endofunction, funcs))
+    funcs += list([randfunc(20) for _ in range(100)])
+    funcs += list(TransformationMonoid(1))
+    funcs += list(TransformationMonoid(3))
+    funcs += list(TransformationMonoid(4))
 
     def test_cycles_are_cyclic(self):
         """Make sure funccylces actually returns cycles."""
@@ -376,11 +396,7 @@ class EndofunctionTests(unittest.TestCase):
 
     def test_conjugation(self):
         """Test that conjugation is invertible, with the obvious inverse."""
-        funclist = list(productrange.endofunctions(4))
-        funclist += [randfunc(20) for _ in range(100)]
-        funclist += list(productrange.endofunctions(2))
-        funclist = list(map(Endofunction, funclist))
-        for f in funclist:
+        for f in self.funcs:
             for _ in range(20):
                 perm = randperm(len(f))
                 self.assertEqual(f, perm.inverse.conj(perm.conj(f)))

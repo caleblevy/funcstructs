@@ -103,6 +103,13 @@ def fixed_lex_partitions(n, L):
         partition[L-j-k+1:], j = _min_part(s, j+k-1)
 
 
+def max_length_partitions(n, L):
+    """Enumerates partitions of length at most l."""
+    for l in range(1, L+1):
+        for partition in fixed_lex_partitions(n, l):
+            yield partition
+
+
 def partition_numbers_upto(N):
     """ Uses Euler's Pentagonal Number Theorem to count partition number using
     the previous terms. The sum is taken over O(sqrt(n)) terms on each pass, so

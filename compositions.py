@@ -31,12 +31,17 @@ compositions of N.
 
 
 import unittest
+
 import productrange
+
+
+def binary_compositions(n):
+    return productrange.product_range([2]*(n-1))
 
 
 def compositions_binary(n):
     """Additive compositions of a number; i.e. partitions with ordering."""
-    for binary_composition in productrange.product_range([2]*(n-1)):
+    for binary_composition in binary_compositions(n):
         tot = 1
         composition = []
         for I in binary_composition:
@@ -92,21 +97,21 @@ def weak_compositions(n, k):
                 yield [i] + comp
 
 
-class CompositionTest(unittest.TestCase):
+class CompositionTests(unittest.TestCase):
 
-    def testCompositionCounts(self):
-        N = 10
-        for n in range(1, N):
-            self.assertEqual(2**(n-1), len(list(compositions_simple(n))))
-            self.assertEqual(2**(n-1), len(list(compositions_binary(n))))
+    def test_counts(self):
+        n = 10
+        for i in range(1, n):
+            self.assertEqual(2**(i-1), len(list(compositions_simple(i))))
+            self.assertEqual(2**(i-1), len(list(compositions_binary(i))))
 
     def testCompositionSums(self):
-        N = 10
-        for n in range(1, N):
-            for comp in compositions_simple(n):
-                self.assertEqual(n, sum(comp))
-            for comp in compositions_binary(n):
-                self.assertEqual(n, sum(comp))
+        n = 10
+        for i in range(1, n):
+            for comp in compositions_simple(i):
+                self.assertEqual(i, sum(comp))
+            for comp in compositions_binary(i):
+                self.assertEqual(i, sum(comp))
 
 
 if __name__ == '__main__':

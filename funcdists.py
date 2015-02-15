@@ -39,7 +39,6 @@ import numpy as np
 import funcstructs
 import multiset
 import endofunctions
-import productrange
 import compositions
 
 
@@ -50,8 +49,8 @@ def iterdist_brute(n):
     computationally infeasible, it is the only true way to check your work.
     """
     M = np.zeros((n, n-1), dtype=object)
-    for f in productrange.endofunctions(n):
-        im = endofunctions.Endofunction(f).imagepath
+    for f in endofunctions.TransformationMonoid(n):
+        im = f.imagepath
         for it, card in enumerate(im):
             M[card-1, it] += 1
     return M
@@ -106,7 +105,7 @@ def imagedist_composition(n):
         return [1]
 
     F = [0]*n
-    for comp in productrange.product_range([2]*(n-1)):
+    for comp in compositions.binary_compositions(n):
         val = n
         rep = 1
         for I in comp:
