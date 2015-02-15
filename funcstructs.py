@@ -57,6 +57,9 @@ class Funcstruct(object):
 
     __lt__ = None
 
+    def __repr__(self):
+        return self.__class__.__name__+'('+repr(list(self.cycles))+')'
+
     @property
     def degeneracy(self):
         """ The number of equivalent representations of a labelling of an
@@ -144,7 +147,7 @@ class FuncstructEnumerator(object):
         self.n = node_count
 
     def __repr__(self):
-        return type(self).__name__+'('+str(n)+')'
+        return type(self).__name__+'('+str(self.n)+')'
 
     def __hash__(self):
         return hash(self.n)
@@ -225,6 +228,17 @@ class FuncstructTests(unittest.TestCase):
             for struct in FuncstructEnumerator(i):
                 func_count += fac//struct.degeneracy
             self.assertEqual(i**i, func_count)
+
+    def test_repr(self):
+        from necklaces import Necklace
+        from rootedtrees import DominantTree
+        struct = Funcstruct.from_func(endofunctions.randfunc(30))
+        self.assertEqual(struct, eval(repr(struct)))
+
+        node_counts = [3, 5, 10, 50]
+        for n in node_counts:
+            structs = FuncstructEnumerator(n)
+            self.assertEqual(structs, eval(repr(structs)))
 
 
 if __name__ == '__main__':
