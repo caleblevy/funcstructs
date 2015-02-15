@@ -16,7 +16,17 @@ import itertools
 
 from PADS.IntegerPartitions import partitions, lex_partitions
 
-import integerroots
+
+def isqrt(n):
+    """ Faster method of iroot for the particular case of the integer square
+    root. Code taken directly from "Integer square root in python" at
+    http://stackoverflow.com/a/15391420. """
+    x = n
+    y = (x + 1) // 2
+    while y < x:
+        x = y
+        y = (x + n // x) // 2
+    return x
 
 
 def tuple_partitions(n):
@@ -102,8 +112,8 @@ def partition_numbers_upto(N):
         return [1]
     P = [1]+[0]*N
     for n in range(1, N+1):
-        k_max = (integerroots.isqrt(24*n+1)-1)//6
-        k_min = -((integerroots.isqrt(24*n+1)+1)//6)
+        k_max = (isqrt(24*n+1)-1)//6
+        k_min = -((isqrt(24*n+1)+1)//6)
         for k in itertools.chain(range(k_min, 0), range(1, k_max+1)):
             P[n] += (-1)**abs((k-1)) * P[n-k*(3*k+1)//2]
     return P

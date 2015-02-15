@@ -95,7 +95,7 @@ def phi_sum(n):
 totient = phi_sum
 
 
-class PrimeTest(unittest.TestCase):
+class FactorizationTests(unittest.TestCase):
 
     def testPrimeDivisorsRepeated(self):
         """OEIS A001222: number of prime divisors with multiplicity."""

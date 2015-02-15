@@ -253,6 +253,9 @@ class Multiset(collections.Set, collections.Hashable):
 
     __nonzero__ = __bool__
 
+    def items(self):
+        return self._dict.items()
+
     def split(self):
         """ Splits the multiset into element-multiplicity pairs. """
         y = list(self._dict)

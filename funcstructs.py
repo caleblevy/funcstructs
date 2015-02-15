@@ -37,10 +37,26 @@ def flatten(lol):
 
 class Funcstruct(object):
 
-    def __init__(self, cycles):
+    def __init__(self, cycles, precounted=None):
         self.cycles = multiset.Multiset(cycles)
-        self._n = len(flatten(flatten(list(cycles))))
+        if precounted is not None:
+            self.n = precounted
+        else:
+            self.n = len(flatten(flatten(list(cycles))))
 
+    def __hash__(self):
+        return hash(self.cycles)
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.cycles == other.cycles
+
+    def __ne__(self, other):
+        return not self == other
+
+    __lt__ = None
+
+    @property
     def degeneracy(self):
         """ The number of equivalent representations of a labelling of an
         endofunction with unlabelled structure funcstruct.
@@ -88,7 +104,7 @@ class Funcstruct(object):
     def imagepath(self):
         """ Given an endofunction structure funcstruct, compute the image path
         directly without conversion to a particular endofunction. """
-        cardinalities = np.array([0]+[0]*(self._n-2), dtype=object)
+        cardinalities = np.array([0]+[0]*(self.n-2), dtype=object)
         for tree in flatten(self.cycles):
             cardinalities += 1
             for subseq in subsequences.increasing_subsequences(tree):
@@ -100,20 +116,19 @@ class Funcstruct(object):
         return cardinalities
 
 
-def multiset_funcstructs(mset):
+def multiset_partition_funcstructs(mpart):
     """Given a multiset of rooted trees, return all endofunction structures
     whose cycles correspond to the multisets."""
     strands = []
-    for beads in mset.unique_elements():
-        necklace_set = necklaces.NecklaceGroup(beads)
-        strand = itertools.combinations_with_replacement(necklace_set, mset.count(beads))
+    for beadset, d in mpart.items():
+        necklace_set = necklaces.NecklaceGroup(beadset)
+        strand = itertools.combinations_with_replacement(necklace_set, d)
         strands.append(strand)
-
     for bundle in itertools.product(*strands):
         yield Funcstruct(flatten(bundle))
 
 
-class Funcstructs(object):
+class FuncstructEnumerator(object):
     def __init__(self, node_count):
         self.n = node_count
 
@@ -132,12 +147,12 @@ class Funcstructs(object):
         return not self == other
 
     def __iter__(self):
-        """An enumeration of endofunction structures on n elements. Equalivalent to
-        all conjugacy classes in End(S)."""
-        for forest in rootedtrees.forests(self.n):
+        """An enumeration of endofunction structures on n elements.
+        Equalivalent to all conjugacy classes in End(S)."""
+        for forest in rootedtrees.ForestEnumerator(self.n):
             for mpart in forest.partitions():
-                for funcstruct in multiset_funcstructs(mpart):
-                    yield funcstruct
+                for struct in multiset_partition_funcstructs(mpart):
+                    yield struct
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes. Iterates
@@ -162,13 +177,15 @@ class Funcstructs(object):
         return self.cardinality()
 
 
-class EndofunctionStructureTest(unittest.TestCase):
+class FuncstructTests(unittest.TestCase):
 
     def testFuncstructToFunc(self):
+        Necklace = necklaces.Necklace
+        Tree = rootedtrees.DominantTree
         struct = Funcstruct([
-            necklaces.Necklace((rootedtrees.DominantTree([1, 2, 3]), rootedtrees.DominantTree([1, 2, 2]))),
-            necklaces.Necklace((rootedtrees.DominantTree([1, 2]), ), ),
-            necklaces.Necklace((rootedtrees.DominantTree([1, 2, 2]), rootedtrees.DominantTree([1]), rootedtrees.DominantTree([1, 2, 2])))
+            Necklace([Tree([1, 2, 3]), Tree([1, 2, 2])]),
+            Necklace([Tree([1, 2])]),
+            Necklace([Tree([1, 2, 2]), Tree([1]), Tree([1, 2, 2])])
         ])
         func = [3, 0, 1, 0, 3, 3, 6, 6, 11, 8, 8, 12, 8, 12, 12]
         self.assertEqual(func, struct.func_form())
@@ -177,7 +194,7 @@ class EndofunctionStructureTest(unittest.TestCase):
         """Check methods for computing structure image paths are equivalent."""
         N = 8
         for n in range(1, N):
-            for struct in Funcstructs(n):
+            for struct in FuncstructEnumerator(n):
                 im = endofunctions.Endofunction(struct.func_form()).imagepath
                 imstruct = struct.imagepath
                 np.testing.assert_array_equal(im, imstruct)
@@ -186,8 +203,8 @@ class EndofunctionStructureTest(unittest.TestCase):
         """OEIS A001372: Number of self-mapping patterns."""
         A001372 = [1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
         for n, num in enumerate(A001372):
-            self.assertEqual(num, len(set(Funcstructs(n+1))))
-            self.assertEqual(num, len(Funcstructs(n+1)))
+            self.assertEqual(num, len(set(FuncstructEnumerator(n+1))))
+            self.assertEqual(num, len(FuncstructEnumerator(n+1)))
 
     def testFuncstructDegeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""

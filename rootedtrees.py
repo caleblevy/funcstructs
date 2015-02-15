@@ -130,13 +130,13 @@ class LevelTree(object):
         return iter(self.level_sequence)
 
     def __bool__(self):
-        return bool(self.level_sequence)
+        return True
 
     __nonzero__ = __bool__
 
     def branch_sequences(self):
         """ Return each major subbranch of a tree (even chopped). """
-        if not self:
+        if len(self.level_sequence) == 1:
             return
         isroot = lambda node: node == self.level_sequence[0] + 1
         for branch in subsequences.startswith(self.level_sequence[1:], isroot):
@@ -152,12 +152,12 @@ class LevelTree(object):
         Return a representation the rooted tree via nested lists. This method
         is a novelty item, and shouldn't be used for anything practical.
         """
-        if not self:
+        if not self.branch_sequences():
             return []
         return [subtree.bracket_form() for subtree in self.subtrees()]
 
     def unordered(self):
-        if not self:
+        if not self.branch_sequences():
             return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
@@ -256,7 +256,7 @@ class DominantTree(LevelTree):
         return deg*logs.degeneracy()
 
 
-class SequenceEnumerator(object):
+class TreeEnumerator(object):
 
     """Represents the class of unlabelled rooted trees on n nodes."""
 
@@ -268,7 +268,7 @@ class SequenceEnumerator(object):
         return hash(self.n)
 
     def __eq__(self, other):
-        if isinstance(other, self.__class__):
+        if isinstance(other, type(self)):
             return self.n == other.n
         return False
 
@@ -298,7 +298,7 @@ class SequenceEnumerator(object):
         "Constant time generation of rooted trees." Siam Journal of
         Computation, Vol. 9, No. 4. November 1980. """
         tree = [I+1 for I in range(self.n)]
-        yield tree
+        yield DominantTree(tree, preordered=True)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -309,7 +309,7 @@ class SequenceEnumerator(object):
                     q -= 1
                 for I in range(p, self.n):
                     tree[I] = tree[I-(p-q)]
-                yield tree
+                yield DominantTree(tree, preordered=True)
 
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm
@@ -328,45 +328,121 @@ class SequenceEnumerator(object):
         return T[-1]
 
     def __len__(self):
-        """ NOTE: For n >= 47, len(DominantTrees(n)) is greater than C long,
+        """ NOTE: For n >= 47, len(TreeEnumerator(n)) is greater than C long,
         and thus gives rise to an index overflow error. Use self.cardinality
         instead. """
         if self._len is None:
             self._len = self.cardinality()
         return self._len
 
-class DominantTrees(SequenceEnumerator):
-    def __iter__(self):
-        for tree in super(self.__class__, self).__iter__():
-            yield DominantTree(tree, preordered=True)
 
-class RootedTrees(SequenceEnumerator):
-    def __iter__(self):
-        for tree in super(self.__class__, self).__iter__():
-            yield unordered_tree(tree)
-
-
-def forests(N):
+class ForestEnumerator(TreeEnumerator):
     """ Any rooted tree on N+1 nodes can be identically described by a
     collection of rooted trees on N nodes, grafted together at a single root.
 
     To enumerate all collections of rooted trees on N nodes, we reverse the
     principle and enumerate all rooted trees on N+1 nodes, chopping them at the
     base. Much simpler than finding all trees corresponding to a partition. """
-    if N == 0:
-        return
-    for tree in DominantTrees(N+1):
-        yield tree.chop()
+
+    def __init__(self, node_count):
+        self.n = node_count + 1
+        self._len = None
+
+    def __repr__(self):
+        return self.__class__.__name__+'('+str(self.n - 1)+')'
+
+    def __iter__(self):
+        for tree in super(type(self), self).__iter__():
+            yield tree.chop()
 
 
-def RootedTrees(n):
-    for tree in DominantTrees(n+1):
-        yield unordered_tree(tree).subtrees
+class PartitionForests(object):
+    """Colections of rooted trees with sizes specified by partitions."""
+    def __init__(self, partition):
+        self.partition = multiset.Multiset(partition)
+
+    def __hash__(self):
+        return hash(self.partition)
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.partition == other.partition
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    __le__ = None
+
+    def __len__(self):
+        l = 1
+        for y, r in self.partition.items():
+            n = len(TreeEnumerator(y))
+            l *= math.factorial(n+r-1)//math.factorial(r)//math.factorial(n-1)
+        return l
+
+    def __iter__(self):
+        seeds = []
+        for y, d in self.partition.items():
+            trees = TreeEnumerator(y)
+            seeds.append(itertools.combinations_with_replacement(trees, d))
+        for forest in itertools.product(*seeds):
+            yield multiset.Multiset(flatten(forest))
+
+    def __repr__(self):
+        return self.__class__.__name__+'('+str(list(self.partition))+')'
 
 
 class TreeTests(unittest.TestCase):
 
-    # UnorderedTree tests
+    # Counting tests
+    A000081 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
+
+    def test_tree_counts(self):
+        """OEIS A000081: number of unlabelled rooted trees on N nodes."""
+        for n, count in enumerate(self.A000081):
+            trees = set()
+            for tree in TreeEnumerator(n+1):
+                trees.add(tree)
+                trees.add(tree)
+            self.assertEqual(count, len(trees))
+            self.assertEqual(count, len(TreeEnumerator(n+1)))
+
+    def test_forest_counts(self):
+        """Check len(ForestEnumerator(N))==A000081(N+1)"""
+        for n, count in enumerate(self.A000081[1:]):
+            forests = set()
+            for forest in ForestEnumerator(n+1):
+                forests.add(forest)
+                forests.add(forest)
+            self.assertEqual(self.A000081[n+1], len(forests))
+            self.assertEqual(self.A000081[n+1], len(ForestEnumerator(n+1)))
+
+    def test_partition_forest_counts(self):
+        """Check alternate way of enumerating forests."""
+        from PADS.IntegerPartitions import partitions
+        for n, count in enumerate(self.A000081[1:]):
+            forests = set()
+            forest_count = 0
+            for partition in partitions(n+1):
+                forests.update(PartitionForests(partition))
+                forest_count += len(PartitionForests(partition))
+            self.assertEqual(self.A000081[n+1], len(forests))
+            self.assertEqual(self.A000081[n+1], forest_count)
+
+    def test_tree_degeneracy(self):
+        """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
+        for n in range(1, len(self.A000081)):
+            labelled_treecount = 0
+            rooted_treecount = 0
+            nfac = math.factorial(n)
+            for tree in TreeEnumerator(n):
+                labelled_treecount += nfac//tree.degeneracy()
+                rooted_treecount += nfac//tree.unordered().degeneracy()
+            self.assertEqual(n**(n-1), labelled_treecount)
+            self.assertEqual(n**(n-1), rooted_treecount)
+
+    # Basic method tests
 
     def test_rooted_tree_strings(self):
         T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
@@ -374,7 +450,7 @@ class TreeTests(unittest.TestCase):
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
-    def test_tree_repr(self):
+    def test_reprs(self):
         TreeSeqs = [[1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5],
                     [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
                     range(1, 5)]
@@ -385,38 +461,26 @@ class TreeTests(unittest.TestCase):
             self.assertEqual(T_unordered, eval(repr(T_unordered)))
             self.assertEqual(T_ordered, eval(repr(T_ordered)))
             self.assertEqual(T_dominant, eval(repr(T_dominant)))
+        node_count = [4, 5, 6, 10]
+        for n in node_count:
+            trees = TreeEnumerator(n)
+            forests = ForestEnumerator(n)
+            self.assertEqual(trees, eval(repr(trees)))
+            self.assertEqual(forests, eval(repr(forests)))
 
-    # Test dominant tree properties.
+    def test_equality(self):
+        node_counts = [4, 5, 6, 10]
+        enumerators = [TreeEnumerator, ForestEnumerator]
+        for n in node_counts:
+            for enum1 in enumerators:
+                for m in node_counts:
+                    for enum2 in enumerators:
+                        if n == m and enum1 == enum2:
+                            self.assertEqual(enum1(n), enum2(m))
+                        else:
+                            self.assertNotEqual(enum1(n), enum2(m))
 
-    A000081 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
-
-    def test_tree_counts(self):
-        """OEIS A000081: number of unlabelled rooted trees on N nodes."""
-        for n, count in enumerate(self.A000081):
-            trees = set()
-            for tree in DominantTrees(n+1):
-                trees.add(tree)
-                trees.add(tree)
-            self.assertEqual(count, len(trees))
-            self.assertEqual(count, len(DominantTrees(n+1)))
-
-    def test_forest_counts(self):
-        """Check len(forests(N))==A000081(N+1)"""
-        for n, count in enumerate(self.A000081[1:]):
-            self.assertEqual(count, len(set(forests(n+1))))
-            self.assertEqual(count, len(set(RootedTrees(n+1))))
-
-    def test_tree_degeneracy(self):
-        """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
-        for n in range(1, len(self.A000081)):
-            labelled_treecount = 0
-            rooted_treecount = 0
-            nfac = math.factorial(n)
-            for tree in DominantTrees(n):
-                labelled_treecount += nfac//tree.degeneracy()
-                rooted_treecount += nfac//tree.unordered().degeneracy()
-            self.assertEqual(n**(n-1), labelled_treecount)
-            self.assertEqual(n**(n-1), rooted_treecount)
+    # Test conversion methods
 
     def test_bracket_form(self):
         """Test the bracket representation of these rooted trees."""
@@ -436,8 +500,8 @@ class TreeTests(unittest.TestCase):
     def test_from_treefunc(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
         from endofunctions import Endofunction
-        for n in range(1, len(self.A000081)+1):
-            for tree in DominantTrees(n):
+        for n in range(1, 10):
+            for tree in TreeEnumerator(n):
                 treefunc = Endofunction.from_tree(tree)
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
