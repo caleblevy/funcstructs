@@ -14,8 +14,8 @@ from math import ceil
 import fractions
 import unittest
 
-import multiset
-from productrange import product_range
+from . import multiset
+from .productrange import product_range
 
 
 def prime_factorization(n):

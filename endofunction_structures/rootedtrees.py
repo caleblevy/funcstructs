@@ -27,10 +27,10 @@ import unittest
 import itertools
 import functools
 
-import subsequences
-import multiset
-import factorization
-import productrange
+from . import subsequences
+from . import multiset
+from . import factorization
+from . import productrange
 
 def flatten(lol):
     """Flatten a list of lists."""

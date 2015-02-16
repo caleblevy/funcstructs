@@ -14,7 +14,7 @@ import random
 import unittest
 import itertools
 
-import productrange
+from . import productrange
 
 
 class Endofunction(object):

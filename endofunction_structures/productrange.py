@@ -13,7 +13,7 @@ cartesian products of finite sets, with variable dimensionality. """
 import unittest
 import itertools
 
-import multiset
+from . import multiset
 
 
 def flatten(lol):
