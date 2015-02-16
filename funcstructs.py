@@ -191,6 +191,96 @@ class FuncstructEnumerator(object):
         return self.cardinality()
 
 
+from rootedtrees import PartitionForests
+from levypartitions import max_length_partitions
+from multiset import Multiset
+from necklaces import NecklaceGroup
+
+
+def part_add(base, part):
+    comp = base[:]
+    for i, p in enumerate(part):
+        comp[i] += p
+    return comp
+
+
+def partitions_of_free_nodes_into_cycle(t, l):
+    """How many ways to partition t free nodes amongst l nodes of a cycle"""
+    base = [1] * l
+    if not t:
+        yield Multiset(base)
+    else:
+        for partition in max_length_partitions(t, l):
+            yield Multiset(part_add(base, partition))
+
+
+def forests_from_attaching_free_nodes_to_cycle(t, l):
+    """Enumerate all ways to attach t free nodes to a cycle of length l."""
+    for partition in partitions_of_free_nodes_into_cycle(t, l):
+        for forest in PartitionForests(partition):
+            for necklace in NecklaceGroup(forest):
+                yield necklace
+
+# for I in forests_from_attaching_free_nodes_to_cycle(5, 3):
+#     print I
+# for I in forests_from_attaching_free_nodes_to_cycle(5, 1):
+#     print I
+# for I in forests_from_attaching_free_nodes_to_cycle(0, 10):
+#     print I
+
+def component_groups(c, l, m):
+    # c number of free tree nodes, l length of cycle, m number of cycles
+    for partition in partitions_of_free_nodes_into_cycle(c, m):
+        strands = []
+        for y, d in partition.items():
+            attachments = forests_from_attaching_free_nodes_to_cycle(y-1, l)
+            strand = itertools.combinations_with_replacement(attachments, d)
+            strands.append(strand)
+        for cycle_group in itertools.product(*strands):
+            yield Multiset(flatten(cycle_group))
+
+# for I in component_groups(5, 3, 1):
+#     print I
+# for I in component_groups(5, 1, 1):
+#     print I
+# for I in component_groups(0, 10, 1):
+#     print I
+# for J in component_groups(5, 3, 2):
+#     print J
+
+
+class CycleTypeFuncstructs(object):
+
+    def __init__(self, node_count, cycle_type):
+        self.n = node_count
+        self.cycle_type = multiset.Multiset(cycle_type)
+        self.lengths, self.multiplicities = self.cycle_type.split()
+        self.num_cycles = self.cycle_type.num_unique_elements()
+
+    def __iter__(self):
+        treenodes = self.n - sum(self.cycle_type)
+        for composition in compositions.weak_compositions(treenodes, self.num_cycles):
+            cycle_groups = []
+            for c, l, m in zip(composition, self.lengths, self.multiplicities):
+                cycle_groups.append(component_groups(c, l, m))
+            for bundle in itertools.product(*cycle_groups):
+                yield Funcstruct(flatten(bundle))
+
+# for s in PartitionFuncstructs(8, [3,3,2]):
+#     print s
+#
+# for t in PartitionFuncstructs(8, [1,1]):
+#     print t
+from PADS.IntegerPartitions import partitions
+def partition_funcstructs(n):
+    for i in range(1, n+1):
+        for partition in partitions(i):
+            for struct in CycleTypeFuncstructs(n, partition):
+                yield struct
+
+print len(list(partition_funcstructs(9)))
+
+
 class FuncstructTests(unittest.TestCase):
 
     def testFuncstructToFunc(self):
