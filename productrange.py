@@ -11,30 +11,29 @@ cartesian products of finite sets, with variable dimensionality. """
 
 
 import unittest
-from itertools import product
-from multiset import prod
+import itertools
+
+import multiset
 
 
-isiterable = lambda obj: hasattr(obj, '__iter__')
+def flatten(lol):
+    """Flatten a list of lists."""
+    return list(itertools.chain.from_iterable(lol))
 
 
 def parse_ranges(begin, end, step):
     """ If begin == end == None then begin is treated as end and step is set by
     default to 1 and begin to 0. If begin and step are integers they are
     transformed into begin = [begin]*len(end) and step = [step]*len(end). """
-
     if end is None:
         begin, end = end, begin
     # If start is not iterable, it is either an int or none.
-    if not isiterable(begin):
+    if not hasattr(begin, '__iter__'):
         begin = [0 if(begin is None) else begin]*len(end)
-
-    if not isiterable(step):
+    if not hasattr(step, '__iter__'):
         step = [1 if(step is None) else step]*len(end)
-
     if not len(begin) == len(step) == len(end):
         raise ValueError("begin, end, and step do not match in length.")
-
     return begin, end, step
 
 
@@ -55,8 +54,8 @@ def product_range(begin, end=None, step=None):
               for In in range(rn, sn, tn):
                 yield tuple([I1, I2, ..., In])
     """
-    begin, end, step = parse_ranges(begin, end, step)
-    return product(*[range(I, J, K) for I, J, K in zip(begin, end, step)])
+    b, e, s = parse_ranges(begin, end, step)
+    return itertools.product(*[range(i, j, k) for i, j, k in zip(b, e, s)])
 
 
 def sign(num):
@@ -118,6 +117,24 @@ def rev_range(begin, end=None, step=None):
                     go = True
                     break
                 V[I] = begin[I]
+
+
+def unordered_product(mset, iterfunc):
+    """Given a multiset of inputs to an iterable, and iterfunc, returns all
+    unordered combinations of elements from iterfunc applied to each el. It is
+    equivalent to:
+
+        set(Multiset(p) for p in product([iterfunc(i) for i in mset]))
+
+    except it runs through each element once. This program makes the
+    assumptions that no two members of iterfunc(el) are the same, and that if
+    el1 != el2 then iterfunc(el1) and iterfunc(el2) are mutually disjoint."""
+    mset = multiset.Multiset(mset)
+    strands = []
+    for y, d in mset.items():
+        strands.append(itertools.combinations_with_replacement(iterfunc(y), d))
+    for bundle in itertools.product(*strands):
+        yield multiset.Multiset(flatten(bundle))
 
 
 class ProductrangeTest(unittest.TestCase):

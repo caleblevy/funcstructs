@@ -47,8 +47,8 @@ class Multiset(collections.Set, collections.Hashable):
         self._size = 0
         if iterable:
             if isinstance(iterable, self.__class__):
-                for elem, count in iterable._dict.items():
-                    self._inc(elem, count)
+                self._dict = iterable._dict
+                self._size = iterable._size
             else:
                 for value in iterable:
                     self._inc(value)

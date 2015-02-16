@@ -30,7 +30,7 @@ import functools
 import subsequences
 import multiset
 import factorization
-
+import productrange
 
 def flatten(lol):
     """Flatten a list of lists."""
@@ -197,7 +197,7 @@ class OrderedTree(LevelTree):
         for branch in self.branches():
             branch_list.append(branch._dominant_sequence())
         branch_list.sort(reverse=True)
-        return tuple([self.level_sequence[0]] + flatten(branch_list))
+        return tuple([self.level_sequence[0]] + productrange.flatten(branch_list))
 
     def canonical_form(self):
         """Return a dominant tree type."""
@@ -384,12 +384,7 @@ class PartitionForests(object):
         return l
 
     def __iter__(self):
-        seeds = []
-        for y, d in self.partition.items():
-            trees = TreeEnumerator(y)
-            seeds.append(itertools.combinations_with_replacement(trees, d))
-        for forest in itertools.product(*seeds):
-            yield multiset.Multiset(flatten(forest))
+        return productrange.unordered_product(self.partition, TreeEnumerator)
 
     def __repr__(self):
         return self.__class__.__name__+'('+str(list(self.partition))+')'

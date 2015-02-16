@@ -20,6 +20,7 @@ import itertools
 import unittest
 
 import numpy as np
+from PADS import IntegerPartitions
 
 import multiset
 import rootedtrees
@@ -29,11 +30,7 @@ import levypartitions
 import factorization
 import compositions
 import endofunctions
-
-
-def flatten(lol):
-    """Flatten a list of lists."""
-    return list(itertools.chain.from_iterable(lol))
+import productrange
 
 
 class Funcstruct(object):
@@ -43,7 +40,7 @@ class Funcstruct(object):
         if precounted is not None:
             self.n = precounted
         else:
-            self.n = len(flatten(flatten(list(cycles))))
+            self.n = len(productrange.flatten(productrange.flatten(cycles)))
 
     def __hash__(self):
         return hash(self.cycles)
@@ -86,7 +83,7 @@ class Funcstruct(object):
         cycles = list(self.cycles)
         tree_start = 0
         func = []
-        for tree in flatten(cycles):
+        for tree in productrange.flatten(cycles):
             l = len(tree)
             tree_perm = range(tree_start, tree_start+l)
             func_tree = endofunctions.Endofunction.from_tree(tree, permutation=tree_perm)
@@ -96,7 +93,7 @@ class Funcstruct(object):
         cycle_start = 0
         for cycle in cycles:
             node_ind = node_next = 0
-            cycle_len = len(flatten(cycle))
+            cycle_len = len(productrange.flatten(cycle))
             for tree in cycle:
                 node_next += len(tree)
                 func[cycle_start+node_ind] = cycle_start + (node_next % cycle_len)
@@ -130,18 +127,6 @@ class Funcstruct(object):
         return cls(struct)
 
 
-def multiset_partition_funcstructs(mpart):
-    """Given a multiset of rooted trees, return all endofunction structures
-    whose cycles correspond to the multisets."""
-    strands = []
-    for beadset, d in mpart.items():
-        necklace_set = necklaces.NecklaceGroup(beadset)
-        strand = itertools.combinations_with_replacement(necklace_set, d)
-        strands.append(strand)
-    for bundle in itertools.product(*strands):
-        yield Funcstruct(flatten(bundle))
-
-
 class FuncstructEnumerator(object):
     def __init__(self, node_count):
         self.n = node_count
@@ -165,8 +150,8 @@ class FuncstructEnumerator(object):
         Equalivalent to all conjugacy classes in End(S)."""
         for forest in rootedtrees.ForestEnumerator(self.n):
             for mpart in forest.partitions():
-                for struct in multiset_partition_funcstructs(mpart):
-                    yield struct
+                for struct in productrange.unordered_product(mpart, necklaces.NecklaceGroup):
+                    yield Funcstruct(struct)
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes. Iterates
@@ -191,62 +176,29 @@ class FuncstructEnumerator(object):
         return self.cardinality()
 
 
-from rootedtrees import PartitionForests
-from levypartitions import max_length_partitions
-from multiset import Multiset
-from necklaces import NecklaceGroup
+def direct_unordered_attachments(t, l):
+    """Enumerate the ways of directly attaching t unlabelled free nodes to l
+    unlabelled nodes."""
+    return levypartitions.fixed_lex_partitions(t+l, l)
 
 
-def part_add(base, part):
-    comp = base[:]
-    for i, p in enumerate(part):
-        comp[i] += p
-    return comp
-
-
-def partitions_of_free_nodes_into_cycle(t, l):
-    """How many ways to partition t free nodes amongst l nodes of a cycle"""
-    base = [1] * l
-    if not t:
-        yield Multiset(base)
-    else:
-        for partition in max_length_partitions(t, l):
-            yield Multiset(part_add(base, partition))
-
-
-def forests_from_attaching_free_nodes_to_cycle(t, l):
-    """Enumerate all ways to attach t free nodes to a cycle of length l."""
-    for partition in partitions_of_free_nodes_into_cycle(t, l):
-        for forest in PartitionForests(partition):
-            for necklace in NecklaceGroup(forest):
+def attachment_forests(t, l):
+    """Enumerate all ways to make rooted trees from t free nodes and attach
+    them to a a cycle of length l."""
+    for partition in direct_unordered_attachments(t, l):
+        for forest in rootedtrees.PartitionForests(partition):
+            for necklace in necklaces.NecklaceGroup(forest):
                 yield necklace
 
-# for I in forests_from_attaching_free_nodes_to_cycle(5, 3):
-#     print I
-# for I in forests_from_attaching_free_nodes_to_cycle(5, 1):
-#     print I
-# for I in forests_from_attaching_free_nodes_to_cycle(0, 10):
-#     print I
 
 def component_groups(c, l, m):
+    """Enumerate ways to make rooted trees from c free nodes and attach them to
+    a group of m cycles of length l."""
     # c number of free tree nodes, l length of cycle, m number of cycles
-    for partition in partitions_of_free_nodes_into_cycle(c, m):
-        strands = []
-        for y, d in partition.items():
-            attachments = forests_from_attaching_free_nodes_to_cycle(y-1, l)
-            strand = itertools.combinations_with_replacement(attachments, d)
-            strands.append(strand)
-        for cycle_group in itertools.product(*strands):
-            yield Multiset(flatten(cycle_group))
-
-# for I in component_groups(5, 3, 1):
-#     print I
-# for I in component_groups(5, 1, 1):
-#     print I
-# for I in component_groups(0, 10, 1):
-#     print I
-# for J in component_groups(5, 3, 2):
-#     print J
+    iterfunc = lambda y: attachment_forests(y-1, l)
+    for partition in direct_unordered_attachments(c, m):
+        for cycle_group in productrange.unordered_product(partition, iterfunc):
+            yield cycle_group
 
 
 class CycleTypeFuncstructs(object):
@@ -254,34 +206,30 @@ class CycleTypeFuncstructs(object):
     def __init__(self, node_count, cycle_type):
         self.n = node_count
         self.cycle_type = multiset.Multiset(cycle_type)
-        self.lengths, self.multiplicities = self.cycle_type.split()
-        self.num_cycles = self.cycle_type.num_unique_elements()
 
     def __iter__(self):
         treenodes = self.n - sum(self.cycle_type)
-        for composition in compositions.weak_compositions(treenodes, self.num_cycles):
+        lengths, multiplicities = self.cycle_type.split()
+        l = len(lengths)
+        for composition in compositions.weak_compositions(treenodes, l):
             cycle_groups = []
-            for c, l, m in zip(composition, self.lengths, self.multiplicities):
+            for c, l, m in zip(composition, lengths, multiplicities):
                 cycle_groups.append(component_groups(c, l, m))
             for bundle in itertools.product(*cycle_groups):
-                yield Funcstruct(flatten(bundle))
+                yield Funcstruct(productrange.flatten(bundle))
 
-# for s in PartitionFuncstructs(8, [3,3,2]):
-#     print s
-#
-# for t in PartitionFuncstructs(8, [1,1]):
-#     print t
-from PADS.IntegerPartitions import partitions
+
 def partition_funcstructs(n):
     for i in range(1, n+1):
-        for partition in partitions(i):
+        for partition in IntegerPartitions.partitions(i):
             for struct in CycleTypeFuncstructs(n, partition):
                 yield struct
 
-print len(list(partition_funcstructs(9)))
-
 
 class FuncstructTests(unittest.TestCase):
+
+    mult_structs = [FuncstructEnumerator(i) for i in range(1, 8)]
+    part_structs = [partition_funcstructs(i) for i in range(1, 8)]
 
     def testFuncstructToFunc(self):
         Necklace = necklaces.Necklace
@@ -295,12 +243,15 @@ class FuncstructTests(unittest.TestCase):
 
     def testFuncstructImagepath(self):
         """Check methods for computing structure image paths are equivalent."""
-        N = 8
-        for n in range(1, N):
-            for struct in FuncstructEnumerator(n):
-                im = endofunctions.Endofunction(struct.func_form()).imagepath
-                imstruct = struct.imagepath
-                np.testing.assert_array_equal(im, imstruct)
+        for i in range(len(self.mult_structs)):
+            for ms, ps in zip(self.mult_structs[i], self.part_structs[i]):
+                print 'h'
+                mim = endofunctions.Endofunction(ms.func_form()).imagepath
+                pim = endofunctions.Endofunction(ps.func_form()).imagepath
+                msim = ms.imagepath
+                psim = ps.imagepath
+                np.testing.assert_array_equal(mim, msim)
+                np.testing.assert_array_equal(pim, psim)
 
     def testFuncstructCounts(self):
         """OEIS A001372: Number of self-mapping patterns."""
@@ -311,20 +262,21 @@ class FuncstructTests(unittest.TestCase):
 
     def testFuncstructDegeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
-        n = 8
-        for i in range(1, n):
+        for i in range(1, len(self.mult_structs)+1):
             fac = math.factorial(i)
-            func_count = 0
-            for struct in FuncstructEnumerator(i):
-                func_count += fac//struct.degeneracy
-            self.assertEqual(i**i, func_count)
+            func_mult_count = func_part_count = 0
+            for ms, ps in zip(self.mult_structs[i-1], self.part_structs[i-1]):
+                func_mult_count += fac//ms.degeneracy
+                func_part_count += fac//ps.degeneracy
+            self.assertEqual(i**i, func_mult_count)
+            self.assertEqual(i**i, func_part_count)
 
     def test_repr(self):
         from necklaces import Necklace
         from rootedtrees import DominantTree
+
         struct = Funcstruct.from_func(endofunctions.randfunc(30))
         self.assertEqual(struct, eval(repr(struct)))
-
         node_counts = [3, 5, 10, 50]
         for n in node_counts:
             structs = FuncstructEnumerator(n)
