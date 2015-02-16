@@ -70,7 +70,7 @@ class RootedTree(object):
             return '{}'
         else:
             strings = []
-            for subtree, mult in self.subtrees._dict.items():
+            for subtree, mult in self.subtrees.items():
                 # Hack to make tree print with multiplicity exponents.
                 tree_string = subtree._str()
                 if mult > 1:

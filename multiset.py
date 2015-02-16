@@ -27,12 +27,8 @@ nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 
 class Multiset(collections.Set, collections.Hashable):
-    """
-    Multiset - Also known as a Multiset or unordered tuple. Multiset is
-    Hashable, thus it is immutable and usable for dict keys.
-    """
-
-    ## Basic object methods
+    """ Multiset - Also known as a Multiset or unordered tuple. Multiset is
+    Hashable, thus it is immutable and usable for dict keys. """
 
     def __init__(self, iterable=None):
         """ Create a new Multiset. 
@@ -47,17 +43,16 @@ class Multiset(collections.Set, collections.Hashable):
         self._size = 0
         if iterable:
             if isinstance(iterable, self.__class__):
-                self._dict = iterable._dict
-                self._size = iterable._size
+                for elem, count in iterable._dict.items():
+                    self._inc(elem, count)
             else:
                 for value in iterable:
                     self._inc(value)
 
     def __repr__(self):
         """The string representation is a call to the constructor given a tuple
-        containing all of the elements.
-
-        This runs in whatever tuple(self) does, I'm assuming O(len(self)). """
+        containing all of the elements. This runs in whatever tuple(self) does,
+        I'm assuming O(len(self)). """
         if self._size == 0:
             return '{0}()'.format(self.__class__.__name__)
 
@@ -67,10 +62,7 @@ class Multiset(collections.Set, collections.Hashable):
     def __str__(self):
         """The printable string appears just like a set, except that each
         element is raised to the power of the multiplicity if it is greater
-        than 1.
-
-        This runs in O(self.num_unique_elements())
-        """
+        than 1. This runs in O(self.num_unique_elements()). """
         if self._size == 0:
             return '{class_name}()'.format(class_name=self.__class__.__name__)
         else:
@@ -91,13 +83,8 @@ class Multiset(collections.Set, collections.Hashable):
                     strings.append(format_single.format(elem=elem))
             return '{%s}' % ', '.join(strings)
 
-    ## Internal methods
-
     def _set(self, elem, value):
-        """Set the multiplicity of elem to count.
-
-        This runs in O(1) time
-        """
+        """Set the multiplicity of elem to count. This runs in O(1) time. """
         if value < 0:
             raise ValueError
         old_count = self.count(elem)
@@ -109,35 +96,25 @@ class Multiset(collections.Set, collections.Hashable):
         self._size += value - old_count
 
     def _inc(self, elem, count=1):
-        """Increment the multiplicity of value by count.
-
-        If count <0 then decrement.
-        """
+        """Increment the multiplicity of value by count. If count <0 then
+        decrement. """
         self._set(elem, self.count(elem) + count)
 
     ## New public methods (not overriding/implementing anything)
 
     def num_unique_elements(self):
-        """ Returns the number of unique elements. 
-        
-        This runs in O(1) time
-        """
+        """ Returns the number of unique elements. This runs in O(1) time. """
         return len(self._dict)
 
     def unique_elements(self):
-        """ Returns a view of unique elements in this multiset. 
-        
-        This runs in O(1) time
-        """
+        """ Returns a view of unique elements in this multiset. This runs in
+        O(1) time. """
         return self._dict.keys()
 
     def count(self, value):
-        """Return the number of value present in this Multiset.
-
-        If value is not in the Multiset no Error is raised, instead 0 is
-        returned.
-
-        This runs in O(1) time
+        """Return the number of value present in this Multiset. If value is not
+        in the Multiset no Error is raised, instead 0 is returned. This runs in
+        O(1) time.
 
         Args:
             value: The element of self to get the count of
@@ -148,10 +125,8 @@ class Multiset(collections.Set, collections.Hashable):
     
     def nlargest(self, n=None):
         """ List the n most common elements and their counts from the most
-        common to the least.  If n is None, the list all element counts.
-
-        Run time should be O(m log m) where m is len(self).
-        """
+        common to the least. If n is None, the list all element counts. Run
+        time should be O(m log m) where m is len(self). """
         if n is None:
             return sorted(self._dict.items(), key=itemgetter(1), reverse=True)
         else:
@@ -164,41 +139,24 @@ class Multiset(collections.Set, collections.Hashable):
     @classmethod
     def _from_map(cls, map_):
         """ Creates a multiset from a dict of elem->count. Each key in the dict
-        is added if the value is > 0.
-
-        This runs in O(len(map))
-        """
+        is added if the value is > 0. This runs in O(len(map)). """
         out = cls()
         for elem, count in map_.items():
             out._inc(elem, count)
         return out
 
     def copy(self):
-        """Create a shallow copy of self.
-
-        This runs in O(len(self.num_unique_elements()))
-        """
+        """ Create a shallow copy of self. This runs in
+        O(len(self.num_unique_elements())). """
         return self._from_map(self._dict)
-    
-    ## implementing Sized methods
 
     def __len__(self):
-        """Returns the cardinality of the Multiset.
-
-        This runs in O(1)
-        """
+        """ Returns the cardinality of the Multiset. This runs in O(1). """
         return self._size
 
-    ## implementing Container methods
-
     def __contains__(self, value):
-        """ Returns the multiplicity of the element.
-
-        This runs in O(1)
-        """
+        """ Returns the multiplicity of the element. This runs in O(1). """
         return self.count(value)
-
-    ## implementing Iterable methods
 
     def __iter__(self):
         """Iterate through all elements; return multiple copies if present."""
@@ -209,9 +167,9 @@ class Multiset(collections.Set, collections.Hashable):
     # Comparison methods
 
     def __le__(self, other):
-        """ Tests if self <= other where other is another multiset
+        """ Tests if self <= other where other is another multiset This runs in
+        O(l + n) where:
 
-        This runs in O(l + n) where:
             n is self.num_unique_elements()
             if other is a multiset:
                 l = 1

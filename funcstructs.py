@@ -106,7 +106,7 @@ class Funcstruct(object):
         """ Given an endofunction structure funcstruct, compute the image path
         directly without conversion to a particular endofunction. """
         cardinalities = np.array([0]+[0]*(self.n-2), dtype=object)
-        for tree in flatten(self.cycles):
+        for tree in productrange.flatten(self.cycles):
             cardinalities += 1
             for subseq in subsequences.increasing_subsequences(tree):
                 k = len(subseq) - 1
@@ -228,8 +228,8 @@ def partition_funcstructs(n):
 
 class FuncstructTests(unittest.TestCase):
 
-    mult_structs = [FuncstructEnumerator(i) for i in range(1, 8)]
-    part_structs = [partition_funcstructs(i) for i in range(1, 8)]
+    mult_structs = [list(FuncstructEnumerator(i)) for i in range(1, 13)]
+    part_structs = [list(partition_funcstructs(i)) for i in range(1, 13)]
 
     def testFuncstructToFunc(self):
         Necklace = necklaces.Necklace
@@ -243,9 +243,8 @@ class FuncstructTests(unittest.TestCase):
 
     def testFuncstructImagepath(self):
         """Check methods for computing structure image paths are equivalent."""
-        for i in range(len(self.mult_structs)):
+        for i in range(8):
             for ms, ps in zip(self.mult_structs[i], self.part_structs[i]):
-                print 'h'
                 mim = endofunctions.Endofunction(ms.func_form()).imagepath
                 pim = endofunctions.Endofunction(ps.func_form()).imagepath
                 msim = ms.imagepath
@@ -256,13 +255,14 @@ class FuncstructTests(unittest.TestCase):
     def testFuncstructCounts(self):
         """OEIS A001372: Number of self-mapping patterns."""
         A001372 = [1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
-        for n, num in enumerate(A001372):
-            self.assertEqual(num, len(set(FuncstructEnumerator(n+1))))
-            self.assertEqual(num, len(FuncstructEnumerator(n+1)))
+        for i, count in enumerate(A001372):
+            self.assertEqual(count, len(set(self.mult_structs[i])))
+            self.assertEqual(count, len(set(self.part_structs[i])))
+            self.assertEqual(count, len(FuncstructEnumerator(i+1)))
 
     def testFuncstructDegeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
-        for i in range(1, len(self.mult_structs)+1):
+        for i in range(1, 8):
             fac = math.factorial(i)
             func_mult_count = func_part_count = 0
             for ms, ps in zip(self.mult_structs[i-1], self.part_structs[i-1]):

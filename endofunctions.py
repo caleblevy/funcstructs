@@ -318,10 +318,10 @@ class EndofunctionTests(unittest.TestCase):
 
     def test_iterate(self):
         sigma = Endofunction([1, 2 ,3, 0, 5, 6, 4]) # Perm (0,1,2,3)(4,5,6)
-        identity = Endofunction(range(7)).cycles
+        identity = Endofunction(range(7))
         for I in range(1, 11): # Order of cycle is 12
-            self.assertNotEqual(identity, (sigma**I).cycles)
-        self.assertItemsEqual(identity, (sigma**12).cycles)
+            self.assertNotEqual(identity.cycles, (sigma**I).cycles)
+        self.assertEqual(identity.cycles, (sigma**12).cycles)
 
     def test_imagepath(self):
         """Check various special and degenerate cases, with right index"""
