@@ -1,3 +1,4 @@
+import unittest
 from endofunction_structures.subsequences import *
 
 class SubsequenceTests(unittest.TestCase):

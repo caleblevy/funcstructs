@@ -7,7 +7,6 @@
 
 from operator import gt, ge, le, lt
 import itertools
-import unittest
 
 
 def monotone_subsequences(seq, comparison):
