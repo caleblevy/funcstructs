@@ -14,7 +14,7 @@ from math import ceil
 import fractions
 
 from . import multiset
-from .productrange import product_range
+from . import productrange
 
 
 def prime_factorization(n):
@@ -45,7 +45,7 @@ def divisorGen(n):
     factors, powers = multiset.Multiset(prime_factorization(n)).split()
     # Since the factors are prime, every unique partition of powers represents
     # a different divisor.
-    for power_combo in product_range([m+1 for m in powers]):
+    for power_combo in productrange.productrange([m+1 for m in powers]):
         yield multiset.prod([factors[I]**p for I, p in enumerate(power_combo)])
 
 

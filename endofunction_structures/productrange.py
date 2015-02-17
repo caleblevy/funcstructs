@@ -36,13 +36,13 @@ def parse_ranges(begin, end, step):
     return begin, end, step
 
 
-def product_range(begin, end=None, step=None):
+def productrange(begin, end=None, step=None):
     """ Nice wrapper for itertools.product. Give it a tuple of starts, stops
     and increments and it will return the nested for loop coresponding to them.
     I.E. if begin = (r1, r2, ..., rn), end = (s1, s2, ..., sn) and step = (t1,
     t2, ..., tn) then
 
-        for tup in product_range(begin, end, step):
+        for tup in productrange(begin, end, step):
             yield tup
 
     is equivalent to:
@@ -81,8 +81,8 @@ def rangelen(start, stop=None, step=None):
 
 
 def rev_range(begin, end=None, step=None):
-    """ Reverse iteration order for product_range. If begin, end and step are
-    as for product_range, then
+    """ Reverse iteration order for productrange. If begin, end and step are
+    as for productrange, then
 
         for tup in rev_range(begin, end, step):
             yield tup
@@ -95,7 +95,7 @@ def rev_range(begin, end=None, step=None):
               for I1 in range(r1, s1, t1):
                 yield tuple([I1, I2, ..., In])
 
-    Note that set(rev_range(**inputs)) == set(product_range(**inputs)). Code
+    Note that set(rev_range(**inputs)) == set(productrange(**inputs)). Code
     originally inspired by:
         http://www.mathworks.com/matlabcentral/answers/79986#answer_89700. """
 

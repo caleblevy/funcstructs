@@ -23,5 +23,5 @@ class ProductrangeTest(unittest.TestCase):
         steps.extend([(-3, 3, 3), (3, -3, 3)])
         counts.extend([4*3*2,     4*3*2])
         for c, b, e, s in zip(counts, begins, ends, steps):
-            self.assertEqual(c, len(list(product_range(b, e, s))))
+            self.assertEqual(c, len(list(productrange(b, e, s))))
             self.assertEqual(c, len(list(rev_range(b, e, s))))

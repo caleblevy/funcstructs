@@ -295,7 +295,7 @@ class TransformationMonoid(object):
     __lt__ = None
 
     def __iter__(self):
-        for func in productrange.product_range([self.n] * self.n):
+        for func in productrange.productrange([self.n] * self.n):
             yield Endofunction(func)
 
     def __len__(self):

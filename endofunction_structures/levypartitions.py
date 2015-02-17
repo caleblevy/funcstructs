@@ -6,8 +6,7 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 
-""" Further functions for enumerating and counting partitions, mostly derived by
-myself. """
+""" Further functions for enumerating and counting partitions. """
 
 
 import itertools

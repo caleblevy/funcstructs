@@ -89,7 +89,7 @@ def msp_iterative(x, powers):
 
     # The powers use up sum(multiplcities) of the original x.
     for K in range(n-sum(d)+1):
-        for ind in productrange.product_range(1, shape):
+        for ind in productrange.productrange(1, shape):
             fac = x[K+sum(ind)-l-1]
             for J in range(l):
                 ind_prev = list(ind)

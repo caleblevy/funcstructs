@@ -34,7 +34,7 @@ from . import productrange
 
 
 def binary_compositions(n):
-    return productrange.product_range([2]*(n-1))
+    return productrange.productrange([2]*(n-1))
 
 
 def compositions_binary(n):
