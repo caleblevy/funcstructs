@@ -95,7 +95,10 @@ def rev_range(begin, end=None, step=None):
               for I1 in range(r1, s1, t1):
                 yield tuple([I1, I2, ..., In])
 
-    Note that set(rev_range(**inputs)) == set(product_range(**inputs))"""
+    Note that set(rev_range(**inputs)) == set(product_range(**inputs)). Code
+    originally inspired by:
+        http://www.mathworks.com/matlabcentral/answers/79986#answer_89700. """
+
     begin, end, step = parse_ranges(begin, end, step)
     if not all([rangelen(I, J, K) for I, J, K in zip(begin, end, step)]):
         return
