@@ -1,3 +1,4 @@
+import unittest
 from endofunction_structures.levypartitions import *
 
 class LevyPartitionTests(unittest.TestCase):

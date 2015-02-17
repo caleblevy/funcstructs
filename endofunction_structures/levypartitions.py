@@ -6,14 +6,11 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 
-""" Further modules for enumerating and counting partitions, mostly derived by
+""" Further functions for enumerating and counting partitions, mostly derived by
 myself. """
 
 
-
-import unittest
 import itertools
-
 from PADS.IntegerPartitions import partitions, lex_partitions
 
 
