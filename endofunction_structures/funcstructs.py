@@ -32,6 +32,35 @@ from . import endofunctions
 from . import productrange
 
 
+def chunks(l, n):
+    """ Yield successive n-sized chunks from l."""
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
+
+
+def indent_treestring(tree, second_indent, end):
+    """Format a rootedtree string with indents."""
+    treestr = str(rootedtrees.unordered_tree(tree))
+    treestr_list = [treestr[:end]]
+    for s in chunks(treestr[end:], end-second_indent):
+        treestr_list.append(' '*second_indent+s)
+    return treestr_list
+
+
+def struct_string(func, cycle_prefix=2, cycle_suffix=2, tree_indent=4, end=78):
+    fstrs = []
+    fstrs.append('\nFuncstruct:\n')
+    cycle_str = ' '*cycle_prefix + 'Cycle(' + ' '*cycle_suffix
+    l = len(cycle_str)
+    for cycle, count in func.cycles.items():
+        fstrs.append(cycle_str+'\n')
+        for tree in cycle:
+            for t in indent_treestring(tree, tree_indent, end-l):
+                fstrs.append(' '*l+t+'\n')
+        fstrs.append(' '*(l-cycle_suffix-1)+')'+' * '+str(count)+'\n')
+    return ''.join(fstrs)
+
+
 class Funcstruct(object):
 
     def __init__(self, cycles, precounted=None):
@@ -55,6 +84,9 @@ class Funcstruct(object):
 
     def __repr__(self):
         return self.__class__.__name__+'('+repr(list(self.cycles))+')'
+
+    def __str__(self):
+        return struct_string(self)
 
     @property
     def degeneracy(self):
