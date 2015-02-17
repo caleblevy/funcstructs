@@ -17,20 +17,19 @@ information contact caleb.levy@berkeley.edu.
 import math
 import fractions
 import itertools
-import unittest
 
 import numpy as np
 from PADS import IntegerPartitions
 
-import multiset
-import rootedtrees
-import subsequences
-import necklaces
-import levypartitions
-import factorization
-import compositions
-import endofunctions
-import productrange
+from . import multiset
+from . import rootedtrees
+from . import subsequences
+from . import necklaces
+from . import levypartitions
+from . import factorization
+from . import compositions
+from . import endofunctions
+from . import productrange
 
 
 class Funcstruct(object):
@@ -224,64 +223,3 @@ def partition_funcstructs(n):
         for partition in IntegerPartitions.partitions(i):
             for struct in CycleTypeFuncstructs(n, partition):
                 yield struct
-
-
-class FuncstructTests(unittest.TestCase):
-
-    mult_structs = [list(FuncstructEnumerator(i)) for i in range(1, 13)]
-    part_structs = [list(partition_funcstructs(i)) for i in range(1, 13)]
-
-    def testFuncstructToFunc(self):
-        Necklace = necklaces.Necklace
-        Tree = rootedtrees.DominantTree
-        struct = Funcstruct([
-            Necklace([Tree([1, 2, 3]), Tree([1, 2, 2])]),
-            Necklace([Tree([1, 2])]),
-            Necklace([Tree([1, 2, 2]), Tree([1]), Tree([1, 2, 2])])
-        ])
-        self.assertEqual(struct, Funcstruct.from_func(struct.func_form()))
-
-    def testFuncstructImagepath(self):
-        """Check methods for computing structure image paths are equivalent."""
-        for i in range(8):
-            for ms, ps in zip(self.mult_structs[i], self.part_structs[i]):
-                mim = endofunctions.Endofunction(ms.func_form()).imagepath
-                pim = endofunctions.Endofunction(ps.func_form()).imagepath
-                msim = ms.imagepath
-                psim = ps.imagepath
-                np.testing.assert_array_equal(mim, msim)
-                np.testing.assert_array_equal(pim, psim)
-
-    def testFuncstructCounts(self):
-        """OEIS A001372: Number of self-mapping patterns."""
-        A001372 = [1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
-        for i, count in enumerate(A001372):
-            self.assertEqual(count, len(set(self.mult_structs[i])))
-            self.assertEqual(count, len(set(self.part_structs[i])))
-            self.assertEqual(count, len(FuncstructEnumerator(i+1)))
-
-    def testFuncstructDegeneracy(self):
-        """OEIS A000312: Number of labeled maps from n points to themselves."""
-        for i in range(1, 8):
-            fac = math.factorial(i)
-            func_mult_count = func_part_count = 0
-            for ms, ps in zip(self.mult_structs[i-1], self.part_structs[i-1]):
-                func_mult_count += fac//ms.degeneracy
-                func_part_count += fac//ps.degeneracy
-            self.assertEqual(i**i, func_mult_count)
-            self.assertEqual(i**i, func_part_count)
-
-    def test_repr(self):
-        from necklaces import Necklace
-        from rootedtrees import DominantTree
-
-        struct = Funcstruct.from_func(endofunctions.randfunc(30))
-        self.assertEqual(struct, eval(repr(struct)))
-        node_counts = [3, 5, 10, 50]
-        for n in node_counts:
-            structs = FuncstructEnumerator(n)
-            self.assertEqual(structs, eval(repr(structs)))
-
-
-if __name__ == '__main__':
-    unittest.main()
