@@ -5,12 +5,10 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""
-A collection of short functions for enumerating factorizations of integers and
-other such things.
-"""
+""" A collection of short functions for enumerating factorizations of integers
+and other such things. """
 
-from math import ceil
+
 import fractions
 
 from . import multiset

@@ -31,6 +31,7 @@ from . import factorization
 from . import productrange
 
 
+@functools.total_ordering
 class RootedTree(object):
 
     def __init__(self, subtrees=None):
@@ -64,15 +65,19 @@ class RootedTree(object):
             return '{}'
         else:
             strings = []
-            for subtree, mult in self.subtrees.items():
+            for subtree in sorted(self.subtrees.unique_elements(), reverse=1):
                 # Hack to make tree print with multiplicity exponents.
+                mult = self.subtrees.count(subtree)
                 tree_string = subtree._str()
                 if mult > 1:
                     tree_string += '^%s' % str(mult)
                 strings.append(tree_string)
             return '{%s}' % ', '.join(strings)
-    # Make unsortable.
-    __lt__ = None
+
+    def __lt__(self, other):
+        if isinstance(other, type(self)):
+            return self.ordered_form() < other.ordered_form()
+        return False
 
     def __str__(self):
         return "RootedTree(%s)" % self._str()
@@ -90,6 +95,15 @@ class RootedTree(object):
         for subtree in self.subtrees:
             deg *= subtree.degeneracy()
         return deg
+
+    def _ordered_level_sequence(self, level=1):
+        level_sequence = [level]
+        for tree in self.subtrees:
+            level_sequence.extend(tree._ordered_level_sequence(level+1))
+        return level_sequence
+
+    def ordered_form(self):
+        return DominantTree(self._ordered_level_sequence())
 
 
 @functools.total_ordering

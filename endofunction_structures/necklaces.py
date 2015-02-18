@@ -5,11 +5,10 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""
-A necklace is a class of n-character strings equivalent under rotation (orbits
-of the set of n-character strings under the action of cyclic permutation by the
-cyclic group). For example, the following are examples of a necklace using
-[a,b,c,d], [a,b,b] and [c,d]:
+""" A necklace is a class of n-character strings equivalent under rotation
+(orbits of the set of n-character strings under the action of cyclic
+permutation by the cyclic group). For example, the following are examples of a
+necklace using [a,b,c,d], [a,b,b] and [c,d]:
 
     [a,b,c,d] ~ [b,c,d,a] ~ [c,d,a,b] ~ [d,a,b,c]
     [a,b,b] ~ [b,a,b] ~ [b,b,a]
@@ -23,8 +22,7 @@ Their relavence to enumerating endofunction structures is as follows: given a
 collection of N forests, the necklaces whose beads are the forests' trees are
 precisely the distinct ways of connecting the trees to form a cycle of length
 n. Thus the ways of connecting a collection of rooted trees together in a cycle
-are precisely the necklaces whose beads are the rooted trees.
-"""
+are precisely the necklaces whose beads are the rooted trees. """
 
 
 import fractions
@@ -155,20 +153,22 @@ class NecklaceGroup(object):
         for factor in factors:
             n = period = p0 * factor
             mults[factor] = 1
-            # The number of character permutations which are periodic in at
-            # MOST "factor" is simply the multinomial coefficient corresponding
-            # to that subset of the multiplicity partition.
+            # The number of character permutations which are periodic in factor
+            # OR ANY OF ITS DIVISORS is simply the multinomial coefficient
+            # corresponding to the subset of the multiplicity partition
+            # featuring 1/factor of each kind of the original partiton's
+            # elements.
             for I in range(k):
                 mults[factor] *= multiset.nCk(n, self.partition[I]*factor//w)
                 n -= self.partition[I] * factor//w
-            # Subtact off the number of necklaces whose period subdivides our
-            # divisor of w, to make sure beads[factor] give the EXACTLY the
-            # number of necklaces with period factor.
+            # Subtact off the number of character permutations whose period
+            # subdivides our divisor of w, to get the number of character
+            # permutations with period EXACTLY equal to factor.
             subdivisors = factorization.divisors(factor)
             if subdivisors[-1] != 1:
                 for subfactor in subdivisors[:-1]:
                     mults[factor] -= subfactor * p0 * mults[subfactor]
-            # Finally, normalize by the period, the number of distinct
+            # Finally, normalize by the period to obtain the number of distinct
             # rotations of any member of mults[factor].
             mults[factor] //= period
         return mults

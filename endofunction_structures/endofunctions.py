@@ -183,7 +183,7 @@ class Endofunction(object):
         node. """
         level_sequence = [level]
         for x in self.attached_treenodes[node]:
-            level_sequence += self._attached_level_sequence(x, level+1)
+            level_sequence.extend(self._attached_level_sequence(x, level+1))
         return level_sequence
 
     def randconj(self):

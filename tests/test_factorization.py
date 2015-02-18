@@ -1,4 +1,5 @@
 import unittest
+import math
 from endofunction_structures.factorization import *
 
 class FactorizationTests(unittest.TestCase):
@@ -30,7 +31,7 @@ class FactorizationTests(unittest.TestCase):
         divrange = list(range(-N, 0))+list(range(1, N+1))
         for I in divrange:
             for J in divrange:
-                self.assertEqual(ceildiv(I, J), ceil(1.*I/J))
+                self.assertEqual(ceildiv(I, J), math.ceil(1.*I/J))
 
     def testIsDivisor(self):
         N = 20
