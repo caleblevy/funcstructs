@@ -13,6 +13,8 @@ cycle decompositions and limitsets. """
 import random
 
 from . import productrange
+from . import rootedtrees
+from memoized_property import memoized_property
 
 
 class Endofunction(object):
@@ -20,37 +22,37 @@ class Endofunction(object):
     itself. """
 
     def __init__(self, func):
-        self._func = tuple(func)
-        self._n = len(self._func)
-        self._descendants = None
+        if isinstance(func, rootedtrees.LevelTree):
+            func = func.labelled_sequence()
+        self.func = tuple(func)
 
     def __hash__(self):
-        return hash(self._func)
+        return hash(self.func)
 
     def __len__(self):
-        return self._n
+        return len(self.func)
 
     def __repr__(self):
-        return self.__class__.__name__+'('+str(list(self._func))+')'
+        return self.__class__.__name__+'('+str(list(self.func))+')'
 
     def __str__(self):
         funcstring = self.__class__.__name__+'(['
         mapvals = []
-        for x, f in enumerate(self._func[:-1]):
+        for x, f in enumerate(self.func[:-1]):
             mapvals.append(str(x)+'->'+str(f)+', ')
         funcstring += ''.join(mapvals)
-        funcstring += str(self._n-1)+"->"+str(self._func[-1])+'])'
+        funcstring += str(len(self)-1)+"->"+str(self.func[-1])+'])'
         return funcstring
 
     def __getitem__(self, ind):
-        return self._func[ind]
+        return self.func[ind]
 
     def __iter__(self):
-        return iter(self._func)
+        return iter(self.func)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self._func == other._func
+            return self.func == other.func
         return False
 
     def __ne__(self, other):
@@ -60,16 +62,16 @@ class Endofunction(object):
         """If f(x)=self and g(x)=other return f(g(x))."""
         return Endofunction([self[x] for x in other])
 
-    @property
+    @memoized_property
     def domain(self):
         return set(range(len(self)))
 
-    @property
+    @memoized_property
     def imageset(self):
         """Return all elements in the image of self."""
-        return set(self._func)
+        return set(self.func)
 
-    @property
+    @memoized_property
     def preimage(self):
         """ Given an endofunction f defined on S=range(len(f)), returns the
         preimage of f. If g=preimage(f), we have
@@ -83,7 +85,7 @@ class Endofunction(object):
             preim[self[x]].add(x)
         return preim
 
-    @property
+    @memoized_property
     def imagepath(self):
         """
         Give it a list such that all([I in range(len(f)) for I in f]) and this
@@ -150,26 +152,24 @@ class Endofunction(object):
                 I -= 1
             yield path[I+1:]
 
-    @property
+    @memoized_property
     def cycles(self):
         return set(tuple(cycle) for cycle in self.enumerate_cycles())
 
-    @property
+    @memoized_property
     def limitset(self):
         return set(productrange.flatten(self.cycles))
 
-    @property
+    @memoized_property
     def attached_treenodes(self):
         """ Returns subsets of the preimages of each element which are not in
         cycles. """
-        if self._descendants is None:
-            descendants = [set() for _ in range(len(self))]
-            for x, inv_image in enumerate(self.preimage):
-                for f in inv_image:
-                    if f not in self.limitset:
-                        descendants[x].add(f)
-            self._descendants = descendants
-        return self._descendants
+        descendants = [set() for _ in range(len(self))]
+        for x, inv_image in enumerate(self.preimage):
+            for f in inv_image:
+                if f not in self.limitset:
+                    descendants[x].add(f)
+        return descendants
 
     def _attached_level_sequence(self, node, level=1):
         """ Given an element of self's domain, return a level sequence of the
@@ -186,34 +186,21 @@ class Endofunction(object):
             level_sequence.extend(self._attached_level_sequence(x, level+1))
         return level_sequence
 
+    def attached_tree(self, node):
+        return rootedtrees.DominantTree(self._attached_level_sequence(node))
+
+    def tree_form(self):
+        """Test if a function has a tree structure and if so return it."""
+        cycles = list(self.cycles)
+        if len(cycles) != 1 or len(cycles[0]) != 1:
+            raise ValueError("Function structure is not a rooted tree.")
+        root = cycles[0][0]
+        return rootedtrees.DominantTree(self.attached_tree(root))
+
     def randconj(self):
         """Return a random conjugate of f."""
         r = randperm(len(self))
         return r.conj(self)
-
-    @classmethod
-    def from_tree(cls, tree, permutation=None):
-        """ Return an endofunction whose structure corresponds to the rooted
-        tree. The root is 0 by default, but can be permuted according a
-        specified permutation. """
-
-        if permutation is None:
-            permutation = range(len(tree))
-        height = max(tree)
-        func = [0]*len(tree)
-        func[0] = permutation[0]
-        height_prev = 1
-        # Most recent node found at height h. Where to graft the next node to.
-        grafting_point = [0]*height
-        for node, height in enumerate(tree.level_sequence[1:]):
-            if height > height_prev:
-                func[node+1] = permutation[grafting_point[height_prev-1]]
-                height_prev += 1
-            else:
-                func[node+1] = permutation[grafting_point[height-2]]
-                height_prev = height
-            grafting_point[height-1] = node+1
-        return cls(func)
 
 
 def randfunc(n):
@@ -237,7 +224,7 @@ class SymmetricFunction(Endofunction):
             # If it is a cycle decomposition, change to function.
             func = cycles_to_funclist(func)
         Endofunction.__init__(self, func)
-        if not self._n == len(set(self._func)):
+        if not len(self) == len(set(self)):
             raise ValueError("This function is not invertible.")
 
     def __pow__(self, n):
@@ -251,7 +238,7 @@ class SymmetricFunction(Endofunction):
         """Multiply notation for symmetric group."""
         return SymmetricFunction(self(other))
 
-    @property
+    @memoized_property
     def inverse(self):
         """ Returns the inverse of a permutation of range(n). Code taken
         directly from: "Inverting permutations in Python" at

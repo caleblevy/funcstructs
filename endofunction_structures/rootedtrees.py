@@ -11,7 +11,7 @@ a tree with a designated "root" node, where every path ends with the root. They
 are equivalent to filesystems consisting entirely of folders with no symbolic
 links. An unlabelled rooted tree is the equivalence class of a given directory
 where folders in each subdirectory may be rearranged in any desired order
-(alphabetical, reverse-alphabetical, date added, or any other permutation). A
+(alphabetical, reverse-alphabetical, date added, or any other labelling). A
 forest is any collection of rooted trees.
 
 Any endofunction structure may be represented as a forest of trees, grouped
@@ -169,18 +169,28 @@ class LevelTree(object):
             return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
-    @classmethod
-    def attached_tree(cls, func, node):
-        return cls(func._attached_level_sequence(node))
+    def labelled_sequence(self, labels=None):
+        """ Return an endofunction whose structure corresponds to the rooted
+        tree. The root is 0 by default, but can be permuted according a
+        specified labelling. """
 
-    @classmethod
-    def from_func(cls, func):
-        """Test if a function has a tree structure and if so return it."""
-        cycles = list(func.cycles)
-        if len(cycles) != 1 or len(cycles[0]) != 1:
-            raise ValueError("Function structure is not a rooted tree.")
-        root = cycles[0][0]
-        return cls.attached_tree(func, root)
+        if labels is None:
+            labels = range(len(self.level_sequence))
+        height = max(self.level_sequence)
+        labelling = [0]*len(self.level_sequence)
+        labelling[0] = labels[0]
+        height_prev = 1
+        # Most recent node found at height h. Where to graft the next node to.
+        grafting_point = [0]*height
+        for node, height in enumerate(self.level_sequence[1:]):
+            if height > height_prev:
+                labelling[node+1] = labels[grafting_point[height_prev-1]]
+                height_prev += 1
+            else:
+                labelling[node+1] = labels[grafting_point[height-2]]
+                height_prev = height
+            grafting_point[height-1] = node+1
+        return labelling
 
 
 class OrderedTree(LevelTree):

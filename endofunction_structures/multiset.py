@@ -5,12 +5,11 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""
-Multisets is a utilities module for performing miscellaneous operations and
+""" Multisets is a utilities module for performing miscellaneous operations and
 finding information about sets and multisets: breaking up multisets, getting
 elements of a set, and counting ways to represent them assuming certain
-properties are equivalent.
-"""
+properties are equivalent. """
+
 
 import heapq
 import collections
@@ -220,6 +219,14 @@ class Multiset(object):
         """ Splits the multiset into element-multiplicity pairs. """
         y = list(self._dict)
         d = [self._dict[el] for el in y]
+        return y, d
+
+    def sort_split(self):
+        y = []
+        d = []
+        for elem, mult in sorted(self._dict.items(), key=itemgetter(0)):
+            y.append(elem)
+            d.append(mult)
         return y, d
 
     def degeneracy(self):

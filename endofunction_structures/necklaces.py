@@ -65,11 +65,13 @@ def periodicity(strand):
 class Necklace(object):
     """An equivalence class of all lists equivalent under rotation."""
 
-    def __init__(self, strand):
+    def __init__(self, strand, preordered=False):
         """Initialize the necklace. Items in the necklace must be hashable
         (immutable), otherwise the equivalence class could change
         dynamically."""
-        self.strand = tuple(Lyndon.SmallestRotation(strand))
+        if not preordered:
+            strand = Lyndon.SmallestRotation(strand)
+        self.strand = tuple(strand)
         self.period = periodicity(strand)
 
     def __repr__(self):
@@ -131,7 +133,7 @@ class NecklaceGroup(object):
     def __init__(self, beads):
         """Form a generator of all necklaces with beads of a given multiset."""
         self.beads = multiset.Multiset(beads)
-        self.elems, self.partition = self.beads.split()
+        self.elems, self.partition = self.beads.sort_split()
 
     def __repr__(self):
         return self.__class__.__name__+'('+repr(self.beads)+')'
@@ -198,7 +200,7 @@ class NecklaceGroup(object):
         for strand in self.sfc():
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
-            yield Necklace([self.elems[I] for I in strand])
+            yield Necklace([self.elems[I] for I in strand], preordered=True)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

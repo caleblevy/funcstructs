@@ -95,4 +95,23 @@ class EndofunctionTests(unittest.TestCase):
         """Make sure treetofunc correctly represents trees as endofunctions"""
         tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
-        self.assertEqual(func, Endofunction.from_tree(tree))
+        self.assertEqual(func, Endofunction(tree))
+
+    def test_hash(self):
+        a = Endofunction(range(10))
+        b = Endofunction([0, 0]+list(range(8)))
+        dic = {}
+        dic[a] = 1
+        dic[Endofunction(range(10))] += 1
+        self.assertEqual(len(dic), 1)
+        dic[b] = 2
+        self.assertEqual(len(dic), 2)
+        c = SymmetricFunction(range(10))
+        dic[c] = 7
+        self.assertEqual(len(dic), 3)
+        dic[c.inverse] = 2
+        self.assertEqual(len(dic), 3)
+        self.assertEqual(dic[c], 2)
+
+        t = TransformationMonoid(7)
+        e = self.assertEqual(1, len(set([t, t, TransformationMonoid(7)])))

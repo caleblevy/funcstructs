@@ -5,14 +5,13 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-"""
-Enumerate every conjugacy class of graphs on N nodes with outdegree one for
+""" Enumerate every conjugacy class of graphs on N nodes with outdegree one for
 every vertex. As far as I know this is original work, and endofunction
 structures have not been enumerated anywhere else.
 
 Most of these algorithms were derived by Caleb Levy in February 2014. For more
-information contact caleb.levy@berkeley.edu.
-"""
+information contact caleb.levy@berkeley.edu. """
+
 
 import math
 import fractions
@@ -61,9 +60,21 @@ def struct_string(func, cycle_prefix=2, cycle_suffix=2, tree_indent=4, end=78):
     return ''.join(fstrs)
 
 
+def _func_to_struct(f):
+    cycles = []
+    for cycle in f.cycles:
+        strand = []
+        for el in cycle:
+            strand.append(f.attached_tree(el))
+        cycles.append(necklaces.Necklace(strand))
+    return cycles
+
+
 class Funcstruct(object):
 
     def __init__(self, cycles, precounted=None):
+        if isinstance(cycles, endofunctions.Endofunction):
+            cycles = _func_to_struct(cycles)
         self.cycles = multiset.Multiset(cycles)
         if precounted is not None:
             self.n = precounted
@@ -117,18 +128,18 @@ class Funcstruct(object):
         for tree in productrange.flatten(cycles):
             l = len(tree)
             tree_perm = range(tree_start, tree_start+l)
-            func_tree = endofunctions.Endofunction.from_tree(tree, permutation=tree_perm)
+            func_tree = tree.labelled_sequence(tree_perm)
             func.extend(func_tree)
             tree_start += l
         # Permute the cyclic nodes to form the cycle decomposition
         cycle_start = 0
         for cycle in cycles:
-            node_ind = node_next = 0
+            node_prev = node = 0
             cycle_len = len(productrange.flatten(cycle))
             for tree in cycle:
-                node_next += len(tree)
-                func[cycle_start+node_ind] = cycle_start + (node_next % cycle_len)
-                node_ind += len(tree)
+                node += len(tree)
+                func[cycle_start+node_prev] = cycle_start + (node % cycle_len)
+                node_prev += len(tree)
             cycle_start += cycle_len
         return endofunctions.Endofunction(func)
 
@@ -146,16 +157,6 @@ class Funcstruct(object):
                     # Microoptimization: memoize the calls to range
                     cardinalities[:k] += range(k, 0, -1)
         return cardinalities
-
-    @classmethod
-    def from_func(cls, f):
-        struct = []
-        for cycle in f.cycles:
-            strand = []
-            for el in cycle:
-                strand.append(rootedtrees.DominantTree.attached_tree(f, el))
-            struct.append(necklaces.Necklace(strand))
-        return cls(struct)
 
 
 class FuncstructEnumerator(object):
