@@ -1,9 +1,19 @@
+#!/usr/bin/env python
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 import unittest
+
 from endofunction_structures.levypartitions import *
+
 
 class LevyPartitionTests(unittest.TestCase):
 
-    def testSmallestPartition(self):
+    def test_minimal_partition(self):
+        """Ensure partitions are lexicographically smallest"""
         N = 20
         for n in range(1, N):
             for L in range(1, n+1):
@@ -12,7 +22,7 @@ class LevyPartitionTests(unittest.TestCase):
                 self.assertTrue(len(mp) == L)
                 self.assertTrue(sum(mp) == n)
 
-    def testFixedLexPartitions(self):
+    def test_fixed_lex_partitions(self):
         """Check that the fixed length lex partition outputs are correct."""
         N = 15
         for n in range(N):
@@ -26,7 +36,8 @@ class LevyPartitionTests(unittest.TestCase):
             # Check for the right number
             self.assertEqual(np, len(pn))
 
-    def testPartitionNumbers(self):
+    def test_partition_counts(self):
+        """Check our pentagonal number theorem based partition counter."""
         A000041 = [1, 1, 2, 3, 5, 7, 11, 15, 22, 30, 42, 56, 77, 101, 135]
         for n, count in enumerate(A000041):
             self.assertEqual(count, partition_number(n))

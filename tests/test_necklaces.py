@@ -1,5 +1,14 @@
+#!/usr/bin/env python
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 import unittest
+
 from endofunction_structures.necklaces import *
+
 
 class PeriodicityTest(unittest.TestCase):
 
@@ -33,6 +42,7 @@ class PeriodicityTest(unittest.TestCase):
 class NecklaceTests(unittest.TestCase):
 
     def test_equality(self):
+        """Make sure rotationally equivalent necklaces compare equal."""
         n = Necklace([1, 2, 3, 1, 2, 3])
         nshort = Necklace([1, 2, 3])
         nlong = Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3])
@@ -45,11 +55,13 @@ class NecklaceTests(unittest.TestCase):
         self.assertEqual(n, ntype)
 
     def test_containement(self):
+        """Make sure Necklace conjugacy class contains all its rotations."""
         n = Necklace([1, 2, 3, 1, 2, 3])
         self.assertFalse(n in n)
         self.assertTrue(tuple([3, 1, 2, 3, 1, 2]) in n)
 
     def test_hash(self):
+        """Test that our hash is rotationally invariant."""
         self.assertEqual(hash(Necklace([1, 2, 3])), hash(Necklace([3, 1, 2])))
 
     def test_repr(self):
@@ -80,6 +92,7 @@ class NecklaceTests(unittest.TestCase):
 class NecklaceEnumerationTests(unittest.TestCase):
 
     def test_counts(self):
+        """Verify the count_by_period method correctly counts necklaces."""
         cp1 = [1]*3 + [2]*3 + [3]*2
         cp2 = [1]*4 + [2]*4 + [3]*4 + [4]*3 + [5]*3 + [6]*2 + [7] + [8]
         cp3 = [1]*24 + [2]*36
@@ -90,6 +103,7 @@ class NecklaceEnumerationTests(unittest.TestCase):
             self.assertEqual(cc, len(NecklaceGroup(cp)))
 
     def test_enumeration(self):
+        """Test necklace counts for various bead sets."""
         beadsets = [[4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6],
                     [4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6], [0]]
         for beadset in beadsets:

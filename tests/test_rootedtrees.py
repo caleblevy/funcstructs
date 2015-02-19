@@ -1,8 +1,17 @@
+#!/usr/bin/env python
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 import unittest
+
 from endofunction_structures.rootedtrees import *
 from endofunction_structures.endofunctions import Endofunction
 
-class TreeTests(unittest.TestCase):
+
+class TreeEnumerationTests(unittest.TestCase):
 
     # Counting tests
     A000081 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
@@ -51,7 +60,19 @@ class TreeTests(unittest.TestCase):
             self.assertEqual(n**(n-1), labelled_treecount)
             self.assertEqual(n**(n-1), rooted_treecount)
 
-    # Basic method tests
+    def test_equality(self):
+        node_counts = [4, 5, 6, 10]
+        enumerators = [TreeEnumerator, ForestEnumerator]
+        for n in node_counts:
+            for enum1 in enumerators:
+                for m in node_counts:
+                    for enum2 in enumerators:
+                        if n == m and enum1 == enum2:
+                            self.assertEqual(enum1(n), enum2(m))
+                        else:
+                            self.assertNotEqual(enum1(n), enum2(m))
+
+class TreeTests(unittest.TestCase):
 
     def test_rooted_tree_strings(self):
         T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
@@ -81,20 +102,6 @@ class TreeTests(unittest.TestCase):
             pforests = PartitionForests(partition)
             self.assertEqual(pforests, eval(repr(pforests)))
 
-    def test_equality(self):
-        node_counts = [4, 5, 6, 10]
-        enumerators = [TreeEnumerator, ForestEnumerator]
-        for n in node_counts:
-            for enum1 in enumerators:
-                for m in node_counts:
-                    for enum2 in enumerators:
-                        if n == m and enum1 == enum2:
-                            self.assertEqual(enum1(n), enum2(m))
-                        else:
-                            self.assertNotEqual(enum1(n), enum2(m))
-
-    # Test conversion methods
-
     def test_bracket_form(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
@@ -110,7 +117,7 @@ class TreeTests(unittest.TestCase):
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.bracket_form())
 
-    def test_from_treefunc(self):
+    def test_treefuncs(self):
         """Tests attached treenodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):

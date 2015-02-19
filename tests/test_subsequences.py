@@ -1,5 +1,14 @@
+#!/usr/bin/env python
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 import unittest
+
 from endofunction_structures.subsequences import *
+
 
 class SubsequenceTests(unittest.TestCase):
     seqs = [
@@ -13,7 +22,9 @@ class SubsequenceTests(unittest.TestCase):
         [1, 1, 1, 1]
     ]
 
-    def testMonotoneSubsequences(self):
+    def test_monotone_subsequences(self):
+        """Test that subsequences are monotonic for given comparison
+        operations."""
         seq = [1, 2, 3, 4, 3, 3, 2, 3, 4, 5, 4, 5, 3, 3, 2, 3, 4, 5, 6, 5, 5,
                5, 5]
 
@@ -35,7 +46,8 @@ class SubsequenceTests(unittest.TestCase):
         # Test the end isn't double counted.
         self.assertSequenceEqual([inc2], list(increasing_subsequences(inc2)))
 
-    def testSubsequencesStartingwith(self):
+    def test_startswith(self):
+        """Make sure leading subsequence terms satisfy the given critereon"""
         teststart = lambda seq: startswith(seq, lambda x: x == 1)
 
         startseqs = [
@@ -52,7 +64,8 @@ class SubsequenceTests(unittest.TestCase):
         for seq, subseq in zip(self.seqs, startseqs):
             self.assertSequenceEqual(subseq, list(teststart(seq)))
 
-    def testSubsequencesEndingwith(self):
+    def test_endswith(self):
+        """Make sure final subsequence terms satisfy the given critereon."""
         testend = lambda seq: endswith(seq, lambda x: x == 1)
 
         endseqs = [

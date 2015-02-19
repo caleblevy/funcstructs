@@ -12,9 +12,10 @@ cycle decompositions and limitsets. """
 
 import random
 
+from memoized_property import memoized_property
+
 from . import productrange
 from . import rootedtrees
-from memoized_property import memoized_property
 
 
 class Endofunction(object):
@@ -220,11 +221,11 @@ def cycles_to_funclist(cycles):
 class SymmetricFunction(Endofunction):
     def __init__(self, func):
         func = tuple(func)
-        if hasattr(func[0], '__iter__'):
+        if hasattr(func, '__getitem__') and hasattr(func[0], '__iter__'):
             # If it is a cycle decomposition, change to function.
             func = cycles_to_funclist(func)
-        Endofunction.__init__(self, func)
-        if not len(self) == len(set(self)):
+        super(type(self), self).__init__(func)
+        if not len(self) == len(self.imageset):
             raise ValueError("This function is not invertible.")
 
     def __pow__(self, n):

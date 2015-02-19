@@ -1,6 +1,15 @@
+#!/usr/bin/env python
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 import unittest
+
 from endofunction_structures.endofunctions import *
 from endofunction_structures.rootedtrees import OrderedTree
+
 
 class EndofunctionTests(unittest.TestCase):
 
@@ -96,6 +105,8 @@ class EndofunctionTests(unittest.TestCase):
         tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
         self.assertEqual(func, Endofunction(tree))
+        with self.assertRaises(ValueError):
+            sym = SymmetricFunction(OrderedTree([0]+list(range(5))))
 
     def test_hash(self):
         a = Endofunction(range(10))

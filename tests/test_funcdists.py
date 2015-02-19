@@ -1,10 +1,18 @@
+#!/usr/bin/env python
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+#
+# The terms of use, license and copyright information for the code and ideas
+# contained herein are described in the LICENSE file included with this
+# project. For more information please contact me at caleb.levy@berkeley.edu.
+
 import unittest
+
 from endofunction_structures.funcdists import *
 
 
 class EndofunctionTest(unittest.TestCase):
 
-    def testIterdist(self):
+    def test_iterdist(self):
         """Check the multiplicities of sizes of images of iterates."""
         iterdists = [
             np.array([
@@ -31,7 +39,7 @@ class EndofunctionTest(unittest.TestCase):
             np.testing.assert_array_equal(dist, iterdist_brute(n))
             np.testing.assert_array_equal(dist, iterdist_funcstruct(n))
 
-    def testSingularImages(self):
+    def test_rootedtree_funcs(self):
         '''
         Test iterdist(n)[k] == labelled rooted trees of height at most k on n
         nodes. Corresponds to the top row of imagedist.
@@ -50,7 +58,7 @@ class EndofunctionTest(unittest.TestCase):
             n = len(dist) + 1
             self.assertSequenceEqual(dist, list(iterdist_funcstruct(n)[0, :]))
 
-    def testFirstdist(self):
+    def test_imagedists(self):
         """
         Test imagedist(n)[h] = number of functions f:{1,2,...,n}->{1,2,...,n}
         such that |Image(f)|=h; h=1,2,...,n, n=1,2,3,...
@@ -69,7 +77,7 @@ class EndofunctionTest(unittest.TestCase):
             self.assertSequenceEqual(dist, list(iterdist(n)[:, 0]))
             self.assertSequenceEqual(dist, imagedist_recurse(n))
 
-    def testBinomialgrid(self):
+    def test_binomial_grid(self):
         """Check that nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
         N = 20
         binomial_coeffs = nCk_grid(N)
@@ -77,7 +85,7 @@ class EndofunctionTest(unittest.TestCase):
             for k in range(n+1):
                 self.assertEqual(multiset.nCk(n, k), binomial_coeffs[n, k])
 
-    def testPowergrid(self):
+    def test_power_grid(self):
         """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
         N = 20
         exponentials = powergrid(N)
@@ -88,7 +96,7 @@ class EndofunctionTest(unittest.TestCase):
                 else:
                     self.assertEqual(I**J, exponentials[I, J])
 
-    def testLimitdists(self):
+    def test_limitdists(self):
         """
         Test limitdist(n)[k] == number of endofunctions on n labeled points
         constructed from k rooted trees.
