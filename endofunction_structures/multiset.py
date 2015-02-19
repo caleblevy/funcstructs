@@ -26,7 +26,7 @@ factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 
-class Multiset(collections.Set, collections.Hashable):
+class Multiset(object):
     """ Multiset - Also known as a Multiset or unordered tuple. Multiset is
     Hashable, thus it is immutable and usable for dict keys. """
 
@@ -39,15 +39,17 @@ class Multiset(collections.Set, collections.Hashable):
         multiset however many times it appears.
 
         This runs in O(len(iterable)). """
-        self._dict = dict()
-        self._size = 0
-        if iterable:
-            if isinstance(iterable, self.__class__):
-                for elem, count in iterable._dict.items():
-                    self._inc(elem, count)
-            else:
+        if isinstance(iterable, self.__class__):
+            self._dict = iterable._dict
+            self._size = iterable._size
+            self._hash = iterable._hash
+        else:
+            self._dict = collections.Counter()
+            self._size = 0
+            if iterable:
                 for value in iterable:
                     self._inc(value)
+            self._hash = hash(frozenset(self._dict.items()))
 
     def __repr__(self):
         """The string representation is a call to the constructor given a tuple
@@ -203,7 +205,7 @@ class Multiset(collections.Set, collections.Hashable):
         return not (self == other)
 
     def __hash__(self):
-        return self._hash()
+        return self._hash
 
     # Truthiness methods
     def __bool__(self):

@@ -105,7 +105,7 @@ class Necklace(object):
         return len(self)//self.period
 
 
-def _partition_necklaces(a, partition, t, p, k):
+def simple_fixed_content(a, content, t, p, k):
     """ This function is a result of refactoring of Sage's simple fixed content
     algorithm, featured in src/sage/combinat/neckalce.py as of December 23,
     2014. The original code was written by Mike Hansen <mhansen@gmail.com> in
@@ -117,13 +117,13 @@ def _partition_necklaces(a, partition, t, p, k):
         yield a
     else:
         for j in range(a[t-p-1], k):
-            if partition[j] > 0:
+            if content[j] > 0:
                 a[t-1] = j
-                partition[j] -= 1
+                content[j] -= 1
                 tp = p if(j == a[t-p-1]) else t
-                for z in _partition_necklaces(a, partition, t+1, tp, k):
+                for z in simple_fixed_content(a, content, t+1, tp, k):
                     yield z
-                partition[j] += 1
+                content[j] += 1
 
 
 class NecklaceGroup(object):
@@ -181,21 +181,21 @@ class NecklaceGroup(object):
     def __len__(self):
         return self.cardinality()
 
-    def _necklaces(self):
+    def sfc(self):
         """Wrapper for partition necklaces, which takes a partition of
         multiplicities and enumerates canonical necklaces on that partition."""
         partition = list(self.partition)
         a = [0]*sum(partition)
         partition[0] -= 1
         k = len(partition)
-        return _partition_necklaces(a, partition, 2, 1, k)
+        return simple_fixed_content(a, partition, 2, 1, k)
 
     def __iter__(self):
         """ Given a set of items (called beads) returns all necklaces which can
         be made with those beads. """
         if not self.beads:
             return
-        for strand in self._necklaces():
+        for strand in self.sfc():
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
             yield Necklace([self.elems[I] for I in strand])

@@ -88,8 +88,11 @@ February 13 2015:
 - Separate unit tests into their own subdirectory.
 - Add necklace emumeration paper to papers.
 
-
 Maybe:
   - Make RootedTree class sortable.
   - Resolve path dependancy issues for PADS to work in python3.
 
+
+February 17, 2015:
+- Incorporate alternate constructors directly into class __init__ methods.
+- Increase speed of modules and tests (in particular multiset)

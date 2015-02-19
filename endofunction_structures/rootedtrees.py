@@ -45,7 +45,7 @@ class RootedTree(object):
         self.subtrees = subtrees
 
     def __hash__(self):
-        return hash(len(self.subtrees))
+        return hash(self.subtrees)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
