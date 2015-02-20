@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
 #
 # The terms of use, license and copyright information for the code and ideas
 # contained herein are described in the LICENSE file included with this
@@ -11,6 +11,12 @@ from endofunction_structures.levypartitions import *
 
 
 class LevyPartitionTests(unittest.TestCase):
+
+    def test_integer_root(self):
+        """Test r = isqrt(n) is greatest integer such that r**2 <= n."""
+        for val in list(range(1000)) + [2**87+2**41+1] + [2**96]:
+            self.assertTrue(isqrt(val)**2 <= val)
+            self.assertTrue(val < (isqrt(val)+1)**2)
 
     def test_minimal_partition(self):
         """Ensure partitions are lexicographically smallest"""

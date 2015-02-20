@@ -14,9 +14,9 @@ from PADS.IntegerPartitions import partitions, lex_partitions
 
 
 def isqrt(n):
-    """ Faster method of iroot for the particular case of the integer square
-    root. Code taken directly from "Integer square root in python" at
-    http://stackoverflow.com/a/15391420. """
+    """ Returns the integer square root of n; i.e. r=isqrt(n) is the greatest
+    integer such that r**2<=n. Code taken directly from "Integer square root in
+    python" at http://stackoverflow.com/a/15391420. """
     x = n
     y = (x + 1) // 2
     while y < x:
