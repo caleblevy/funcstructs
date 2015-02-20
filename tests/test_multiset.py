@@ -60,17 +60,11 @@ class MultisetTests(unittest.TestCase):
         abra = Multiset('abracadabra')
         sort_key = lambda e: (-e[1], e[0])
         abra_counts = [('a', 5), ('b', 2), ('r', 2), ('c', 1), ('d', 1)]
-        self.assertEqual(sorted(abra.nlargest(), key=sort_key), abra_counts)
-        self.assertEqual(sorted(abra.nlargest(3), key=sort_key), 
+        self.assertEqual(sorted(abra.most_common(), key=sort_key), abra_counts)
+        self.assertEqual(sorted(abra.most_common(3), key=sort_key), 
                          abra_counts[:3])
-        self.assertEqual(Multiset('abcaba').nlargest(3),
+        self.assertEqual(Multiset('abcaba').most_common(3),
                          [('a', 3), ('b', 2), ('c', 1)])
-
-    def test_from_map(self):
-        """Check that we can form a multiset from a map."""
-        frommap = Multiset._from_map({'a': 1, 'b': 2})
-        fromit = Multiset(('a', 'b', 'b'))
-        self.assertEqual(frommap, fromit)
 
     def test_copy(self):
         """Check that we can copy multisets"""
@@ -114,7 +108,7 @@ class MultisetTests(unittest.TestCase):
         self.assertTrue(hash(Multiset('badce')) == hash(Multiset(('dbeac'))))
 
     def test_num_unique_elems(self):
-        assert Multiset('abracadabra').num_unique_elements() == 5
+        self.assertEqual(5, Multiset('abracadabra').num_elements)
 
     def test_keying(self):
         """
@@ -147,3 +141,9 @@ class MultisetTests(unittest.TestCase):
     def test_degeneracy(self):
         abra = Multiset("abracadabra")
         self.assertEqual(120*2*2, abra.degeneracy())
+
+    def test_from_map(self):
+        """Check that we can form a multiset from a map."""
+        fromit = Multiset(('a', 'b', 'b'))
+        frommap = Multiset(fromit)
+        self.assertEqual(frommap, fromit)

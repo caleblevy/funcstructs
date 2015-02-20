@@ -37,9 +37,9 @@ class RootedTree(object):
     def __init__(self, subtrees=None):
         # there is no root; this is totally structureless.
         if subtrees is None:
-            self.subtrees = multiset.Multiset()
+            subtrees = multiset.Multiset()
         subtrees = multiset.Multiset(subtrees)
-        for subtree in subtrees.unique_elements():
+        for subtree in subtrees.elements():
             if not isinstance(subtree, RootedTree):
                 raise ValueError("Subtrees must be rooted trees.")
         self.subtrees = subtrees
@@ -65,7 +65,7 @@ class RootedTree(object):
             return '{}'
         else:
             strings = []
-            for subtree in sorted(self.subtrees.unique_elements(), reverse=1):
+            for subtree in sorted(self.subtrees.keys(), reverse=1):
                 # Hack to make tree print with multiplicity exponents.
                 mult = self.subtrees.count(subtree)
                 tree_string = subtree._str()

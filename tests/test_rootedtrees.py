@@ -125,3 +125,10 @@ class TreeTests(unittest.TestCase):
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
                     self.assertEqual(tree, rtreefunc.tree_form())
+
+    def test_rootedtree_conversion(self):
+        """Test conversion between rooted and unordered trees is seemless."""
+        T = DominantTree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        RT = T.unordered()
+        TRT = RT.ordered_form()
+        self.assertEqual(T, TRT)

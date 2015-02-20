@@ -17,6 +17,7 @@ from functools import reduce
 from math import factorial
 from operator import mul, itemgetter
 
+from memoized_property import memoized_property
 from sympy.utilities.iterables import multiset_partitions
 
 
@@ -25,30 +26,55 @@ factorial_prod = lambda iterable: prod(factorial(I) for I in iterable)
 nCk = lambda n, k: factorial(n)//factorial(k)//factorial(n-k)
 
 
-class Multiset(object):
+class Multiset(collections.Counter):
     """ Multiset - Also known as a Multiset or unordered tuple. Multiset is
     Hashable, thus it is immutable and usable for dict keys. """
 
     def __init__(self, iterable=None):
-        """ Create a new Multiset. 
+        self._size = 0
+        self._items = frozenset()
+        self._hash = hash(self._items)
+        super(dict, self).__init__()
+        if iterable is not None:
+            if isinstance(iterable, self.__class__):
+                super(collections.Counter, self).update(iterable)
+                self._size = iterable._size
+                self._hash = iterable._hash
+                self._items = iterable._items
+            else:
+                for el in iterable:
+                    super(collections.Counter, self).__setitem__(el, self.get(el, 0)+1)
+                    self._size += 1
+                self._items = frozenset(self.items())
+                self._hash = hash(self._items)
 
-        If iterable isn't given, is None or is empty then the set is empty. If
-        iterable is another multiset, then the returned set is a shallow copy
-        of iterable. Otherwise each element from iterable will be added to the
-        multiset however many times it appears.
+    def __setitem__(self, key, value):
+        raise TypeError("{0} does not support item assignment"
+                         .format(self.__class__.__name__))
+    def __delitem__(self, key):
+        raise TypeError("{0} does not support item assignment"
+                         .format(self.__class__.__name__))
+    def clear(self):
+        raise TypeError("{0} does not support item assignment"
+                         .format(self.__class__.__name__))
+    def pop(self, *args, **kwargs):
+        raise TypeError("{0} does not support item assignment"
+                         .format(self.__class__.__name__))
+    def popitem(self, *args, **kwargs):
+        raise TypeError("{0} does not support item assignment"
+                         .format(self.__class__.__name__))
+    def setdefault(self, *args, **kwargs):
+        raise TypeError("{0} does not support item assignment"
+                         .format(self.__class__.__name__))
+    def update(self, *args, **kwargs):
+        raise TypeError("{0} does not support item assignment"
+                         .format(self.__class__.__name__))
 
-        This runs in O(len(iterable)). """
-        if isinstance(iterable, self.__class__):
-            self._dict = iterable._dict
-            self._size = iterable._size
-            self._hash = iterable._hash
-        else:
-            self._dict = collections.Counter()
-            self._size = 0
-            if iterable:
-                for value in iterable:
-                    self._inc(value)
-            self._hash = hash(frozenset(self._dict.items()))
+    def __len__(self):
+        return self._size
+
+    def __hash__(self):
+        return self._hash
 
     def __repr__(self):
         """The string representation is a call to the constructor given a tuple
@@ -63,14 +89,14 @@ class Multiset(object):
     def __str__(self):
         """The printable string appears just like a set, except that each
         element is raised to the power of the multiplicity if it is greater
-        than 1. This runs in O(self.num_unique_elements()). """
+        than 1. This runs in O(self.num_elements()). """
         if self._size == 0:
             return '{class_name}()'.format(class_name=self.__class__.__name__)
         else:
             format_single = '{elem!r}'
             format_mult = '{elem!r}^{mult}'
             strings = []
-            for elem, mult in self._dict.items():
+            for elem, mult in self.items():
                 # Hack to make multisets print with parentheses.
                 if isinstance(elem, self.__class__):
                     mstring = str(elem)
@@ -84,33 +110,11 @@ class Multiset(object):
                     strings.append(format_single.format(elem=elem))
             return '{%s}' % ', '.join(strings)
 
-    def _set(self, elem, value):
-        """Set the multiplicity of elem to count. This runs in O(1) time. """
-        if value < 0:
-            raise ValueError
-        old_count = self.count(elem)
-        if value == 0:
-            if elem in self:
-                del self._dict[elem]
-        else:
-            self._dict[elem] = value
-        self._size += value - old_count
-
-    def _inc(self, elem, count=1):
-        """Increment the multiplicity of value by count. If count <0 then
-        decrement. """
-        self._set(elem, self.count(elem) + count)
-
     ## New public methods (not overriding/implementing anything)
-
-    def num_unique_elements(self):
+    @memoized_property
+    def num_elements(self):
         """ Returns the number of unique elements. This runs in O(1) time. """
-        return len(self._dict)
-
-    def unique_elements(self):
-        """ Returns a view of unique elements in this multiset. This runs in
-        O(1) time. """
-        return self._dict.keys()
+        return len(self.values())
 
     def count(self, value):
         """Return the number of value present in this Multiset. If value is not
@@ -122,38 +126,7 @@ class Multiset(object):
         Returns:
             int: The count of value in self
         """
-        return self._dict.get(value, 0)
-    
-    def nlargest(self, n=None):
-        """ List the n most common elements and their counts from the most
-        common to the least. If n is None, the list all element counts. Run
-        time should be O(m log m) where m is len(self). """
-        if n is None:
-            return sorted(self._dict.items(), key=itemgetter(1), reverse=True)
-        else:
-            return heapq.nlargest(n, self._dict.items(), key=itemgetter(1))
-
-    @classmethod
-    def _from_iterable(cls, it):
-        return cls(it)
-
-    @classmethod
-    def _from_map(cls, map_):
-        """ Creates a multiset from a dict of elem->count. Each key in the dict
-        is added if the value is > 0. This runs in O(len(map)). """
-        out = cls()
-        for elem, count in map_.items():
-            out._inc(elem, count)
-        return out
-
-    def copy(self):
-        """ Create a shallow copy of self. This runs in
-        O(len(self.num_unique_elements())). """
-        return self._from_map(self._dict)
-
-    def __len__(self):
-        """ Returns the cardinality of the Multiset. This runs in O(1). """
-        return self._size
+        return self.get(value, 0)
 
     def __contains__(self, value):
         """ Returns the multiplicity of the element. This runs in O(1). """
@@ -161,7 +134,7 @@ class Multiset(object):
 
     def __iter__(self):
         """Iterate through all elements; return multiple copies if present."""
-        for elem, count in self._dict.items():
+        for elem, count in self.items():
             for i in range(count):
                 yield(elem)
 
@@ -171,7 +144,7 @@ class Multiset(object):
         """ Tests if self <= other where other is another multiset This runs in
         O(l + n) where:
 
-            n is self.num_unique_elements()
+            n is self.num_elements()
             if other is a multiset:
                 l = 1
             else:
@@ -181,7 +154,7 @@ class Multiset(object):
             raise TypeError("Cannot compare Multiset with another type.")
         if len(self) > len(other):
             return False
-        for elem in self.unique_elements():
+        for elem in self.elements():
             if self.count(elem) > other.count(elem):
                 return False
         return True
@@ -196,35 +169,23 @@ class Multiset(object):
         return other <= self
 
     def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return False
-        return len(self) == len(other) and self <= other
+        if isinstance(other, self.__class__):
+            return self._items == other._items
+        return False
 
     def __ne__(self, other):
         return not (self == other)
 
-    def __hash__(self):
-        return self._hash
-
-    # Truthiness methods
-    def __bool__(self):
-        return bool(self._size)
-
-    __nonzero__ = __bool__
-
-    def items(self):
-        return self._dict.items()
-
     def split(self):
         """ Splits the multiset into element-multiplicity pairs. """
-        y = list(self._dict)
-        d = [self._dict[el] for el in y]
+        y = list(self.keys())
+        d = [self[el] for el in y]
         return y, d
 
     def sort_split(self):
         y = []
         d = []
-        for elem, mult in sorted(self._dict.items(), key=itemgetter(0)):
+        for elem, mult in sorted(self.items(), key=itemgetter(0)):
             y.append(elem)
             d.append(mult)
         return y, d
@@ -239,4 +200,3 @@ class Multiset(object):
         multisets. """
         for mpart in multiset_partitions(list(self)):
             yield self.__class__(self.__class__(m) for m in mpart)
-
