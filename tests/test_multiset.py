@@ -87,15 +87,6 @@ class MultisetTests(unittest.TestCase):
         self.assertFalse('a' in Multiset())
         self.assertFalse('a' in Multiset('missing letter'))
 
-    def test_le(self):
-        self.assertTrue(Multiset() <= Multiset())
-        self.assertTrue(Multiset() <= Multiset('a'))
-        self.assertTrue(Multiset('abc') <= Multiset('aabbbc'))
-        self.assertFalse(Multiset('abbc') <= Multiset('abc'))
-        with self.assertRaises(TypeError):
-            Multiset('abc') < set('abc')
-        self.assertFalse(Multiset('aabc') < Multiset('abc'))
-
     def test_hash(self):
         bag_with_empty_tuple = Multiset([()])
         self.assertFalse(hash(Multiset()) == hash(bag_with_empty_tuple))
@@ -108,7 +99,7 @@ class MultisetTests(unittest.TestCase):
         self.assertTrue(hash(Multiset('badce')) == hash(Multiset(('dbeac'))))
 
     def test_num_unique_elems(self):
-        self.assertEqual(5, Multiset('abracadabra').num_elements)
+        self.assertEqual(5, Multiset('abracadabra').num_unique_elements())
 
     def test_keying(self):
         """
