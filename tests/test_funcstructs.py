@@ -7,6 +7,7 @@
 
 import unittest
 
+import endofunction_structures as ec
 from endofunction_structures.funcstructs import *
 from endofunction_structures.necklaces import Necklace
 from endofunction_structures.rootedtrees import DominantTree
@@ -15,21 +16,31 @@ from endofunction_structures.rootedtrees import DominantTree
 class FuncstructTests(unittest.TestCase):
 
     def test_func_form(self):
+        """Convert struct to func and back, and check we get the same thing."""
         struct = Funcstruct([
-            Necklace([DominantTree([1, 2, 3]), DominantTree([1, 2, 2])]),
-            Necklace([DominantTree([1, 2])]),
-            Necklace([DominantTree([1, 2, 2]), DominantTree([1]), DominantTree([1, 2, 2])])
+            Necklace([
+                DominantTree([1, 2, 3]),
+                DominantTree([1, 2, 2])
+            ]),
+            Necklace([
+                DominantTree([1, 2])
+            ]),
+            Necklace([
+                DominantTree([1, 2, 2]),
+                DominantTree([1]),
+                DominantTree([1, 2, 2])
+            ])
         ])
         self.assertEqual(struct, Funcstruct(struct.func_form()))
 
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""
-        for i in range(8):
-            for ms, ps in zip(FuncstructEnumerator(i+1), partition_funcstructs(i+1)):
-                mim = endofunctions.Endofunction(ms.func_form()).imagepath
-                pim = endofunctions.Endofunction(ps.func_form()).imagepath
-                msim = ms.imagepath
-                psim = ps.imagepath
+        for i in range(1, 8):
+            for m, p in zip(FuncstructEnumerator(i), partition_funcstructs(i)):
+                mim = endofunctions.Endofunction(m.func_form()).imagepath
+                pim = endofunctions.Endofunction(p.func_form()).imagepath
+                msim = m.imagepath
+                psim = p.imagepath
                 np.testing.assert_array_equal(mim, msim)
                 np.testing.assert_array_equal(pim, psim)
 
@@ -48,9 +59,9 @@ class FuncstructTests(unittest.TestCase):
         for i in range(1, 8):
             fac = math.factorial(i)
             func_mult_count = func_part_count = 0
-            for ms, ps in zip(FuncstructEnumerator(i), partition_funcstructs(i)):
-                func_mult_count += fac//ms.degeneracy
-                func_part_count += fac//ps.degeneracy
+            for m, p in zip(FuncstructEnumerator(i), partition_funcstructs(i)):
+                func_mult_count += fac//m.degeneracy
+                func_part_count += fac//p.degeneracy
             self.assertEqual(i**i, func_mult_count)
             self.assertEqual(i**i, func_part_count)
 
@@ -64,4 +75,3 @@ class FuncstructTests(unittest.TestCase):
 
     def test_hash(self):
         pass
-        

@@ -56,12 +56,12 @@ class MultisetTests(unittest.TestCase):
         self.assertEqual(5, ms.count('a'))
         self.assertEqual(0, ms.count('x'))
 
-    def test_nlargest(self):
+    def test_most_common(self):
         abra = Multiset('abracadabra')
         sort_key = lambda e: (-e[1], e[0])
         abra_counts = [('a', 5), ('b', 2), ('r', 2), ('c', 1), ('d', 1)]
         self.assertEqual(sorted(abra.most_common(), key=sort_key), abra_counts)
-        self.assertEqual(sorted(abra.most_common(3), key=sort_key), 
+        self.assertEqual(sorted(abra.most_common(3), key=sort_key),
                          abra_counts[:3])
         self.assertEqual(Multiset('abcaba').most_common(3),
                          [('a', 3), ('b', 2), ('c', 1)])
@@ -89,19 +89,15 @@ class MultisetTests(unittest.TestCase):
 
     def test_hash(self):
         bag_with_empty_tuple = Multiset([()])
-        self.assertFalse(hash(Multiset()) == hash(bag_with_empty_tuple))
-        self.assertFalse(hash(Multiset()) == hash(Multiset((0,))))
-        self.assertFalse(hash(Multiset('a')) == hash(Multiset(('aa'))))
-        self.assertFalse(hash(Multiset('a')) == hash(Multiset(('aaa'))))
-        self.assertFalse(hash(Multiset('a')) == hash(Multiset(('aaaa'))))
-        self.assertFalse(hash(Multiset('a')) == hash(Multiset(('aaaaa'))))
-        self.assertTrue(hash(Multiset('ba')) == hash(Multiset(('ab'))))
-        self.assertTrue(hash(Multiset('badce')) == hash(Multiset(('dbeac'))))
+        self.assertEqual(hash(bag_with_empty_tuple), hash(Multiset([()])))
+        self.assertEqual(hash(Multiset('aabc')), hash(Multiset('baca')))
+        self.assertEqual(hash(Multiset('ba')), hash(Multiset(('ab'))))
+        self.assertEqual(hash(Multiset('badce')), hash(Multiset(('dbeac'))))
 
     def test_num_unique_elems(self):
         self.assertEqual(5, Multiset('abracadabra').num_unique_elements())
 
-    def test_keying(self):
+    def test_keyability(self):
         """
         Since Multiset is mutable and FronzeMultiset is hashable, the second
         should be usable for dictionary keys and the second should raise a key
@@ -122,8 +118,30 @@ class MultisetTests(unittest.TestCase):
         # test commutativity of multiset instantiation.
         self.assertEqual(Multiset([4, 4, 5, 5, c]), Multiset([4, 5, d, 4, 5]))
 
+    def test_immutability(self):
+        """Test that all inherited mutating methods have been disabled."""
+        abra = Multiset('abracadabra')
+        with self.assertRaises(TypeError):
+            abra['a'] += 1
+        with self.assertRaises(TypeError):
+            abra['b'] = 2
+        with self.assertRaises(TypeError):
+            del abra['b']
+        with self.assertRaises(TypeError):
+            abra.clear()
+        with self.assertRaises(TypeError):
+            key = abra.pop('a')
+        with self.assertRaises(TypeError):
+            item = abra.popitem()
+        with self.assertRaises(TypeError):
+            k = abra.setdefault('f', 1)
+        with self.assertRaises(TypeError):
+            abra.update(abra)
+        self.assertEqual(Multiset('abracadabra'), abra)
+
     def test_split(self):
-        """Test that we can split the multiset into elements and counts"""
+        """ Test that the indices of the elements and multiplicities
+        correspond. """
         abra = Multiset("abracadabra")
         y, d = abra.split()
         for el in y:

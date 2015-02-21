@@ -108,10 +108,10 @@ class EndofunctionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             sym = SymmetricFunction(OrderedTree([0]+list(range(5))))
 
-    def test_hash(self):
+    def test_keyability(self):
+        dic = {}
         a = Endofunction(range(10))
         b = Endofunction([0, 0]+list(range(8)))
-        dic = {}
         dic[a] = 1
         dic[Endofunction(range(10))] += 1
         self.assertEqual(len(dic), 1)
@@ -123,6 +123,5 @@ class EndofunctionTests(unittest.TestCase):
         dic[c.inverse] = 2
         self.assertEqual(len(dic), 3)
         self.assertEqual(dic[c], 2)
-
         t = TransformationMonoid(7)
-        e = self.assertEqual(1, len(set([t, t, TransformationMonoid(7)])))
+        self.assertEqual(1, len(set([t, t, TransformationMonoid(7)])))

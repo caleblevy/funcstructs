@@ -16,15 +16,16 @@ import functools
 import math
 import operator
 
-from memoized_property import memoized_property
 from sympy.utilities.iterables import multiset_partitions
 
 
 def prod(iterable):
     return functools.reduce(operator.mul, iterable, 1)
 
+
 def factorial_prod(iterable):
     return prod(math.factorial(I) for I in iterable)
+
 
 def nCk(n, k):
     return math.factorial(n)//math.factorial(k)//math.factorial(n-k)
@@ -53,32 +54,32 @@ class Multiset(Counter):
                 self._hash = hash(self._items)
 
     def __setitem__(self, key, value):
-        raise TypeError("{0} does not support item assignment"
-                         .format(self.__class__.__name__))
+        raise TypeError("{0} is immutable and does not support item assignment"
+                        .format(self.__class__.__name__))
 
     def __delitem__(self, key):
-        raise TypeError("{0} does not support item removal"
-                         .format(self.__class__.__name__))
+        raise TypeError("{0} is immutable and does not support item removal"
+                        .format(self.__class__.__name__))
 
     def clear(self):
-        raise TypeError("{0} does not support item removal"
-                         .format(self.__class__.__name__))
+        raise TypeError("{0} is immutable and does not support item removal"
+                        .format(self.__class__.__name__))
 
     def pop(self, *args, **kwargs):
-        raise TypeError("{0} does not support item removal"
-                         .format(self.__class__.__name__))
+        raise TypeError("{0} is immutable and does not support item removal"
+                        .format(self.__class__.__name__))
 
     def popitem(self, *args, **kwargs):
-        raise TypeError("{0} does not support item removal"
-                         .format(self.__class__.__name__))
+        raise TypeError("{0} is immutable and does not support item removal"
+                        .format(self.__class__.__name__))
 
     def setdefault(self, *args, **kwargs):
-        raise TypeError("{0} does not support item assignment"
-                         .format(self.__class__.__name__))
+        raise TypeError("{0} is immutable and does not support item assignment"
+                        .format(self.__class__.__name__))
 
     def update(self, *args, **kwargs):
-        raise TypeError("{0} does not support item assignment"
-                         .format(self.__class__.__name__))
+        raise TypeError("{0} is immutable and does not support item assignment"
+                        .format(self.__class__.__name__))
 
     def __len__(self):
         return self._size
@@ -105,11 +106,11 @@ class Multiset(Counter):
             format_mult = '{elem!r}^{mult}'
             strings = []
             for elem, mult in self.items():
-                # Hack to make multisets print with parentheses.
+                # Hack to make nested multisets print in bracket form.
                 if isinstance(elem, self.__class__):
                     mstring = str(elem)
                     if mult > 1:
-                        mstring += '^%s'%str(mult)
+                        mstring += '^%s' % str(mult)
                     strings.append(mstring)
                     continue
                 if mult > 1:

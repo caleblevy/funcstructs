@@ -28,9 +28,7 @@ class PeriodicityTest(unittest.TestCase):
         t4 = t3*3 + [(3, )]*3+[(1, 2)]
         lists.append(t4*4)
         periods.append(112)
-
-        lists.extend([[(1, 2), (1, 2)], 
-                      [(1, 2), (1, )],
+        lists.extend([[(1, 2), (1, 2)], [(1, 2), (1, )],
                       [(1, 2), (1, ), (1, 2), (1, ), (1, )],
                       [(1, 2), (1, ), (1, 2), (1, ), (1, 2)]])
         periods.extend([1, 2, 5, 5])
@@ -44,15 +42,10 @@ class NecklaceTests(unittest.TestCase):
     def test_equality(self):
         """Make sure rotationally equivalent necklaces compare equal."""
         n = Necklace([1, 2, 3, 1, 2, 3])
-        nshort = Necklace([1, 2, 3])
-        nlong = Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3])
-        nrot = Necklace([3, 1, 2, 3, 1, 2])
-        ntype = Necklace(tuple([2, 3, 1, 2, 3, 1]))
-
-        self.assertNotEqual(n, nshort)
-        self.assertNotEqual(n, nlong)
-        self.assertEqual(n, nrot)
-        self.assertEqual(n, ntype)
+        self.assertNotEqual(n, Necklace([1, 2, 3]))
+        self.assertNotEqual(n, Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3]))
+        self.assertEqual(n, Necklace([3, 1, 2, 3, 1, 2]))
+        self.assertEqual(n, Necklace(tuple([2, 3, 1, 2, 3, 1])))
 
     def test_containement(self):
         """Make sure Necklace conjugacy class contains all its rotations."""
@@ -68,7 +61,7 @@ class NecklaceTests(unittest.TestCase):
         n = Necklace([1, 2, 3, 1, 2, 3])
         self.assertTrue(n == eval(repr(n)))
 
-    def test_necklace_as_key(self):
+    def test_keyability(self):
         dic = {}
         neck = Necklace([1, 2, 3, 1, 2, 3])
         dic[neck] = 1
@@ -91,26 +84,64 @@ class NecklaceTests(unittest.TestCase):
 
 class NecklaceEnumerationTests(unittest.TestCase):
 
-    def test_counts(self):
-        """Verify the count_by_period method correctly counts necklaces."""
-        cp1 = [1]*3 + [2]*3 + [3]*2
-        cp2 = [1]*4 + [2]*4 + [3]*4 + [4]*3 + [5]*3 + [6]*2 + [7] + [8]
-        cp3 = [1]*24 + [2]*36
-        # color_partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
-        color_partitions = [cp1, cp2, cp3]
+    def test_from_partition(self):
+        """Ensure """
+        p1 = [3, 3, 2]
+        p2 = [4, 4, 4, 3, 3, 2, 1, 1]
+        p3 = [24, 36]
+        p4 = [36, 24]
+        b1 = [1]*3 + [2]*3 + [3]*2
+        b2 = [1]*4 + [2]*4 + [3]*4 + [4]*3 + [5]*3 + [6]*2 + [7] + [8]
+        b3 = [1]*24 + [2]*36
+        b4 = [1]*36 + [2]*24  # test that order matters
+        for b, p in zip([b1, b2, b3, b4], [p1, p2, p3, p4]):
+            self.assertEqual(NecklaceGroup(b), NecklaceGroup.from_partition(p))
+
+    def test_total_counts(self):
+        """Verify the count_by_period method agrees with Sage's totals."""
+        color_partitions =    [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
         color_cardinalities = [70, 51330759480000, 600873126148801]
         for cp, cc in zip(color_partitions, color_cardinalities):
-            self.assertEqual(cc, len(NecklaceGroup(cp)))
+            self.assertEqual(cc, len(NecklaceGroup.from_partition(cp)))
 
-    def test_enumeration(self):
+    def test_enumeration_counts(self):
         """Test necklace counts for various bead sets."""
         beadsets = [[4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6],
                     [4, 4, 5, 5, 2, 2, 2, 2, 2, 2, 6, 6, 6], [0]]
         for beadset in beadsets:
             count = 0
-            necklaces = set()
+            necks = set()
             for necklace in NecklaceGroup(beadset):
                 count += 1
-                necklaces.add(necklace)
-                necklaces.add(necklace)
-            self.assertEqual(len(necklaces), count)
+                necks.add(necklace)
+                necks.add(necklace)
+            self.assertEqual(len(necks), count)
+
+    def test_enumeration_period_counts(self):
+        """Test distribution of periods of enumerated necklaces."""
+        necks = NecklaceGroup.from_partition([6, 12])
+        counts = necks.count_by_period()
+        baseperiod = 3
+        self.assertEqual(1038, sum(counts))
+        for necklace in necks:
+            counts[necklace.period//baseperiod] -= 1
+        for count in counts:
+            self.assertEqual(0, count)
+
+    def test_ordering(self):
+        necks = NecklaceGroup([1]*1 + [2]*2 + [3]*3)
+        for necklace in necks:
+            self.assertSequenceEqual(Lyndon.SmallestRotation(list(necklace)),
+                                     list(necklace))
+
+    def test_keyability(self):
+        dic = dict()
+        a = NecklaceGroup([1, 1, 1, 2, 3])
+        dic[a] = 1
+        dic[NecklaceGroup([3, 1, 1, 2, 1])] = 2
+        self.assertEqual(len(dic), 1)
+        necks = set(a)
+        dic[a] += 1
+        self.assertEqual(len(dic), 1)
+        dic[NecklaceGroup([4, 4, 3, 2, 1])] = 7
+        self.assertEqual(len(dic), 2)

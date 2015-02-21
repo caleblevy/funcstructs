@@ -130,6 +130,13 @@ def simple_fixed_content(a, content, t, p, k):
 
 class NecklaceGroup(object):
 
+    @classmethod
+    def from_partition(cls, partition):
+        beads = []
+        for i, d in enumerate(partition):
+            beads.extend([i+1]*d)
+        return cls(beads)
+
     def __init__(self, beads):
         """Form a generator of all necklaces with beads of a given multiset."""
         self.beads = multiset.Multiset(beads)
@@ -148,12 +155,12 @@ class NecklaceGroup(object):
         N = sum(self.partition)
         # Each period must be a divisor of the gcd of the multiplicities.
         w = functools.reduce(fractions.gcd, self.partition)
-        p0 = N//w
+        baseperiod = N//w
         factors = factorization.divisors(w)
         mults = [0] * (factors[-1] + 1)
         # Find the multiplicity of each period.
         for factor in factors:
-            n = period = p0 * factor
+            n = period = baseperiod * factor
             mults[factor] = 1
             # The number of character permutations which are periodic in factor
             # OR ANY OF ITS DIVISORS is simply the multinomial coefficient
@@ -169,7 +176,7 @@ class NecklaceGroup(object):
             subdivisors = factorization.divisors(factor)
             if subdivisors[-1] != 1:
                 for subfactor in subdivisors[:-1]:
-                    mults[factor] -= subfactor * p0 * mults[subfactor]
+                    mults[factor] -= subfactor * baseperiod * mults[subfactor]
             # Finally, normalize by the period to obtain the number of distinct
             # rotations of any member of mults[factor].
             mults[factor] //= period
