@@ -372,7 +372,7 @@ class ForestEnumerator(TreeEnumerator):
         return self.__class__.__name__+'('+str(self.n - 1)+')'
 
     def __iter__(self):
-        for tree in super(type(self), self).__iter__():
+        for tree in super(ForestEnumerator, self).__iter__():
             yield tree.chop()
 
 

@@ -11,45 +11,28 @@ import unittest
 
 import multiset
 
-class SetPartition(object):
-    def __init__(self, S):
-        pass
-        # if len(set(S)) != len(S):
-        #  print warning
-        # if isinstance(S, int):
-        #  S = set(range(S))
 
-
-def multinomial_coefficient(partition, n=None):
-    """Number of ordered combinations into the given partition. """
-    if n is None:
-        n = sum(partition)
-    coeff = 1
-    for p in partition:
-        coeff *= multiset.nCk(n, p)
-        n -= p
-    return coeff
-
-
-def _ordered_divisions(S, partition):
-    if len(partition) == 1:
+def _equipartitions(S, b):
+    n = len(S)
+    if b == 1 or n == 1:
         yield [frozenset(S)]
     else:
-        for first_combo in itertools.combinations(S, partition[0]):
-            for remaining_combos in _ordered_divisions(S - set(first_combo), partition[1:]):
-                yield [frozenset(first_combo)] + remaining_combos
+        marked_el = (S.pop(), )
+        for first_combo in itertools.combinations(S, n//b-1):
+            for remaining_combos in _equipartitions(S - set(first_combo), b-1):
+                yield [frozenset(marked_el + first_combo)] + remaining_combos
 
 
-def ordered_divisions(S, partition):
+def equipartitions(S, b):
+    """Evenly split a set of itmes into b parts."""
     S = set(S)
-    if not len(S) == sum(partition):
-        raise ValueError("partition must sum to size of set")
-    for p in _ordered_divisions(S, partition):
-        yield tuple(p)
+    if len(S) % b:
+        raise ValueError("items must divide evenly")
+    for division in _equipartitions(S, b):
+        yield frozenset(division)
 
 
-def arrangement_count(n, b):
-
+def equipartition_count(n, b):
     """The total number of ways of evenly dividing a set S with n elements
     into b parts is n!/((n/b)!^b b!) which we can see as follows:
 
@@ -65,27 +48,65 @@ def arrangement_count(n, b):
     return math.factorial(n)//(math.factorial(n//b)**b)//math.factorial(b)
 
 
-def _even_divisions(S, b):
-    n = len(S)
-    if b == 1 or n == 1:
+def _ordered_partitions(S, partition):
+    if len(partition) == 1:
         yield [frozenset(S)]
     else:
-        marked_el = (S.pop(), )
-        for first_combo in itertools.combinations(S, n//b-1):
-            for remaining_combos in _even_divisions(S - set(first_combo), b-1):
-                yield [frozenset(marked_el + first_combo)] + remaining_combos
+        for first in itertools.combinations(S, partition[0]):
+            for remaining in _ordered_partitions(S-set(first), partition[1:]):
+                yield [frozenset(first)] + remaining
 
 
-def even_divisions(S, b):
-    """Evenly split a set of itmes into b parts."""
+def ordered_partitions(partition, S=None):
+    partition = list(partition)
+    if S is None:
+        S = range(sum(partition))
+    elif isinstance(S, int):
+        S = range(S)
     S = set(S)
-    if len(S) % b:
-        raise ValueError("items must divide evenly")
-    for division in _even_divisions(S, b):
-        yield frozenset(division)
+    if not len(S) == sum(partition):
+        raise ValueError("partition must sum to size of set")
+    for p in _ordered_partitions(S, partition):
+        yield tuple(p)
 
 
-def partition_division_count(partition, n=None):
+def ordered_partition_count(partition, n=None):
+    """Number of ordered combinations into the given partition. """
+    if n is None:
+        n = sum(partition)
+    coeff = 1
+    for p in partition:
+        coeff *= multiset.nCk(n, p)
+        n -= p
+    return coeff
+
+
+def _set_partitions(S, partition):
+    lengths, mults = multiset.Multiset(partition).sort_split()
+    # clm[i] is the number of nodes situated in some bin of size l[i].
+    for odiv in _ordered_partitions(S, [l*m for l, m in zip(lengths, mults)]):
+        strand = []
+        for m, c in zip(mults, odiv):
+            strand.append(_equipartitions(set(c), m))
+        for bundle in itertools.product(*strand):
+            yield itertools.chain.from_iterable(bundle)
+
+
+def set_partitions(partition, S=None):
+    """Unordered allocations of a set amongst a partition of bin sizes."""
+    if S is None:
+        S = range(sum(partition))
+    elif isinstance(S, int):
+        S = range(S)
+    else:
+        S = set(S)
+
+    for subset in itertools.combinations(S, sum(partition)):
+        for p in _set_partitions(set(subset), partition):
+            yield frozenset(frozenset(s) for s in p)
+
+
+def set_partition_count(partition, n=None):
     """The total number of ways of partitioning S with n elements into a given
     combination of bin sizes [l1, l2, ..., lk] with multiplicities [m1, m2,
     ..., mk] is given by n!/(l1!^m1 * m1!)/(l2!^m2 * m2!)/.../(lk!^mk * mk!),
@@ -109,73 +130,89 @@ def partition_division_count(partition, n=None):
         count //= math.factorial(l)**m * math.factorial(m)
     return count
 
-# Just as a side note to myself, there was a moment (today Feb 21 at 6:30 P.M California) when I was looking at the above block of code - (partition_division_count) after having just been examining and comparing it to set_partition.py in sage's project code, and I thought that this function was part of sage's repository; i.e. I thought it could ahve been part of the sage package.
+
+def _cycle_permutations(cycle):
+    """Given a set of elements, a representative of each cyclic permutation of
+    those elements."""
+    cycle = list(cycle)
+    marked_el = cycle.pop()
+    for p in itertools.permutations(cycle):
+        yield (marked_el, ) + p
 
 
-def _unordered_partition_divisions(S, partition):
-    lengths, mults = multiset.Multiset(partition).sort_split()
-    # clm[i] is the number of nodes situated in some bin of size l[i].
-    clm = [l*m for l, m in zip(lengths, mults)]
-    for odiv in _ordered_divisions(S, clm):
-        strand = []
-        for m, cbin in zip(mults, odiv):
-            strand.append(_even_divisions(set(cbin), m))
-        for bundle in itertools.product(*strand):
-            yield frozenset(itertools.chain.from_iterable(bundle))
+def cycle_labellings(partition, S=None):
+    """Given a conjugacy class of symmetric functions find all ways to label
+    the cycle using the input set."""
+    for upd in set_partitions(partition, S):
+        for cycle in itertools.product(*map(_cycle_permutations, upd)):
+            yield cycle
 
 
-def unordered_partition_divisions(partition, S=None):
-    if S is None:
-        S = range(sum(partition))
-    elif isinstance(S, int):
-        S = range(S)
-    else:
-        S = set(S)
-
-    for subset in itertools.combinations(S, sum(partition)):
-        for p in _unordered_partition_divisions(set(subset), partition):
-            yield p
+def cycle_index(partition, n=None):
+    """Found by multiplying the set partition count by the product of the
+    number of permutations of each cycle."""
+    partition = multiset.Multiset(partition)
+    if n is None:
+        n = sum(partition)
+    count = math.factorial(n)
+    for l, m in zip(*partition.split()):
+        count //= l**m * math.factorial(m)
+    return count
 
 
 class LabellingTests(unittest.TestCase):
 
     split_sets = [(6, 2), (6, 3), (9, 3), (12, 3), (12, 4)]
 
-    def test_even_division_counts(self):
-        """ Check that we produce the correct number of combinations. """
+    def test_equipartition_counts(self):
+        """ Check that we produce the correct number of equipartitions. """
         for n, b in self.split_sets:
-            self.assertEqual(arrangement_count(n, b),
-                             len(frozenset(even_divisions(range(n), b))))
+            self.assertEqual(equipartition_count(n, b),
+                             len(frozenset(equipartitions(range(n), b))))
 
-    def test_even_division_uniqueness(self):
-        """Make sure each division is a partition of the original set"""
+    def test_even_division_lengths(self):
+        """Make sure each equipartition is a partition of the original set"""
         for n, b in self.split_sets:
-            for division in even_divisions(range(n), b):
+            for division in equipartitions(range(n), b):
                 s = set(itertools.chain.from_iterable(division))
                 self.assertEqual(n, len(s))
-    
+
     partitions = [[3, 3, 2, 1], [3, 3, 4], [3, 3, 2, 2], [2, 2, 1]]
 
-    def test_ordered_division_counts(self):
+    def test_ordered_partition_counts(self):
+        """Check we produce the coorect number of ordered partitions."""
         for partition in self.partitions:
-            self.assertEqual(multinomial_coefficient(partition),
-                             len(set(ordered_divisions(range(sum(partition)), partition))))
+            self.assertEqual(ordered_partition_count(partition),
+                             len(set(ordered_partitions(partition))))
 
-    def test_ordered_partition_sums(self):
+    def test_ordered_partition_lengths(self):
+        """Check that each ordered partition is a partition S"""
         for partition in self.partitions:
             n = sum(partition)
-            for division in ordered_divisions(range(sum(partition)), partition):
+            for division in ordered_partitions(partition):
                 s = set(itertools.chain.from_iterable(division))
                 self.assertEqual(n, len(s))
 
-    def test_unordered_partition_divisions(self):
+    def test_set_partition_counts(self):
+        """Check we produce the correct number of set partitions"""
         for partition in self.partitions:
-            self.assertEqual(partition_division_count(partition),
-                             len(frozenset(unordered_partition_divisions(partition))))
-        self.assertEqual(partition_division_count([3, 3, 2], 9),
-                         len(frozenset(unordered_partition_divisions([3, 3, 2], 9))))
-        self.assertEqual(len(frozenset(unordered_partition_divisions([2, 2], 5))),
-                         len(frozenset(unordered_partition_divisions([2, 2, 1]))))
+            self.assertEqual(set_partition_count(partition),
+                             len(set(set_partitions(partition))))
+        self.assertEqual(set_partition_count([3, 3, 2], 9),
+                         len(set(set_partitions([3, 3, 2], 9))))
+
+        self.assertEqual(len(set(set_partitions([2, 2], 5))),
+                         len(set(set_partitions([2, 2, 1]))))
+
+    def test_cycle_labellings(self):
+        """Test that we produce the correct number of cycle labellings."""
+        for partition in self.partitions:
+            self.assertEqual(cycle_index(partition),
+                             len(frozenset(cycle_labellings(partition))))
+        self.assertEqual(cycle_index([3, 3, 2], 9),
+                         len(frozenset(cycle_labellings([3, 3, 2], 9))))
+        self.assertEqual(len(frozenset(cycle_labellings([2, 2], 5))),
+                         len(frozenset(cycle_labellings([2, 2, 1]))))
 
 if __name__ == '__main__':
     unittest.main()

@@ -224,7 +224,7 @@ class SymmetricFunction(Endofunction):
         if hasattr(func, '__getitem__') and hasattr(func[0], '__iter__'):
             # If it is a cycle decomposition, change to function.
             func = cycles_to_funclist(func)
-        super(type(self), self).__init__(func)
+        super(SymmetricFunction, self).__init__(func)
         if not len(self) == len(self.imageset):
             raise ValueError("This function is not invertible.")
 
