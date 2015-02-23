@@ -99,10 +99,10 @@ class NecklaceEnumerationTests(unittest.TestCase):
 
     def test_total_counts(self):
         """Verify the count_by_period method agrees with Sage's totals."""
-        color_partitions =    [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
-        color_cardinalities = [70, 51330759480000, 600873126148801]
-        for cp, cc in zip(color_partitions, color_cardinalities):
-            self.assertEqual(cc, len(NecklaceGroup.from_partition(cp)))
+        partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
+        cardinalities = [70, 51330759480000, 600873126148801]
+        for c, p in zip(cardinalities, partitions):
+            self.assertEqual(c, NecklaceGroup.from_partition(p).cardinality())
 
     def test_enumeration_counts(self):
         """Test necklace counts for various bead sets."""

@@ -25,6 +25,8 @@ themselves. """
 import math
 import functools
 
+from memoized_property import memoized_property
+
 from . import subsequences
 from . import multiset
 from . import factorization
@@ -331,6 +333,7 @@ class TreeEnumerator(object):
                     tree[I] = tree[I-(p-q)]
                 yield DominantTree(tree, preordered=True)
 
+    @memoized_property
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm
         featured without derivation in Finch, S. R. "Otter's Tree Enumeration
@@ -347,13 +350,13 @@ class TreeEnumerator(object):
             T[n] //= n-1
         return T[-1]
 
-    def __len__(self):
-        """ NOTE: For n >= 47, len(TreeEnumerator(n)) is greater than C long,
-        and thus gives rise to an index overflow error. Use self.cardinality
-        instead. """
-        if self._len is None:
-            self._len = self.cardinality()
-        return self._len
+    # def __len__(self):
+    #     """ NOTE: For n >= 47, len(TreeEnumerator(n)) is greater than C long,
+    #     and thus gives rise to an index overflow error. Use self.cardinality
+    #     instead. """
+    #     if self._len is None:
+    #         self._len = self.cardinality()
+    #     return self._len
 
 
 class ForestEnumerator(TreeEnumerator):
@@ -394,10 +397,11 @@ class PartitionForests(object):
 
     __le__ = None
 
-    def __len__(self):
+    @memoized_property
+    def cardinality(self):
         l = 1
         for y, r in self.partition.items():
-            n = len(TreeEnumerator(y))
+            n = TreeEnumerator(y).cardinality
             l *= math.factorial(n+r-1)//math.factorial(r)//math.factorial(n-1)
         return l
 

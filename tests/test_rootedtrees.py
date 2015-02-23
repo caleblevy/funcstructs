@@ -24,7 +24,7 @@ class TreeEnumerationTests(unittest.TestCase):
                 trees.add(tree)
                 trees.add(tree)
             self.assertEqual(count, len(trees))
-            self.assertEqual(count, len(TreeEnumerator(n+1)))
+            self.assertEqual(count, TreeEnumerator(n+1).cardinality)
 
     def test_forest_counts(self):
         """Check len(ForestEnumerator(N))==A000081(N+1)"""
@@ -34,7 +34,10 @@ class TreeEnumerationTests(unittest.TestCase):
                 forests.add(forest)
                 forests.add(forest)
             self.assertEqual(self.A000081[n+1], len(forests))
-            self.assertEqual(self.A000081[n+1], len(ForestEnumerator(n+1)))
+            self.assertEqual(
+                self.A000081[n+1],
+                ForestEnumerator(n+1).cardinality
+            )
 
     def test_partition_forest_counts(self):
         """Check alternate way of enumerating forests."""
@@ -44,7 +47,7 @@ class TreeEnumerationTests(unittest.TestCase):
             forest_count = 0
             for partition in partitions(n+1):
                 forests.update(PartitionForests(partition))
-                forest_count += len(PartitionForests(partition))
+                forest_count += PartitionForests(partition).cardinality
             self.assertEqual(self.A000081[n+1], len(forests))
             self.assertEqual(self.A000081[n+1], forest_count)
 

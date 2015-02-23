@@ -28,6 +28,7 @@ are precisely the necklaces whose beads are the rooted trees. """
 import fractions
 import functools
 
+from memoized_property import memoized_property
 from PADS import Lyndon
 
 from . import multiset
@@ -72,7 +73,11 @@ class Necklace(object):
         if not preordered:
             strand = Lyndon.SmallestRotation(strand)
         self.strand = tuple(strand)
-        self.period = periodicity(strand)
+        self._hash = hash(self.strand)
+
+    @memoized_property
+    def period(self):
+        return periodicity(self.strand)
 
     def __repr__(self):
         return "Necklace(%s)" % str(self.strand)
@@ -81,13 +86,13 @@ class Necklace(object):
         return len(self.strand)
 
     def __hash__(self):
-        return hash(self.strand)
+        return self._hash
 
     def __eq__(self, other):
         """For now we check for equality by "brute force" rotation, as D.
         Eppstein's normalization algorithm produces unpredictable output for
         items with ill-defined orderability."""
-        if isinstance(other, self.__class__):
+        if isinstance(other, type(self)):
             return self.strand == other.strand
         return False
 
@@ -186,9 +191,6 @@ class NecklaceGroup(object):
         """Return the number of necklaces formed from the given multiset of
         beads."""
         return sum(self.count_by_period())
-
-    def __len__(self):
-        return self.cardinality()
 
     def sfc(self):
         """Wrapper for partition necklaces, which takes a partition of

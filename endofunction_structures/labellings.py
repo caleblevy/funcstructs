@@ -9,7 +9,8 @@ import math
 import itertools
 import unittest
 
-import multiset
+from . import multiset
+from . import necklaces
 
 
 def _equipartitions(S, b):
@@ -134,18 +135,22 @@ def set_partition_count(partition, n=None):
 def _cycle_permutations(cycle):
     """Given a set of elements, a representative of each cyclic permutation of
     those elements."""
-    cycle = list(cycle)
-    marked_el = cycle.pop()
+    cycle = set(cycle)
+    start = min(cycle)
+    cycle.remove(start)
     for p in itertools.permutations(cycle):
-        yield (marked_el, ) + p
+        yield necklaces.Necklace((start, ) + p, preordered=True)
 
 
 def cycle_labellings(partition, S=None):
     """Given a conjugacy class of symmetric functions find all ways to label
     the cycle using the input set."""
     for upd in set_partitions(partition, S):
-        for cycle in itertools.product(*map(_cycle_permutations, upd)):
-            yield cycle
+        for cycle_group in itertools.product(*map(_cycle_permutations, upd)):
+            yield frozenset(cycle_group)
+
+for cycle in cycle_labellings([3,3,2,1]):
+    print cycle
 
 
 def cycle_index(partition, n=None):
