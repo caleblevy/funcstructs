@@ -11,7 +11,6 @@ import endofunction_structures as ec
 from endofunction_structures.funcstructs import *
 from endofunction_structures.necklaces import Necklace
 from endofunction_structures.rootedtrees import DominantTree
-import cProfile
 
 
 class FuncstructTests(unittest.TestCase):
@@ -76,6 +75,3 @@ class FuncstructTests(unittest.TestCase):
 
     def test_hash(self):
         pass
-
-# if __name__ == '__main__':
-#     cProfile.run('unittest.main()')
