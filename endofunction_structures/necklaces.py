@@ -135,6 +135,7 @@ def simple_fixed_content(a, content, t, p, k):
 
 
 class NecklaceGroup(object):
+    __slots__ = ['partition', 'beads', 'elems']
 
     @classmethod
     def from_partition(cls, partition):

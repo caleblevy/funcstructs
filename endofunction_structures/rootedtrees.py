@@ -110,6 +110,7 @@ class RootedTree(object):
 
 @functools.total_ordering
 class LevelTree(object):
+    __slots__ = ['level_sequence']
     """Represents an unlabelled ordered rooted tree."""
 
     def __repr__(self):
@@ -281,6 +282,7 @@ class DominantTree(LevelTree):
 
 
 class TreeEnumerator(object):
+    __slots__ = ['n', '_cardinality']
 
     """Represents the class of unlabelled rooted trees on n nodes."""
 
@@ -288,7 +290,6 @@ class TreeEnumerator(object):
         if node_count < 1:
             raise ValueError("Every tree requires at least one node.")
         self.n = node_count
-        self._len = None
 
     def __hash__(self):
         return hash(self.n)
@@ -362,10 +363,10 @@ class ForestEnumerator(TreeEnumerator):
     To enumerate all collections of rooted trees on N nodes, we reverse the
     principle and enumerate all rooted trees on N+1 nodes, chopping them at the
     base. Much simpler than finding all trees corresponding to a partition. """
+    __slots__ = ['n', '_cardinality']
 
     def __init__(self, node_count):
         self.n = node_count + 1
-        self._len = None
 
     def __repr__(self):
         return self.__class__.__name__+'('+str(self.n - 1)+')'
@@ -377,6 +378,7 @@ class ForestEnumerator(TreeEnumerator):
 
 class PartitionForests(object):
     """Colections of rooted trees with sizes specified by partitions."""
+    __slots__ = ['partition', '_cardinality']
     def __init__(self, partition):
         self.partition = multiset.Multiset(partition)
 

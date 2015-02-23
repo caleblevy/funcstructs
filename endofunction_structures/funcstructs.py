@@ -184,7 +184,7 @@ class FuncstructEnumerator(object):
         for forest in rootedtrees.ForestEnumerator(self.n):
             for mpart in forest.partitions():
                 for struct in productrange.unordered_product(mpart, necklaces.NecklaceGroup):
-                    yield Funcstruct(struct)
+                    yield Funcstruct(struct, self.n)
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes. Iterates
@@ -249,7 +249,7 @@ class CycleTypeFuncstructs(object):
             for c, l, m in zip(composition, lengths, multiplicities):
                 cycle_groups.append(component_groups(c, l, m))
             for bundle in itertools.product(*cycle_groups):
-                yield Funcstruct(productrange.flatten(bundle))
+                yield Funcstruct(productrange.flatten(bundle), self.n)
 
 
 def partition_funcstructs(n):

@@ -52,7 +52,7 @@ class FuncstructTests(unittest.TestCase):
             s.update(FuncstructEnumerator(i+1))
             s.update(partition_funcstructs(i+1))
             self.assertEqual(count, len(s))
-            self.assertEqual(count, len(FuncstructEnumerator(i+1)))
+            self.assertEqual(count, FuncstructEnumerator(i+1).cardinality())
 
     def test_degeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
