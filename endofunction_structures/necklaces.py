@@ -64,6 +64,7 @@ def periodicity(strand):
 
 
 class Necklace(object):
+    __slots__ = ['strand', '_hash', '_period']
     """An equivalence class of all lists equivalent under rotation."""
 
     def __init__(self, strand, preordered=False):

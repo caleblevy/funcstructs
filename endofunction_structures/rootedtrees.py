@@ -41,7 +41,7 @@ class RootedTree(object):
         if subtrees is None:
             subtrees = multiset.Multiset()
         subtrees = multiset.Multiset(subtrees)
-        for subtree in subtrees.elements():
+        for subtree in subtrees.unique_elements():
             if not isinstance(subtree, RootedTree):
                 raise ValueError("Subtrees must be rooted trees.")
         self.subtrees = subtrees
@@ -69,7 +69,7 @@ class RootedTree(object):
             strings = []
             for subtree in sorted(self.subtrees.keys(), reverse=1):
                 # Hack to make tree print with multiplicity exponents.
-                mult = self.subtrees.count(subtree)
+                mult = self.subtrees[subtree]
                 tree_string = subtree._str()
                 if mult > 1:
                     tree_string += '^%s' % str(mult)
@@ -131,7 +131,7 @@ class LevelTree(object):
             raise ValueError("Cannot compare tree with type %s" % type(other))
 
     def __hash__(self):
-        return hash(self.level_sequence)
+        return self._hash
 
     def __len__(self):
         return len(self.level_sequence)
@@ -199,6 +199,7 @@ class OrderedTree(LevelTree):
 
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
+        self._hash = hash(self.level_sequence)
 
     def branches(self):
         for branch in self.branch_sequences():
@@ -237,12 +238,15 @@ def unordered_tree(level_sequence):
 class DominantTree(LevelTree):
 
     def __init__(self, level_sequence, preordered=False):
-        if preordered:
-            self.level_sequence = tuple(level_sequence)
-        elif isinstance(level_sequence, type(self)):
+        if isinstance(level_sequence, type(self)):
             self.level_sequence = level_sequence.level_sequence
+            self._hash = level_sequence._hash
         else:
-            self.level_sequence = dominant_sequence(level_sequence)
+            if preordered:
+                self.level_sequence = tuple(level_sequence)
+            else:
+                self.level_sequence = dominant_sequence(level_sequence)
+            self._hash = hash(self.level_sequence)
 
     def branches(self):
         for branch in self.branch_sequences():
@@ -349,14 +353,6 @@ class TreeEnumerator(object):
                 T[n] += s
             T[n] //= n-1
         return T[-1]
-
-    # def __len__(self):
-    #     """ NOTE: For n >= 47, len(TreeEnumerator(n)) is greater than C long,
-    #     and thus gives rise to an index overflow error. Use self.cardinality
-    #     instead. """
-    #     if self._len is None:
-    #         self._len = self.cardinality()
-    #     return self._len
 
 
 class ForestEnumerator(TreeEnumerator):

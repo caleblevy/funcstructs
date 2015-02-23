@@ -71,6 +71,7 @@ def _func_to_struct(f):
 
 
 class Funcstruct(object):
+    __slots__ = ['cycles', 'n']
 
     def __init__(self, cycles, precounted=None):
         if isinstance(cycles, endofunctions.Endofunction):

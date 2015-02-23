@@ -32,6 +32,7 @@ def nCk(n, k):
 
 
 class Multiset(Counter):
+    __slots__ = ['_size', '_items', '_hash']
     """ Multiset - Also known as a bag or unordered tuple. Multiset is
     hashable, immutable and usable for dict keys. """
 
@@ -48,7 +49,7 @@ class Multiset(Counter):
                 self._items = iterable._items
             else:
                 for el in iterable:
-                    super(Counter, self).__setitem__(el, self.count(el) + 1)
+                    super(Counter, self).__setitem__(el, self.get(el, 0) + 1)
                     self._size += 1
                 self._items = frozenset(self.items())
                 self._hash = hash(self._items)
@@ -120,7 +121,7 @@ class Multiset(Counter):
             return '{%s}' % ', '.join(strings)
 
     def unique_elements(self):
-        return self.values()
+        return self.keys()
 
     def num_unique_elements(self):
         return len(self.values())
@@ -128,20 +129,13 @@ class Multiset(Counter):
     def num_elements(self):
         return len(self)
 
-    def count(self, value):
-        """Return the number of value present in this Multiset. If value is not
-        in the Multiset no Error is raised, instead 0 is returned. """
-        return self.get(value, 0)
-
     def __contains__(self, value):
         """ Returns the multiplicity of the element. This runs in O(1). """
-        return self.count(value)
+        return self.get(value, 0)
 
     def __iter__(self):
         """Iterate through all elements; return multiple copies if present."""
-        for elem, count in self.items():
-            for i in range(count):
-                yield elem
+        return self.elements()
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

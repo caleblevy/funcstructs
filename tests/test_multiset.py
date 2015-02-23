@@ -25,11 +25,11 @@ class MultisetTests(unittest.TestCase):
     def test_init(self):
         """Test the multiset initializer"""
         b = Multiset('abracadabra')
-        self.assertTrue(b.count('a') == 5)
-        self.assertTrue(b.count('b') == 2)
-        self.assertTrue(b.count('r') == 2)
-        self.assertTrue(b.count('c') == 1)
-        self.assertTrue(b.count('d') == 1)
+        self.assertTrue(b['a'] == 5)
+        self.assertTrue(b['b'] == 2)
+        self.assertTrue(b['r'] == 2)
+        self.assertTrue(b['c'] == 1)
+        self.assertTrue(b['d'] == 1)
         b2 = Multiset(b)
         self.assertTrue(b2 == b)
 
@@ -53,8 +53,8 @@ class MultisetTests(unittest.TestCase):
     def test_count(self):
         """Check that we record the correct number of elements."""
         ms = Multiset('abracadabra')
-        self.assertEqual(5, ms.count('a'))
-        self.assertEqual(0, ms.count('x'))
+        self.assertEqual(5, ms['a'])
+        self.assertEqual(0, ms['x'])
 
     def test_most_common(self):
         abra = Multiset('abracadabra')
@@ -145,7 +145,7 @@ class MultisetTests(unittest.TestCase):
         abra = Multiset("abracadabra")
         y, d = abra.split()
         for el in y:
-            self.assertEqual(abra.count(el), d[y.index(el)])
+            self.assertEqual(abra[el], d[y.index(el)])
 
     def test_degeneracy(self):
         abra = Multiset("abracadabra")
