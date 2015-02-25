@@ -165,7 +165,7 @@ class FuncstructEnumerator(object):
         self.n = node_count
 
     def __repr__(self):
-        return type(self).__name__+'('+str(self.n)+')'
+        return self.__class__.__name__+'('+str(self.n)+')'
 
     def __hash__(self):
         return hash(self.n)

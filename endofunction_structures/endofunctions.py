@@ -140,7 +140,7 @@ class Endofunction(object):
                 if x in prev_els:
                     skip_el = True
                     break
-                # If an element appears in the path twice, we have already 
+                # If an element appears in the path twice, we have already
                 # found the cycle
                 if x in path_els:
                     break
@@ -251,7 +251,7 @@ class SymmetricFunction(Endofunction):
 
     def conj(self, func):
         """Conjugate a function f by a permutation."""
-        return self.inverse(func(self))
+        return self.inverse(func)(self)
 
 
 def randperm(n):

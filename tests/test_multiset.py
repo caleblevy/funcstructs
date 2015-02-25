@@ -107,15 +107,15 @@ class MultisetTests(unittest.TestCase):
 
         c = Multiset([4, 4, 5, 5, b, b])  # make sure we can nest them
         d = Multiset([4, Multiset([1, 3, 2, 1]), 4, 5, b, 5])
-        self.assertEqual(c, d) # Make sure both constructions work.
+        self.assertEqual(c, d)  # Make sure both constructions work.
 
         dic = {}
         dic[b] = 3
         dic[c] = 5
         dic[d] = 7
-        self.assertEqual(len(dic), 2) # Make sure no duplicates in dictionary.
+        self.assertEqual(len(dic), 2)  # Make sure no duplicates in dictionary.
 
-        # test commutativity of multiset instantiation.
+        # Test commutativity of multiset instantiation.
         self.assertEqual(Multiset([4, 4, 5, 5, c]), Multiset([4, 5, d, 4, 5]))
 
     def test_immutability(self):

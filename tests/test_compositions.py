@@ -42,4 +42,3 @@ class CompositionTests(unittest.TestCase):
             for k in range(1, 10):
                 for comp in weak_compositions(n, k):
                     self.assertEqual(n, sum(comp))
-                

@@ -21,9 +21,9 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves. """
 
 
-
 import math
 import functools
+import itertools
 
 from memoized_property import memoized_property
 
@@ -110,8 +110,10 @@ class RootedTree(object):
 
 @functools.total_ordering
 class LevelTree(object):
-    __slots__ = ['level_sequence']
     """Represents an unlabelled ordered rooted tree."""
+
+    def __getitem__(self, key):
+        return self.level_sequence[key]
 
     def __repr__(self):
         return self.__class__.__name__ + "("+str(list(self.level_sequence))+')'
@@ -147,10 +149,10 @@ class LevelTree(object):
 
     def branch_sequences(self):
         """ Return each major subbranch of a tree (even chopped). """
-        if len(self.level_sequence) == 1:
+        if len(self) == 1:
             return
-        isroot = lambda node: node == self.level_sequence[0] + 1
-        for branch in subsequences.startswith(self.level_sequence[1:], isroot):
+        isroot = lambda node: node == self[0] + 1
+        for branch in subsequences.startswith(self[1:], isroot):
             yield branch
 
     def subtree_sequences(self):
@@ -178,14 +180,14 @@ class LevelTree(object):
         specified labelling. """
 
         if labels is None:
-            labels = range(len(self.level_sequence))
-        height = max(self.level_sequence)
-        labelling = [0]*len(self.level_sequence)
+            labels = range(len(self))
+        height = max(self)
+        labelling = [0]*len(self)
         labelling[0] = labels[0]
         height_prev = 1
         # Most recent node found at height h. Where to graft the next node to.
         grafting_point = [0]*height
-        for node, height in enumerate(self.level_sequence[1:]):
+        for node, height in enumerate(self[1:]):
             if height > height_prev:
                 labelling[node+1] = labels[grafting_point[height_prev-1]]
                 height_prev += 1
@@ -219,7 +221,7 @@ class OrderedTree(LevelTree):
         for branch in self.branches():
             branch_list.append(branch._dominant_sequence())
         branch_list.sort(reverse=True)
-        return tuple([self.level_sequence[0]] + productrange.flatten(branch_list))
+        return [self[0]] + productrange.flatten(branch_list)
 
     def canonical_form(self):
         """Return a dominant tree type."""
@@ -243,10 +245,9 @@ class DominantTree(LevelTree):
             self.level_sequence = level_sequence.level_sequence
             self._hash = level_sequence._hash
         else:
-            if preordered:
-                self.level_sequence = tuple(level_sequence)
-            else:
-                self.level_sequence = dominant_sequence(level_sequence)
+            if not preordered:
+                level_sequence = dominant_sequence(level_sequence)
+            self.level_sequence = tuple(level_sequence)
             self._hash = hash(self.level_sequence)
 
     def branches(self):
@@ -282,9 +283,9 @@ class DominantTree(LevelTree):
 
 
 class TreeEnumerator(object):
-    __slots__ = ['n', '_cardinality']
-
     """Represents the class of unlabelled rooted trees on n nodes."""
+
+    __slots__ = ['n', '_cardinality']
 
     def __init__(self, node_count):
         if node_count < 1:
@@ -363,6 +364,7 @@ class ForestEnumerator(TreeEnumerator):
     To enumerate all collections of rooted trees on N nodes, we reverse the
     principle and enumerate all rooted trees on N+1 nodes, chopping them at the
     base. Much simpler than finding all trees corresponding to a partition. """
+
     __slots__ = ['n', '_cardinality']
 
     def __init__(self, node_count):
@@ -378,7 +380,9 @@ class ForestEnumerator(TreeEnumerator):
 
 class PartitionForests(object):
     """Colections of rooted trees with sizes specified by partitions."""
+
     __slots__ = ['partition', '_cardinality']
+
     def __init__(self, partition):
         self.partition = multiset.Multiset(partition)
 

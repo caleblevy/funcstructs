@@ -75,7 +75,9 @@ def isdivisor(d, n):
 
 def phi_product(n):
     """Return the totient using the fancy prime formula."""
-    return int(n*multiset.prod((1-fractions.Fraction(1, p) for p in prime_divisors(n))))
+    return int(n*multiset.prod(
+        (1-fractions.Fraction(1, p) for p in prime_divisors(n))
+    ))
 
 
 def phi_sum(n):

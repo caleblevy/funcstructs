@@ -51,11 +51,11 @@ def equipartition_count(n, b):
 
 def _ordered_partitions(S, partition):
     if len(partition) == 1:
-        yield [frozenset(S)]
+        yield [tuple(S)]
     else:
         for first in itertools.combinations(S, partition[0]):
             for remaining in _ordered_partitions(S-set(first), partition[1:]):
-                yield [frozenset(first)] + remaining
+                yield [first] + remaining
 
 
 def ordered_partitions(partition, S=None):
@@ -68,7 +68,7 @@ def ordered_partitions(partition, S=None):
     if not len(S) == sum(partition):
         raise ValueError("partition must sum to size of set")
     for p in _ordered_partitions(S, partition):
-        yield tuple(p)
+        yield tuple(frozenset(s) for s in p)
 
 
 def ordered_partition_count(partition, n=None):
@@ -149,9 +149,6 @@ def cycle_labellings(partition, S=None):
         for cycle_group in itertools.product(*map(_cycle_permutations, upd)):
             yield frozenset(cycle_group)
 
-for cycle in cycle_labellings([3,3,2,1]):
-    print cycle
-
 
 def cycle_index(partition, n=None):
     """Found by multiplying the set partition count by the product of the
@@ -209,6 +206,14 @@ class LabellingTests(unittest.TestCase):
         self.assertEqual(len(set(set_partitions([2, 2], 5))),
                          len(set(set_partitions([2, 2, 1]))))
 
+    def test_set_partition_lengths(self):
+        """Check that each ordered partition is a partition S"""
+        for partition in self.partitions:
+            n = sum(partition)
+            for division in set_partitions(partition):
+                s = set(itertools.chain.from_iterable(division))
+                self.assertEqual(n, len(s))
+
     def test_cycle_labellings(self):
         """Test that we produce the correct number of cycle labellings."""
         for partition in self.partitions:
@@ -218,6 +223,7 @@ class LabellingTests(unittest.TestCase):
                          len(frozenset(cycle_labellings([3, 3, 2], 9))))
         self.assertEqual(len(frozenset(cycle_labellings([2, 2], 5))),
                          len(frozenset(cycle_labellings([2, 2, 1]))))
+
 
 if __name__ == '__main__':
     unittest.main()

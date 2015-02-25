@@ -75,6 +75,7 @@ class TreeEnumerationTests(unittest.TestCase):
                         else:
                             self.assertNotEqual(enum1(n), enum2(m))
 
+
 class TreeTests(unittest.TestCase):
 
     def test_rooted_tree_strings(self):

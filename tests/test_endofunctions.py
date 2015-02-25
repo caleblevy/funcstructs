@@ -16,9 +16,9 @@ class EndofunctionTests(unittest.TestCase):
     # Imagepath Tests
 
     def test_iterate(self):
-        sigma = Endofunction([1, 2 ,3, 0, 5, 6, 4]) # Perm (0,1,2,3)(4,5,6)
+        sigma = Endofunction([1, 2, 3, 0, 5, 6, 4])  # Perm (0,1,2,3)(4,5,6)
         identity = Endofunction(range(7))
-        for I in range(1, 11): # Order of cycle is 12
+        for I in range(1, 11):  # Order of cycle is 12
             self.assertNotEqual(identity.cycles, (sigma**I).cycles)
         self.assertEqual(identity.cycles, (sigma**12).cycles)
 
