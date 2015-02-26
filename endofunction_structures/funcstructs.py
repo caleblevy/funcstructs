@@ -183,7 +183,10 @@ class FuncstructEnumerator(object):
         Equalivalent to all conjugacy classes in End(S)."""
         for forest in rootedtrees.ForestEnumerator(self.n):
             for mpart in forest.partitions():
-                for struct in productrange.unordered_product(mpart, necklaces.NecklaceGroup):
+                for struct in productrange.unordered_product(
+                    mpart,
+                    necklaces.NecklaceGroup
+                ):
                     yield Funcstruct(struct, self.n)
 
     def cardinality(self):
@@ -195,12 +198,12 @@ class FuncstructEnumerator(object):
         tot = 0
         for b in levypartitions.tuple_partitions(self.n):
             product_terms = []
-            for I in range(1, len(b)+1):
+            for i in range(1, len(b)):
                 s = 0
-                for J in factorization.divisors(I):
-                    s += J*b[J-1]
-                s **= b[I-1]
-                s *= fractions.Fraction(I, 1)**(-b[I-1])/math.factorial(b[I-1])
+                for j in factorization.divisors(i):
+                    s += j * b[j]
+                s **= b[i]
+                s *= fractions.Fraction(i, 1)**(-b[i])/math.factorial(b[i])
                 product_terms.append(s)
             tot += multiset.prod(product_terms)
         return int(tot)

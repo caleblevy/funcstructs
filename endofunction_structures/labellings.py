@@ -7,10 +7,12 @@
 
 import math
 import itertools
-import unittest
 
 from . import multiset
 from . import necklaces
+from . import rootedtrees
+from . import endofunctions
+from . import productrange
 
 
 def _equipartitions(S, b):
@@ -116,13 +118,12 @@ def set_partition_count(partition, n=None):
     List all permutations of S of which there are n!. Order the partition
     arbitrarily, and set division markers in each permutation at those
     locations. The number of appearances of each group of cycles of the same
-    length is covered above. We just multiply these together to get the number
-    of combinations.
+    length is covered above. Their product is the number of combinations.
 
-    Alternatively it is the cycle index divided by the factorial of each cycle
-    length, including multiplicity, since here permutation order does not
-    matter.
-    """
+    Alternatively it is the cycle index divided by the factorial of one less
+    than each cycle length, including multiplicity, since here permutation
+    order does not matter. """
+
     partition = multiset.Multiset(partition)
     if n is None:
         n = sum(partition)
@@ -162,68 +163,68 @@ def cycle_index(partition, n=None):
     return count
 
 
-class LabellingTests(unittest.TestCase):
-
-    split_sets = [(6, 2), (6, 3), (9, 3), (12, 3), (12, 4)]
-
-    def test_equipartition_counts(self):
-        """ Check that we produce the correct number of equipartitions. """
-        for n, b in self.split_sets:
-            self.assertEqual(equipartition_count(n, b),
-                             len(frozenset(equipartitions(range(n), b))))
-
-    def test_even_division_lengths(self):
-        """Make sure each equipartition is a partition of the original set"""
-        for n, b in self.split_sets:
-            for division in equipartitions(range(n), b):
-                s = set(itertools.chain.from_iterable(division))
-                self.assertEqual(n, len(s))
-
-    partitions = [[3, 3, 2, 1], [3, 3, 4], [3, 3, 2, 2], [2, 2, 1]]
-
-    def test_ordered_partition_counts(self):
-        """Check we produce the coorect number of ordered partitions."""
-        for partition in self.partitions:
-            self.assertEqual(ordered_partition_count(partition),
-                             len(set(ordered_partitions(partition))))
-
-    def test_ordered_partition_lengths(self):
-        """Check that each ordered partition is a partition S"""
-        for partition in self.partitions:
-            n = sum(partition)
-            for division in ordered_partitions(partition):
-                s = set(itertools.chain.from_iterable(division))
-                self.assertEqual(n, len(s))
-
-    def test_set_partition_counts(self):
-        """Check we produce the correct number of set partitions"""
-        for partition in self.partitions:
-            self.assertEqual(set_partition_count(partition),
-                             len(set(set_partitions(partition))))
-        self.assertEqual(set_partition_count([3, 3, 2], 9),
-                         len(set(set_partitions([3, 3, 2], 9))))
-
-        self.assertEqual(len(set(set_partitions([2, 2], 5))),
-                         len(set(set_partitions([2, 2, 1]))))
-
-    def test_set_partition_lengths(self):
-        """Check that each ordered partition is a partition S"""
-        for partition in self.partitions:
-            n = sum(partition)
-            for division in set_partitions(partition):
-                s = set(itertools.chain.from_iterable(division))
-                self.assertEqual(n, len(s))
-
-    def test_cycle_labellings(self):
-        """Test that we produce the correct number of cycle labellings."""
-        for partition in self.partitions:
-            self.assertEqual(cycle_index(partition),
-                             len(frozenset(cycle_labellings(partition))))
-        self.assertEqual(cycle_index([3, 3, 2], 9),
-                         len(frozenset(cycle_labellings([3, 3, 2], 9))))
-        self.assertEqual(len(frozenset(cycle_labellings([2, 2], 5))),
-                         len(frozenset(cycle_labellings([2, 2, 1]))))
+def branch_inds(tree):
+    """Return the grafting points of tree's main sub branches in order."""
+    inds = []
+    for i, node in enumerate(tree):
+        if node == tree[0]+1:
+            inds.append(i)
+    return inds
 
 
-if __name__ == '__main__':
-    unittest.main()
+def branch_groups(tree):
+    """Yield, in order, tree's unique branches, and all nodes to which an
+    instance of that branch is attached."""
+    branches, mults = multiset.Multiset(tree.branches()).sort_split()
+    branches = iter(branches[::-1])
+    mults.reverse()
+    indset = branch_inds(tree)[::-1]
+    for m in mults:
+        inds = []
+        for _ in range(m):
+            inds.append(indset.pop())
+        yield next(branches), inds
+
+
+def label_groups(tree):
+    """ Order in which we label and group the nodes of the rooted tree. """
+    if tree[0] == 1:
+        yield [0]
+    for subtree, inds in branch_groups(tree):
+        yield inds
+        for ind in inds:
+            for indseq in label_groups(subtree):
+                yield [i + ind for i in indseq]
+
+
+def translation_keys(tree):
+    """Given a combination of nodes from label groups, output keys with which
+    to translate each combination into an endofunction."""
+    ind_groups = list(label_groups(tree))
+    bin_widths = list(map(len, ind_groups))
+    indperm = endofunctions.SymmetricFunction(productrange.flatten(ind_groups))
+    translation_sequence = indperm.conj(endofunctions.Endofunction(tree))
+    return bin_widths, translation_sequence
+
+
+def tree_labellings(tree):
+    """Constant amortized time enumeration of every endofunction whose
+    structure is described by the given tree. In many cases it may be much more
+    efficient to use itertools.permutations (since they are at C speed) and may
+    even be true in the amortized sense (since there are provably on average
+    O(n!) labellings of a tree).
+
+    Still, it is constant time per tree (really per node per tree), and its
+    here for completeness sake.
+
+    Note that order of the elements in a given combination bin does not matter
+    PER SE, as long as it is consistant for any suffix with starting with that
+    combination."""
+    n = len(tree)
+    bin_widths, translation_sequence = translation_keys(tree)
+    func = [0] * n
+    for combo in _ordered_partitions(set(range(n)), bin_widths):
+        c = productrange.flatten(combo)
+        for i in range(n):
+            func[c[i]] = c[translation_sequence[i]]
+        yield endofunctions.Endofunction(func)

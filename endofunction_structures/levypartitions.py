@@ -29,11 +29,10 @@ def tuple_partitions(n):
     """ Every partition on N may be represented in the form as a tuple of
     numbers (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N. This
     program outputs every partition of n in a tuple format. """
-
     for part in partitions(n):
-        b = [0]*n
+        b = [0]*(n+1)
         for p in part:
-            b[p-1] += 1
+            b[p] += 1
         yield b
 
 

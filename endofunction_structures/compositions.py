@@ -29,7 +29,6 @@ to binary digits of numbers of length up to N-1. There are thus 2^(N-1)
 compositions of N.
 """
 
-
 from . import productrange
 
 
@@ -37,40 +36,21 @@ def binary_compositions(n):
     return productrange.productrange([2]*(n-1))
 
 
-def compositions_binary(n):
-    """Additive compositions of a number; i.e. partitions with ordering."""
-    for binary_composition in binary_compositions(n):
-        tot = 1
-        composition = []
-        for I in binary_composition:
-            if I:
-                composition.append(tot)
-                tot = 1
-                continue
-            tot += 1
-        composition.append(tot)
-        yield composition
-
-
-def compositions_simple(n):
-    """A more direct way of enumerating compositions."""
+def compositions(n):
+    """Enumerate ordered lists of positive integers summing to n."""
     comp = [n]
-    while True:
+    while comp:
         yield comp
         J = len(comp)
-        if J == n:
-            return
         for K in range(J-1, -1, -1):
             # Keep descending (backwards) until hitting a "step" you can
             # subtract from
-            if comp[K] is not 1:
+            if comp[K] > 1:
                 comp[K] -= 1
                 comp.append(J-K)
                 break
             # Haven't hit the target, pop the last element, and step back
             comp.pop()
-
-compositions = compositions_simple  # best by test.
 
 
 def weak_compositions(n, k):

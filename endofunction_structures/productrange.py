@@ -61,25 +61,6 @@ def sign(num):
     return num//abs(num)
 
 
-def rangelen(start, stop=None, step=None):
-    if stop is None:
-        start, stop = stop, start
-    if start is None:
-        start = 0
-    if step is None:
-        step = 1
-
-    l = (stop - start)
-    if l == 0:
-        return 0
-    if sign(l) != sign(step):
-        return 0
-    if step*(l//step) == l:
-        return l//step
-    else:
-        return l//step+1
-
-
 def rev_range(begin, end=None, step=None):
     """ Reverse iteration order for productrange. If begin, end and step are
     as for productrange, then
@@ -100,7 +81,7 @@ def rev_range(begin, end=None, step=None):
         http://www.mathworks.com/matlabcentral/answers/79986#answer_89700. """
 
     begin, end, step = parse_ranges(begin, end, step)
-    if not all([rangelen(I, J, K) for I, J, K in zip(begin, end, step)]):
+    if not all([len(range(I, J, K)) for I, J, K in zip(begin, end, step)]):
         return
     end = [abs(I) for I in end]
     l = len(end)

@@ -15,88 +15,54 @@ from . import multiset
 from . import productrange
 
 
-# MSP == Monomial Symmetric Polynomial
-def msp_recursive(x, powers):
-    # Wrapper for _recursive_monomial_alg which separates the multiset powers
-    # into elements with degeneracies, and returns the value of the function.
-    y, d = multiset.Multiset(powers).split()
-    return _recursive_monomial_alg(x, d, y)
+def monomial_symmetric_polynomial(x, powers):
+    """ Symmetric monomial polynomial with partition of powers [p_1, ..., p_j]
+    evaluated at the vector of values [x_1, ..., x_n]. The partition is further
+    split into two vectors:
 
+        (e_1, e_2, ..., e_l) - vector of exponent values;
+        (m_1, m_2, ..., m_l) - vector of multiplicities of each exponent
 
-def _recursive_monomial_alg(x, d, y):
-    """_recursive_monomial_alg(x, d, y)
+    Instead of summing over all possible monomial terms, we use the recursion
+    relation
 
-    Recursive version of the general formula for evaluating symmetric
-    monomial polynomials. This one, while inefficient, is certainly in some
-    sense elegant, and is written as such for that reason.
+        T(n, m_1, ..., m_l) =   T(n-1, m_1, ..., m_l)
+                              + x_n**e_1 * T(n-1, m_1-1, m_2, ..., m_l)
+                              + x_n**e_2 * T(n-1, m_1, m_2-1, ..., m_l)
+                              + ...
+                              + x_n**e_l * T(n-1, m_1, m_2, ..., m_l-1),
 
-    This function itero-recursive and HIGHLY inefficient, duplicating an
-    extraordinary amount of work. It exists as a showcase of the concepts
-    behind MSP_iterative. Its running time might be something like
-    len(y)^len(x), but either way, do not run this thing with input vectors of
-    length greater than about 5 to 10, depending on your system.
+    where T(n, m_1, ..., m_l) is the symmetric monomial polynomial with the
+    same powers evaluated with multiplicities (m_1, ..., m_l). This exploits
+    additive and multiplicative associativity and commutativity to avoid
+    repeated work.
 
-    X = (a1,a2,...,an) - Vector of values for polynomial evaluation
-    D = (d1,d2,...,dl) - Vector of degeneracies of exponent partitions
-    Y = (y1,y2,...,yl) - Vector of exponents
+    This algorithm runs in O(n * m_1 *...* m_k) steps, and requires an array of
+    size O(m_1 *...* m_j) for storing previous terms of the recurrence. For
+    fun, you can input an array of symbolic variables from sympy and get fast
+    evaluation of many variable polynomials via a numpy array with object
+    elements. """
 
-    Premise of formula is given by:
-       T(n,d1,...,dl) = T(n-1,d1,...,dl) + an^y1*T(n-1,d1-1,...,dl) + ...
-                           ... + an^yl*T(n-1,d1,...,dl-1).
-
-    D and Y need to be of same length.
-    """
-    # This is the matlab copy version
-    if any(I < 0 for I in d):
-        return 0
-    elif not x:
-        if all(I == 0 for I in d):
-            return 1
-        else:
-            return 0
-    else:
-        val = _recursive_monomial_alg(x[:-1], d, y)
-        for I in range(len(d)):
-            d_temp = d[:]
-            d_temp[I] -= 1
-            val += x[-1]**y[I]*_recursive_monomial_alg(x[:-1], d_temp, y)
-
-        return val
-
-
-def msp_iterative(x, powers):
-    """
-    Symmetric monomial polynomial formed from the vector x=[x_1,...,x_n] formed
-    from the partition of powers partition=[p_1,...,p_l]. It is equivalent to
-    the sum (x[a[1]]**p_1)*(x[a[2]]**p_2)*...*(x[a[I]]**p_l) over all a such
-    that a[I] != a[J] for 0<=I<J<=l-1 which are not equivalent under
-    permutation (I think anyway...).
-
-    If there are distinct powers p_1,...,p_j with multiplicities m_1,...,m_j
-    and the list x has n elements then the algorithm runs in O(n*m_1*...*m_j)
-    steps, and takes O(m_1*...*m_j) memory in the form of an array of just as
-    many dimensions. Inputs may be symbolic, or anything you like.
-    """
     n = len(x)
-    y, d = multiset.Multiset(powers).split()
-    l = len(y)
-    shape = tuple(I+2 for I in d)
+    pows, mults = multiset.Multiset(powers).split()
+    l = len(pows)
+    shape = tuple(i+2 for i in mults)
 
     # Contains 1, possibly 2 more dimensions than necessary.
     T = np.ndarray(shape, object)
     T[:] = 0
-    T[(1,)*l] = 1
+    T[(1, )*l] = 1
 
     # The powers use up sum(multiplcities) of the original x.
-    for K in range(n-sum(d)+1):
+    for k in range(n-sum(mults)+1):
         for ind in productrange.productrange(1, shape):
-            fac = x[K+sum(ind)-l-1]
-            for J in range(l):
+            fac = x[k+sum(ind)-l-1]
+            for j in range(l):
                 ind_prev = list(ind)
-                ind_prev[J] -= 1
-                T[ind] += fac**y[J]*T[tuple(ind_prev)]
+                ind_prev[j] -= 1
+                T[ind] += fac**pows[j]*T[tuple(ind_prev)]
 
-    return T[tuple(I-1 for I in shape)]
+    return T[tuple(i-1 for i in shape)]
 
 
 def poly_multiply(coeffs1, coeffs2):

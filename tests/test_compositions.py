@@ -17,16 +17,13 @@ class CompositionTests(unittest.TestCase):
         """Ensure #(compositions(n)) = 2^(n-1)"""
         n = 10
         for i in range(1, n):
-            self.assertEqual(2**(i-1), len(list(compositions_simple(i))))
-            self.assertEqual(2**(i-1), len(list(compositions_binary(i))))
+            self.assertEqual(2**(i-1), len(list(compositions(i))))
 
     def test_composition_sums(self):
         """Check that compositions of n sum to n"""
         n = 10
         for i in range(1, n):
-            for comp in compositions_simple(i):
-                self.assertEqual(i, sum(comp))
-            for comp in compositions_binary(i):
+            for comp in compositions(i):
                 self.assertEqual(i, sum(comp))
 
     def test_weak_composition_counts(self):

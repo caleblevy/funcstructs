@@ -73,22 +73,8 @@ def isdivisor(d, n):
     return False
 
 
-def phi_product(n):
+def totient(n):
     """Return the totient using the fancy prime formula."""
     return int(n*multiset.prod(
         (1-fractions.Fraction(1, p) for p in prime_divisors(n))
     ))
-
-
-def phi_sum(n):
-    """ Return the totient using its definition. Code taken directly from
-        "Computing Eulers Totient Function" at
-        http://stackoverflow.com/a/18114286
-    """
-    phi = 0
-    for k in range(1, n+1):
-        if fractions.gcd(n, k) == 1:
-            phi += 1
-    return int(phi)
-
-totient = phi_sum

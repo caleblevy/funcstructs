@@ -27,16 +27,13 @@ class PolynomialTests(unittest.TestCase):
         for n in range(1, 20):
             foilmon = FOIL(range(-n, 0))[1:]
             x = range(1, n+1)
-            symmon = [msp_iterative(x, [1]*I) for I in range(1, n+1)]
+            symmon = [
+                monomial_symmetric_polynomial(x, [1]*I) for I in range(1, n+1)
+            ]
             self.assertSequenceEqual(foilmon, symmon)
-            # Recursive version is far more expensive; test small values.
-            if n <= 5:
-                recmon = [msp_recursive(x, [1]*I) for I in range(1, n+1)]
-                self.assertSequenceEqual(foilmon, recmon)
 
         vecs = [[5, 5, 5], [1, 2, 3, 4, 5, 6, 7, 8]]
         powers = [[3, 3, 2], [4, 4, 3, 3, 2]]
         counts = [1171875, 139100509734480]
         for vec, power, count in zip(vecs, powers, counts):
-            self.assertEqual(count, msp_iterative(vec, power))
-            self.assertEqual(count, msp_recursive(vec, power))
+            self.assertEqual(count, monomial_symmetric_polynomial(vec, power))

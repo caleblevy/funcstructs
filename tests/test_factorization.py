@@ -70,5 +70,4 @@ class FactorizationTests(unittest.TestCase):
         values = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4, 12, 6, 8, 8, 16, 6, 18,
                   8, 12, 10, 22, 8, 20, 12, 18]
         for I in range(1, len(values)+1):
-            self.assertEqual(values[I-1], phi_product(I))
-            self.assertEqual(values[I-1], phi_sum(I))
+            self.assertEqual(values[I-1], totient(I))

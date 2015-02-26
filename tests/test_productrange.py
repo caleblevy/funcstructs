@@ -12,18 +12,6 @@ from endofunction_structures.productrange import *
 
 class ProductrangeTest(unittest.TestCase):
 
-    def test_rangelen(self):
-        """Test rangelen returns same number of elements as range on the given
-        inputs."""
-
-        ranges = [
-            [0], [1], [1, 2], [-1, 2], [2, -1], [-1], [0, -1, 1],
-            [0, -1, -1], [0, 100, 10], [0, 100, 101], [0, 101, 10],
-            [2], [-10, -20, -2], [-10, -21, -2], [2**128+1, 2**128+178, 45]
-        ]
-        for r in ranges:
-            self.assertEqual(len(range(*r)), rangelen(*r))
-
     def test_productrange(self):
         """Test number of outputs in the product range is correct."""
         begins = [[1], None,   0,      1,      [1]*4,   [3]*4,  (1, 2, 3, 3)]
