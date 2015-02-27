@@ -90,10 +90,9 @@ February 13 2015:
     # Maybe:
     #   - Make RootedTree class sortable.
     #   - Resolve path dependency issues for PADS to work in python3.
-
-      - Make iterdist_brute and iterdist_funcstruct into methods of their
-        respective TransformationMonoid and FuncstructEnumerator classes. 
-        (on hold for now.)
+    #   - Make iterdist_brute and iterdist_funcstruct into methods of their
+    #     respective TransformationMonoid and FuncstructEnumerator classes.
+    #     (on hold for now.)
 
 February 17, 2015:
 

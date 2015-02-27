@@ -5,14 +5,19 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" A rooted tree is a connected digraph with a single cycle such that every
-node's out-degree and every cycle's length is exactly one. Alternatively, it is
-a tree with a designated "root" node, where every path ends with the root. They
-are equivalent to filesystems consisting entirely of folders with no symbolic
-links. An unlabelled rooted tree is the equivalence class of a given directory
-where folders in each subdirectory may be rearranged in any desired order
-(alphabetical, reverse-alphabetical, date added, or any other labelling). A
-forest is any collection of rooted trees.
+""" Representations and algorithms for rooted trees.
+
+A rooted tree is a connected digraph with a single length-one cycle such that
+every node's out-degree is exactly one. A forest is any collection of rooted
+trees.
+
+A level tree is a representation of an ordered rooted tree by its level
+sequence: a listing of each node's height above the root, where node n+1 is
+connected either to vertex n or the previous node at the next lowest level.
+
+A dominant tree is the ordered tree with lexicographically largest level
+sequence for a given rooted tree. It is formed by placing all subtrees in
+dominant form and then sorting the subtrees from largest to smallest.
 
 Any endofunction structure may be represented as a forest of trees, grouped
 together in multisets corresponding to cycle decompositions of the final set
@@ -36,8 +41,12 @@ from . import productrange
 @functools.total_ordering
 class RootedTree(object):
 
+    """An unlabelled, unordered rooted tree. The ordering of the nodes in the
+    subtrees is unimportant. Since there is nothing to distinguish the nodes,
+    we characterize a rooted tree strictly by the multiset of its subtrees.
+    Since every rooted tree has a root, there are no empty rooted trees."""
+
     def __init__(self, subtrees=None):
-        # there is no root; this is totally structureless.
         if subtrees is None:
             subtrees = multiset.Multiset()
         subtrees = multiset.Multiset(subtrees)
@@ -58,9 +67,9 @@ class RootedTree(object):
         return not self == other
 
     def __bool__(self):
-        if self.subtrees:
-            return True
-        return False
+        return True
+
+    __nonzero__ = __bool__
 
     def _str(self):
         if not self:
@@ -265,12 +274,10 @@ class DominantTree(LevelTree):
         return multiset.Multiset(subtree for subtree in self.subtrees())
 
     def degeneracy(self):
-        """ To calculate the degeneracy of a collection of subtrees you
-        start with the lowest branches and then work upwards. If a group of
-        identical subbranches are connected to the same node, we multiply
-        the degeneracy of the tree by the factorial of the multiplicity of
-        these subbranches to account for their distinct orderings. The same
-        principal applies to subtrees.
+        """ The number of representations of each labelling of the unordered
+        tree corresponding to self is found by multiplying the product of the
+        degeneracies of all the subtrees by the degeneracy of the multiset
+        containing the rooted trees.
 
         TODO: A writeup of this with diagrams will be in the notes. """
         logs = self.chop()
@@ -309,23 +316,14 @@ class TreeEnumerator(object):
         return self.__class__.__name__+'('+str(self.n)+')'
 
     def __iter__(self):
-        """ Takes an integer N as input and outputs a generator object
-        enumerating all isomorphic unlabeled rooted trees on N nodes.
-
-        The basic idea of the algorithm is to represent a tree by its level
-        sequence: list each vertice's height above the root, where vertex v+1
-        is connected either to vertex v or the previous node at some lower
-        level.
-
-        Choosing the lexicographically greatest level sequence gives a
-        canonical representation for each rooted tree. We start with the
-        tallest rooted tree given by T=range(1,N+1) and then go downward,
-        lexicographically, until we are flat so that T=[1]+[2]*(N-1).
+        """ Generates the dominant representatives of each unordered tree in
+        lexicographic order, starting with the tallest tree with level sequence
+        range(1, n+1) and ending with [1]+[2]*(n-1).
 
         Algorithm and description provided in T. Beyer and S. M. Hedetniemi,
         "Constant time generation of rooted trees." Siam Journal of
         Computation, Vol. 9, No. 4. November 1980. """
-        tree = [I+1 for I in range(self.n)]
+        tree = [i+1 for i in range(self.n)]
         yield DominantTree(tree, preordered=True)
         if self.n > 2:
             while tree[1] != tree[2]:
@@ -335,8 +333,8 @@ class TreeEnumerator(object):
                 q = p-1
                 while tree[q] >= tree[p]:
                     q -= 1
-                for I in range(p, self.n):
-                    tree[I] = tree[I-(p-q)]
+                for i in range(p, self.n):
+                    tree[i] = tree[i-(p-q)]
                 yield DominantTree(tree, preordered=True)
 
     @memoized_property

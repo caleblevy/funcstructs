@@ -159,56 +159,16 @@ class Funcstruct(object):
         return cardinalities
 
 
-class FuncstructEnumerator(object):
-    def __init__(self, node_count):
-        self.n = node_count
-
-    def __repr__(self):
-        return self.__class__.__name__+'('+str(self.n)+')'
-
-    def __hash__(self):
-        return hash(self.n)
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.n == other.n
-        return False
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __iter__(self):
-        """Enumerate endofunction structures on n elements. Equalivalent to all
-        conjugacy classes in TransformationMonoid(n)."""
-        for forest in rootedtrees.ForestEnumerator(self.n):
-            for mpart in forest.partitions():
-                for struct in productrange.unordered_product(
-                    mpart,
-                    necklaces.FixedContentNecklaces
-                ):
-                    yield Funcstruct(struct, self.n)
-
-    def cardinality(self):
-        """Count the number of endofunction structures on n nodes. Iterates
-        over the tuple representation of partitions using the formula featured
-        in De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
-        Combinatorial Theory, Volume 12, 1972. See the papers directory for the
-        original reference."""
-        tot = 0
-        for b in levypartitions.tuple_partitions(self.n):
-            product_terms = []
-            for i in range(1, len(b)):
-                s = 0
-                for j in factorization.divisors(i):
-                    s += j * b[j]
-                s **= b[i]
-                s *= fractions.Fraction(i, 1)**(-b[i])/math.factorial(b[i])
-                product_terms.append(s)
-            tot += multiset.prod(product_terms)
-        return int(tot)
-
-    def __len__(self):
-        return self.cardinality()
+def funcstruct_enumerator(n):
+    """Enumerate endofunction structures on n elements. Equalivalent to all
+    conjugacy classes in TransformationMonoid(n)."""
+    for forest in rootedtrees.ForestEnumerator(n):
+        for mpart in forest.partitions():
+            for struct in productrange.unordered_product(
+                mpart,
+                necklaces.FixedContentNecklaces
+            ):
+                yield Funcstruct(struct, n)
 
 
 def direct_unordered_attachments(t, l):
@@ -236,26 +196,92 @@ def component_groups(c, l, m):
             yield cycle_group
 
 
-class CycleTypeFuncstructs(object):
+def cycle_type_funcstructs(n, cycle_type):
+    """ Enumerate all funcstructs on n nodes corresponding to a give cycle
+    type. """
+    treenodes = n - sum(cycle_type)
+    lengths, multiplicities = cycle_type.split()
+    l = len(lengths)
+    for composition in compositions.weak_compositions(treenodes, l):
+        cycle_groups = []
+        for c, l, m in zip(composition, lengths, multiplicities):
+            cycle_groups.append(component_groups(c, l, m))
+        for bundle in itertools.product(*cycle_groups):
+            yield Funcstruct(productrange.flatten(bundle), n)
 
-    def __init__(self, node_count, cycle_type):
+
+class EndofunctionStructures(object):
+    def __init__(self, node_count, cycle_type=None):
         self.n = node_count
         self.cycle_type = multiset.Multiset(cycle_type)
 
+    def __repr__(self):
+        struct_string = self.__class__.__name__+'('+str(self.n)
+        if self.cycle_type:
+            struct_string += ', '+repr(cycle_type)
+        struct_string += ')'
+        return struct_string
+
+    def __hash__(self):
+        return hash(tuple([self.n, self.cycle_type]))
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.n == other.n and self.cycle_type == other.cycle_type
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
     def __iter__(self):
-        treenodes = self.n - sum(self.cycle_type)
-        lengths, multiplicities = self.cycle_type.split()
-        l = len(lengths)
-        for composition in compositions.weak_compositions(treenodes, l):
-            cycle_groups = []
-            for c, l, m in zip(composition, lengths, multiplicities):
-                cycle_groups.append(component_groups(c, l, m))
-            for bundle in itertools.product(*cycle_groups):
-                yield Funcstruct(productrange.flatten(bundle), self.n)
+        if not self.cycle_type:
+            return funcstruct_enumerator(self.n)
+        else:
+            return cycle_type_funcstructs(self.n, self.cycle_type)
+
+    def cardinality(self):
+        """Count the number of endofunction structures on n nodes. Iterates
+        over the tuple representation of partitions using the formula featured
+        in De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
+        Combinatorial Theory, Volume 12, 1972. See the papers directory for the
+        original reference."""
+        tot = 0
+        for b in levypartitions.tuple_partitions(self.n):
+            product_terms = []
+            for i in range(1, len(b)):
+                s = 0
+                for j in factorization.divisors(i):
+                    s += j * b[j]
+                s **= b[i]
+                s *= fractions.Fraction(i, 1)**(-b[i])/math.factorial(b[i])
+                product_terms.append(s)
+            tot += multiset.prod(product_terms)
+        return int(tot)
+
+    def iterdist(self):
+        """ Since every labelling of a function structure shares the same image
+        path, we may return the iteration distribution of the endofunctions on
+        n nodes by computing the image path of each member of self, scaled by
+        its multiplicity.
+
+        TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
+        investigate possibility that a<=4, and add writeup to the repository.
+        """
+        if self.n == 1:
+            return np.array([1], dtype=object)
+
+        M = np.zeros((self.n, self.n-1), dtype=object)
+        nfac = math.factorial(self.n)
+        for struct in self:
+            mult = nfac//struct.degeneracy
+            im = struct.imagepath
+            for it, card in enumerate(im):
+                M[card-1, it] += mult
+        return M
 
 
 def partition_funcstructs(n):
     for i in range(1, n+1):
         for partition in IntegerPartitions.partitions(i):
-            for struct in CycleTypeFuncstructs(n, partition):
+            for struct in EndofunctionStructures(n, partition):
                 yield struct

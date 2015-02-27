@@ -12,6 +12,7 @@ cycle decompositions and limit sets. """
 
 import random
 
+import numpy as np
 from memoized_property import memoized_property
 
 from . import productrange
@@ -296,3 +297,13 @@ class TransformationMonoid(object):
 
     def __repr__(self):
         return self.__class__.__name__+'('+str(self.n)+')'
+
+    def iterdist(self):
+        """ Return the iteration distribution of the endofunctions in self by
+        enumerating all of self's members and computing their image paths. """
+        M = np.zeros((self.n, self.n-1), dtype=object)
+        for f in self:
+            im = f.imagepath
+            for it, card in enumerate(im):
+                M[card-1, it] += 1
+        return M
