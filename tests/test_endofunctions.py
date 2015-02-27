@@ -101,7 +101,8 @@ class EndofunctionTests(unittest.TestCase):
                 self.assertEqual(f, perm.inverse.conj(perm.conj(f)))
 
     def test_from_tree(self):
-        """Make sure treetofunc correctly represents trees as endofunctions"""
+        """Make sure Endofunction finds a correct representative for a given
+        tree"""
         tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
         self.assertEqual(func, Endofunction(tree))

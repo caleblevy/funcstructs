@@ -31,10 +31,12 @@ def prime_factorization(n):
         primfac.append(n)
     return primfac
 
-prime_divisors = lambda n: list(set(prime_factorization(n)))
+
+def prime_divisors(n):
+    return list(set(prime_factorization(n)))
 
 
-def divisorGen(n):
+def _divisor_gen(n):
     """
     Find every divisor of an integer n. Code inspired by
         "What is the best way to get all the divisors of a number" at
@@ -47,19 +49,10 @@ def divisorGen(n):
         yield multiset.prod([factors[I]**p for I, p in enumerate(power_combo)])
 
 
-divisor_list = lambda n: list(divisorGen(n))
-
-
-def divisors_memoized(n, factors={}):
+def divisors(n, factors={}):
     if n not in factors:
-        factors[n] = divisor_list(n)
+        factors[n] = list(_divisor_gen(n))
     return factors[n]
-
-divisors = divisors_memoized
-
-
-def divisor_sum(n, power=1):
-    return sum(map(lambda x: pow(x, power), divisors(n)))
 
 
 def ceildiv(a, b):

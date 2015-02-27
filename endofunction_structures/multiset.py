@@ -32,9 +32,10 @@ def nCk(n, k):
 
 
 class Multiset(Counter):
-    __slots__ = ['_size', '_items', '_hash']
     """ Multiset - Also known as a bag or unordered tuple. Multiset is
     hashable, immutable and usable for dict keys. """
+
+    __slots__ = ['_size', '_items', '_hash']
 
     def __init__(self, iterable=None):
         self._size = 0
@@ -53,6 +54,9 @@ class Multiset(Counter):
                     self._size += 1
                 self._items = frozenset(self.items())
                 self._hash = hash(self._items)
+
+    # Disable all inherited mutating methods. Based on answers from
+    #    http://stackoverflow.com/questions/1151658/python-hashable-dicts
 
     def __setitem__(self, key, value):
         raise TypeError("{0} is immutable and does not support item assignment"
@@ -81,6 +85,8 @@ class Multiset(Counter):
     def update(self, *args, **kwargs):
         raise TypeError("{0} is immutable and does not support item assignment"
                         .format(self.__class__.__name__))
+
+    # Override Counter len; length of a multiset is total number of elements.
 
     def __len__(self):
         return self._size
@@ -130,7 +136,7 @@ class Multiset(Counter):
         return len(self)
 
     def __contains__(self, value):
-        """ Returns the multiplicity of the element. This runs in O(1). """
+        """ Returns the multiplicity of the element. """
         return self.get(value, 0)
 
     def __iter__(self):

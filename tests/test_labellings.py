@@ -30,7 +30,7 @@ class LabellingTests(unittest.TestCase):
     partitions = [[3, 3, 2, 1], [3, 3, 4], [3, 3, 2, 2], [2, 2, 1]]
 
     def test_ordered_partition_counts(self):
-        """Check we produce the coorect number of ordered partitions."""
+        """Check we produce the correct number of ordered partitions."""
         for partition in self.partitions:
             self.assertEqual(ordered_partition_count(partition),
                              len(set(ordered_partitions(partition))))

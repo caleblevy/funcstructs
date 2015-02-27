@@ -18,7 +18,7 @@ Different necklaces may have different periodicity, as seen above. This module
 contains a collection of functions for counting and enumerating necklaces of a
 given multiset.
 
-Their relavence to enumerating endofunction structures is as follows: given a
+Their relevance to enumerating endofunction structures is as follows: given a
 collection of N forests, the necklaces whose beads are the forests' trees are
 precisely the distinct ways of connecting the trees to form a cycle of length
 n. Thus the ways of connecting a collection of rooted trees together in a cycle
@@ -64,13 +64,19 @@ def periodicity(strand):
 
 
 class Necklace(object):
-    __slots__ = ['strand', '_hash', '_period']
     """An equivalence class of all lists equivalent under rotation."""
+
+    __slots__ = ['strand', '_hash', '_period']
 
     def __init__(self, strand, preordered=False):
         """Initialize the necklace. Items in the necklace must be hashable
         (immutable), otherwise the equivalence class could change
-        dynamically."""
+        dynamically.
+
+        Inputs must also be comparable or you may get unpredictable results.
+        Input content is normalized to smallest rotation unless preordered is
+        set to true. Only use this option if you can (mathematically) prove
+        that your input is in lexicographically smallest form."""
         if not preordered:
             strand = Lyndon.SmallestRotation(strand)
         self.strand = tuple(strand)
@@ -90,9 +96,6 @@ class Necklace(object):
         return self._hash
 
     def __eq__(self, other):
-        """For now we check for equality by "brute force" rotation, as D.
-        Eppstein's normalization algorithm produces unpredictable output for
-        items with ill-defined orderability."""
         if isinstance(other, type(self)):
             return self.strand == other.strand
         return False
@@ -101,6 +104,8 @@ class Necklace(object):
         return not self == other
 
     def __contains__(self, other):
+        """If the normalization of other is the representative of self, then
+        other is a rotation of the necklace."""
         try:
             return self == self.__class__(other)
         except:
@@ -110,16 +115,18 @@ class Necklace(object):
         return iter(self.strand)
 
     def degeneracy(self):
+        """Number of distinct representations of the same necklace."""
         return len(self)//self.period
 
 
 def simple_fixed_content(a, content, t, p, k):
-    """ This function is a result of refactoring of Sage's simple fixed content
-    algorithm, featured in src/sage/combinat/neckalce.py as of December 23,
-    2014. The original code was written by Mike Hansen <mhansen@gmail.com> in
-    2007, who based his algorithm on Sawada, Joe. "A fast algorithm to generate
-    necklaces with fixed content", Theoretical Computer Science archive Volume
-    301 , Issue 1-3, May 2003. """
+    # This function is a result of refactoring of Sage's simple fixed content
+    # algorithm, featured in src/sage/combinat/neckalce.py as of December 23,
+    # 2014. The original code was written by Mike Hansen <mhansen@gmail.com> in
+    # 2007, who based his algorithm on Sawada, Joe. "A fast algorithm to
+    # generate necklaces with fixed content", Theoretical Computer Science
+    # archive Volume 301 , Issue 1-3, May 2003, which may be found in the
+    # references.
     n = len(a)
     if t > n and not(n % p):
         yield a
@@ -134,7 +141,9 @@ def simple_fixed_content(a, content, t, p, k):
                 content[j] += 1
 
 
-class NecklaceGroup(object):
+class FixedContentNecklaces(object):
+    """Necklaces of fixed content."""
+
     __slots__ = ['partition', 'beads', 'elems']
 
     @classmethod

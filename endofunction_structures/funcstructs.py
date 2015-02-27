@@ -38,7 +38,7 @@ def chunks(l, n):
 
 
 def indent_treestring(tree, second_indent, end):
-    """Format a rootedtree string with indents."""
+    """Format a rooted tree string with indents."""
     treestr = str(rootedtrees.unordered_tree(tree))
     treestr_list = [treestr[:end]]
     for s in chunks(treestr[end:], end-second_indent):
@@ -102,11 +102,10 @@ class Funcstruct(object):
 
     @property
     def degeneracy(self):
-        """ The number of equivalent representations of a labelling of an
-        endofunction with unlabelled structure funcstruct.
+        """ The number of equivalent ways of labelling each endofunction with
+        unlabelled structure self.
 
-        The size of the conjugacy class of funcstruct is
-        n!/funcstruct_degeneracy(funcstruct) """
+        The size of the conjugacy class of self is n!/self.degeneracy() """
         if not self.cycles:
             return 1
         # First the degeneracy from the permutations of arrangements of cycles
@@ -179,13 +178,13 @@ class FuncstructEnumerator(object):
         return not self == other
 
     def __iter__(self):
-        """An enumeration of endofunction structures on n elements.
-        Equalivalent to all conjugacy classes in End(S)."""
+        """Enumerate endofunction structures on n elements. Equalivalent to all
+        conjugacy classes in TransformationMonoid(n)."""
         for forest in rootedtrees.ForestEnumerator(self.n):
             for mpart in forest.partitions():
                 for struct in productrange.unordered_product(
                     mpart,
-                    necklaces.NecklaceGroup
+                    necklaces.FixedContentNecklaces
                 ):
                     yield Funcstruct(struct, self.n)
 
@@ -223,7 +222,7 @@ def attachment_forests(t, l):
     them to a a cycle of length l."""
     for partition in direct_unordered_attachments(t, l):
         for forest in rootedtrees.PartitionForests(partition):
-            for necklace in necklaces.NecklaceGroup(forest):
+            for necklace in necklaces.FixedContentNecklaces(forest):
                 yield necklace
 
 

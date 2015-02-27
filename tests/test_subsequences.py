@@ -47,7 +47,7 @@ class SubsequenceTests(unittest.TestCase):
         self.assertSequenceEqual([inc2], list(increasing_subsequences(inc2)))
 
     def test_startswith(self):
-        """Make sure leading subsequence terms satisfy the given critereon"""
+        """Make sure leading subsequence terms satisfy the given criterion"""
         teststart = lambda seq: startswith(seq, lambda x: x == 1)
 
         startseqs = [
@@ -65,7 +65,7 @@ class SubsequenceTests(unittest.TestCase):
             self.assertSequenceEqual(subseq, list(teststart(seq)))
 
     def test_endswith(self):
-        """Make sure final subsequence terms satisfy the given critereon."""
+        """Make sure final subsequence terms satisfy the given criterion."""
         testend = lambda seq: endswith(seq, lambda x: x == 1)
 
         endseqs = [

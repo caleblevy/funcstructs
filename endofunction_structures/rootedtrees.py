@@ -6,7 +6,7 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 """ A rooted tree is a connected digraph with a single cycle such that every
-node's outdegree and every cycle's length is exactly one. Alternatively, it is
+node's out-degree and every cycle's length is exactly one. Alternatively, it is
 a tree with a designated "root" node, where every path ends with the root. They
 are equivalent to filesystems consisting entirely of folders with no symbolic
 links. An unlabelled rooted tree is the equivalence class of a given directory
@@ -322,7 +322,7 @@ class TreeEnumerator(object):
         tallest rooted tree given by T=range(1,N+1) and then go downward,
         lexicographically, until we are flat so that T=[1]+[2]*(N-1).
 
-        Algorithm and description provided in: T. Beyer and S. M. Hedetniemi.
+        Algorithm and description provided in T. Beyer and S. M. Hedetniemi,
         "Constant time generation of rooted trees." Siam Journal of
         Computation, Vol. 9, No. 4. November 1980. """
         tree = [I+1 for I in range(self.n)]
@@ -379,7 +379,7 @@ class ForestEnumerator(TreeEnumerator):
 
 
 class PartitionForests(object):
-    """Colections of rooted trees with sizes specified by partitions."""
+    """Collections of rooted trees with sizes specified by partitions."""
 
     __slots__ = ['partition', '_cardinality']
 

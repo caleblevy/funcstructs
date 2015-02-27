@@ -82,7 +82,7 @@ class NecklaceTests(unittest.TestCase):
         self.assertEqual(2, len(dic))
 
 
-class NecklaceEnumerationTests(unittest.TestCase):
+class FixedContentNecklaceTests(unittest.TestCase):
 
     def test_from_partition(self):
         """Ensure """
@@ -95,14 +95,18 @@ class NecklaceEnumerationTests(unittest.TestCase):
         b3 = [1]*24 + [2]*36
         b4 = [1]*36 + [2]*24  # test that order matters
         for b, p in zip([b1, b2, b3, b4], [p1, p2, p3, p4]):
-            self.assertEqual(NecklaceGroup(b), NecklaceGroup.from_partition(p))
+            self.assertEqual(
+                FixedContentNecklaces(b),
+                FixedContentNecklaces.from_partition(p)
+            )
 
     def test_total_counts(self):
         """Verify the count_by_period method agrees with Sage's totals."""
         partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
         cardinalities = [70, 51330759480000, 600873126148801]
         for c, p in zip(cardinalities, partitions):
-            self.assertEqual(c, NecklaceGroup.from_partition(p).cardinality())
+            nc = FixedContentNecklaces.from_partition(p).cardinality()
+            self.assertEqual(c, nc)
 
     def test_enumeration_counts(self):
         """Test necklace counts for various bead sets."""
@@ -111,7 +115,7 @@ class NecklaceEnumerationTests(unittest.TestCase):
         for beadset in beadsets:
             count = 0
             necks = set()
-            for necklace in NecklaceGroup(beadset):
+            for necklace in FixedContentNecklaces(beadset):
                 count += 1
                 necks.add(necklace)
                 necks.add(necklace)
@@ -119,7 +123,7 @@ class NecklaceEnumerationTests(unittest.TestCase):
 
     def test_enumeration_period_counts(self):
         """Test distribution of periods of enumerated necklaces."""
-        necks = NecklaceGroup.from_partition([6, 12])
+        necks = FixedContentNecklaces.from_partition([6, 12])
         counts = necks.count_by_period()
         baseperiod = 3
         self.assertEqual(1038, sum(counts))
@@ -129,19 +133,20 @@ class NecklaceEnumerationTests(unittest.TestCase):
             self.assertEqual(0, count)
 
     def test_ordering(self):
-        necks = NecklaceGroup([1]*1 + [2]*2 + [3]*3)
+        necks = FixedContentNecklaces([1]*1 + [2]*2 + [3]*3)
         for necklace in necks:
-            self.assertSequenceEqual(Lyndon.SmallestRotation(list(necklace)),
-                                     list(necklace))
+            necklace = list(necklace)
+            normalized_necklace = Lyndon.SmallestRotation(necklace)
+            self.assertSequenceEqual(normalized_necklace, necklace)
 
     def test_keyability(self):
         dic = dict()
-        a = NecklaceGroup([1, 1, 1, 2, 3])
+        a = FixedContentNecklaces([1, 1, 1, 2, 3])
         dic[a] = 1
-        dic[NecklaceGroup([3, 1, 1, 2, 1])] = 2
+        dic[FixedContentNecklaces([3, 1, 1, 2, 1])] = 2
         self.assertEqual(len(dic), 1)
         necks = set(a)
         dic[a] += 1
         self.assertEqual(len(dic), 1)
-        dic[NecklaceGroup([4, 4, 3, 2, 1])] = 7
+        dic[FixedContentNecklaces([4, 4, 3, 2, 1])] = 7
         self.assertEqual(len(dic), 2)

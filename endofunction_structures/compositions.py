@@ -5,10 +5,8 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-
-"""
-A composition of an integer N is an ordered tuple of positive integers which
-sum to N, for example:
+""" A composition of an integer N is an ordered tuple of positive integers
+which sum to N, for example:
 
     4 = 4
       = 3 + 1
@@ -22,17 +20,18 @@ sum to N, for example:
 The compositions of 4 are thus (4), (3,1), (2,2), (2,1,1), (1,3), (1,2,1),
 (1,1,2) and (1,1,1,1).
 
-One can see a clear correspondance between compositions of N and the subsets of
+One can see a clear correspondence between compositions of N and the subsets of
 a set with N-1 elements. Simply list N zeros in a row; every way to draw
 dividing lines between the zeros is a different composition. These correspond
 to binary digits of numbers of length up to N-1. There are thus 2^(N-1)
-compositions of N.
-"""
+compositions of N. """
+
 
 from . import productrange
 
 
 def binary_compositions(n):
+    """The division marker representation of each composition."""
     return productrange.productrange([2]*(n-1))
 
 
@@ -43,13 +42,13 @@ def compositions(n):
         yield comp
         J = len(comp)
         for K in range(J-1, -1, -1):
-            # Keep descending (backwards) until hitting a "step" you can
+            # Keep descending (backwards) until hitting a component you can
             # subtract from
             if comp[K] > 1:
                 comp[K] -= 1
                 comp.append(J-K)
                 break
-            # Haven't hit the target, pop the last element, and step back
+            # Haven't hit a 1, pop the last element, and step back
             comp.pop()
 
 

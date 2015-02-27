@@ -7,7 +7,7 @@
 
 """ A collection of utilities returning certain information about and kinds of
 images of sets under functions: preimages, cardinalities of iterate images,
-cycle decompositions and limitsets. """
+cycle decompositions and limit sets. """
 
 
 import random

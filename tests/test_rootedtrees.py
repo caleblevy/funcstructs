@@ -122,7 +122,7 @@ class TreeTests(unittest.TestCase):
             self.assertSequenceEqual(nest, tree.bracket_form())
 
     def test_treefuncs(self):
-        """Tests attached treenodes and canonical_treeorder in one go."""
+        """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
                 treefunc = Endofunction(tree)
@@ -131,7 +131,7 @@ class TreeTests(unittest.TestCase):
                     self.assertEqual(tree, rtreefunc.tree_form())
 
     def test_rootedtree_conversion(self):
-        """Test conversion between rooted and unordered trees is seemless."""
+        """Test conversion between rooted and unordered trees is seamless."""
         T = DominantTree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
         RT = T.unordered()
         TRT = RT.ordered_form()

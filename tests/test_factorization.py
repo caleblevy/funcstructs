@@ -48,24 +48,7 @@ class FactorizationTests(unittest.TestCase):
             for J in range(1, N):
                 self.assertEqual(J in divisors(I), isdivisor(J, I))
 
-    def test_divisor_sums(self):
-        """Test sums of powers of divisors. Features:
-            -OEIS A000005: divisor_sum(n,0)
-            -OEIS A000203: divisor_sum(n,1)
-            -OEIS A001157: divisor_sum(n,2)
-            -OEIS A001158: divisor_sum(n,3)
-        """
-        sums = [
-            [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6],
-            [1, 3, 4, 7, 6, 12, 8, 15, 13, 18],
-            [1, 5, 10, 21, 26, 50, 50, 85, 91, 130],
-            [1, 9, 28, 73, 126, 252, 344, 585, 757, 1134]
-        ]
-        for power, seq in enumerate(sums):
-            for n, tot in enumerate(seq):
-                self.assertEqual(tot, divisor_sum(n+1, power))
-
-    def test_Euler_totient(self):
+    def test_totient(self):
         """OEIS A000010: number of relatively prime smaller integers."""
         values = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4, 12, 6, 8, 8, 16, 6, 18,
                   8, 12, 10, 22, 8, 20, 12, 18]

@@ -27,7 +27,8 @@ def _equipartitions(S, b):
 
 
 def equipartitions(S, b):
-    """Evenly split a set of itmes into b parts."""
+    """Evenly split a set of items into unordered bins of unordered elements"""
+
     S = set(S)
     if len(S) % b:
         raise ValueError("items must divide evenly")
@@ -61,6 +62,10 @@ def _ordered_partitions(S, partition):
 
 
 def ordered_partitions(partition, S=None):
+    """Enumerate ordered partitions of a set; i.e. order of the elements in
+    each bin does not matter, but if the same bin is found in two different
+    locations, it is a different ordered partition. Bin sizes are fixed and
+    ordered according to partition."""
     partition = list(partition)
     if S is None:
         S = range(sum(partition))
@@ -218,7 +223,7 @@ def tree_labellings(tree):
     here for completeness sake.
 
     Note that order of the elements in a given combination bin does not matter
-    PER SE, as long as it is consistant for any suffix with starting with that
+    per se, as long as it is consistent for any suffix starting with that
     combination."""
     n = len(tree)
     bin_widths, translation_sequence = translation_keys(tree)

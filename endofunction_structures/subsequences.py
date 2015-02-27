@@ -10,7 +10,7 @@ import itertools
 
 
 def monotone_subsequences(seq, comparison):
-    """ Given an iterable seq and a comparsion function, returns a generator of
+    """ Given an iterable seq and a comparison function, returns a generator of
     the subsequences of seq such that comparison(seq[I],seq[I+1]) holds for
     0<=I<=len(seq)-1.
 

@@ -27,7 +27,7 @@ def isqrt(n):
 
 def tuple_partitions(n):
     """ Every partition on N may be represented in the form as a tuple of
-    numbers (n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N. This
+    numbers (0,n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N. This
     program outputs every partition of n in a tuple format. """
     for part in partitions(n):
         b = [0]*(n+1)
@@ -48,7 +48,7 @@ def _min_part(n, L):
     binsize = n//L
     overstuffed = n - L*binsize
     regular = L - overstuffed
-    ones_count = 1 if binsize != 1 else regular + 1
+    ones_count = 0 if binsize != 1 else regular
     return [binsize+1]*overstuffed + [binsize]*regular, ones_count
 
 
@@ -87,22 +87,15 @@ def fixed_lex_partitions(n, L):
         # minimum partition, and repeat.
         yield partition
         k = 2
-        s = (j-1) + partition[L-j] - 1
-        while j+k-1 < L and partition[L-j-k] == partition[L-j-1]:
-            s += partition[L-j-1]
+        s = j + partition[L-j-1] - 1
+        while j+k < L and partition[L-j-k-1] == partition[L-j-2]:
+            s += partition[L-j-2]
             k += 1
-        if j+k-1 > L:
+        if j+k > L:
             return
         k -= 1
-        partition[L-j-k] += 1
-        partition[L-j-k+1:], j = _min_part(s, j+k-1)
-
-
-def max_length_partitions(n, L):
-    """Enumerates partitions of length at most l."""
-    for l in range(1, L+1):
-        for partition in fixed_lex_partitions(n, l):
-            yield partition
+        partition[L-j-k-1] += 1
+        partition[L-j-k:], j = _min_part(s, j+k)
 
 
 def partition_numbers_upto(N):
