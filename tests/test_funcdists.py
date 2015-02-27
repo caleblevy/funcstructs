@@ -40,12 +40,9 @@ class EndofunctionTest(unittest.TestCase):
             np.testing.assert_array_equal(dist, iterdist_funcstruct(n))
 
     def test_rootedtree_funcs(self):
-        '''
-        Test iterdist(n)[k] == labelled rooted trees of height at most k on n
-        nodes. Corresponds to the top row of imagedist.
-        '''
-        # Distribution of functions whose nth iterate has size 1; i.e connected
-        # to the root
+        """ Test iterdist(n)[k] == labelled rooted trees of height at most k on
+        n nodes. Corresponds to the top row of imagedist. """
+        # Distribution of functions whose nth iterate has size 1
         A236396 = [
             [3, 9],
             [4, 40, 64],
@@ -59,9 +56,8 @@ class EndofunctionTest(unittest.TestCase):
             self.assertSequenceEqual(dist, list(iterdist_funcstruct(n)[0, :]))
 
     def test_imagedists(self):
-        """
-        Test imagedist(n)[h] = number of functions f:{1,2,...,n}->{1,2,...,n}
-        such that |Image(f)|=h; h=1,2,...,n, n=1,2,3,...
+        """ Test imagedist(n)[h] = number of functions in
+        TransformationMonoid(n) such that |Image(f)|=h for h in {1, 2, ..., n}.
         """
         A101817 = [
             [2, 2],
@@ -97,10 +93,8 @@ class EndofunctionTest(unittest.TestCase):
                     self.assertEqual(I**J, exponentials[I, J])
 
     def test_limitdists(self):
-        """
-        Test limitdist(n)[k] == number of endofunctions on n labeled points
-        constructed from k rooted trees.
-        """
+        """ Test limitdist(n)[k] == number of endofunctions on n labeled points
+        constructed from k rooted trees. """
         A066324 = [
             [2, 2],
             [9, 12, 6],

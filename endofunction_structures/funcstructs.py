@@ -187,9 +187,8 @@ def attachment_forests(t, l):
 
 
 def component_groups(c, l, m):
-    """Enumerate ways to make rooted trees from c free nodes and attach them to
-    a group of m cycles of length l."""
-    # c number of free tree nodes, l length of cycle, m number of cycles
+    """ Enumerate ways to make rooted trees from c free nodes and attach them
+    to a group of m cycles of length l. """
     iterfunc = lambda y: attachment_forests(y-1, l)
     for partition in direct_unordered_attachments(c, m):
         for cycle_group in productrange.unordered_product(partition, iterfunc):
@@ -257,27 +256,6 @@ class EndofunctionStructures(object):
                 product_terms.append(s)
             tot += multiset.prod(product_terms)
         return int(tot)
-
-    def iterdist(self):
-        """ Since every labelling of a function structure shares the same image
-        path, we may return the iteration distribution of the endofunctions on
-        n nodes by computing the image path of each member of self, scaled by
-        its multiplicity.
-
-        TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
-        investigate possibility that a<=4, and add writeup to the repository.
-        """
-        if self.n == 1:
-            return np.array([1], dtype=object)
-
-        M = np.zeros((self.n, self.n-1), dtype=object)
-        nfac = math.factorial(self.n)
-        for struct in self:
-            mult = nfac//struct.degeneracy
-            im = struct.imagepath
-            for it, card in enumerate(im):
-                M[card-1, it] += mult
-        return M
 
 
 def partition_funcstructs(n):

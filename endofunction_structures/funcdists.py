@@ -28,7 +28,7 @@ Various special cases can be done much faster. This distribution of (first
 iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula). """
 
-from math import factorial
+import math
 
 import numpy as np
 
@@ -39,15 +39,34 @@ from . import compositions
 
 
 def iterdist_brute(n):
-    """Calculate iterdist through enumerating imagepaths of every endofunction.
+    """ Calculate iterdist by enumerating all endofunction image paths."""
+    M = np.zeros((n, n-1), dtype=object)
+    for f in endofunctions.TransformationMonoid(n):
+        im = f.imagepath
+        for it, card in enumerate(im):
+            M[card-1, it] += 1
+    return M
+
+
+def iterdist_funcstruct(n, cycle_type=None):
+    """ Since every labelling of a function structure shares the same image
+    path, we may calculate iterdist by enumerating all endofunction
+    structure image paths and scaling them by their multiplicities.
+
+    TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
+    investigate possibility that a<=4, and add writeup to the repository.
     """
-    return endofunctions.TransformationMonoid(n).iterdist()
+    if n == 1:
+        return np.array([1], dtype=object)
 
-
-def iterdist_funcstruct(n):
-    """ Calculate iterdist through enumerating imagepaths of every endofunction
-    structure scaled by their multiplicities. """
-    return funcstructs.EndofunctionStructures(n).iterdist()
+    M = np.zeros((n, n-1), dtype=object)
+    nfac = math.factorial(n)
+    for struct in funcstructs.EndofunctionStructures(n, cycle_type):
+        mult = nfac//struct.degeneracy
+        im = struct.imagepath
+        for it, card in enumerate(im):
+            M[card-1, it] += mult
+    return M
 
 iterdist = iterdist_funcstruct
 
@@ -91,7 +110,7 @@ def imagedists_upto(N):
 
     for n in range(N):
         for I in range(n+1):
-            FD[I, n] *= factorial(n+1)//factorial(n-I)
+            FD[I, n] *= math.factorial(n+1)//math.factorial(n-I)
 
     return FD
 
@@ -144,14 +163,14 @@ def limitdist_composition(N):
             val *= binomial_coefficients[sum(comp[J:]), comp[J]]
         L[comp[0]-1] += val
     for n in range(N, 0, -1):
-        L[n-1] *= factorial(N)//factorial(N-n)
+        L[n-1] *= math.factorial(N)//math.factorial(N-n)
     return L
 
 
 def limitset_count(n, k):
     """ Analytic expression for the number of endofunctions on n nodes whose
     cycle decomposition contains k elements. """
-    return k*n**(n-k)*factorial(n-1)//factorial(n-k)
+    return k*n**(n-k)*math.factorial(n-1)//math.factorial(n-k)
 
 
 def limitdist_direct(n):
