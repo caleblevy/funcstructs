@@ -7,9 +7,10 @@
 
 """ Representations and algorithms for rooted trees.
 
-A rooted tree is a connected digraph with a single length-one cycle such that
-every node's out-degree is exactly one. A forest is any collection of rooted
-trees.
+A rooted tree is a connected directed graph with a single length-one cycle such
+that every node's out-degree is exactly one. A forest is any collection of
+rooted trees.
+
 
 A level tree is a representation of an ordered rooted tree by its level
 sequence: a listing of each node's height above the root, where node n+1 is

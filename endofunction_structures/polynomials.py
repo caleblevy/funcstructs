@@ -8,7 +8,7 @@
 """ Enumerate and produce polynomials of various kinds. """
 
 
-from functools import reduce
+import functools
 import numpy as np
 
 from . import multiset
@@ -95,4 +95,4 @@ def FOIL(roots):
         (X - roots[0]) * (X - roots[1]) * ... * (X - roots[-1])
     """
     monomials = [(1, -root) for root in roots]
-    return reduce(poly_multiply, monomials, [1])
+    return functools.reduce(poly_multiply, monomials, [1])
