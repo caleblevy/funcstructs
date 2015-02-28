@@ -9,7 +9,9 @@
 
 
 import functools
+
 import numpy as np
+import sympy
 
 from . import multiset
 from . import productrange
@@ -96,3 +98,32 @@ def FOIL(roots):
     """
     monomials = [(1, -root) for root in roots]
     return functools.reduce(poly_multiply, monomials, [1])
+
+
+def symvec(n):
+    """Symbolic vector of variables x_0, ..., x_n-1."""
+    return [sympy.Symbol('x'+str(i)) for i in range(n)]
+
+
+def power_sum(X, k):
+    return sum(x**k for x in X)
+
+
+def newton_elementary_polynomial(x, n):
+    """ Calculate the nth elementary symmetric polynomial in values x using the
+    Newton identities. """
+
+    e = [0]*(n+1)
+    p = [power_sum(x, i) for i in range(n+1)]
+    e[0] = 1
+    e[1] = p[1]
+    for i in range(2, n+1):
+        for j in range(1, i+1):
+            e[i] += (-1)**(j-1) * e[i-j]*p[j]
+        e[i] /= i
+    return e[-1]
+
+
+def elementary_symmetric_polynomial(x, n):
+    """Returns the nth elementary symmetric polynomial in list of values x."""
+    return monomial_symmetric_polynomial(x, [1]*n)
