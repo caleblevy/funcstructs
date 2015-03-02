@@ -114,3 +114,14 @@ def partition_numbers_upto(N):
     return P
 
 partition_number = lambda n: partition_numbers_upto(n)[-1]
+
+
+def max_length_partitions(n, k):
+    """Enumerate partitions of length less than or equal to k."""
+    if k >= n:
+        for part in partitions(n):
+            yield part
+    else:
+        for l in range(1, k+1):
+            for part in fixed_length_partitions(n, l):
+                yield part
