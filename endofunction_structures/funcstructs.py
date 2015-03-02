@@ -18,7 +18,6 @@ import fractions
 import itertools
 
 import numpy as np
-from PADS import IntegerPartitions
 
 from . import multiset
 from . import rootedtrees
@@ -174,7 +173,7 @@ def funcstruct_enumerator(n):
 def direct_unordered_attachments(t, l):
     """Enumerate the ways of directly attaching t unlabelled free nodes to l
     unlabelled nodes."""
-    return levypartitions.fixed_lex_partitions(t+l, l)
+    return levypartitions.fixed_length_partitions(t+l, l)
 
 
 def attachment_forests(t, l):
@@ -260,6 +259,6 @@ class EndofunctionStructures(object):
 
 def partition_funcstructs(n):
     for i in range(1, n+1):
-        for partition in IntegerPartitions.partitions(i):
+        for partition in levypartitions.partitions(i):
             for struct in EndofunctionStructures(n, partition):
                 yield struct

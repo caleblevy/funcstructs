@@ -10,7 +10,10 @@
 
 
 import itertools
-from PADS.IntegerPartitions import partitions, lex_partitions
+
+from PADS import IntegerPartitions
+
+from . import multiset
 
 
 def isqrt(n):
@@ -25,11 +28,22 @@ def isqrt(n):
     return x
 
 
+# Wrappers for Eppstein's modules returning multisets
+def partitions(n):
+    for partition in IntegerPartitions.partitions(n):
+        yield multiset.Multiset(partition)
+
+
+def fixed_length_partitions(n, L):
+    for partition in IntegerPartitions.fixed_length_partitions(n, L):
+        yield multiset.Multiset(partition)
+
+
 def tuple_partitions(n):
     """ Every partition on N may be represented in the form as a tuple of
     numbers (0,n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N. This
     program outputs every partition of n in a tuple format. """
-    for part in partitions(n):
+    for part in IntegerPartitions.partitions(n):
         b = [0]*(n+1)
         for p in part:
             b[p] += 1

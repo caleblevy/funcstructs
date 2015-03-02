@@ -7,8 +7,9 @@
 
 """ Enumerate and produce polynomials of various kinds. """
 
-
 import functools
+import itertools
+import collections
 
 import numpy as np
 import sympy
@@ -127,3 +128,91 @@ def newton_elementary_polynomial(x, n):
 def elementary_symmetric_polynomial(x, n):
     """Returns the nth elementary symmetric polynomial in list of values x."""
     return monomial_symmetric_polynomial(x, [1]*n)
+
+
+class MultisetPolynomial(object):
+    """A commutative ring with identity consisting of collections of multisets.
+    The addition is defined by union of two elements. The multiplication is the
+    collection of all pairwise unions of elements.
+
+    The multiset combinations function essentially like multinomials where the
+    free variables are the elements of the multiset and the exponents are the
+    multiplicities They are built to be fed into a symmetric monomial
+    polynomial and expand into lists of multisets. """
+
+    def __init__(self, iterable=None):
+        self.cpart = collections.Counter()
+        if iterable is not None:
+            if hasattr(iterable, 'elements'):
+                iterable = iterable.elements()
+            if hasattr(iterable, '__iter__'):
+                for el in iterable:
+                    if not hasattr(el, '__iter__'):
+                        el = [el]
+                    self.cpart.update([multiset.Multiset(el)])
+            else:
+                self.cpart.update([multiset.Multiset([iterable])])
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.cpart == other.cpart
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __repr__(self):
+        return type(self).__name__+'(%s)' % str(list(self.cpart))
+
+    def __str__(self):
+        set_str = str(multiset.Multiset(self.cpart))[1:-1]
+        if not self.cpart:
+            set_str = '{}'
+        return type(self).__name__+'(%s)' % set_str
+
+    def __iter__(self):
+        return (el for el in self.cpart.elements())
+
+    def __add__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__class__(self.cpart + other.cpart)
+        elif other == 0:
+            return self
+        raise TypeError("Cannot perform arithmetic with %s and %s" % (
+            self.__class__.__name__,
+            other.__class__.__name__)
+        )
+
+    def __radd__(self, other):
+        return self + other
+
+    def __mul__(self, other):
+        if isinstance(other, self.__class__):
+            lol = []
+            for l1 in self:
+                for l2 in other:
+                    lol.append(list(l1)+list(l2))
+            return self.__class__(lol)
+        elif other == 1:
+            return self
+        elif other == 0:
+            return 0
+        raise TypeError("Cannot perform arithmetic with %s and %s" % (
+            self.__class__.__name__,
+            other.__class__.__name__)
+        )
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __pow__(self, n):
+        cp = 1
+        for i in range(n):
+            cp *= self
+        return cp
+
+
+def multisets_with_multiplicities(elems, multiplicities):
+    x = [MultisetPolynomial(el) for el in elems]
+    for mset in monomial_symmetric_polynomial(x, multiplicities):
+        yield multiset.Multiset(mset)

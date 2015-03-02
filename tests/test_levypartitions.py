@@ -32,13 +32,13 @@ class LevyPartitionTests(unittest.TestCase):
         """Check that the fixed length lex partition outputs are correct."""
         N = 15
         for n in range(N):
-            pn = [list(p) for p in lex_partitions(n)]
+            pn = [list(p) for p in IntegerPartitions.lex_partitions(n)]
             np = 0
             for L in range(n+1):
                 pnL = [list(p) for p in fixed_lex_partitions(n, L)]
                 np += len(pnL)
                 # Check for the right order
-                self.assertSequenceEqual(pnL, [p for p in pn if len(p) == L])
+                self.assertSequenceEqual([p for p in pn if len(p) == L], pnL)
             # Check for the right number
             self.assertEqual(np, len(pn))
 
