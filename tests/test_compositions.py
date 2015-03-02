@@ -8,7 +8,7 @@
 import unittest
 
 from endofunction_structures.compositions import *
-from endofunction_structures.multiset import nCk
+from endofunction_structures import counts
 
 
 class CompositionTests(unittest.TestCase):
@@ -31,7 +31,7 @@ class CompositionTests(unittest.TestCase):
         for n in range(1, 5):
             for k in range(1, 10):
                 l = list(weak_compositions(n, k))
-                self.assertEqual(nCk(n+k-1, k-1), len(l))
+                self.assertEqual(counts.nCk(n+k-1, k-1), len(l))
 
     def test_weak_composition_sums(self):
         """Ensure each weak composition sums to n"""

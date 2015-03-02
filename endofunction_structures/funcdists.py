@@ -28,45 +28,20 @@ Various special cases can be done much faster. This distribution of (first
 iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula). """
 
-import math
-
 import numpy as np
 
+from . import counts
 from . import funcstructs
-from . import multiset
 from . import endofunctions
 from . import compositions
 
 
 def iterdist_brute(n):
-    """ Calculate iterdist by enumerating all endofunction image paths."""
-    M = np.zeros((n, n-1), dtype=object)
-    for f in endofunctions.TransformationMonoid(n):
-        im = f.imagepath
-        for it, card in enumerate(im):
-            M[card-1, it] += 1
-    return M
+    return endofunctions.TransformationMonoid(n).iterdist()
 
 
 def iterdist_funcstruct(n, cycle_type=None):
-    """ Since every labelling of a function structure shares the same image
-    path, we may calculate iterdist by enumerating all endofunction
-    structure image paths and scaling them by their multiplicities.
-
-    TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
-    investigate possibility that a<=4, and add writeup to the repository.
-    """
-    if n == 1:
-        return np.array([1], dtype=object)
-
-    M = np.zeros((n, n-1), dtype=object)
-    nfac = math.factorial(n)
-    for struct in funcstructs.EndofunctionStructures(n, cycle_type):
-        mult = nfac//struct.degeneracy
-        im = struct.imagepath
-        for it, card in enumerate(im):
-            M[card-1, it] += mult
-    return M
+    return funcstructs.EndofunctionStructures(n, cycle_type).iterdist()
 
 iterdist = iterdist_funcstruct
 
@@ -110,7 +85,7 @@ def imagedists_upto(N):
 
     for n in range(N):
         for I in range(n+1):
-            FD[I, n] *= math.factorial(n+1)//math.factorial(n-I)
+            FD[I, n] *= counts.factorial(n+1)//counts.factorial(n-I)
 
     return FD
 
@@ -124,7 +99,7 @@ def nCk_grid(N):
         for J in range(N+1):
             if J > I:
                 continue
-            binomial_coeffs[I, J] = multiset.nCk(I, J)
+            binomial_coeffs[I, J] = counts.nCk(I, J)
     return binomial_coeffs
 
 
@@ -163,14 +138,14 @@ def limitdist_composition(N):
             val *= binomial_coefficients[sum(comp[J:]), comp[J]]
         L[comp[0]-1] += val
     for n in range(N, 0, -1):
-        L[n-1] *= math.factorial(N)//math.factorial(N-n)
+        L[n-1] *= counts.factorial(N)//counts.factorial(N-n)
     return L
 
 
 def limitset_count(n, k):
     """ Analytic expression for the number of endofunctions on n nodes whose
     cycle decomposition contains k elements. """
-    return k*n**(n-k)*math.factorial(n-1)//math.factorial(n-k)
+    return k*n**(n-k)*counts.factorial(n-1)//counts.factorial(n-k)
 
 
 def limitdist_direct(n):

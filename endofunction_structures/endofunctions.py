@@ -9,7 +9,6 @@
 images of sets under functions: preimages, cardinalities of iterate images,
 cycle decompositions and limit sets. """
 
-
 import random
 
 import numpy as np
@@ -32,6 +31,7 @@ class Endofunction(object):
         return hash(self.func)
 
     def __len__(self):
+        """Number of elements in the function's domain."""
         return len(self.func)
 
     def __repr__(self):
@@ -47,9 +47,11 @@ class Endofunction(object):
         return funcstring
 
     def __getitem__(self, ind):
+        """f(x) <-> self[x]"""
         return self.func[ind]
 
     def __iter__(self):
+        """[f(x) for x in range(len(f))] <-> list(iter(self))"""
         return iter(self.func)
 
     def __eq__(self, other):
@@ -83,7 +85,7 @@ class Endofunction(object):
         Note the particularly close correspondence between python's list
         comprehensions and mathematical set-builder notation. """
         preim = [set() for _ in range(len(self))]
-        for x in range(len(self)):
+        for x in self.domain:
             preim[self[x]].add(x)
         return preim
 
@@ -297,3 +299,12 @@ class TransformationMonoid(object):
 
     def __repr__(self):
         return self.__class__.__name__+'('+str(self.n)+')'
+
+    def iterdist(self):
+        """ Calculate iterdist by enumerating all endofunction image paths."""
+        M = np.zeros((self.n, self.n-1), dtype=object)
+        for f in self:
+            im = f.imagepath
+            for it, card in enumerate(im):
+                M[card-1, it] += 1
+        return M

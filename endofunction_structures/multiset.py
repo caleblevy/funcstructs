@@ -10,25 +10,12 @@ finding information about sets and multisets: breaking up multisets, getting
 elements of a set, and counting ways to represent them assuming certain
 properties are equivalent. """
 
-
 from collections import Counter
-import functools
-import math
 import operator
 
 from sympy.utilities.iterables import multiset_partitions
 
-
-def prod(iterable):
-    return functools.reduce(operator.mul, iterable, 1)
-
-
-def factorial_prod(iterable):
-    return prod(math.factorial(I) for I in iterable)
-
-
-def nCk(n, k):
-    return math.factorial(n)//math.factorial(k)//math.factorial(n-k)
+from . import counts
 
 
 class Multiset(Counter):
@@ -167,7 +154,7 @@ class Multiset(Counter):
 
     def degeneracy(self):
         """ Number of different representations of the same multiset. """
-        return factorial_prod(self.values())
+        return counts.factorial_prod(self.values())
 
     def partitions(self):
         """ Yield partitions of a multiset, each one being a multiset of

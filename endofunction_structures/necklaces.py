@@ -33,6 +33,7 @@ from PADS import Lyndon
 
 from . import multiset
 from . import factorization
+from . import counts
 
 
 def periodicity(strand):
@@ -177,15 +178,14 @@ class FixedContentNecklaces(object):
         # Find the multiplicity of each period.
         for factor in factors:
             n = period = baseperiod * factor
-            mults[factor] = 1
             # The number of character permutations which are periodic in factor
             # OR ANY OF ITS DIVISORS is simply the multinomial coefficient
             # corresponding to the subset of the multiplicity partition
             # featuring 1/factor of each kind of the original partiton's
             # elements.
-            for I in range(k):
-                mults[factor] *= multiset.nCk(n, self.partition[I]*factor//w)
-                n -= self.partition[I] * factor//w
+            mults[factor] = counts.multinomial_coefficient(
+                [(i*factor)//w for i in self.partition]
+            )
             # Subtact off the number of character permutations whose period
             # subdivides our divisor of w, to get the number of character
             # permutations with period EXACTLY equal to factor.

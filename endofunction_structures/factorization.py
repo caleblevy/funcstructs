@@ -5,12 +5,11 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" A collection of short functions for enumerating factorizations of integers
-and other such things. """
-
+""" Computation of prime factorizations and divisors. """
 
 import fractions
 
+from . import counts
 from . import multiset
 from . import productrange
 
@@ -46,7 +45,7 @@ def _divisor_gen(n):
     # Since the factors are prime, every unique partition of powers represents
     # a different divisor.
     for power_combo in productrange.productrange([m+1 for m in powers]):
-        yield multiset.prod([factors[I]**p for I, p in enumerate(power_combo)])
+        yield counts.prod([factors[I]**p for I, p in enumerate(power_combo)])
 
 
 def divisors(n, factors={}):
@@ -61,13 +60,11 @@ def ceildiv(a, b):
 
 
 def isdivisor(d, n):
-    if ceildiv(n, d) == n//d:
-        return True
-    return False
+    return ceildiv(n, d) == n//d
 
 
 def totient(n):
     """Return the totient using the fancy prime formula."""
-    return int(n*multiset.prod(
+    return int(n*counts.prod(
         (1-fractions.Fraction(1, p) for p in prime_divisors(n))
     ))

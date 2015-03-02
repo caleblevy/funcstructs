@@ -81,7 +81,7 @@ class LabellingTests(unittest.TestCase):
         """Ensure each tree has the correct number of representations"""
         for tree in self.trees:
             self.assertEqual(
-                math.factorial(len(tree))//tree.degeneracy(),
+                counts.factorial(len(tree))//tree.degeneracy(),
                 len(set(tree_labellings(tree)))
             )
 

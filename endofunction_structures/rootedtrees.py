@@ -26,12 +26,12 @@ trees in the multisets correspond to necklaces whose beads are the trees
 themselves. """
 
 
-import math
 import functools
 import itertools
 
 from memoized_property import memoized_property
 
+from . import counts
 from . import subsequences
 from . import multiset
 from . import factorization
@@ -170,15 +170,15 @@ class LevelTree(object):
             yield [node-1 for node in branch_sequence]
 
     def bracket_form(self):
-        """
-        Return a representation the rooted tree via nested lists. This method
-        is a novelty item, and shouldn't be used for anything practical.
+        """ Return a representation the rooted tree via nested lists. This
+        method is a novelty item, and shouldn't be used for anything practical.
         """
         if not self.branch_sequences():
             return []
         return [subtree.bracket_form() for subtree in self.subtrees()]
 
     def unordered(self):
+        """Return the unordered tree corresponding ot the rooted tree."""
         if not self.branch_sequences():
             return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
@@ -402,7 +402,7 @@ class PartitionForests(object):
         l = 1
         for y, r in self.partition.items():
             n = TreeEnumerator(y).cardinality
-            l *= math.factorial(n+r-1)//math.factorial(r)//math.factorial(n-1)
+            l *= counts.nCWRk(n, r)
         return l
 
     def __iter__(self):

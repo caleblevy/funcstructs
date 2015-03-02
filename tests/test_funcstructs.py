@@ -51,7 +51,7 @@ class FuncstructTests(unittest.TestCase):
     def test_degeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
         for i in range(1, 8):
-            fac = math.factorial(i)
+            fac = counts.factorial(i)
             func_count = 0
             for struct in EndofunctionStructures(i):
                 func_count += fac//struct.degeneracy

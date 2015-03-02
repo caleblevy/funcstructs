@@ -26,7 +26,6 @@ dividing lines between the zeros is a different composition. These correspond
 to binary digits of numbers of length up to N-1. There are thus 2^(N-1)
 compositions of N. """
 
-
 from . import productrange
 
 

@@ -13,12 +13,12 @@ Most of these algorithms were derived by Caleb Levy in February 2014. For more
 information contact caleb.levy@berkeley.edu. """
 
 
-import math
 import fractions
 import itertools
 
 import numpy as np
 
+from . import counts
 from . import multiset
 from . import rootedtrees
 from . import subsequences
@@ -251,10 +251,29 @@ class EndofunctionStructures(object):
                 for j in factorization.divisors(i):
                     s += j * b[j]
                 s **= b[i]
-                s *= fractions.Fraction(i, 1)**(-b[i])/math.factorial(b[i])
+                s *= fractions.Fraction(i, 1)**(-b[i])/counts.factorial(b[i])
                 product_terms.append(s)
-            tot += multiset.prod(product_terms)
+            tot += counts.prod(product_terms)
         return int(tot)
+
+    def iterdist(self):
+        """ Since every labelling of a function structure shares the same image
+        path, we may calculate iterdist by enumerating all endofunction
+        structure image paths and scaling them by their multiplicities.
+
+        TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
+        investigate possibility that a<=4, and add writeup to the repository.
+        """
+        if self.n == 1:
+            return np.array([1], dtype=object)
+        M = np.zeros((self.n, self.n-1), dtype=object)
+        nfac = counts.factorial(self.n)
+        for struct in self:
+            mult = nfac//struct.degeneracy
+            im = struct.imagepath
+            for it, card in enumerate(im):
+                M[card-1, it] += mult
+        return M
 
 
 def partition_funcstructs(n):

@@ -5,9 +5,9 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-import math
 import itertools
 
+from . import counts
 from . import multiset
 from . import necklaces
 from . import rootedtrees
@@ -38,7 +38,7 @@ def equipartitions(S, b):
 
 def equipartition_count(n, b):
     """The total number of ways of evenly dividing a set S with n elements
-    into b parts is n!/((n/b)!^b b!) which we can see as follows:
+    into b parts is n!/b!/(n/b)!**b which we can see as follows:
 
     Take all the permutations of S of which there are n!. We divide them
     into subsequences of length b. If we then disregard ordering each
@@ -49,7 +49,7 @@ def equipartition_count(n, b):
     Each combination of combinations will thus have (n/b)!**b * b! distinct
     representations. """
 
-    return math.factorial(n)//(math.factorial(n//b)**b)//math.factorial(b)
+    return counts.factorial(n)//(counts.factorial(b)*counts.factorial(n//b)**b)
 
 
 def _ordered_partitions(S, partition):
@@ -80,13 +80,7 @@ def ordered_partitions(partition, S=None):
 
 def ordered_partition_count(partition, n=None):
     """Number of ordered combinations into the given partition. """
-    if n is None:
-        n = sum(partition)
-    coeff = 1
-    for p in partition:
-        coeff *= multiset.nCk(n, p)
-        n -= p
-    return coeff
+    return multinomial_coefficient(partition, n)
 
 
 def _set_partitions(S, partition):
@@ -132,9 +126,9 @@ def set_partition_count(partition, n=None):
     partition = multiset.Multiset(partition)
     if n is None:
         n = sum(partition)
-    count = math.factorial(n)
+    count = counts.factorial(n)
     for l, m in zip(*partition.split()):
-        count //= math.factorial(l)**m * math.factorial(m)
+        count //= counts.factorial(l)**m * counts.factorial(m)
     return count
 
 
@@ -162,9 +156,9 @@ def cycle_index(partition, n=None):
     partition = multiset.Multiset(partition)
     if n is None:
         n = sum(partition)
-    count = math.factorial(n)
+    count = counts.factorial(n)
     for l, m in zip(*partition.split()):
-        count //= l**m * math.factorial(m)
+        count //= l**m * counts.factorial(m)
     return count
 
 

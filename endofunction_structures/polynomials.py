@@ -12,7 +12,6 @@ import itertools
 import collections
 
 import numpy as np
-import sympy
 
 from . import multiset
 from . import productrange
@@ -99,11 +98,6 @@ def FOIL(roots):
     """
     monomials = [(1, -root) for root in roots]
     return functools.reduce(poly_multiply, monomials, [1])
-
-
-def symvec(n):
-    """Symbolic vector of variables x_0, ..., x_n-1."""
-    return [sympy.Symbol('x'+str(i)) for i in range(n)]
 
 
 def power_sum(X, k):

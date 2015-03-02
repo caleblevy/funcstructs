@@ -56,7 +56,7 @@ class TreeEnumerationTests(unittest.TestCase):
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
             rooted_treecount = 0
-            nfac = math.factorial(n)
+            nfac = counts.factorial(n)
             for tree in TreeEnumerator(n):
                 labelled_treecount += nfac//tree.degeneracy()
                 rooted_treecount += nfac//tree.unordered().degeneracy()

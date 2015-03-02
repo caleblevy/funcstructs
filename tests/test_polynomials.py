@@ -8,6 +8,7 @@
 import unittest
 
 from endofunction_structures.polynomials import *
+from endofunction_structures import counts
 
 
 class PolynomialTests(unittest.TestCase):
@@ -15,7 +16,7 @@ class PolynomialTests(unittest.TestCase):
     def test_foil(self):
         """Check binomial coefficients."""
         for n in range(20):
-            binomial_coeffs = [multiset.nCk(n, k) for k in range(n+1)]
+            binomial_coeffs = [counts.nCk(n, k) for k in range(n+1)]
             self.assertSequenceEqual(binomial_coeffs, FOIL([-1]*n))
 
     def test_monomial_symmetric_polynomial(self):
