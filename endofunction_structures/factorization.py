@@ -45,7 +45,7 @@ def _divisor_gen(n):
     # Since the factors are prime, every unique partition of powers represents
     # a different divisor.
     for power_combo in productrange.productrange([m+1 for m in powers]):
-        yield counts.prod([factors[I]**p for I, p in enumerate(power_combo)])
+        yield counts.prod([factors[i]**p for i, p in enumerate(power_combo)])
 
 
 def divisors(n, factors={}):

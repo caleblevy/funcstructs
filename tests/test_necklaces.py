@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
 #
 # The terms of use, license and copyright information for the code and ideas
 # contained herein are described in the LICENSE file included with this
@@ -124,12 +124,12 @@ class FixedContentNecklaceTests(unittest.TestCase):
     def test_enumeration_period_counts(self):
         """Test distribution of periods of enumerated necklaces."""
         necks = FixedContentNecklaces.from_partition([6, 12])
-        counts = necks.count_by_period()
+        counts_by_period = necks.count_by_period()
         baseperiod = 3
-        self.assertEqual(1038, sum(counts))
+        self.assertEqual(1038, sum(counts_by_period))
         for necklace in necks:
-            counts[necklace.period//baseperiod] -= 1
-        for count in counts:
+            counts_by_period[necklace.period//baseperiod] -= 1
+        for count in counts_by_period:
             self.assertEqual(0, count)
 
     def test_ordering(self):

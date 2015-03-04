@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
 #
 # The terms of use, license and copyright information for the code and ideas
 # contained herein are described in the LICENSE file included with this
@@ -17,12 +17,12 @@ class ProductrangeTest(unittest.TestCase):
         begins = [[1], None,   0,      1,      [1]*4,   [3]*4,  (1, 2, 3, 3)]
         ends = [[0],   [4]*4,  [4]*4,  [7]*3,  [10]*4,  [6]*4,  (2, 4, 8, 10)]
         steps = [None, 1,      None,   2,      3,       None,   (1, 1, 2, 2)]
-        counts = [0,   4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
+        numels = [0,   4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
 
         begins.extend([(1, 2, 3), (1, 2, 3)])
         ends.extend([(-9, 9, 9),  (9, -9, 9)])
         steps.extend([(-3, 3, 3), (3, -3, 3)])
-        counts.extend([4*3*2,     4*3*2])
-        for c, b, e, s in zip(counts, begins, ends, steps):
-            self.assertEqual(c, len(list(productrange(b, e, s))))
-            self.assertEqual(c, len(list(rev_range(b, e, s))))
+        numels.extend([4*3*2,     4*3*2])
+        for n, b, e, s in zip(numels, begins, ends, steps):
+            self.assertEqual(n, len(list(productrange(b, e, s))))
+            self.assertEqual(n, len(list(rev_range(b, e, s))))

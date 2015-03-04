@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
 #
 # The terms of use, license and copyright information for the code and ideas
 # contained herein are described in the LICENSE file included with this
@@ -35,9 +35,9 @@ class PolynomialTests(unittest.TestCase):
 
         vecs = [[5, 5, 5], [1, 2, 3, 4, 5, 6, 7, 8]]
         powers = [[3, 3, 2], [4, 4, 3, 3, 2]]
-        counts = [1171875, 139100509734480]
-        for vec, power, count in zip(vecs, powers, counts):
-            self.assertEqual(count, monomial_symmetric_polynomial(vec, power))
+        vals = [1171875, 139100509734480]
+        for vec, power, val in zip(vecs, powers, vals):
+            self.assertEqual(val, monomial_symmetric_polynomial(vec, power))
 
 
 class MultisetPolynomialTests(unittest.TestCase):

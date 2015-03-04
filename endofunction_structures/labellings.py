@@ -80,7 +80,7 @@ def ordered_partitions(partition, S=None):
 
 def ordered_partition_count(partition, n=None):
     """Number of ordered combinations into the given partition. """
-    return multinomial_coefficient(partition, n)
+    return counts.multinomial_coefficient(partition, n)
 
 
 def _set_partitions(S, partition):

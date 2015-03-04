@@ -196,14 +196,14 @@ class LevelTree(object):
         height_prev = 1
         # Most recent node found at height h. Where to graft the next node to.
         grafting_point = [0]*height
-        for node, height in enumerate(self[1:]):
+        for node, height in enumerate(self[1:], start=1):
             if height > height_prev:
-                labelling[node+1] = labels[grafting_point[height_prev-1]]
+                labelling[node] = labels[grafting_point[height_prev-1]]
                 height_prev += 1
             else:
-                labelling[node+1] = labels[grafting_point[height-2]]
+                labelling[node] = labels[grafting_point[height-2]]
                 height_prev = height
-            grafting_point[height-1] = node+1
+            grafting_point[height-1] = node
         return labelling
 
 
