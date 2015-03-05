@@ -5,26 +5,9 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" Representations and algorithms for rooted trees.
-
-A rooted tree is a connected directed graph with a single length-one cycle such
-that every node's out-degree is exactly one. A forest is any collection of
-rooted trees.
-
-A level tree is a representation of an ordered rooted tree by its level
-sequence: a listing of each node's height above the root, where node n+1 is
-connected either to vertex n or the previous node at the next lowest level.
-
-A dominant tree is the ordered tree with lexicographically largest level
-sequence for a given rooted tree. It is formed by placing all subtrees in
-dominant form and then sorting the subtrees from largest to smallest.
-
-Any endofunction structure may be represented as a forest of trees, grouped
-together in multisets corresponding to cycle decompositions of the final set
-(the subset of its domain on which it is invertible). The orderings of the
-trees in the multisets correspond to necklaces whose beads are the trees
-themselves. """
-
+""" Algorithms for representing and enumerating unlabelled rooted trees:
+connected directed graphs with a single length-one cycle and nodes of
+out-degree one. A forest is any collection of rooted trees. """
 
 import functools
 import itertools
@@ -40,11 +23,9 @@ from . import productrange
 
 @functools.total_ordering
 class RootedTree(object):
-
-    """An unlabelled, unordered rooted tree. The ordering of the nodes in the
-    subtrees is unimportant. Since there is nothing to distinguish the nodes,
-    we characterize a rooted tree strictly by the multiset of its subtrees.
-    Since every rooted tree has a root, there are no empty rooted trees."""
+    """An unlabelled, unordered rooted tree; i.e. the ordering of the subtrees
+    is unimportant. Since there is nothing to distinguish the nodes, we
+    characterize a rooted tree strictly by the multiset of its subtrees."""
 
     def __init__(self, subtrees=None):
         if subtrees is None:
@@ -67,6 +48,8 @@ class RootedTree(object):
         return not self == other
 
     def __bool__(self):
+        # A rooted tree, by definition, contains a root, thus is nonempty and
+        # evaluates True.
         return True
 
     __nonzero__ = __bool__
@@ -100,8 +83,6 @@ class RootedTree(object):
 
     def degeneracy(self):
         """Return #(nodes)!/#(labellings)"""
-        if not self:
-            return 1
         deg = self.subtrees.degeneracy()
         for subtree in self.subtrees:
             deg *= subtree.degeneracy()
@@ -119,7 +100,16 @@ class RootedTree(object):
 
 @functools.total_ordering
 class LevelTree(object):
-    """Represents an unlabelled ordered rooted tree."""
+    """ Data structure for representing ordered trees by a level sequence: a
+    listing of each node's height above the root produced in depth-first
+    traversal order. The tree is reconstructed by connecting each node to
+    previous one directly below its height. """
+
+    def __init__(self):
+        raise ValueError(
+            "LevelTree should not be invoked directly. Use either OrderedTree "
+            "or DominantTree."
+        )
 
     def __getitem__(self, key):
         return self.level_sequence[key]
@@ -152,6 +142,8 @@ class LevelTree(object):
         return iter(self.level_sequence)
 
     def __bool__(self):
+        # A rooted tree, by definition, contains a root, thus is nonempty and
+        # evaluates True.
         return True
 
     __nonzero__ = __bool__
@@ -208,6 +200,7 @@ class LevelTree(object):
 
 
 class OrderedTree(LevelTree):
+    """An unlabelled ordered tree represented by its level sequence."""
 
     def __init__(self, level_sequence):
         self.level_sequence = tuple(level_sequence)
@@ -222,8 +215,7 @@ class OrderedTree(LevelTree):
             yield self.__class__(subtree)
 
     def _dominant_sequence(self):
-        """ Return the lexicographically dominant rooted tree corresponding to
-        self. """
+        """ Return the dominant rooted tree corresponding to self. """
         if not self.branches():
             return self.level_sequence
         branch_list = []
@@ -248,6 +240,9 @@ def unordered_tree(level_sequence):
 
 
 class DominantTree(LevelTree):
+    """ A dominant tree is the ordering of an unordered tree with
+    lexicographically largest level sequence. It is formed by placing all
+    subtrees in dominant form and then putting them in descending order."""
 
     def __init__(self, level_sequence, preordered=False):
         if isinstance(level_sequence, type(self)):
@@ -356,12 +351,7 @@ class TreeEnumerator(object):
 
 
 class ForestEnumerator(TreeEnumerator):
-    """ Any rooted tree on N+1 nodes can be identically described by a
-    collection of rooted trees on N nodes, grafted together at a single root.
-
-    To enumerate all collections of rooted trees on N nodes, we reverse the
-    principle and enumerate all rooted trees on N+1 nodes, chopping them at the
-    base. Much simpler than finding all trees corresponding to a partition. """
+    """Represents the class of collections of rooted trees on n nodes."""
 
     __slots__ = ['n', '_cardinality']
 
@@ -372,6 +362,10 @@ class ForestEnumerator(TreeEnumerator):
         return self.__class__.__name__+'('+str(self.n - 1)+')'
 
     def __iter__(self):
+        """ Any rooted tree on n+1 nodes can be identically described as a
+        collection of rooted trees on n nodes, grafted together at a single
+        root. To enumerate all collections of rooted trees on n nodes, we may
+        enumerate all rooted trees on n+1 nodes, chopping them at the base. """
         for tree in super(ForestEnumerator, self).__iter__():
             yield tree.chop()
 

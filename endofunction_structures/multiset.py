@@ -5,10 +5,8 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" Multisets is a utilities module for performing miscellaneous operations and
-finding information about sets and multisets: breaking up multisets, getting
-elements of a set, and counting ways to represent them assuming certain
-properties are equivalent. """
+""" Data structure for representing a multiset - also known as a bag, or
+unordered tuple. """
 
 from collections import Counter
 import operator
@@ -19,8 +17,9 @@ from . import counts
 
 
 class Multiset(Counter):
-    """ Multiset - Also known as a bag or unordered tuple. Multiset is
-    hashable, immutable and usable for dict keys. """
+    """ Multiset is represented as a dictionary (hash table) whose keys are the
+    elements of the set and values are the multiplicities. Multiset is
+    immutable, and thus suitable for use as a dictionary key. """
 
     __slots__ = ['_size', '_items', '_hash']
 

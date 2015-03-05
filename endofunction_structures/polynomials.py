@@ -126,13 +126,13 @@ def elementary_symmetric_polynomial(x, n):
 
 class MultisetPolynomial(object):
     """A commutative ring with identity consisting of collections of multisets.
-    The addition is defined by union of two elements. The multiplication is the
-    collection of all pairwise unions of elements.
+    The addition of elements is defined by their union, and the multiplication
+    by union of all pairwise unions of their elements.
 
-    The multiset combinations function essentially like multinomials where the
-    free variables are the elements of the multiset and the exponents are the
+    These multiset collections function essentially as multinomials where the
+    free variables are the elements of the multisets and the exponents are the
     multiplicities They are built to be fed into a symmetric monomial
-    polynomial and expand into lists of multisets. """
+    polynomial to be expanded into lists of multisets. """
 
     def __init__(self, iterable=None):
         self.cpart = collections.Counter()

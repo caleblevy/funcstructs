@@ -5,6 +5,8 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
+"""Algorithms for enumerating all labellings of given unlabelled structures."""
+
 import itertools
 
 from . import counts
@@ -207,13 +209,13 @@ def translation_keys(tree):
 
 
 def tree_labellings(tree):
-    """Constant amortized time enumeration of every endofunction whose
+    """ Constant amortized time enumeration of every endofunction whose
     structure is described by the given tree. In many cases it may be much more
     efficient to use itertools.permutations (since they are at C speed) and may
     even be true in the amortized sense (since there are provably on average
     O(n!) labellings of a tree).
 
-    Still, it is constant time per tree (really per node per tree), and its
+    Still, it is constant time per tree (really per node per tree), and it's
     here for completeness sake.
 
     Note that order of the elements in a given combination bin does not matter

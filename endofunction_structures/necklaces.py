@@ -5,25 +5,8 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" A necklace is a class of n-character strings equivalent under rotation
-(orbits of the set of n-character strings under the action of cyclic
-permutation by the cyclic group). For example, the following are examples of a
-necklace using [a,b,c,d], [a,b,b] and [c,d]:
-
-    [a,b,c,d] ~ [b,c,d,a] ~ [c,d,a,b] ~ [d,a,b,c]
-    [a,b,b] ~ [b,a,b] ~ [b,b,a]
-    [c,d,c,d] ~ [d,c,d,c]
-
-Different necklaces may have different periodicity, as seen above. This module
-contains a collection of functions for counting and enumerating necklaces of a
-given multiset.
-
-Their relevance to enumerating endofunction structures is as follows: given a
-collection of N forests, the necklaces whose beads are the forests' trees are
-precisely the distinct ways of connecting the trees to form a cycle of length
-n. Thus the ways of connecting a collection of rooted trees together in a cycle
-are precisely the necklaces whose beads are the rooted trees. """
-
+""" Algorithms for representing and enumerating necklaces: ordered lists
+equivalent under cyclic rotation. """
 
 import fractions
 import functools
@@ -65,7 +48,16 @@ def periodicity(strand):
 
 
 class Necklace(object):
-    """An equivalence class of all lists equivalent under rotation."""
+    """ A necklace is a class of n-character strings equivalent under rotation
+    (orbits of the set of n-character strings under the action of the cyclic
+    group). For example, each of the following are representative of the same
+    necklace:
+
+        [a,b,c,d] ~ [b,c,d,a] ~ [c,d,a,b] ~ [d,a,b,c]
+        [a,b,b] ~ [b,a,b] ~ [b,b,a]
+        [c,d,c,d] ~ [d,c,d,c]
+
+    Different necklaces may have different periodicity, as seen above."""
 
     __slots__ = ['strand', '_hash', '_period']
 
@@ -143,7 +135,8 @@ def simple_fixed_content(a, content, t, p, k):
 
 
 class FixedContentNecklaces(object):
-    """Necklaces of fixed content."""
+    """ Representation of the set of necklaces of fixed content; i.e. a fixed
+    pool of beads from which to form necklaces. """
 
     __slots__ = ['partition', 'beads', 'elems']
 
@@ -199,8 +192,6 @@ class FixedContentNecklaces(object):
         return mults
 
     def cardinality(self):
-        """Return the number of necklaces formed from the given multiset of
-        beads."""
         return sum(self.count_by_period())
 
     def sfc(self):
@@ -213,8 +204,6 @@ class FixedContentNecklaces(object):
         return simple_fixed_content(a, partition, 2, 1, k)
 
     def __iter__(self):
-        """ Given a set of items (called beads) returns all necklaces which can
-        be made with those beads. """
         if not self.beads:
             return
         for strand in self.sfc():

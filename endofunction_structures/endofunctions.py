@@ -5,9 +5,8 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" A collection of utilities returning certain information about and kinds of
-images of sets under functions: preimages, cardinalities of iterate images,
-cycle decompositions and limit sets. """
+""" Data structures for representing endofunction structures: mappings from a
+finite set into itself. """
 
 import random
 
@@ -19,8 +18,8 @@ from . import rootedtrees
 
 
 class Endofunction(object):
-    """ Implementation of an endofunction object: a map from set(range(N)) to
-    itself. """
+    """ Implementation of an endofunction as a map of range(N) into itself
+    using a list. """
 
     def __init__(self, func):
         if isinstance(func, rootedtrees.LevelTree):
@@ -91,10 +90,8 @@ class Endofunction(object):
 
     @memoized_property
     def imagepath(self):
-        """
-        Give it a list such that all([I in range(len(f)) for I in f]) and this
-        program spits out the image path of f.
-        """
+        """ Give it a list such that all([I in range(len(f)) for I in f]) and
+        this program spits out the image path of f. """
         cardinalities = [len(self.imageset)]
         f = self
         card_prev = len(self)
@@ -110,8 +107,7 @@ class Endofunction(object):
         return cardinalities
 
     def __pow__(self, n):
-        """ Iterate by self-composing, inspired by exponentiation by squaring.
-        """
+        """ Iterate by self-composing, akin to exponentiation by squaring. """
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
         f = self
@@ -124,8 +120,7 @@ class Endofunction(object):
 
     def enumerate_cycles(self):
         """ Returns self's cycle decomposition. Since lookup in sets is O(1),
-        this algorithm should take O(len(self.domain)) time. """
-
+        this algorithm should take O(len(f.domain)) time. """
         if len(self) == 1:
             yield [0]
             return
@@ -166,8 +161,7 @@ class Endofunction(object):
 
     @memoized_property
     def attached_treenodes(self):
-        """ Returns subsets of the preimages of each element which are not in
-        cycles. """
+        """ Returns set differences of the preimages with the limit set. """
         descendants = [set() for _ in range(len(self))]
         for x, inv_image in enumerate(self.preimage):
             for f in inv_image:
@@ -176,15 +170,8 @@ class Endofunction(object):
         return descendants
 
     def _attached_level_sequence(self, node, level=1):
-        """ Given an element of self's domain, return a level sequence of the
-        rooted tree formed from the graph of all noncyclic nodes whose paths
-        iteration paths pass through node.
-
-        At each call it builds the level sequence with first element at the
-        current level and appends the level sequences of the attached subtrees
-        of each noncyclic element in the preimage the the node, with the
-        subtrees' level sequences starting one level higher than the current
-        node. """
+        """ Return the level sequence of the rooted tree formed from the graph
+        of all noncyclic nodes whose iteration paths pass through node."""
         level_sequence = [level]
         for x in self.attached_treenodes[node]:
             level_sequence.extend(self._attached_level_sequence(x, level+1))
@@ -208,6 +195,7 @@ class Endofunction(object):
 
 
 def randfunc(n):
+    """ Return a random endofunction on n elements. """
     return Endofunction([random.randrange(n) for I in range(n)])
 
 
@@ -222,6 +210,8 @@ def cycles_to_funclist(cycles):
 
 
 class SymmetricFunction(Endofunction):
+    """ An invertible endofunction. """
+
     def __init__(self, func):
         func = tuple(func)
         if hasattr(func, '__getitem__') and hasattr(func[0], '__iter__'):
@@ -265,7 +255,7 @@ def randperm(n):
 
 
 class TransformationMonoid(object):
-    """Set of all endofunctions."""
+    """Set of all endofunctions on n elements."""
 
     def __init__(self, set_size):
         if set_size < 1:

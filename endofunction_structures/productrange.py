@@ -6,9 +6,7 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 
-""" Functions for iterating over dynamically nested loops; i.e. iterating over
-cartesian products of finite sets, with variable dimensionality. """
-
+""" Functions for iterating over dynamically nested loops. """
 
 import itertools
 
@@ -55,10 +53,6 @@ def productrange(begin, end=None, step=None):
     """
     b, e, s = parse_ranges(begin, end, step)
     return itertools.product(*[range(i, j, k) for i, j, k in zip(b, e, s)])
-
-
-def sign(num):
-    return num//abs(num)
 
 
 def rev_range(begin, end=None, step=None):

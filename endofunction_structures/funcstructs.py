@@ -5,13 +5,9 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" Enumerate every conjugacy class of graphs on N nodes with outdegree one for
-every vertex. As far as I know this is original work, and endofunction
-structures have not been enumerated anywhere else.
-
-Most of these algorithms were derived by Caleb Levy in February 2014. For more
-information contact caleb.levy@berkeley.edu. """
-
+""" Algorithms for representing and enumerating endofunction structures:
+conjugacy classes of the transformation monoid, represented by directed graphs
+with nodes of outdegree one. """
 
 import fractions
 import itertools
@@ -31,13 +27,13 @@ from . import productrange
 
 
 def chunks(l, n):
-    """ Yield successive n-sized chunks from l."""
+    """ Yield successive n-sized chunks from l. """
     for i in range(0, len(l), n):
         yield l[i:i+n]
 
 
 def indent_treestring(tree, second_indent, end):
-    """Format a rooted tree string with indents."""
+    """Format a rooted tree string with indents. """
     treestr = str(rootedtrees.unordered_tree(tree))
     treestr_list = [treestr[:end]]
     for s in chunks(treestr[end:], end-second_indent):
@@ -70,6 +66,12 @@ def _func_to_struct(f):
 
 
 class Funcstruct(object):
+    """ An endofunction structure may be represented as a forest of trees,
+    grouped together in multisets corresponding to cycle decompositions of the
+    final set (the subset of its domain on which it is invertible). The
+    orderings of the trees in the multisets correspond to necklaces whose beads
+    are the trees themselves. """
+
     __slots__ = ['cycles', 'n']
 
     def __init__(self, cycles, precounted=None):
@@ -209,6 +211,8 @@ def cycle_type_funcstructs(n, cycle_type):
 
 
 class EndofunctionStructures(object):
+    """Represents the class of all endofunction structures."""
+
     def __init__(self, node_count, cycle_type=None):
         self.n = node_count
         self.cycle_type = multiset.Multiset(cycle_type)
@@ -257,9 +261,10 @@ class EndofunctionStructures(object):
         return int(tot)
 
     def iterdist(self):
-        """ Since every labelling of a function structure shares the same image
-        path, we may calculate iterdist by enumerating all endofunction
-        structure image paths and scaling them by their multiplicities.
+        """ Every labelling of a function structure shares the same image path,
+        thus we may calculate iteration distributions by enumerating all
+        endofunction structure image paths and scaling them by their
+        multiplicities.
 
         TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
         investigate possibility that a<=4, and add writeup to the repository.
