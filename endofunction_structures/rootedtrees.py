@@ -170,7 +170,7 @@ class LevelTree(object):
         return [subtree.bracket_form() for subtree in self.subtrees()]
 
     def unordered(self):
-        """Return the unordered tree corresponding ot the rooted tree."""
+        """Return the unordered tree corresponding to the rooted tree."""
         if not self.branch_sequences():
             return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
