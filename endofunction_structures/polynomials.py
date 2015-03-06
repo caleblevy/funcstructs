@@ -68,9 +68,8 @@ def monomial_symmetric_polynomial(x, powers):
 
 
 def poly_multiply(coeffs1, coeffs2):
-    """
-    Given numerical lists c and d of length n and m, returns the coefficients
-    of P(X)*Q(X) in decreasing order, where
+    """ Given numerical lists c and d of length n and m, returns the
+    coefficients of P(X)*Q(X) in decreasing order, where
         P(X) = c[-1] + c[-2]*X + ... + c[0]*x^n
         Q(X) = d[-1] + d[-2]*X + ... + d[0]*x^m
 

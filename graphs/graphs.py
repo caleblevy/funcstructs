@@ -17,7 +17,7 @@ def circle_points(n, r=1):
     return r*points
 
 
-def z_to_xy(z):
+def complex_to_cart(z):
     """Separate array z into real and imaginary part."""
     x = np.real(z)
     y = np.imag(z)
@@ -27,8 +27,8 @@ def z_to_xy(z):
 def slope_between_points(z1, z2):
     """ Return the slope of the line connecting points z1 and z2 in the complex
     plane. """
-    x1, y1 = z_to_xy(z1)
-    x2, y2 = z_to_xy(z2)
+    x1, y1 = complex_to_cart(z1)
+    x2, y2 = complex_to_cart(z2)
 
     m = (y1-y2)/(1.*(x1-x2))
     b = y1 - m*x1
@@ -39,7 +39,7 @@ def intersection_point(z, z1, z2):
     """Return the intersection point between the line connecting z1 and z2, and
     the perpendicular to this line passing through z."""
     m1, b1 = slope_between_points(z1, z2)
-    x0, y0 = z_to_xy(z)
+    x0, y0 = complex_to_cart(z)
     m2 = -1./m1  # perpendicular slope to m is -1/m
     b2 = y0 - m2*x0
     x_intersect = (b1-b2)/(1.*(m2-m1))
@@ -66,10 +66,10 @@ def add_nodes(ax, r, node_locs, circ_res=100):
         # to contain them. Circle primitives apparently do not necessarily
         # active matplotlib's automatic scaling.
         invisible_circle = circ_points + z
-        circ_x, circ_y = z_to_xy(invisible_circle)
+        circ_x, circ_y = complex_to_cart(invisible_circle)
         plt.plot(circ_x, circ_y, color='black', visible=False)
 
-        x_pos, y_pos = z_to_xy(z)
+        x_pos, y_pos = complex_to_cart(z)
         circ = plt.Circle((x_pos, y_pos), radius=r, color='white', zorder=2)
         circ.set_edgecolor('black')
         ax.add_patch(circ)
@@ -84,8 +84,8 @@ def func_to_vertices(f):
 
 def draw_connecting_line(z1, z2, fig):
     """ Add a connecting line between points z1 and z2 to fig. """
-    x1, y1 = z_to_xy(z1)
-    x2, y2 = z_to_xy(z2)
+    x1, y1 = complex_to_cart(z1)
+    x2, y2 = complex_to_cart(z2)
     x = np.array([x1, x2])
     y = np.array([y1, y2])
     fig.plot(x, y, color='blue', zorder=1)

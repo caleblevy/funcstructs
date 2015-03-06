@@ -5,9 +5,7 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-
 """ Further functions for enumerating and counting partitions. """
-
 
 import itertools
 
@@ -40,8 +38,8 @@ def fixed_length_partitions(n, L):
 
 
 def tuple_partitions(n):
-    """ Every partition on N may be represented in the form as a tuple of
-    numbers (0,n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=N. This
+    """ Every partition on n may be represented in the form as a tuple of
+    numbers (0,n1,n2,...,nk) with 1<=i<=k such that 1*n1+2*n2+...+k*nk=n. This
     program outputs every partition of n in a tuple format. """
     for part in IntegerPartitions.partitions(n):
         b = [0]*(n+1)

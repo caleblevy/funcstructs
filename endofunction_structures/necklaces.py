@@ -171,23 +171,25 @@ class FixedContentNecklaces(object):
         # Find the multiplicity of each period.
         for factor in factors:
             n = period = baseperiod * factor
-            # The number of character permutations which are periodic in factor
-            # OR ANY OF ITS DIVISORS is simply the multinomial coefficient
+            # The number of character permutations which are periodic in any
+            # divisor of factor is simply the multinomial coefficient
             # corresponding to the subset of the multiplicity partition
             # featuring 1/factor of each kind of the original partiton's
             # elements.
             mults[factor] = counts.multinomial_coefficient(
                 [(i*factor)//w for i in self.partition]
             )
-            # Subtact off the number of character permutations whose period
-            # subdivides our divisor of w, to get the number of character
-            # permutations with period EXACTLY equal to factor.
+            # To enusre mults[factor] gives the number of character
+            # permutations with period exactly equal to (not subdividing)
+            # factor, subtact off the number of permutations whose period
+            # subdivides our factor.
             subdivisors = factorization.divisors(factor)
             if subdivisors[-1] != 1:
                 for subfactor in subdivisors[:-1]:
                     mults[factor] -= subfactor * baseperiod * mults[subfactor]
-            # Finally, normalize by the period to obtain the number of distinct
-            # rotations of any member of mults[factor].
+            # Finally, normalize by the period: the number of distinct
+            # rotations of any member of mults[factor], to obtain the number of 
+            # distinct necklaces with this period.
             mults[factor] //= period
         return mults
 
