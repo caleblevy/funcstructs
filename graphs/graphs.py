@@ -88,7 +88,7 @@ def draw_connecting_line(z1, z2, fig):
     x2, y2 = complex_to_cart(z2)
     x = np.array([x1, x2])
     y = np.array([y1, y2])
-    fig.plot(x, y, color='blue', zorder=1)
+    fig.plot(x, y, color='black', zorder=1)
 
 
 def draw_connections(ax, node_locs, connections):
