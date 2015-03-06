@@ -1,3 +1,4 @@
 [submodule "PADS"]
 	path = PADS
 	url = http://www.ics.uci.edu/~eppstein/PADS/.git
+	branch = master
