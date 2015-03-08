@@ -10,36 +10,57 @@ from sage.all import *
 from endofunction_structures import rootedtrees, endofunctions
 
 
-def tree_to_graph(tree):
-    """ Return the graphical form of a rooted tree. """
-    f = endofunctions.Endofunction(tree).attached_treenodes
+def _place_tree_nodes(tree, name=None):
+    """ Save basic tree plot or return node positions depending on calling
+    wrapper. """
+    t = rootedtrees.DominantTree(tree)
+    f = endofunctions.Endofunction(t).attached_treenodes
     labels = {node: list(neighbors) for node, neighbors in enumerate(f)}
     g = Graph(labels)
-    return g
-
-
-def levseq_to_graph(seq):
-    """ Return the graph of the level sequence corresponding to a rooted tree.
-    """
-    return tree_to_graph(rootedtrees.DominantTree(seq))
-
-
-def tree_plot(g, name='tree'):
-    """Plot a rooted tree, and return the positions"""
-    p = g.plot(
+    gp = g.graphplot(
         layout='tree',
         tree_root=0,
         save_pos=True,
         vertex_labels=False,
         tree_orientation='up'
     )
-    p.save(name+'.pdf')
+    if name is not None:
+        gp.plot().save('funcgraphs/images/'+name+'.pdf')
+    else:
+        return g.get_pos()
+
+
+def tree_plot(tree, name):
+    """Plot a rooted tree, and return the positions"""
+    _place_tree_nodes(tree, name)
+
+
+def treenode_positions(tree):
+    """Return node placements of the rooted tree. """
+    return _place_tree_nodes(tree)
+
+
+def rooted_tree_plot(tree, name, downarrows=False):
+    """Make rooted tree plot with root loop and downward arrows optionally."""
+    tree_pos = treenode_positions(tree)
+    f = endofunctions.Endofunction(rootedtrees.DominantTree(tree))
+    if downarrows:
+        dg = DiGraph(connections.func_to_vertices(f))
+    else:
+        dg = Graph(connections.func_to_vertices(f))
+    dgp = dg.graphplot(vertex_labels=False)
+    for node, loc in tree_pos.items():
+        dgp._pos[node] = loc
+    dgp.set_vertices()
+    dgp.set_edges()
+    dp = dgp.plot()
+    if name is not None:
+        dp.save('funcgraphs/images/'+name+'.pdf')
 
 
 if __name__ == '__main__':
     l1 = [1, 2, 3, 4, 4, 4, 3, 3, 2, 3, 3, 2]
     l2 = [1, 2, 3, 4, 4, 3, 4, 4, 2, 3, 4, 4, 3, 4, 4]
-    g1 = levseq_to_graph(l1)
-    g2 = levseq_to_graph(l2)
-    tree_plot(g1)
-    tree_plot(g2, 'binary')
+    tree_plot(l1, 'tree')
+    tree_plot(l2, 'binary')
+    rooted_tree_plot(l1, 'downtree', downarrows=True)
