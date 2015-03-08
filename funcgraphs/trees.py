@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
+# Copyright (C) 2015 Caleb Levy - All Rights Reserved.
 #
 # The terms of use, license and copyright information for the code and ideas
 # contained herein are described in the LICENSE file included with this
@@ -8,6 +8,7 @@
 from sage.all import *
 
 from endofunction_structures import rootedtrees, endofunctions
+
 
 def tree_to_graph(tree):
     """ Return the graphical form of a rooted tree. """
