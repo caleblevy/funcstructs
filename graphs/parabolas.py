@@ -8,13 +8,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import graphs
+import connections
 
 
 def complex_to_polar(z):
     """Convert complex coordinates to polar coordinates"""
     r = np.abs(z)
-    x, y = graphs.complex_to_cart(z)
+    x, y = connections.complex_to_cart(z)
     theta = np.arctan2(y, x)
     return r, theta
 
@@ -80,7 +80,7 @@ def connecting_parabola(d, z1, z2):
 
 def zplot(z):
     """Plot an array of complex numbers by (re(z), im(z))"""
-    x, y = graphs.complex_to_cart(z)
+    x, y = connections.complex_to_cart(z)
     plt.plot(x, y)
 
 
@@ -90,14 +90,14 @@ if __name__ == '__main__':
     z_f1 = 4+1j*7
     r1 = .2
 
-    graphs.draw_connecting_line(z_s1, z_f1, plt.gca())
+    connections.draw_connecting_line(z_s1, z_f1, plt.gca())
     zplot(connecting_parabola(r1, z_s1, z_f1))
 
     z_s2 = 0
     z_f2 = -4-1j*2
     r2 = [-1.5, -1, -.5, 0, .5, 1, 1.5]
     zplot(draw_bisecting_line(z_s2, z_f2, plt.gca()))
-    graphs.draw_connecting_line(z_s2, z_f2, plt.gca())
+    connections.draw_connecting_line(z_s2, z_f2, plt.gca())
     for i in r2:
         zplot(connecting_parabola(i, z_s2, z_f2))
 
