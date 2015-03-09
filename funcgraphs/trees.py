@@ -8,6 +8,7 @@
 from sage.all import *
 
 from endofunction_structures import rootedtrees, endofunctions
+from . import connections
 
 
 def _place_tree_nodes(tree, name=None):
@@ -64,3 +65,4 @@ if __name__ == '__main__':
     tree_plot(l1, 'tree')
     tree_plot(l2, 'binary')
     rooted_tree_plot(l1, 'downtree', downarrows=True)
+    tree_plot([1]+[2]*100+[3]*100, 'onebig')
