@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
 #
 # The terms of use, license and copyright information for the code and ideas
@@ -188,7 +187,7 @@ class FixedContentNecklaces(object):
                 for subfactor in subdivisors[:-1]:
                     mults[factor] -= subfactor * baseperiod * mults[subfactor]
             # Finally, normalize by the period: the number of distinct
-            # rotations of any member of mults[factor], to obtain the number of 
+            # rotations of any member of mults[factor], to obtain the number of
             # distinct necklaces with this period.
             mults[factor] //= period
         return mults
