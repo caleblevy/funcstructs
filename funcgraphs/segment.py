@@ -12,20 +12,15 @@ import unittest
 import numpy as np
 
 
-class Coordinates(object):
+class LocationSpecifier2D(object):
     """Abstract coordinates. Invoked either as a point or a point cloud. """
 
     def __init__(self, x, y=None):
-        """ Takes either a single complex number z, a tuple (x, y) or real and
-        imaginary part separately. I.E. Point(0, 1) == Point(0+1j) ==
-        Point((1,2)) == Point(Point(0, 1)). """
-
-        if isinstance(x, self.__class__):
-            self._coord = x._coord
-        elif y is not None:
-            self._coord = x + 1j*y
-        else:
-            self._coord = x.real + 1j*x.imag
+        # Conceptually, Location2D should be an abstract base class. However,
+        # without some ugly hacks or third party libraries, there is no python
+        # 2 and 3 compatible syntax for specifying a metaclass, so we mock
+        # ABCMeta by raising an error at instantiation.
+        raise NotImplementedError("Cannot call coordinates directly.")
 
     @classmethod
     def from_polar(cls, r, theta):
@@ -33,42 +28,39 @@ class Coordinates(object):
 
     @property
     def z(self):
+        """Return the locations as points on the complex plane"""
         return self._coord
 
     @property
     def x(self):
+        """Return x components of the cartesian representations"""
         return self.z.real
 
     @property
     def y(self):
+        """Return the y components of cartesian representations"""
         return self.z.imag
 
     @property
     def r(self):
+        """Return radial components of the polar representation"""
         return np.abs(self.z)
 
     @property
     def theta(self):
+        """Return the angular component of the polar representation"""
         return np.arctan2(self.y, self.x)
 
-    def __repr__(self):
-        return self.__class__.__name__+'(%s, %s)' % (str(self.x), str(self.y))
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self._coord == other._coord
-        return False
-
-    def __ne__(self, other):
-        return not self == other
-
     def __add__(self, other):
+        """Reverse of __sub__"""
         return self.__class__(self.z + Point(other).z)
 
     def __neg__(self):
+        """Reflection about the origin"""
         return self.__class__(-self.z)
 
     def __sub__(self, other):
+        """Representation with origin shifted to other."""
         return self + (-other)
 
     def __rmul__(self, other):
@@ -78,19 +70,66 @@ class Coordinates(object):
         raise TypeError("Cannot multiply coordinates by %s" % str(type(other)))
 
     def __div__(self, other):
+        """inverse of mul"""
         return (1./other) * self
 
 
-class Point(Coordinates):
-    """ A basic cartesian point. Internally represented as a complex number
-    (i.e. a point in the complex plane). """
+def coordinate_parser(x, y=None):
+    """Parses tuples, complex numbers and pairs of inputs for Point and
+    PointCloud classes."""
+    if isinstance(x, LocationSpecifier2D):
+        return x.z
+    elif y is not None:
+        return x + 1j*y
+    else:
+        return x.real + 1j*x.imag  # ensure coordinates are cast as complex
+
+
+class Point(LocationSpecifier2D):
+    """A basic cartesian point. Internally represented as a complex number
+    (i.e. a point in the complex plane)."""
 
     def __init__(self, x, y=None):
+        """Takes either a single complex number z, a tuple (x, y) or real and
+        imaginary part separately. i.e. Point(0, 1) == Point(0+1j) == Point((1,
+        2)) == Point(Point(0, 1))."""
         if hasattr(x, '__iter__'):
             if not(len(x) == 2 and y is None):
                 raise TypeError("More than one coordinate specified.")
             x, y = x[0], x[1]
-        super(Point, self).__init__(x, y)
+        self._coord = coordinate_parser(x, y)
+
+    def __repr__(self):
+        return self.__class__.__name__+'(%s, %s)' % (str(self.x), str(self.y))
+
+    def __eq__(self, other):
+        if isinstance(other, type(self)):
+            return self.z == other.z
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+
+class Coordinates(LocationSpecifier2D):
+    """A set of points."""
+
+    def __init__(self, x, y=None):
+        """ Takes either two equal length arrays of real numbers or one array
+        of complex numbers. """
+        z = coordinate_parser(x, y)
+        if isinstance(z, complex):
+            z = np.array([z])
+        self._coord = z
+
+    def __len__(self):
+        """Number of points in the set"""
+        return len(self.z)
+
+    def __iter__(self):
+        """Enumerate all points in z."""
+        for p in self.z:
+            yield Point(p)
 
 
 class LineSegment(object):
@@ -118,16 +157,13 @@ class LineSegment(object):
 
     @property
     def slope(self):
-        rise = self.p1.y - self.p2.y
-        run = 1.*(self.p1.x - self.p2.x)
-        try:
-            m = rise/run
-        except ZeroDivisionError as e:
-            if abs(rise) > 0:
-                m = float('Inf')
-            else:
-                raise e
-        return m
+        rise = self.p2.y - self.p1.y
+        run = 1.*(self.p2.x - self.p1.x)
+        if run:
+            return rise/run
+        if rise:
+            return rise/abs(rise)*float('inf')
+        raise ZeroDivisionError
 
     @property
     def midpoint(self):
@@ -157,7 +193,10 @@ class CoordinateTests(unittest.TestCase):
         """Ensure equivalence of various ways to initialize a point."""
         p1 = Point(1, 2)
         p2 = Point(1 + 2j)
+        p3 = Point((1, 2))
         self.assertEqual(p1, p2)
+        self.assertEqual(p1, p3)
+        self.assertEqual(p2, p3)
         self.assertEqual(p1, Point(p1))
 
     def test_repr(self):
@@ -200,11 +239,17 @@ class CoordinateTests(unittest.TestCase):
         self.assertAlmostEqual(-1, p1.x)
         self.assertAlmostEqual(-2, p1.y)
 
-    def test_points_are_not_coordinates(self):
-        self.assertFalse(Point(1, 2) == Coordinates(1, 2))
-        self.assertFalse(Coordinates(1, 2) == Point(1, 2))
-        self.assertTrue(Coordinates(1, 2) == Coordinates(1, 2))
-        self.assertTrue(Point(1, 2) == Point(1, 2))
+    def test_coordinates(self):
+        """Test arrays of coordinates"""
+        coords = Coordinates(np.arange(10), np.arange(10)**2)
+        for i, p in enumerate(coords):
+            self.assertAlmostEqual(i, p.x)
+            self.assertAlmostEqual(i**2, p.y)
+        self.assertEqual(10, len(coords))
+        np.testing.assert_array_almost_equal(
+            coords.z,
+            Coordinates.from_polar(coords.r, coords.theta).z
+        )
 
 
 class LineTests(unittest.TestCase):
