@@ -52,7 +52,7 @@ class LocationSpecifier2D(object):
         return np.arctan2(self.y, self.x)
 
     def __add__(self, other):
-        """Reverse of __sub__"""
+        """Change to coordinates in which old origin is now at other in new"""
         return self.__class__(self.z + Point(other).z)
 
     def __neg__(self):
@@ -60,7 +60,7 @@ class LocationSpecifier2D(object):
         return self.__class__(-self.z)
 
     def __sub__(self, other):
-        """Representation with origin shifted to other."""
+        """Change to coordinates such that new origin is at other in the old"""
         return self + (-other)
 
     def __rmul__(self, other):
@@ -72,6 +72,8 @@ class LocationSpecifier2D(object):
     def __div__(self, other):
         """inverse of mul"""
         return (1./other) * self
+
+    __truediv__ = __div__
 
 
 def coordinate_parser(x, y=None):
@@ -153,21 +155,21 @@ class LineSegment(object):
 
     @property
     def unit(self):
-        return self.vector/(1.*self.length)
+        return self.vector/self.length
 
     @property
     def slope(self):
         rise = self.p2.y - self.p1.y
-        run = 1.*(self.p2.x - self.p1.x)
+        run = self.p2.x - self.p1.x
         if run:
-            return rise/run
+            return 1.*rise/run
         if rise:
             return rise/abs(rise)*float('inf')
         raise ZeroDivisionError
 
     @property
     def midpoint(self):
-        return (self.p1 + self.p2)/2.
+        return (self.p1 + self.p2)/2
 
     def __add__(self, other):
         return self.__class__(self.p1 + Point(other), self.p2 + Point(other))
@@ -250,6 +252,7 @@ class CoordinateTests(unittest.TestCase):
             coords.z,
             Coordinates.from_polar(coords.r, coords.theta).z
         )
+
 
 
 class LineTests(unittest.TestCase):
