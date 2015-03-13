@@ -10,6 +10,7 @@ otherwise manipulating line segments in a convenient fashion. """
 import unittest
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class LocationSpecifier2D(object):
@@ -101,6 +102,10 @@ class Point(LocationSpecifier2D):
             x, y = x[0], x[1]
         self._coord = coordinate_parser(x, y)
 
+    def __mul__(self, other):
+        """Dot product with other vector."""
+        return self.x * other.x + self.y * other.y
+
     def __repr__(self):
         return self.__class__.__name__+'(%s, %s)' % (str(self.x), str(self.y))
 
@@ -133,6 +138,12 @@ class Coordinates(LocationSpecifier2D):
         for p in self.z:
             yield Point(p)
 
+    def __getitem__(self, key):
+        """Return the nth point in the cloud"""
+        if isinstance(key, int):
+            return Point(self.z[key])
+        return Coordinates(self.z[key])
+
 
 class LineSegment(object):
     """ Line segment between two points. May be directed or undirected.
@@ -154,11 +165,7 @@ class LineSegment(object):
         return self.vector.r
 
     @property
-    def unit(self):
-        return self.vector/self.length
-
-    @property
-    def slope(self):
+    def m(self):
         rise = self.p2.y - self.p1.y
         run = self.p2.x - self.p1.x
         if run:
@@ -168,8 +175,18 @@ class LineSegment(object):
         raise ZeroDivisionError
 
     @property
-    def midpoint(self):
-        return (self.p1 + self.p2)/2
+    def b(self):
+        """Return the y-intercept of the extended line segment"""
+        return self.p1.y - self.m * self.p1.x
+
+    def projection(self, p):
+        """Return projection of point p onto the segment"""
+        p = Point(p)
+        m_perp = -1./self.m
+        b_perp = p.y - m_perp*p.x
+        x_int = 1.*(self.b - b_perp)/(m_perp - self.m)
+        y_int = self.m*x_int + self.b
+        return Point(x_int, y_int)
 
     def __add__(self, other):
         return self.__class__(self.p1 + Point(other), self.p2 + Point(other))
@@ -187,6 +204,15 @@ class LineSegment(object):
 
     def __ne__(self, other):
         return not self == other
+
+    def draw_line(self, ax=None):
+        if ax is None:
+            ax = plt.gca()
+        x1, y1 = self.p1.x, self.p1.y
+        x2, y2 = self.p2.x, self.p2.y
+        x = np.array([x1, x2])
+        y = np.array([y1, y2])
+        ax.plot(x, y, color='black', zorder=1)
 
 
 class CoordinateTests(unittest.TestCase):
@@ -247,12 +273,23 @@ class CoordinateTests(unittest.TestCase):
         for i, p in enumerate(coords):
             self.assertAlmostEqual(i, p.x)
             self.assertAlmostEqual(i**2, p.y)
+            self.assertAlmostEqual(p, coords[i])
         self.assertEqual(10, len(coords))
         np.testing.assert_array_almost_equal(
             coords.z,
             Coordinates.from_polar(coords.r, coords.theta).z
         )
 
+    def test_dot_product(self):
+        """Test values for the dot product of points"""
+        p1 = Point((1, 2))
+        p2 = Point((3, 4))
+        # Test commutativity
+        self.assertEqual(11, p1 * p2)
+        self.assertEqual(11, p2 * p1)
+        p3 = Point(-2, 1)
+        self.assertEqual(0., p1 * p3)
+        self.assertEqual(0., p3 * p1)
 
 
 class LineTests(unittest.TestCase):
@@ -266,24 +303,33 @@ class LineTests(unittest.TestCase):
         """Test slopes of the lines"""
         l1 = LineSegment(1+2j, 3+7j)
         l2 = LineSegment((1, 2), (3, 7))
-        self.assertAlmostEqual(2.5, l1.slope)
-        self.assertAlmostEqual(l1.slope, l2.slope)
+        self.assertAlmostEqual(2.5, l1.m)
+        self.assertAlmostEqual(l1.m, l2.m)
         # Test vertical line gives infinite slope
         l_vert = LineSegment(0, 1j)
-        self.assertEqual(float('inf'), l_vert.slope)
+        self.assertEqual(float('inf'), l_vert.m)
         # Test zero length line raises error
         with self.assertRaises(ZeroDivisionError):
-            LineSegment((1, 1), (1, 1)).slope
+            LineSegment((1, 1), (1, 1)).m
 
-    def test_unit(self):
+    def test_vector(self):
         """Test angle of unit vector is tangent of the slope."""
         l1 = LineSegment((1, 3), (1, 7))
         l2 = LineSegment(0, (-1, -1))
-        self.assertAlmostEqual(np.pi/2., l1.unit.theta)
+        self.assertAlmostEqual(np.pi/2., l1.vector.theta)
+        self.assertAlmostEqual(np.sqrt(2), l2.vector.r)
 
     def test_repr(self):
         l = LineSegment((1, 2), (3, 7))
         self.assertEqual(l, eval(repr(l)))
+
+    def test_projection(self):
+        """Test projection on the line y = x"""
+        l = LineSegment((-1, -1), (1, 1))
+        self.assertEqual(Point(0, 0), l.projection((-1, 1)))
+        self.assertEqual(Point(0, 0), l.projection((2, -2)))
+        self.assertEqual(Point(5.5, 5.5), l.projection((7, 4)))
+
 
 if __name__ == '__main__':
     unittest.main()
