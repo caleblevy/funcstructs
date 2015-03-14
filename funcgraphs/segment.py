@@ -32,6 +32,9 @@ class LocationSpecifier2D(object):
         """Return the locations as points on the complex plane"""
         return self._coord
 
+    def __abs__(self):
+        return np.abs(self.z)
+
     @property
     def x(self):
         """Return x components of the cartesian representations"""
@@ -45,7 +48,7 @@ class LocationSpecifier2D(object):
     @property
     def r(self):
         """Return radial components of the polar representation"""
-        return np.abs(self.z)
+        return abs(self)
 
     @property
     def theta(self):
@@ -66,7 +69,7 @@ class LocationSpecifier2D(object):
 
     def __rmul__(self, other):
         """Scale self by real value other. """
-        if other == other.real:
+        if not hasattr(other, '__iter__') and other == other.real:
             return self.__class__(other*self.z)
         raise TypeError("Cannot multiply coordinates by %s" % str(type(other)))
 
@@ -75,6 +78,13 @@ class LocationSpecifier2D(object):
         return (1./other) * self
 
     __truediv__ = __div__
+
+    def rotate(self, angle, origin=0):
+        """Rotate the locations by angle about point p, default is origin"""
+        p = Point(origin)
+        coords = self - p
+        r, theta = coords.r, coords.theta
+        self._coord = (self.from_polar(r, theta - angle) + p).z
 
 
 def coordinate_parser(x, y=None):
@@ -104,7 +114,7 @@ class Point(LocationSpecifier2D):
 
     def __mul__(self, other):
         """Dot product with other vector."""
-        return self.x * other.x + self.y * other.y
+        return self.x * Point(other).x + self.y * Point(other).y
 
     def __repr__(self):
         return self.__class__.__name__+'(%s, %s)' % (str(self.x), str(self.y))
@@ -145,6 +155,21 @@ class Coordinates(LocationSpecifier2D):
         return Coordinates(self.z[key])
 
 
+def parabola(sep, h, cut_short=0., n=100):
+    """ Return the array of x + 1j*f(x) sampled at n evenly spaced points on
+    the interval [cut_short, sep - cut_short], where f(x) is a parabola
+    satisfying f(0)=f(sep)=0 and f(sep/2)=h.
+
+    Used to construct curved arrows pointing between nodes of a graph. """
+    k = sep/2.
+    x_s = cut_short - k
+    x_f = k - cut_short
+    x = np.linspace(x_s, x_f, n)
+    f = -h/(1.*k**2) * (x + k) * (x - k)
+    z = x + 1j*f
+    return Coordinates(z + k)
+
+
 class LineSegment(object):
     """ Line segment between two points. May be directed or undirected.
     Internally represented as an ordered tuple of points in the complex plane,
@@ -156,13 +181,30 @@ class LineSegment(object):
         self.p1 = Point(p1)
         self.p2 = Point(p2)
 
+    def __repr__(self):
+        return self.__class__.__name__+'(p1=%s, p2=%s)' % (
+            str(self.p1),
+            str(self.p2)
+        )
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.p1 == other.p1 and self.p2 == other.p2
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
     @property
     def vector(self):
+        """Displacement vector from beginning of segment to end"""
         return self.p2 - self.p1
 
     @property
     def length(self):
         return self.vector.r
+
+    # Slope-intercept form: y = m*x + b
 
     @property
     def m(self):
@@ -179,6 +221,17 @@ class LineSegment(object):
         """Return the y-intercept of the extended line segment"""
         return self.p1.y - self.m * self.p1.x
 
+    @property
+    def midpoint(self):
+        return (self.p1 + self.p2)/2
+
+    def bisecting_line(self):
+        """Draw a line segment perpendicular to z1-z2 of the same length, whose
+        center bisects z1-z2."""
+        lc = Coordinates(np.array([self.p1.z, self.p2.z]))
+        lc.rotate(angle=np.pi/2, origin=self.midpoint)
+        return self.__class__(lc[0], lc[1])
+
     def projection(self, p):
         """Return projection of point p onto the segment"""
         p = Point(p)
@@ -188,24 +241,13 @@ class LineSegment(object):
         y_int = self.m*x_int + self.b
         return Point(x_int, y_int)
 
-    def __add__(self, other):
-        return self.__class__(self.p1 + Point(other), self.p2 + Point(other))
-
-    def __repr__(self):
-        return self.__class__.__name__+'(p1=%s, p2=%s)' % (
-            str(self.p1),
-            str(self.p2)
-        )
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.p1 == other.p1 and self.p2 == other.p2
-        return False
-
-    def __ne__(self, other):
-        return not self == other
+    def shorten(self, r):
+        """Shorten the line connecting z_s and z_f by r/2 on each side."""
+        self.p1 = self.p1 + Point.from_polar(r/2., self.vector.theta)
+        self.p2 = self.p2 + Point.from_polar(r/2., self.vector.theta - np.pi)
 
     def draw_line(self, ax=None):
+        """Draw the line segment on the current axis."""
         if ax is None:
             ax = plt.gca()
         x1, y1 = self.p1.x, self.p1.y
@@ -213,6 +255,21 @@ class LineSegment(object):
         x = np.array([x1, x2])
         y = np.array([y1, y2])
         ax.plot(x, y, color='black', zorder=1)
+
+    def connecting_parabola(self, d, n=100):
+        """ Return a parabola connecting points z1 and z2 with peak distance r
+        away from the connecting line. """
+        r, theta = self.vector.r, self.vector.theta
+        parab = parabola(r, d, n=n)
+        r_p, theta_p = parab.r, parab.theta
+        return Coordinates.from_polar(r_p, theta_p + theta) + self.p1
+
+    def draw_parabola(self, d=1./3, ax=None):
+        """Draw parabola of width d connecting the ends of the line segment"""
+        if ax is None:
+            ax = plt.gca()
+        parab = self.connecting_parabola(d*self.length/2)
+        ax.plot(parab.x, parab.y)
 
 
 class CoordinateTests(unittest.TestCase):
@@ -222,40 +279,37 @@ class CoordinateTests(unittest.TestCase):
         p1 = Point(1, 2)
         p2 = Point(1 + 2j)
         p3 = Point((1, 2))
-        self.assertEqual(p1, p2)
-        self.assertEqual(p1, p3)
-        self.assertEqual(p2, p3)
-        self.assertEqual(p1, Point(p1))
+        self.assertAlmostEqual(p1, p2)
+        self.assertAlmostEqual(p1, p3)
+        self.assertAlmostEqual(p2, p3)
+        self.assertAlmostEqual(p1, Point(p1))
 
     def test_repr(self):
         p1 = Point(1., 2.)
-        self.assertTrue(p1 == eval(repr(p1)))
         p2 = Point(-7, 56)
-        self.assertTrue(p2 == eval(repr(p2)))
+        self.assertAlmostEqual(p1, eval(repr(p1)))
+        self.assertAlmostEqual(p2, eval(repr(p2)))
 
     def test_polar(self):
         """Test forming a vector from polar coordinates behaves correctly."""
         # Test the origin
         o = Point(0, 0)
         p = Point.from_polar(0, 0)
-        self.assertEqual(p, o)
+        self.assertAlmostEqual(p, o)
         # Test a vertical line
         h = Point.from_polar(2, np.pi/2)
-        self.assertAlmostEqual(h.x, 0)
-        self.assertAlmostEqual(h.y, 2)
+        self.assertAlmostEqual(Point(0, 2), h)
         # Test periodic in 2*pi
         k1 = Point.from_polar(2, -3)
         k2 = Point.from_polar(2, -3+2*np.pi)
-        self.assertAlmostEqual(k1.x, k2.x)
-        self.assertAlmostEqual(k1.y, k2.y)
+        self.assertAlmostEqual(k1, k2)
 
     def test_coordinate_transforms(self):
         """Test going back and forth from cartesian to polar."""
         # From polar to cartesian
         p1 = Point(1, 2)
         rp1 = Point.from_polar(p1.r, p1.theta)
-        self.assertAlmostEqual(0, (p1-rp1).x)
-        self.assertAlmostEqual(0, (p1-rp1).y)
+        self.assertAlmostEqual(p1, rp1)
         # From Cartesian to polar
         p2 = Point(-1, 1)
         self.assertAlmostEqual(np.sqrt(2), p2.r)
@@ -263,16 +317,13 @@ class CoordinateTests(unittest.TestCase):
 
     def test_negation(self):
         """Test that negation mirrors points about y=-x"""
-        p1 = -Point(1, 2)
-        self.assertAlmostEqual(-1, p1.x)
-        self.assertAlmostEqual(-2, p1.y)
+        self.assertAlmostEqual(Point(-1, -2), -Point(1, 2))
 
     def test_coordinates(self):
         """Test arrays of coordinates"""
         coords = Coordinates(np.arange(10), np.arange(10)**2)
         for i, p in enumerate(coords):
-            self.assertAlmostEqual(i, p.x)
-            self.assertAlmostEqual(i**2, p.y)
+            self.assertAlmostEqual(Point(i, i**2), p)
             self.assertAlmostEqual(p, coords[i])
         self.assertEqual(10, len(coords))
         np.testing.assert_array_almost_equal(
@@ -291,8 +342,33 @@ class CoordinateTests(unittest.TestCase):
         self.assertEqual(0., p1 * p3)
         self.assertEqual(0., p3 * p1)
 
+    def test_rotation(self):
+        """Test rotation and unrotation of a point"""
+        # Test rotation maintains object identity
+        a = Point(1, 2)
+        ai = id(a)
+        a.rotate(3)
+        a.rotate(-3)
+        self.assertEqual(ai, id(a))
+        self.assertAlmostEqual(Point(1, 2), a)
+        a.rotate(np.pi)
+        self.assertAlmostEqual(-Point(1, 2), a)
+        # Test dot product with perpendicular is zero
+        b = Point(3, -4)
+        br = Point(b)
+        br.rotate(np.pi/2)
+        self.assertAlmostEqual(0, b * br)
+
 
 class LineTests(unittest.TestCase):
+
+    def assertLinesEqual(self, l1, l2):
+        """Test two line segments contain the same points."""
+        lsort = lambda l: sorted([(l.p1.x, l.p1.y), (l.p2.x, l.p2.y)])
+        l1_points = lsort(l1)
+        l2_points = lsort(l2)
+        for p, q in zip(l1_points, l2_points):
+            self.assertAlmostEqual(Point(p), Point(q))
 
     def test_length(self):
         """Verify the length of a 3-4-5 isosceles right triangle."""
@@ -329,6 +405,23 @@ class LineTests(unittest.TestCase):
         self.assertEqual(Point(0, 0), l.projection((-1, 1)))
         self.assertEqual(Point(0, 0), l.projection((2, -2)))
         self.assertEqual(Point(5.5, 5.5), l.projection((7, 4)))
+
+    def test_bisecting_line(self):
+        """Test bisection is same length, perpendicular and shares midpoints"""
+        l = LineSegment((3, 7), (4, 2))
+        lp = l.bisecting_line()
+        lpp = lp.bisecting_line()
+        self.assertLinesEqual(l, lpp)
+        self.assertAlmostEqual(-1./l.m, lp.m)
+        self.assertAlmostEqual(l.length, lp.length)
+        self.assertAlmostEqual(l.midpoint, lp.midpoint)
+
+    def test_shorten(self):
+        """Test shortening clips the line segments"""
+        a = LineSegment((1, 2), (5, 4))
+        b = LineSegment((1, 2), (5, 4))
+        a.shorten(0.5)
+        self.assertAlmostEqual(b.length - 0.5, a.length)
 
 
 if __name__ == '__main__':

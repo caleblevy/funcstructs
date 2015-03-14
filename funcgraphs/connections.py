@@ -7,6 +7,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from segment import *
+
 
 def circle_points(n, r=1):
     """ Return a list of n points on a circle of radius r in the complex plane
@@ -23,35 +25,14 @@ def complex_to_cart(z):
     return x, y
 
 
-def slope_between_points(z1, z2):
-    """ Return the slope of the line connecting points z1 and z2 in the complex
-    plane. """
-    x1, y1 = complex_to_cart(z1)
-    x2, y2 = complex_to_cart(z2)
-
-    m = (y1-y2)/(1.*(x1-x2))
-    b = y1 - m*x1
-    return m, b
-
-
-def intersection_point(z, z1, z2):
-    """Return the intersection point between the line connecting z1 and z2, and
-    the perpendicular to this line passing through z."""
-    m1, b1 = slope_between_points(z1, z2)
-    x0, y0 = complex_to_cart(z)
-    m2 = -1./m1  # perpendicular slope to m is -1/m
-    b2 = y0 - m2*x0
-    x_intersect = (b1-b2)/(1.*(m2-m1))
-    y_intersect = m1*x_intersect + b1
-    return x_intersect, y_intersect
-
-
-def node_radius(z, z1, z2, safety_margin=1.5):
+def node_radius(p, p1, p2, safety_margin=1.5):
     """Compute a node radius less than distance from z to z1-z2."""
-    x_int, y_int = intersection_point(z, z1, z2)
-    z_int = x_int + 1j*y_int
-    side_distance = np.abs(z_int - z)
-    vertical_distance = np.abs(z1 - z)
+    p = Point(p)
+    p1 = Point(p1)
+    p2 = Point(p2)
+    p_int = LineSegment(p1, p2).projection(p)
+    side_distance = (p_int - p).r
+    vertical_distance = (p1 - p).r
     safe_radius = min([side_distance, vertical_distance])/(1.*safety_margin)
     return safe_radius
 
@@ -81,20 +62,11 @@ def func_to_vertices(f):
     return {i: [f[i]] for i in range(len(f))}
 
 
-def draw_connecting_line(z1, z2, fig):
-    """ Add a connecting line between points z1 and z2 to fig. """
-    x1, y1 = complex_to_cart(z1)
-    x2, y2 = complex_to_cart(z2)
-    x = np.array([x1, x2])
-    y = np.array([y1, y2])
-    fig.plot(x, y, color='black', zorder=1)
-
-
 def draw_connections(ax, node_locs, connections):
     """ Draw connections between the ordered points in node_locs. """
     for node, links in connections.items():
         for link in links:
-            draw_connecting_line(node_locs[node], node_locs[link], ax)
+            LineSegment(node_locs[node], node_locs[link]).draw_line()
 
 
 def circular_endofunction_graph(func):
