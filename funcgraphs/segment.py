@@ -226,8 +226,7 @@ class LineSegment(object):
         return (self.p1 + self.p2)/2
 
     def bisecting_line(self):
-        """Draw a line segment perpendicular to z1-z2 of the same length, whose
-        center bisects z1-z2."""
+        """Return a perpendicular line segment with overlapping midpoint"""
         lc = Coordinates(np.array([self.p1.z, self.p2.z]))
         lc.rotate(angle=np.pi/2, origin=self.midpoint)
         return self.__class__(lc[0], lc[1])
@@ -242,7 +241,7 @@ class LineSegment(object):
         return Point(x_int, y_int)
 
     def shorten(self, r):
-        """Shorten the line connecting z_s and z_f by r/2 on each side."""
+        """Shorten the line segment by r/2 on each side."""
         self.p1 = self.p1 + Point.from_polar(r/2., self.vector.theta)
         self.p2 = self.p2 + Point.from_polar(r/2., self.vector.theta - np.pi)
 
@@ -257,8 +256,9 @@ class LineSegment(object):
         ax.plot(x, y, color='black', zorder=1)
 
     def connecting_parabola(self, d, n=100):
-        """ Return a parabola connecting points z1 and z2 with peak distance r
-        away from the connecting line. """
+        """ Return a parabola sampled at n grid points connecting the end
+        points of the line segment with peak distance r away from the
+        connecting line. """
         r, theta = self.vector.r, self.vector.theta
         parab = parabola(r, d, n=n)
         r_p, theta_p = parab.r, parab.theta
