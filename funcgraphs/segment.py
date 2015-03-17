@@ -21,7 +21,7 @@ class LocationSpecifier2D(object):
         # without some ugly hacks or third party libraries, there is no python
         # 2 and 3 compatible syntax for specifying a metaclass, so we mock
         # ABCMeta by raising an error at instantiation.
-        raise NotImplementedError("Cannot call coordinates directly.")
+        raise NotImplementedError("Cannot call LocationSpecifier2D directly.")
 
     @classmethod
     def from_polar(cls, r, theta):
@@ -208,6 +208,7 @@ class LineSegment(object):
 
     @property
     def m(self):
+        """Return the slope fo the line segment"""
         rise = self.p2.y - self.p1.y
         run = self.p2.x - self.p1.x
         if run:
@@ -232,7 +233,7 @@ class LineSegment(object):
         return self.__class__(lc[0], lc[1])
 
     def projection(self, p):
-        """Return projection of point p onto the segment"""
+        """Return projection of point p onto the extended segment"""
         p = Point(p)
         m_perp = -1./self.m
         b_perp = p.y - m_perp*p.x
