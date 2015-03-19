@@ -7,6 +7,7 @@
 """ Module for representing, moving, shifting, stretching plotting and
 otherwise manipulating line segments in a convenient fashion. """
 
+import numbers
 import unittest
 
 import numpy as np
@@ -87,15 +88,13 @@ class LocationSpecifier2D(object):
         self._coord = (self.from_polar(r, theta - angle) + p).z
 
 
-def coordinate_parser(x, y=None):
-    """Parses tuples, complex numbers and pairs of inputs for Point and
-    PointCloud classes."""
-    if isinstance(x, LocationSpecifier2D):
-        return x.z
-    elif y is not None:
-        return x + 1j*y
-    else:
-        return x.real + 1j*x.imag  # ensure coordinates are cast as complex
+def check_coords_are_real(x, y):
+    """Check that both x and y are real numbers, if not raise error"""
+    if not all(map(lambda x: isinstance(x, numbers.Real), [x, y])):
+        raise TypeError(
+            ("Both coordinates must be real numbers, "
+             "received %s, %s") % (type(x).__name__, type(y).__name__)
+        )
 
 
 class Point(LocationSpecifier2D):
@@ -103,14 +102,31 @@ class Point(LocationSpecifier2D):
     (i.e. a point in the complex plane)."""
 
     def __init__(self, x, y=None):
-        """Takes either a single complex number z, a tuple (x, y) or real and
-        imaginary part separately. i.e. Point(0, 1) == Point(0+1j) == Point((1,
-        2)) == Point(Point(0, 1))."""
-        if hasattr(x, '__iter__'):
-            if not(len(x) == 2 and y is None):
-                raise TypeError("More than one coordinate specified.")
-            x, y = x[0], x[1]
-        self._coord = coordinate_parser(x, y)
+        """All of the following inputs to point are equivalent:
+            Point(1, 2)
+            Point((1, 2))
+            Point(1+2j)
+            Point(Point(1, 2))
+        Any other input will raise a value error."""
+        if y is not None:
+            check_coords_are_real(x, y)
+            z = x + 1j*y
+        elif hasattr(x, '__iter__'):
+            if len(x) != 2:
+                raise ValueError("More than one coordinate specified.")
+            check_coords_are_real(x[0], x[1])
+            z = x[0] + 1j*x[1]
+        elif isinstance(x, numbers.Complex):
+            z = x.real + 1j*x.imag  # Explicitly cast to complex (e.g. if ints)
+        elif isinstance(x, self.__class__):
+            z = x.z
+        else:
+            raise TypeError("Cannot parse coordinates from %s, %s" % (
+                type(x).__name__,
+                type(y).__name__
+                )
+            )
+        self._coord = z
 
     def __mul__(self, other):
         """Dot product with other vector."""
@@ -126,6 +142,17 @@ class Point(LocationSpecifier2D):
 
     def __ne__(self, other):
         return not self == other
+
+
+def coordinate_parser(x, y=None):
+    """Parses tuples, complex numbers and pairs of inputs for Point and
+    PointCloud classes."""
+    if isinstance(x, LocationSpecifier2D):
+        return x.z
+    elif y is not None:
+        return x + 1j*y
+    else:
+        return x.real + 1j*x.imag  # ensure coordinates are cast as complex
 
 
 class Coordinates(LocationSpecifier2D):
