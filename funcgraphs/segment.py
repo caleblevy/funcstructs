@@ -88,9 +88,10 @@ class LocationSpecifier2D(object):
         self._coord = (self.from_polar(r, theta - angle) + p).z
 
 
-def check_coords_are_real(x, y):
+def check_components_are_real(x, y):
     """Check that both x and y are real numbers, if not raise error"""
-    if not all(map(lambda x: isinstance(x, numbers.Real), [x, y])):
+    isreal = lambda ob: isinstance(ob, numbers.Real)
+    if not(isreal(x) and isreal(y)):
         raise TypeError(
             ("Both coordinates must be real numbers, "
              "received %s, %s") % (type(x).__name__, type(y).__name__)
@@ -109,28 +110,21 @@ class Point(LocationSpecifier2D):
             Point(Point(1, 2))
         Any other input will raise a value error."""
         if y is not None:
-            check_coords_are_real(x, y)
+            check_components_are_real(x, y)
             z = x + 1j*y
         elif hasattr(x, '__iter__'):
+            check_components_are_real(x[0], x[1])
             if len(x) != 2:
                 raise ValueError("More than one coordinate specified.")
-            check_coords_are_real(x[0], x[1])
             z = x[0] + 1j*x[1]
-        elif isinstance(x, numbers.Complex):
-            z = x.real + 1j*x.imag  # Explicitly cast to complex (e.g. if ints)
-        elif isinstance(x, self.__class__):
-            z = x.z
         else:
-            raise TypeError("Cannot parse coordinates from %s, %s" % (
-                type(x).__name__,
-                type(y).__name__
-                )
-            )
+            z = complex(x)  # Explicitly cast to complex (e.g. if ints)
         self._coord = z
 
     def __mul__(self, other):
         """Dot product with other vector."""
-        return self.x * Point(other).x + self.y * Point(other).y
+        other = Point(other)
+        return self.x * other.x + self.y * other.y
 
     def __repr__(self):
         return self.__class__.__name__+'(%s, %s)' % (str(self.x), str(self.y))
@@ -143,27 +137,40 @@ class Point(LocationSpecifier2D):
     def __ne__(self, other):
         return not self == other
 
+    def __complex__(self):
+        return self.z
 
-def coordinate_parser(x, y=None):
-    """Parses tuples, complex numbers and pairs of inputs for Point and
-    PointCloud classes."""
-    if isinstance(x, LocationSpecifier2D):
-        return x.z
-    elif y is not None:
-        return x + 1j*y
-    else:
-        return x.real + 1j*x.imag  # ensure coordinates are cast as complex
+
+def check_coords_are_real(x, y):
+    """Check that x and y are real valued arrays"""
+    array_is_real = lambda arr: issubclass(arr.dtype.type, numbers.Real)
+    if not(array_is_real(x) and array_is_real(y)):
+        raise TypeError(
+            ("Both coordinates must be real valued, received"
+             " %s, %s" % (x.dtype.type.__name__, y.dtype.type.__name__))
+        )
 
 
 class Coordinates(LocationSpecifier2D):
-    """A set of points."""
+    """A set of points internally represented by a numpy array."""
 
     def __init__(self, x, y=None):
-        """ Takes either two equal length arrays of real numbers or one array
-        of complex numbers. """
-        z = coordinate_parser(x, y)
-        if isinstance(z, complex):
-            z = np.array([z])
+        """All of the following inputs to point are equivalent:
+            Coordinates([Point(1, 2), Point(3, 4), Point(5, 6)])
+            Coordinates([1, 3, 5], [2, 4, 6])
+            Coordinates([1+2j, 3+4j, 5+6j])
+        Any other input will raise a value error."""
+        x = np.array(x)
+        if x.ndim != 1:
+            raise TypeError("Input must be flat iterable location collection")
+        if y is not None:
+            y = np.array(y)
+            check_coords_are_real(x, y)
+            if x.shape != y.shape:
+                raise ValueError("Inputs must be equal length")
+            z = x + 1j*y
+        else:
+            z = x.astype(complex)
         self._coord = z
 
     def __len__(self):
@@ -349,7 +356,7 @@ class CoordinateTests(unittest.TestCase):
 
     def test_coordinates(self):
         """Test arrays of coordinates"""
-        coords = Coordinates(np.arange(10), np.arange(10)**2)
+        coords = Coordinates(range(10), np.arange(10)**2)
         for i, p in enumerate(coords):
             self.assertAlmostEqual(Point(i, i**2), p)
             self.assertAlmostEqual(p, coords[i])
