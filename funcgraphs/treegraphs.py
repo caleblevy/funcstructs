@@ -86,6 +86,17 @@ class TreeGraph(rootedtrees.DominantTree):
         pass
 
 
+def balanced_binary_tree(n):
+    """Produce a balanced binary tree of height n."""
+    h = n
+    tree = [h]
+    while h-1:
+        h -= 1
+        tree *= 2
+        tree = [h] + tree
+    return TreeGraph(tree)
+
+
 if __name__ == '__main__':
     l1 = TreeGraph([1, 2, 3, 4, 4, 4, 3, 3, 2, 3, 3, 2])
     l2 = TreeGraph([1, 2, 3, 4, 4, 3, 4, 4, 2, 3, 4, 4, 3, 4, 4])
@@ -99,3 +110,4 @@ if __name__ == '__main__':
     t4 = [1, 2, 3, 4, 4, 3, 4, 4, 2, 3, 4, 5, 4, 5, 3, 4, 4, 2, 3, 4, 5, 5]
     l4 = TreeGraph(t4)
     l4.sage_plot('hi')
+    balanced_binary_tree(6).sage_plot('fractal')
