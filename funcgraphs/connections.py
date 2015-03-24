@@ -7,7 +7,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from segment import *
+from coordinates import *
 
 
 def circle_points(n, r=1):

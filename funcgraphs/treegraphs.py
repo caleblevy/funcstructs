@@ -13,7 +13,7 @@ from endofunction_structures import (
     endofunctions
 )
 from . import (
-    segment,
+    coordinates,
     connections
 )
 
@@ -77,8 +77,8 @@ class TreeGraph(rootedtrees.DominantTree):
     def sage_node_coordinates(self):
         """Coordinate object representing positions of the tree nodes."""
         t = self.sage_node_positions()
-        z = [t[i][0]+1j*t[i][1] for i in range(len(self))]
-        coords = segment.Coordinates(np.array(z))
+        z = map(coordinates.Point, [t[i] for i in range(len(self))])
+        coords = coordinates.Coordinates(z)
         return coords - coords[0]
 
     def vertical_offsets(self):
