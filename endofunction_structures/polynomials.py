@@ -66,27 +66,6 @@ def monomial_symmetric_polynomial(x, powers):
     return T[tuple(i-1 for i in shape)]
 
 
-def poly_multiply(coeffs1, coeffs2):
-    """ Given numerical lists c and d of length n and m, returns the
-    coefficients of P(X)*Q(X) in decreasing order, where
-        P(X) = c[-1] + c[-2]*X + ... + c[0]*x^n
-        Q(X) = d[-1] + d[-2]*X + ... + d[0]*x^m
-
-    For some reason sympy and numpy do not seem to have this capacity easily
-    accessible, or at least nothing dedicated to the purpose. Very likely to be
-    faster than the expand method.
-
-    Source taken from:
-        "How can I multiply two polynomials in Python using a loop and by
-        calling another function?" at http://stackoverflow.com/a/18116401.
-    """
-    final_coeffs = [0] * (len(coeffs1)+len(coeffs2)-1)
-    for ind1, coef1 in enumerate(coeffs1):
-        for ind2, coef2 in enumerate(coeffs2):
-            final_coeffs[ind1 + ind2] += coef1 * coef2
-    return final_coeffs
-
-
 def FOIL(roots):
     """First Outer Inner Last
 
@@ -95,7 +74,7 @@ def FOIL(roots):
         (X - roots[0]) * (X - roots[1]) * ... * (X - roots[-1])
     """
     monomials = [(1, -root) for root in roots]
-    return functools.reduce(poly_multiply, monomials, [1])
+    return list(functools.reduce(np.polymul, monomials, [1]))
 
 
 def power_sum(X, k):
