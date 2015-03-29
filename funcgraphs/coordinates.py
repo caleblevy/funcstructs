@@ -66,11 +66,11 @@ class LocationSpecifier2D(object):
 
     def __sub__(self, other):
         """Change to coordinates such that new origin is at other in the old"""
-        return self + (-other)
+        return -(-self + other)
 
     def __rmul__(self, other):
         """Scale self by real value other. """
-        if not hasattr(other, '__iter__') and other == other.real:
+        if isinstance(other, numbers.Real):
             return self.__class__(other*self.z)
         raise TypeError("Cannot multiply coordinates by %s" % str(type(other)))
 
@@ -126,7 +126,7 @@ class Point(LocationSpecifier2D):
         return self.x * other.x + self.y * other.y
 
     def __repr__(self):
-        return self.__class__.__name__+'(%s, %s)' % (str(self.x), str(self.y))
+        return type(self).__name__+'(%s, %s)' % (str(self.x), str(self.y))
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -190,11 +190,14 @@ class Coordinates(LocationSpecifier2D):
             return Point(self.z[key])
         return Coordinates(self.z[key])
 
-    def plot(self, ax=None):
+    def plot(self, *args, **kwargs):
         """Draw connected sequence of points"""
-        if ax is None:
+        if kwargs.get('ax', None) is not None:
+            ax = kwargs['ax']
+        else:
             ax = plt.gca()
-        ax.plot(self.x, self.y)
+        kwargs.pop('ax', None)
+        ax.plot(self.x, self.y, *args, **kwargs)
 
 
 def parabola(sep, h, cut_short=0., n=100):
@@ -224,7 +227,7 @@ class LineSegment(object):
         self.p2 = Point(p2)
 
     def __repr__(self):
-        return self.__class__.__name__+'(p1=%s, p2=%s)' % (
+        return type(self).__name__+'(p1=%s, p2=%s)' % (
             str(self.p1),
             str(self.p2)
         )
@@ -268,20 +271,29 @@ class LineSegment(object):
     def midpoint(self):
         return (self.p1 + self.p2)/2
 
+    @property
+    def coordinates(self):
+        return Coordinates([self.p1, self.p2])
+
     def bisecting_line(self):
         """Return a perpendicular line segment with overlapping midpoint"""
-        lc = Coordinates(np.array([self.p1.z, self.p2.z]))
+        lc = self.coordinates
         lc.rotate(angle=np.pi/2, origin=self.midpoint)
         return self.__class__(lc[0], lc[1])
 
     def projection(self, p):
         """Return projection of point p onto the extended segment"""
-        p = Point(p)
-        m_perp = -1./self.m
-        b_perp = p.y - m_perp*p.x
-        x_int = 1.*(self.b - b_perp)/(m_perp - self.m)
-        y_int = self.m*x_int + self.b
-        return Point(x_int, y_int)
+        if self.length == 0:  # p1 == p2 case
+            return self.p1
+        # Consider the line extending the segment, parameterized as v+t*(w-v).
+        # We find projection of point p onto the line.
+        # It falls where t = [(p-v) . (w-v)] / |w-v|^2
+        t = -(self.p1 - p)*(self.vector)/self.length**2
+        if t < 0:
+            return self.p1  # Beyond the 'p1' end of the segment
+        elif t > 1:
+            return self.p2  # Beyond the 'p2' end of the segment
+        return self.p1 + t*(self.vector)
 
     def shorten(self, r):
         """Shorten the line segment by r/2 on each side."""
@@ -290,13 +302,7 @@ class LineSegment(object):
 
     def draw_line(self, ax=None):
         """Draw the line segment on the current axis."""
-        if ax is None:
-            ax = plt.gca()
-        x1, y1 = self.p1.x, self.p1.y
-        x2, y2 = self.p2.x, self.p2.y
-        x = np.array([x1, x2])
-        y = np.array([y1, y2])
-        ax.plot(x, y, color='black', zorder=1)
+        self.coordinates.plot(ax=None, color='blue', zorder=1)
 
     def connecting_parabola(self, d=1./3):
         """ Return a parabola sampled at n grid points connecting the end
@@ -509,9 +515,10 @@ class LineTests(unittest.TestCase):
     def test_projection(self):
         """Test projection on the line y = x"""
         l = LineSegment((-1, -1), (1, 1))
-        self.assertEqual(Point(0, 0), l.projection((-1, 1)))
-        self.assertEqual(Point(0, 0), l.projection((2, -2)))
-        self.assertEqual(Point(5.5, 5.5), l.projection((7, 4)))
+        self.assertAlmostEqual(Point(0, 0), l.projection((-1, 1)))
+        self.assertAlmostEqual(Point(0, 0), l.projection((2, -2)))
+        self.assertAlmostEqual(Point(1, 1), l.projection((7, 4)))
+        self.assertAlmostEqual(Point(1./2, 1./2), l.projection((0, 1)))
 
     def test_bisecting_line(self):
         """Test bisection is same length, perpendicular and shares midpoints"""
