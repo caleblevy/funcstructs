@@ -17,8 +17,8 @@ from . import rootedtrees
 
 
 class Endofunction(object):
-    """ Implementation of an endofunction as a map of range(N) into itself
-    using a list. """
+    """Implementation of an endofunction as a map of range(N) into itself using
+    a list."""
 
     def __init__(self, func):
         if isinstance(func, rootedtrees.LevelTree):
@@ -33,15 +33,15 @@ class Endofunction(object):
         return len(self.func)
 
     def __repr__(self):
-        return self.__class__.__name__+'('+str(list(self.func))+')'
+        return type(self).__name__+'(%s)'+str(list(self))
 
     def __str__(self):
-        funcstring = self.__class__.__name__+'(['
+        funcstring = type(self).__name__+'(['
         mapvals = []
-        for x, f in enumerate(self.func[:-1]):
+        for x, f in enumerate(self[:-1]):
             mapvals.append(str(x)+'->'+str(f)+', ')
         funcstring += ''.join(mapvals)
-        funcstring += str(len(self)-1)+"->"+str(self.func[-1])+'])'
+        funcstring += str(len(self)-1)+"->"+str(self[-1])+'])'
         return funcstring
 
     def __getitem__(self, ind):
@@ -71,7 +71,7 @@ class Endofunction(object):
     @memoized_property
     def imageset(self):
         """Return all elements in the image of self."""
-        return set(self.func)
+        return set(self)
 
     @memoized_property
     def preimage(self):
@@ -90,7 +90,7 @@ class Endofunction(object):
     @memoized_property
     def imagepath(self):
         """ Give it a list such that all([I in range(len(f)) for I in f]) and
-        this program spits out the image path of f. """
+        this program returns the image path of f. """
         cardinalities = [len(self.imageset)]
         f = self
         card_prev = len(self)
@@ -123,7 +123,7 @@ class Endofunction(object):
         if len(self) == 1:
             yield [0]
             return
-        # If we run  elements for total of O(len(f)) time.
+        # If we run elements for total of O(len(f)) time.
         prev_els = set()
         for x in self.domain:
             skip_el = False
