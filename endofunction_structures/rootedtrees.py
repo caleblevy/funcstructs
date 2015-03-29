@@ -105,7 +105,7 @@ class LevelTree(object):
     previous one directly below its height. """
 
     def __init__(self):
-        raise ValueError(
+        raise NotImplementedError(
             "LevelTree should not be invoked directly. Use either OrderedTree "
             "or DominantTree."
         )
@@ -114,7 +114,7 @@ class LevelTree(object):
         return self.level_sequence[key]
 
     def __repr__(self):
-        return self.__class__.__name__ + "("+str(list(self.level_sequence))+')'
+        return type(self).__name__+"(%s)" % str(list(self))
 
     def __eq__(self, other):
         if isinstance(other, LevelTree):
@@ -161,7 +161,7 @@ class LevelTree(object):
             yield [node-1 for node in branch_sequence]
 
     def bracket_form(self):
-        """ Return a representation the rooted tree via nested lists. This
+        """ Return a representation of the rooted tree via nested lists. This
         method is a novelty item, and shouldn't be used for anything practical.
         """
         if not self.branch_sequences():
@@ -307,7 +307,7 @@ class TreeEnumerator(object):
     __le__ = None
 
     def __repr__(self):
-        return self.__class__.__name__+'('+str(self.n)+')'
+        return type(self).__name__+'(%s)' % str(self.n)
 
     def __iter__(self):
         """ Generates the dominant representatives of each unordered tree in
@@ -358,7 +358,7 @@ class ForestEnumerator(TreeEnumerator):
         self.n = node_count + 1
 
     def __repr__(self):
-        return self.__class__.__name__+'('+str(self.n - 1)+')'
+        return type(self).__name__+'(%s)' % str(self.n - 1)
 
     def __iter__(self):
         """ Any rooted tree on n+1 nodes can be identically described as a
@@ -402,4 +402,4 @@ class PartitionForests(object):
         return productrange.unordered_product(self.partition, TreeEnumerator)
 
     def __repr__(self):
-        return self.__class__.__name__+'('+str(list(self.partition))+')'
+        return type(self).__name__+'(%s)' % str(list(self.partition))
