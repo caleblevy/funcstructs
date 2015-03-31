@@ -29,4 +29,3 @@ from .endofunctions import (
     TransformationMonoid
 )
 from .funcstructs import Funcstruct, EndofunctionStructures
-
