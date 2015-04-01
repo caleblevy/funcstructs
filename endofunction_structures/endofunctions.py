@@ -120,35 +120,22 @@ class Endofunction(object):
     def enumerate_cycles(self):
         """ Returns self's cycle decomposition. Since lookup in sets is O(1),
         this algorithm should take O(len(f.domain)) time. """
-        if len(self) == 1:
-            yield [0]
-            return
-        # If we run elements for total of O(len(f)) time.
-        prev_els = set()
-        for x in self.domain:
-            skip_el = False
+        Tried = set()
+        CycleEls = set()
+        Remaining = set(range(len(self)))
+        while Remaining:
+            x = Remaining.pop()
             path = [x]
-            path_els = set(path)
-            for it in range(len(self)+1):
+            while x not in Tried:
+                Remaining.discard(x)
+                Tried.add(x)
                 x = self[x]
                 path.append(x)
-                # If we hit an element seen in a previous path, this path will
-                # not contain a new cycle.
-                if x in prev_els:
-                    skip_el = True
-                    break
-                # If an element appears in the path twice, we have already
-                # found the cycle
-                if x in path_els:
-                    break
-                path_els.add(x)
-            prev_els.update(path)
-            if skip_el:
-                continue
-            I = len(path)-2
-            while I >= 0 and path[I] != path[-1]:
-                I -= 1
-            yield path[I+1:]
+            if x not in CycleEls:
+                cycle = path[path.index(x)+1:]
+                if cycle:
+                    yield cycle
+                    CycleEls.update(cycle)
 
     @memoized_property
     def cycles(self):
