@@ -6,10 +6,12 @@
 
 import unittest
 
-from . import counts
-from . import polynomials
-from . import levypartitions
-from . import necklaces
+from endofunction_structures import (
+    counts,
+    polynomials,
+    levypartitions,
+    necklaces
+)
 
 
 def count_by_period(beads):
