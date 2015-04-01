@@ -7,7 +7,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from coordinates import *
+from funcgraphs.coordinates import *
 
 
 def circle_points(n, r=1):

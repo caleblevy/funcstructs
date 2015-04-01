@@ -8,14 +8,9 @@ from sage.all import *
 
 import numpy as np
 
-from endofunction_structures import (
-    rootedtrees,
-    endofunctions
-)
-from . import (
-    coordinates,
-    connections
-)
+from endofunction_structures import rootedtrees, endofunctions
+from funcgraphs import coordinates
+from . import connections
 
 
 class TreeGraph(rootedtrees.DominantTree):
