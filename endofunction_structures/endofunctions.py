@@ -66,12 +66,12 @@ class Endofunction(object):
 
     @memoized_property
     def domain(self):
-        return set(range(len(self)))
+        return frozenset(range(len(self)))
 
     @memoized_property
     def imageset(self):
         """Return all elements in the image of self."""
-        return set(self)
+        return frozenset(self)
 
     @memoized_property
     def preimage(self):
@@ -85,7 +85,7 @@ class Endofunction(object):
         preim = [set() for _ in range(len(self))]
         for x in self.domain:
             preim[self[x]].add(x)
-        return preim
+        return tuple(preim)
 
     @memoized_property
     def imagepath(self):
@@ -122,7 +122,7 @@ class Endofunction(object):
         this algorithm should take O(len(f.domain)) time. """
         Tried = set()
         CycleEls = set()
-        Remaining = set(range(len(self)))
+        Remaining = set(self.domain)
         while Remaining:
             x = Remaining.pop()
             path = [x]
@@ -139,11 +139,11 @@ class Endofunction(object):
 
     @memoized_property
     def cycles(self):
-        return set(tuple(cycle) for cycle in self.enumerate_cycles())
+        return frozenset(tuple(cycle) for cycle in self.enumerate_cycles())
 
     @memoized_property
     def limitset(self):
-        return set(productrange.flatten(self.cycles))
+        return frozenset(productrange.flatten(self.cycles))
 
     @memoized_property
     def attached_treenodes(self):
@@ -153,7 +153,7 @@ class Endofunction(object):
             for f in inv_image:
                 if f not in self.limitset:
                     descendants[x].add(f)
-        return descendants
+        return tuple(descendants)
 
     def _attached_level_sequence(self, node, level=1):
         """ Return the level sequence of the rooted tree formed from the graph
