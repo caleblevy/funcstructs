@@ -10,6 +10,7 @@ import numpy as np
 
 from ..coordinates import *
 
+
 class Location2DTests(unittest.TestCase):
 
     def test_polar_coordinates(self):
