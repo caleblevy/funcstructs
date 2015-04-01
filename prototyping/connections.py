@@ -7,7 +7,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from funcgraphs.coordinates import *
+from funcgraphs.coordinates import Point
+from funcgraphs.line import Line
 
 
 def circle_points(n, r=1):
@@ -30,7 +31,7 @@ def node_radius(p, p1, p2, safety_margin=1.5):
     p = Point(p)
     p1 = Point(p1)
     p2 = Point(p2)
-    p_int = LineSegment(p1, p2).projection(p)
+    p_int = Line(p1, p2).projection(p)
     side_distance = (p_int - p).r
     vertical_distance = (p1 - p).r
     safe_radius = min([side_distance, vertical_distance])/(1.*safety_margin)
@@ -66,7 +67,7 @@ def draw_connections(ax, node_locs, connections):
     """ Draw connections between the ordered points in node_locs. """
     for node, links in connections.items():
         for link in links:
-            LineSegment(node_locs[node], node_locs[link]).draw_line()
+            Line(node_locs[node], node_locs[link]).draw_line()
 
 
 def circular_endofunction_graph(func):
