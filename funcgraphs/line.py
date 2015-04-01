@@ -7,13 +7,11 @@
 """Module for representing, moving, shifting, stretching plotting and otherwise
 manipulating line segments in a convenient fashion."""
 
-import unittest
-
 import numpy as np
 
 from .coordinates import Point, Coordinates
 
-__all__ = ["Line", "parabola"]
+__all__ = ["Line"]
 
 
 def parabola(sep, h, cut_short=0., n=100):
