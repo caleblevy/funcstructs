@@ -49,8 +49,8 @@ class NecklaceTests(unittest.TestCase):
     def test_containement(self):
         """Make sure Necklace conjugacy class contains all its rotations."""
         n = Necklace([1, 2, 3, 1, 2, 3])
-        self.assertFalse(n in n)
-        self.assertTrue(tuple([3, 1, 2, 3, 1, 2]) in n)
+        self.assertNotIn(n, n)
+        self.assertIn(tuple([3, 1, 2, 3, 1, 2]), n)
 
     def test_hash(self):
         """Test that our hash is rotationally invariant."""
@@ -58,7 +58,7 @@ class NecklaceTests(unittest.TestCase):
 
     def test_repr(self):
         n = Necklace([1, 2, 3, 1, 2, 3])
-        self.assertTrue(n == eval(repr(n)))
+        self.assertEqual(n, eval(repr(n)))
 
     def test_keyability(self):
         dic = {}

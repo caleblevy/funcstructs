@@ -23,21 +23,21 @@ class EndofunctionTests(unittest.TestCase):
 
     def test_imagepath(self):
         """Check various special and degenerate cases, with right index"""
-        self.assertEqual([1], Endofunction([0]).imagepath)
-        self.assertEqual([1], Endofunction([0, 0]).imagepath)
-        self.assertEqual([1], Endofunction([1, 1]).imagepath)
-        self.assertEqual([2], Endofunction([0, 1]).imagepath)
-        self.assertEqual([2], Endofunction([1, 0]).imagepath)
+        self.assertSequenceEqual([1], Endofunction([0]).imagepath)
+        self.assertSequenceEqual([1], Endofunction([0, 0]).imagepath)
+        self.assertSequenceEqual([1], Endofunction([1, 1]).imagepath)
+        self.assertSequenceEqual([2], Endofunction([0, 1]).imagepath)
+        self.assertSequenceEqual([2], Endofunction([1, 0]).imagepath)
         node_count = [2, 3, 5, 15]
         for n in node_count:
             tower = Endofunction([0] + list(range(n-1)))
             cycle = Endofunction([n-1] + list(range(n-1)))
             fixed = Endofunction(list(range(n)))
             degen = Endofunction([0]*n)
-            self.assertEqual(list(range(n)[:0:-1]), tower.imagepath)
-            self.assertEqual([n]*(n-1), cycle.imagepath)
-            self.assertEqual([n]*(n-1), fixed.imagepath)
-            self.assertEqual([1]*(n-1), degen.imagepath)
+            self.assertSequenceEqual(list(range(n)[:0:-1]), tower.imagepath)
+            self.assertSequenceEqual([n]*(n-1), cycle.imagepath)
+            self.assertSequenceEqual([n]*(n-1), fixed.imagepath)
+            self.assertSequenceEqual([1]*(n-1), degen.imagepath)
 
     # Cycle tests
 
@@ -75,7 +75,7 @@ class EndofunctionTests(unittest.TestCase):
             descendents = f.attached_treenodes
             for preim in descendents:
                 for x in preim:
-                    self.assertTrue(x not in lim)
+                    self.assertNotIn(x, lim)
 
     # Permutation Tests
 
