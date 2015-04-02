@@ -85,7 +85,7 @@ class Endofunction(object):
         preim = [set() for _ in range(len(self))]
         for x in self.domain:
             preim[self[x]].add(x)
-        return tuple(preim)
+        return tuple(map(frozenset, preim))
 
     @memoized_property
     def imagepath(self):
@@ -176,8 +176,7 @@ class Endofunction(object):
 
     def randconj(self):
         """Return a random conjugate of f."""
-        r = randperm(len(self))
-        return r.conj(self)
+        return randperm(len(self)).conj(self)
 
 
 def randfunc(n):
