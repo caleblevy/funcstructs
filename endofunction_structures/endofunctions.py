@@ -103,7 +103,7 @@ class Endofunction(object):
                 cardinalities.extend([card]*(len(self)-2-it))
                 break
             card_prev = card
-        return cardinalities
+        return tuple(cardinalities)
 
     def __pow__(self, n):
         """ Iterate by self-composing, akin to exponentiation by squaring. """
@@ -153,7 +153,7 @@ class Endofunction(object):
             for f in inv_image:
                 if f not in self.limitset:
                     descendants[x].add(f)
-        return tuple(descendants)
+        return tuple(map(frozenset, descendants))
 
     def _attached_level_sequence(self, node, level=1):
         """ Return the level sequence of the rooted tree formed from the graph
