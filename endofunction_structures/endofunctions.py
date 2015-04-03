@@ -29,7 +29,7 @@ class Endofunction(object):
         return hash(self.func)
 
     def __len__(self):
-        """Number of elements in the function's domain."""
+        """len(f) is the number of elements in f's domain"""
         return len(self.func)
 
     def __repr__(self):
@@ -44,12 +44,12 @@ class Endofunction(object):
         funcstring += str(len(self)-1)+"->"+str(self[-1])+'])'
         return funcstring
 
-    def __getitem__(self, ind):
-        """f(x) <-> self[x]"""
-        return self.func[ind]
+    def __getitem__(self, x):
+        """f(x) <==> f[x]"""
+        return self.func[x]
 
     def __iter__(self):
-        """[f(x) for x in range(len(f))] <-> list(iter(self))"""
+        """[f(x) for x in range(len(f))] <==> list(iter(self))"""
         return iter(self.func)
 
     def __eq__(self, other):
@@ -61,7 +61,7 @@ class Endofunction(object):
         return not self == other
 
     def __call__(self, other):
-        """If f(x)=self and g(x)=other return f(g(x))."""
+        """f(g) <==> Endofunction(f[g[x]] for x in g.domain)"""
         return Endofunction([self[x] for x in other])
 
     @memoized_property
@@ -69,19 +69,12 @@ class Endofunction(object):
         return frozenset(range(len(self)))
 
     @memoized_property
-    def imageset(self):
-        """Return all elements in the image of self."""
+    def image(self):
         return frozenset(self)
 
     @memoized_property
     def preimage(self):
-        """ Given an endofunction f defined on S=range(len(f)), returns the
-        preimage of f. If g=preimage(f), we have
-            g[y]=[x for x in S if f[x]==y],
-        or mathematically:
-            f^-1(y)={x in S: f(x)=y}.
-        Note the particularly close correspondence between python's list
-        comprehensions and mathematical set-builder notation. """
+        """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
         preim = [set() for _ in range(len(self))]
         for x in self.domain:
             preim[self[x]].add(x)
@@ -89,14 +82,13 @@ class Endofunction(object):
 
     @memoized_property
     def imagepath(self):
-        """ Give it a list such that all([I in range(len(f)) for I in f]) and
-        this program returns the image path of f. """
-        cardinalities = [len(self.imageset)]
+        """f.imagepath[n] <==> len(set(f**n)) for n in range(1, len(f))"""
+        cardinalities = [len(self.image)]
         f = self
         card_prev = len(self)
         for it in range(1, len(self)-1):
             f = f(self)
-            card = len(f.imageset)
+            card = len(f.image)
             cardinalities.append(card)
             # Save some time; if we have reached the fixed set, return.
             if card == card_prev:
@@ -106,11 +98,12 @@ class Endofunction(object):
         return tuple(cardinalities)
 
     def __pow__(self, n):
-        """ Iterate by self-composing, akin to exponentiation by squaring. """
+        """f**n <==> the nth iterate of f"""
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
         f = self
         f_iter = self.__class__(range(len(self)))
+        # Iterate by self-composing, akin to exponentiation by squaring.
         for it in component_iterates:
             if it == '1':
                 f_iter = f_iter(f)
@@ -118,8 +111,7 @@ class Endofunction(object):
         return f_iter
 
     def enumerate_cycles(self):
-        """ Returns self's cycle decomposition. Since lookup in sets is O(1),
-        this algorithm should take O(len(f.domain)) time. """
+        """Generate f's cycle decomposition in O(len(f)) time"""
         Tried = set()
         CycleEls = set()
         Remaining = set(self.domain)
@@ -139,15 +131,17 @@ class Endofunction(object):
 
     @memoized_property
     def cycles(self):
+        """Return the set of f's cycles"""
         return frozenset(tuple(cycle) for cycle in self.enumerate_cycles())
 
     @memoized_property
     def limitset(self):
+        """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
         return frozenset(productrange.flatten(self.cycles))
 
     @memoized_property
     def attached_treenodes(self):
-        """ Returns set differences of the preimages with the limit set. """
+        """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
         descendants = [set() for _ in range(len(self))]
         for x, inv_image in enumerate(self.preimage):
             for f in inv_image:
@@ -156,8 +150,8 @@ class Endofunction(object):
         return tuple(map(frozenset, descendants))
 
     def _attached_level_sequence(self, node, level=1):
-        """ Return the level sequence of the rooted tree formed from the graph
-        of all noncyclic nodes whose iteration paths pass through node."""
+        """Return the level sequence of the rooted tree formed from the graph
+        of all noncyclic nodes whose iteration paths pass through node"""
         level_sequence = [level]
         for x in self.attached_treenodes[node]:
             level_sequence.extend(self._attached_level_sequence(x, level+1))
@@ -167,10 +161,10 @@ class Endofunction(object):
         return rootedtrees.DominantTree(self._attached_level_sequence(node))
 
     def tree_form(self):
-        """Test if a function has a tree structure and if so return it."""
+        """Test if a function has a tree structure and if so return it"""
         cycles = list(self.cycles)
         if len(cycles) != 1 or len(cycles[0]) != 1:
-            raise ValueError("Function structure is not a rooted tree.")
+            raise ValueError("Function structure is not a rooted tree")
         root = cycles[0][0]
         return rootedtrees.DominantTree(self.attached_tree(root))
 
@@ -203,7 +197,7 @@ class SymmetricFunction(Endofunction):
             # If it is a cycle decomposition, change to function.
             func = cycles_to_funclist(func)
         super(SymmetricFunction, self).__init__(func)
-        if not len(self) == len(self.imageset):
+        if not len(self) == len(self.image):
             raise ValueError("This function is not invertible.")
 
     def __pow__(self, n):
