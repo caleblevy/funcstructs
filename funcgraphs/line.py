@@ -41,10 +41,7 @@ class Line(object):
         self.p2 = Point(p2)
 
     def __repr__(self):
-        return type(self).__name__+'(p1=%s, p2=%s)' % (
-            str(self.p1),
-            str(self.p2)
-        )
+        return self.__class__.__name__+'(p1=%s, p2=%s)' % (self.p1, self.p2)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

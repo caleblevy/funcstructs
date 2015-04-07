@@ -73,7 +73,7 @@ class LocationSpecifier2D(object):
         """Scale self by real value other. """
         if isinstance(other, numbers.Real):
             return self.__class__(other*self.z)
-        raise TypeError("Cannot multiply coordinates by %s" % str(type(other)))
+        raise TypeError("Cannot multiply coordinates by %s" % type(other))
 
     def __div__(self, other):
         """inverse of mul"""
@@ -127,7 +127,7 @@ class Point(LocationSpecifier2D):
         return self.x * other.x + self.y * other.y
 
     def __repr__(self):
-        return type(self).__name__+'(%s, %s)' % (str(self.x), str(self.y))
+        return self.__class__.__name__+'(%s, %s)' % (self.x, self.y)
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
@@ -174,7 +174,7 @@ class Coordinates(LocationSpecifier2D):
         self._coord = z
 
     def __repr__(self):
-        return type(self).__name__+'(%s)' % repr(list(self))
+        return self.__class__.__name__+'(%s)' % list(self)
 
     def __len__(self):
         """Number of points in the set"""

@@ -63,7 +63,7 @@ class RootedTree(object):
                 mult = self.subtrees[subtree]
                 tree_string = subtree._str()
                 if mult > 1:
-                    tree_string += '^%s' % str(mult)
+                    tree_string += '^%s' % mult
                 strings.append(tree_string)
             return '{%s}' % ', '.join(strings)
 
@@ -114,7 +114,7 @@ class LevelTree(object):
         return self.level_sequence[key]
 
     def __repr__(self):
-        return type(self).__name__+"(%s)" % str(list(self))
+        return self.__class__.__name__+"(%s)" % list(self)
 
     def __eq__(self, other):
         if isinstance(other, LevelTree):
@@ -128,8 +128,7 @@ class LevelTree(object):
     def __lt__(self, other):
         if isinstance(other, LevelTree):
             return self.level_sequence < other.level_sequence
-        else:
-            raise ValueError("Cannot compare tree with type %s" % type(other))
+        raise ValueError("Cannot compare tree with %s" % type(other))
 
     def __hash__(self):
         return self._hash
@@ -307,7 +306,7 @@ class TreeEnumerator(object):
     __le__ = None
 
     def __repr__(self):
-        return type(self).__name__+'(%s)' % str(self.n)
+        return self.__class__.__name__+'(%s)' % self.n
 
     def __iter__(self):
         """ Generates the dominant representatives of each unordered tree in
@@ -358,7 +357,7 @@ class ForestEnumerator(TreeEnumerator):
         self.n = node_count + 1
 
     def __repr__(self):
-        return type(self).__name__+'(%s)' % str(self.n - 1)
+        return self.__class__.__name__+'(%s)' % (self.n - 1)
 
     def __iter__(self):
         """ Any rooted tree on n+1 nodes can be identically described as a
@@ -402,4 +401,4 @@ class PartitionForests(object):
         return productrange.unordered_product(self.partition, TreeEnumerator)
 
     def __repr__(self):
-        return type(self).__name__+'(%s)' % str(list(self.partition))
+        return self.__class__.__name__+'(%s)' % list(self.partition)

@@ -79,7 +79,7 @@ class Necklace(object):
         return periodicity(self.strand)
 
     def __repr__(self):
-        return "Necklace(%s)" % str(self.strand)
+        return self.__class__.__name__+"(%s)" % list(self.strand)
 
     def __len__(self):
         return len(self.strand)
@@ -152,10 +152,10 @@ class FixedContentNecklaces(object):
         self.elems, self.partition = self.beads.sort_split()
 
     def __repr__(self):
-        return self.__class__.__name__+'('+repr(self.beads)+')'
+        return self.__class__.__name__+'(%s)' % repr(self.beads)
 
     def __str__(self):
-        return 'Necklaces('+str(self.beads)+')'
+        return self.__class__.__name__+'(%s)' % str(self.beads)
 
     def count_by_period(self):
         """ Returns a list whose kth element is the number of necklaces

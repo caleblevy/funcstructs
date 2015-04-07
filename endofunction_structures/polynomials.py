@@ -133,13 +133,13 @@ class MultisetPolynomial(object):
         return not self == other
 
     def __repr__(self):
-        return type(self).__name__+'(%s)' % str(list(self.cpart))
+        return self.__class__.__name__+'(%s)' % list(self.cpart.elements())
 
     def __str__(self):
-        set_str = str(multiset.Multiset(self.cpart))[1:-1]
+        set_str = str(multiset.Multiset(self.cpart.elements()))[1:-1]
         if not self.cpart:
             set_str = '{}'
-        return type(self).__name__+'(%s)' % set_str
+        return self.__class__.__name__+'(%s)' % set_str
 
     def __iter__(self):
         return (el for el in self.cpart.elements())

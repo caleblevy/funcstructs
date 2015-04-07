@@ -102,7 +102,7 @@ class Multiset(Counter):
                 if isinstance(elem, self.__class__):
                     mstring = str(elem)
                     if mult > 1:
-                        mstring += '^%s' % str(mult)
+                        mstring += '^%s' % mult
                     strings.append(mstring)
                     continue
                 if mult > 1:

@@ -33,10 +33,10 @@ class Endofunction(object):
         return len(self.func)
 
     def __repr__(self):
-        return type(self).__name__+'(%s)'+str(list(self))
+        return self.__class__.__name__+'(%s)' % list(self)
 
     def __str__(self):
-        funcstring = type(self).__name__+'(['
+        funcstring = self.__class__.__name__+'(['
         mapvals = []
         for x, f in enumerate(self[:-1]):
             mapvals.append(str(x)+'->'+str(f)+', ')
@@ -267,7 +267,7 @@ class TransformationMonoid(object):
         return False
 
     def __repr__(self):
-        return self.__class__.__name__+'('+str(self.n)+')'
+        return self.__class__.__name__+'(%s)' % self.n
 
     def iterdist(self):
         """ Calculate iterdist by enumerating all endofunction image paths."""
