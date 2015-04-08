@@ -17,7 +17,7 @@ __all__ = [
     "Inf", "Zero", "One", "NaN", "Min16", "Max16",
     "Positives", "Negatives", "FinitePositives", "FiniteNegatives",
     "NonPositives", "NonNegatives", "FiniteNonPositives", "FiniteNonNegatives",
-    "Finites", "NonNan", "Floats"
+    "UnitInterval", "Finites", "NonNan", "Floats"
 ]
 
 
@@ -114,6 +114,7 @@ FiniteNonNegatives = NonNegatives[:-1]
 FiniteNegatives = Negatives[1:]
 FiniteNonPositives = NonPositives[1:]
 
+UnitInterval = NonNegatives[:NonNegatives._intmap[One]+1]
 Finites = FiniteNegatives + FiniteNonNegatives
 NonNan = Negatives + NonNegatives
 Floats = (NaN, ) + NonNan
@@ -149,7 +150,7 @@ class FloatSetTests(unittest.TestCase):
         for fset in [
             Negatives, NonNegatives, Positives, NonPositives,
             FiniteNonNegatives, FiniteNonPositives, FiniteNegatives,
-            FinitePositives, Finites, NonNan, Floats
+            FinitePositives, UnitInterval, Finites, NonNan, Floats
         ]:
             self.assertIsInstance(fset, FloatSet)
 
