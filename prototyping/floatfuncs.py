@@ -49,9 +49,6 @@ class FloatSet(tuple):
     def __contains__(self, item):
         return item in self._elems
 
-    def __set__(self):
-        return set(self._elems)
-
     def __add__(self, other):
         return self.__class__(tuple(self) + tuple(other))
 
