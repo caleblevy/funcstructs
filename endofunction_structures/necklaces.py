@@ -46,21 +46,20 @@ def periodicity(strand):
     return len(seed)
 
 
-class Necklace(object):
-    """ A necklace is a class of n-character strings equivalent under rotation
-    (orbits of the set of n-character strings under the action of the cyclic
-    group). For example, each of the following are representative of the same
-    necklace:
+class Necklace(tuple):
+    """A necklace is the lexicographically smallest representative of a class
+    of n-character strings equivalent under rotation (orbits of the set of
+    n-character strings under the action of the cyclic group). For example the
+    following are necklaces, and the classes they represent:
 
-        [a,b,c,d] ~ [b,c,d,a] ~ [c,d,a,b] ~ [d,a,b,c]
-        [a,b,b] ~ [b,a,b] ~ [b,b,a]
-        [c,d,c,d] ~ [d,c,d,c]
+        Necklace([a,b,c,d]) :==: {(a,b,c,d), (b,c,d,a), (c,d,a,b), (d,a,b,c)}
+        Necklace([c,d,c,d]) :==: {(c,d,c,d), (d,c,d,c)}
+        Necklace([1,2,2])   :==: {(1,2,2), (2,1,2), (2,2,1)}
 
-    Different necklaces may have different periodicity, as seen above."""
+    Different necklaces may have different periodicity, as seen above.
+    """
 
-    __slots__ = ['strand', '_hash', '_period']
-
-    def __init__(self, strand, preordered=False):
+    def __new__(cls, strand, preordered=False):
         """Initialize the necklace. Items in the necklace must be hashable
         (immutable), otherwise the equivalence class could change
         dynamically.
@@ -71,40 +70,14 @@ class Necklace(object):
         that your input is in lexicographically smallest form."""
         if not preordered:
             strand = Lyndon.SmallestRotation(strand)
-        self.strand = tuple(strand)
-        self._hash = hash(self.strand)
+        return super(Necklace, cls).__new__(cls, strand)
 
     @memoized_property
     def period(self):
-        return periodicity(self.strand)
+        return periodicity(self)
 
     def __repr__(self):
-        return self.__class__.__name__+"(%s)" % list(self.strand)
-
-    def __len__(self):
-        return len(self.strand)
-
-    def __hash__(self):
-        return self._hash
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.strand == other.strand
-        return False
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __contains__(self, other):
-        """If the normalization of other is the representative of self, then
-        other is a rotation of the necklace."""
-        try:
-            return self == self.__class__(other)
-        except:
-            return False
-
-    def __iter__(self):
-        return iter(self.strand)
+        return self.__class__.__name__+"(%s)" % list(self)
 
     def degeneracy(self):
         """Number of distinct representations of the same necklace."""
@@ -152,10 +125,7 @@ class FixedContentNecklaces(object):
         self.elems, self.partition = self.beads.sort_split()
 
     def __repr__(self):
-        return self.__class__.__name__+'(%s)' % repr(self.beads)
-
-    def __str__(self):
-        return self.__class__.__name__+'(%s)' % str(self.beads)
+        return self.__class__.__name__+'(%s)' % list(self.beads)
 
     def count_by_period(self):
         """ Returns a list whose kth element is the number of necklaces
@@ -210,7 +180,7 @@ class FixedContentNecklaces(object):
         for strand in self.sfc():
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
-            yield Necklace([self.elems[I] for I in strand], preordered=True)
+            yield Necklace([self.elems[i] for i in strand], preordered=True)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

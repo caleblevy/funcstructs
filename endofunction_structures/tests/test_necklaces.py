@@ -20,18 +20,19 @@ class PeriodicityTest(unittest.TestCase):
             for d in factorization.divisors(n):
                 periods.append(d)
                 lists.append(([0]+[1]*(d-1))*(n//d))
-
         t1 = [(1, 2), ]*3+[(1, 1)]
         t2 = t1*3 + [(1, 4, 3)]*3 + [(1, )]
         t3 = t2*2 + [(2, )]*3 + [(1, 4, 3)]
         t4 = t3*3 + [(3, )]*3+[(1, 2)]
         lists.append(t4*4)
         periods.append(112)
-        lists.extend([[(1, 2), (1, 2)], [(1, 2), (1, )],
-                      [(1, 2), (1, ), (1, 2), (1, ), (1, )],
-                      [(1, 2), (1, ), (1, 2), (1, ), (1, 2)]])
+        lists.extend([
+            [(1, 2), (1, 2)],
+            [(1, 2), (1, )],
+            [(1, 2), (1, ), (1, 2), (1, ), (1, )],
+            [(1, 2), (1, ), (1, 2), (1, ), (1, 2)]
+        ])
         periods.extend([1, 2, 5, 5])
-
         for period, lst in zip(periods, lists):
             self.assertEqual(period, periodicity(lst))
 
@@ -39,21 +40,16 @@ class PeriodicityTest(unittest.TestCase):
 class NecklaceTests(unittest.TestCase):
 
     def test_equality(self):
-        """Make sure rotationally equivalent necklaces compare equal."""
+        """Check Necklace returns same output for different rotations of the
+        input"""
         n = Necklace([1, 2, 3, 1, 2, 3])
         self.assertNotEqual(n, Necklace([1, 2, 3]))
         self.assertNotEqual(n, Necklace([1, 2, 3, 1, 2, 3, 1, 2, 3]))
         self.assertEqual(n, Necklace([3, 1, 2, 3, 1, 2]))
         self.assertEqual(n, Necklace(tuple([2, 3, 1, 2, 3, 1])))
 
-    def test_containement(self):
-        """Make sure Necklace conjugacy class contains all its rotations."""
-        n = Necklace([1, 2, 3, 1, 2, 3])
-        self.assertNotIn(n, n)
-        self.assertIn(tuple([3, 1, 2, 3, 1, 2]), n)
-
     def test_hash(self):
-        """Test that our hash is rotationally invariant."""
+        """Test that our hash is rotationally invariant"""
         self.assertEqual(hash(Necklace([1, 2, 3])), hash(Necklace([3, 1, 2])))
 
     def test_repr(self):
