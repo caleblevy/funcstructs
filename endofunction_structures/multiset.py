@@ -20,25 +20,21 @@ class Multiset(Counter):
     elements of the set and values are the multiplicities. Multiset is
     immutable, and thus suitable for use as a dictionary key. """
 
-    __slots__ = ['_size', '_items', '_hash']
+    def __new__(cls, iterable=None):
+        if isinstance(iterable, cls):
+            return iterable
+        self = dict.__new__(cls)
+        self._size = 0
+        if iterable is not None:
+            for el in iterable:
+                dict.__setitem__(self, el, self.get(el, 0) + 1)
+                self._size += 1
+        self._items = frozenset(self.items())
+        self._hash = hash(self._items)
+        return self
 
     def __init__(self, iterable=None):
-        self._size = 0
-        self._items = frozenset()
-        self._hash = hash(self._items)
-        super(dict, self).__init__()
-        if iterable is not None:
-            if isinstance(iterable, self.__class__):
-                super(Counter, self).update(iterable)
-                self._size = iterable._size
-                self._hash = iterable._hash
-                self._items = iterable._items
-            else:
-                for el in iterable:
-                    super(Counter, self).__setitem__(el, self.get(el, 0) + 1)
-                    self._size += 1
-                self._items = frozenset(self.items())
-                self._hash = hash(self._items)
+        pass  # Override Counter.__init__ to avoid call to self.update()
 
     # Disable all inherited mutating methods. Based on answers from
     #    http://stackoverflow.com/questions/1151658/python-hashable-dicts

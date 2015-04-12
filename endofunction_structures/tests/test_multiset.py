@@ -65,15 +65,6 @@ class MultisetTests(unittest.TestCase):
         self.assertEqual(Multiset('abcaba').most_common(3),
                          [('a', 3), ('b', 2), ('c', 1)])
 
-    def test_copy(self):
-        """Check that we can copy multisets"""
-        empty = Multiset()
-        self.assertTrue(empty.copy() == empty)
-        self.assertTrue(empty.copy() is not empty)
-        abc = Multiset('abc')
-        self.assertTrue(abc.copy() == abc)
-        self.assertTrue(abc.copy() is not abc)
-
     def test_len(self):
         """Check the number of elements in our multisets."""
         self.assertEqual(0, len(Multiset()))
