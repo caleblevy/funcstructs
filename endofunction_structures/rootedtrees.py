@@ -97,54 +97,20 @@ class RootedTree(object):
         return DominantTree(self._ordered_level_sequence())
 
 
-@functools.total_ordering
-class LevelTree(object):
+class LevelTree(tuple):
     """ Data structure for representing ordered trees by a level sequence: a
     listing of each node's height above the root produced in depth-first
     traversal order. The tree is reconstructed by connecting each node to
     previous one directly below its height. """
 
-    def __init__(self):
+    def __new__(cls, *args, **kwargs):
         raise NotImplementedError(
             "LevelTree should not be invoked directly. Use either OrderedTree "
             "or DominantTree."
         )
 
-    def __getitem__(self, key):
-        return self.level_sequence[key]
-
     def __repr__(self):
         return self.__class__.__name__+"(%s)" % list(self)
-
-    def __eq__(self, other):
-        if isinstance(other, LevelTree):
-            return self.level_sequence == other.level_sequence
-        else:
-            return False
-
-    def __ne__(self, other):
-        return not self == other
-
-    def __lt__(self, other):
-        if isinstance(other, LevelTree):
-            return self.level_sequence < other.level_sequence
-        raise ValueError("Cannot compare tree with %s" % type(other))
-
-    def __hash__(self):
-        return self._hash
-
-    def __len__(self):
-        return len(self.level_sequence)
-
-    def __iter__(self):
-        return iter(self.level_sequence)
-
-    def __bool__(self):
-        # A rooted tree, by definition, contains a root, thus is nonempty and
-        # evaluates True.
-        return True
-
-    __nonzero__ = __bool__
 
     def branch_sequences(self):
         """ Return each major subbranch of a tree (even chopped). """
@@ -200,9 +166,8 @@ class LevelTree(object):
 class OrderedTree(LevelTree):
     """An unlabelled ordered tree represented by its level sequence."""
 
-    def __init__(self, level_sequence):
-        self.level_sequence = tuple(level_sequence)
-        self._hash = hash(self.level_sequence)
+    def __new__(cls, level_sequence):
+        return tuple.__new__(cls, level_sequence)
 
     def branches(self):
         for branch in self.branch_sequences():
@@ -215,7 +180,7 @@ class OrderedTree(LevelTree):
     def _dominant_sequence(self):
         """ Return the dominant rooted tree corresponding to self. """
         if not self.branches():
-            return self.level_sequence
+            return list(self)
         branch_list = []
         for branch in self.branches():
             branch_list.append(branch._dominant_sequence())
@@ -242,15 +207,13 @@ class DominantTree(LevelTree):
     lexicographically largest level sequence. It is formed by placing all
     subtrees in dominant form and then putting them in descending order."""
 
-    def __init__(self, level_sequence, preordered=False):
-        if isinstance(level_sequence, type(self)):
-            self.level_sequence = level_sequence.level_sequence
-            self._hash = level_sequence._hash
+    def __new__(cls, level_sequence, preordered=False):
+        if isinstance(level_sequence, cls):
+            return level_sequence
         else:
             if not preordered:
                 level_sequence = dominant_sequence(level_sequence)
-            self.level_sequence = tuple(level_sequence)
-            self._hash = hash(self.level_sequence)
+            return tuple.__new__(cls, level_sequence)
 
     def branches(self):
         for branch in self.branch_sequences():
