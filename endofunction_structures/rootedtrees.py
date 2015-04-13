@@ -4,9 +4,10 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" Algorithms for representing and enumerating unlabelled rooted trees:
+"""Algorithms for representing and enumerating unlabelled rooted trees:
 connected directed graphs with a single length-one cycle and nodes of
-out-degree one. A forest is any collection of rooted trees. """
+out-degree one. A forest is any collection of rooted trees.
+"""
 
 from memoized_property import memoized_property
 
@@ -80,16 +81,13 @@ class LevelTree(tuple):
     """
 
     def __new__(cls, *args, **kwargs):
-        raise NotImplementedError(
-            "LevelTree should not be invoked directly. Use either OrderedTree "
-            "or DominantTree."
-        )
+        raise NotImplementedError("LevelTree should not be invoked directly")
 
     def __repr__(self):
         return self.__class__.__name__+"(%s)" % list(self)
 
     def branch_sequences(self):
-        """ Return each major subbranch of a tree (even chopped). """
+        """Return each major subbranch of a tree."""
         isroot = lambda node: node == self[0] + 1
         for branch in subsequences.startswith(self[1:], isroot):
             yield branch
@@ -100,9 +98,7 @@ class LevelTree(tuple):
             yield [node-1 for node in branch_sequence]
 
     def bracket_form(self):
-        """ Return a representation of the rooted tree via nested lists. This
-        method is a novelty item, and shouldn't be used for anything practical.
-        """
+        """Return a representation of the rooted tree via nested lists."""
         if not self.branch_sequences():
             return []
         return [subtree.bracket_form() for subtree in self.subtrees()]
@@ -115,7 +111,7 @@ class LevelTree(tuple):
 
     def labelled_sequence(self, labels=None):
         """Return an endofunction whose structure corresponds to the rooted
-        tree. The root is 0 by default, but can be permuted according a
+        tree. The root is 0 by default, but can be permuted according to a
         specified labelling.
         """
         if labels is None:
@@ -200,7 +196,7 @@ class DominantTree(LevelTree):
 
     def chop(self):
         """Return a multiset of the input tree's main sub branches."""
-        return multiset.Multiset(subtree for subtree in self.subtrees())
+        return multiset.Multiset(self.subtrees())
 
     def degeneracy(self):
         """The number of representations of each labelling of the unordered
@@ -211,12 +207,10 @@ class DominantTree(LevelTree):
         TODO: A writeup of this with diagrams will be in the notes.
         """
         logs = self.chop()
-        if not logs:
-            return 1
-        deg = 1
-        for subtree in logs:
-            deg *= subtree.degeneracy()
-        return deg*logs.degeneracy()
+        deg = logs.degeneracy()
+        for subtree, mult in logs.items():
+            deg *= subtree.degeneracy()**mult
+        return deg
 
 
 class TreeEnumerator(object):
@@ -254,7 +248,7 @@ class TreeEnumerator(object):
         "Constant time generation of rooted trees." Siam Journal of
         Computation, Vol. 9, No. 4. November 1980.
         """
-        tree = [i+1 for i in range(self.n)]
+        tree = list(range(1, self.n+1))
         yield DominantTree(tree, preordered=True)
         if self.n > 2:
             while tree[1] != tree[2]:
