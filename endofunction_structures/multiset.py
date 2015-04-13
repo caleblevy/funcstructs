@@ -11,6 +11,7 @@ from collections import Counter
 import operator
 
 from sympy.utilities.iterables import multiset_partitions
+from memoized_property import memoized_property
 
 from . import counts
 
@@ -24,13 +25,9 @@ class Multiset(Counter):
         if isinstance(iterable, cls):
             return iterable
         self = dict.__new__(cls)
-        self._size = 0
         if iterable is not None:
             for el in iterable:
                 dict.__setitem__(self, el, self.get(el, 0) + 1)
-                self._size += 1
-        self._items = frozenset(self.items())
-        self._hash = hash(self._items)
         return self
 
     def __init__(self, iterable=None):
@@ -70,7 +67,11 @@ class Multiset(Counter):
     # Override Counter len; length of a multiset is total number of elements.
 
     def __len__(self):
-        return self._size
+        return sum(self.values())
+
+    @memoized_property
+    def _hash(self):
+        return hash(frozenset(self.items()))
 
     def __hash__(self):
         return self._hash
@@ -78,7 +79,7 @@ class Multiset(Counter):
     def __repr__(self):
         """ The string representation is a call to the constructor given a
         tuple containing all of the elements. """
-        if self._size == 0:
+        if len(self) == 0:
             return '{0}()'.format(self.__class__.__name__)
         format_str = '{cls}({tup!r})'
         return format_str.format(cls=self.__class__.__name__, tup=tuple(self))
@@ -87,7 +88,7 @@ class Multiset(Counter):
         """The printable string appears just like a set, except that each
         element is raised to the power of the multiplicity if it is greater
         than 1. """
-        if self._size == 0:
+        if len(self) == 0:
             return '{class_name}()'.format(class_name=self.__class__.__name__)
         else:
             format_single = '{elem!r}'
@@ -110,27 +111,9 @@ class Multiset(Counter):
     def unique_elements(self):
         return self.keys()
 
-    def num_unique_elements(self):
-        return len(self.values())
-
-    def num_elements(self):
-        return len(self)
-
-    def __contains__(self, value):
-        """ Returns the multiplicity of the element. """
-        return self.get(value, 0)
-
     def __iter__(self):
         """Iterate through all elements; return multiple copies if present."""
         return self.elements()
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self._items == other._items
-        return False
-
-    def __ne__(self, other):
-        return not self == other
 
     def split(self):
         """ Splits the multiset into element-multiplicity pairs. """

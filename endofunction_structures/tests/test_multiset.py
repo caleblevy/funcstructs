@@ -84,9 +84,6 @@ class MultisetTests(unittest.TestCase):
         self.assertEqual(hash(Multiset('ba')), hash(Multiset(('ab'))))
         self.assertEqual(hash(Multiset('badce')), hash(Multiset(('dbeac'))))
 
-    def test_num_unique_elems(self):
-        self.assertEqual(5, Multiset('abracadabra').num_unique_elements())
-
     def test_keyability(self):
         """
         Since Multiset is mutable and FronzeMultiset is hashable, the second
