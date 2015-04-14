@@ -81,9 +81,6 @@ class Funcstruct(multiset.Multiset):
             cycles.append(necklaces.Necklace(strand))
         return cls(cycles)
 
-    def __init__(self, *args, **kwargs):
-        pass
-
     __lt__ = None
 
     def __repr__(self):

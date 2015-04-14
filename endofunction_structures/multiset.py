@@ -30,7 +30,7 @@ class Multiset(Counter):
                 dict.__setitem__(self, el, self.get(el, 0) + 1)
         return self
 
-    def __init__(self, iterable=None):
+    def __init__(*args, **kwargs):
         pass  # Override Counter.__init__ to avoid call to self.update()
 
     # Disable all inherited mutating methods. Based on answers from
