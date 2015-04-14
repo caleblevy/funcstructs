@@ -45,7 +45,7 @@ def struct_string(func, cycle_prefix=2, cycle_suffix=2, tree_indent=4, end=78):
     fstrs.append('\nFuncstruct:\n')
     cycle_str = ' '*cycle_prefix + 'Cycle(' + ' '*cycle_suffix
     l = len(cycle_str)
-    for cycle, count in func.cycles.items():
+    for cycle, count in func.items():
         fstrs.append(cycle_str+'\n')
         for tree in cycle:
             for t in indent_treestring(tree, tree_indent, end-l):
@@ -54,48 +54,40 @@ def struct_string(func, cycle_prefix=2, cycle_suffix=2, tree_indent=4, end=78):
     return ''.join(fstrs)
 
 
-def _func_to_struct(f):
-    cycles = []
-    for cycle in f.cycles:
-        strand = []
-        for el in cycle:
-            strand.append(f.attached_tree(el))
-        cycles.append(necklaces.Necklace(strand))
-    return cycles
-
-
-class Funcstruct(object):
+class Funcstruct(multiset.Multiset):
     """ An endofunction structure may be represented as a forest of trees,
     grouped together in multisets corresponding to cycle decompositions of the
     final set (the subset of its domain on which it is invertible). The
     orderings of the trees in the multisets correspond to necklaces whose beads
     are the trees themselves. """
 
-    __slots__ = ['cycles', 'n']
-
-    def __init__(self, cycles, precounted=None):
-        if isinstance(cycles, endofunctions.Endofunction):
-            cycles = _func_to_struct(cycles)
-        self.cycles = multiset.Multiset(cycles)
+    def __new__(cls, cycles, precounted=True):
+        if isinstance(cycles, cls):
+            return cycles
+        self = super(Funcstruct, cls).__new__(cls, cycles)
         if precounted is not None:
             self.n = precounted
         else:
             self.n = len(productrange.flatten(productrange.flatten(cycles)))
+        return self
 
-    def __hash__(self):
-        return hash(self.cycles)
+    @classmethod
+    def from_endofunction(cls, f):
+        cycles = []
+        for cycle in f.cycles:
+            strand = []
+            for el in cycle:
+                strand.append(f.attached_tree(el))
+            cycles.append(necklaces.Necklace(strand))
+        return cls(cycles)
 
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.cycles == other.cycles
-
-    def __ne__(self, other):
-        return not self == other
+    def __init__(self, *args, **kwargs):
+        pass
 
     __lt__ = None
 
     def __repr__(self):
-        return self.__class__.__name__+'('+repr(list(self.cycles))+')'
+        return self.__class__.__name__+'(%s)' % list(self)
 
     def __str__(self):
         return struct_string(self)
@@ -106,23 +98,22 @@ class Funcstruct(object):
         unlabelled structure self.
 
         The size of the conjugacy class of self is n!/self.degeneracy() """
-        if not self.cycles:
-            return 1
         # First the degeneracy from the permutations of arrangements of cycles
-        degeneracy = self.cycles.degeneracy()
+        degeneracy = super(Funcstruct, self).degeneracy()
         # Then account for the periodcity of each cycle
-        for cycle in self.cycles:
-            degeneracy *= cycle.degeneracy()
+        for cycle, mult in self.items():
+            cycledeg = cycle.degeneracy()
             # Finally the degeneracy of each rooted tree.
             for tree in cycle:
-                degeneracy *= tree.degeneracy()
+                cycledeg *= tree.degeneracy()
+            degeneracy *= cycledeg ** mult
         return degeneracy
 
     def func_form(self):
         """ Convert function structure to canonical form by filling in numbers
         from 0 to n-1 on the cycles and trees. """
         # Find the tree form of non-cyclic nodes
-        cycles = list(self.cycles)
+        cycles = list(self)
         tree_start = 0
         func = []
         for tree in productrange.flatten(cycles):
@@ -148,7 +139,7 @@ class Funcstruct(object):
         """ Given an endofunction structure funcstruct, compute the image path
         directly without conversion to a particular endofunction. """
         cardinalities = np.array([0]+[0]*(self.n-2), dtype=object)
-        for tree in productrange.flatten(self.cycles):
+        for tree in productrange.flatten(self):
             cardinalities += 1
             for subseq in subsequences.increasing_subsequences(tree):
                 k = len(subseq) - 1

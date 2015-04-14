@@ -27,7 +27,10 @@ class FuncstructTests(unittest.TestCase):
                 rootedtrees.DominantTree([1, 2, 2])
             ])
         ])
-        self.assertEqual(struct, Funcstruct(struct.func_form()))
+        self.assertEqual(
+            struct,
+            Funcstruct.from_endofunction(struct.func_form())
+        )
 
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""
