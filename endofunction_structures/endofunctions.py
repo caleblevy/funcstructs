@@ -16,21 +16,16 @@ from . import productrange
 from . import rootedtrees
 
 
-class Endofunction(object):
+class Endofunction(tuple):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
 
-    def __init__(self, func):
-        if isinstance(func, rootedtrees.LevelTree):
+    def __new__(cls, func):
+        if isinstance(func, cls):
+            return func
+        elif isinstance(func, rootedtrees.LevelTree):
             func = func.labelled_sequence()
-        self.func = tuple(func)
-
-    def __hash__(self):
-        return hash(self.func)
-
-    def __len__(self):
-        """len(f) is the number of elements in f's domain"""
-        return len(self.func)
+        return tuple.__new__(cls, func)
 
     def __repr__(self):
         return self.__class__.__name__+'(%s)' % list(self)
@@ -43,22 +38,6 @@ class Endofunction(object):
         funcstring += ''.join(mapvals)
         funcstring += str(len(self)-1)+"->"+str(self[-1])+'])'
         return funcstring
-
-    def __getitem__(self, x):
-        """f(x) <==> f[x]"""
-        return self.func[x]
-
-    def __iter__(self):
-        """[f(x) for x in range(len(f))] <==> list(iter(self))"""
-        return iter(self.func)
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.func == other.func
-        return False
-
-    def __ne__(self, other):
-        return not self == other
 
     def __call__(self, other):
         """f(g) <==> Endofunction(f[g[x]] for x in g.domain)"""
@@ -178,27 +157,14 @@ def randfunc(n):
     return Endofunction([random.randrange(n) for I in range(n)])
 
 
-def cycles_to_funclist(cycles):
-    """Convert cycle decomposition into endofunction"""
-    funclist = [0] * len(productrange.flatten(cycles))
-    for cycle in cycles:
-        for i, el in enumerate(cycle[:-1]):
-            funclist[el] = cycle[i+1]
-        funclist[cycle[-1]] = cycle[0]
-    return funclist
-
-
 class SymmetricFunction(Endofunction):
     """ An invertible endofunction. """
 
-    def __init__(self, func):
-        func = tuple(func)
-        if hasattr(func, '__getitem__') and hasattr(func[0], '__iter__'):
-            # If it is a cycle decomposition, change to function.
-            func = cycles_to_funclist(func)
-        super(SymmetricFunction, self).__init__(func)
+    def __new__(cls, func):
+        self = super(SymmetricFunction, cls).__new__(cls, func)
         if not len(self) == len(self.image):
             raise ValueError("This function is not invertible.")
+        return self
 
     def __pow__(self, n):
         """Symmetric functions allow us to take inverses."""
