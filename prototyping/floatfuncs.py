@@ -65,7 +65,6 @@ class FloatSet(tuple):
         elif isinstance(key, slice):
             return self.__class__(super(FloatSet, self).__getitem__(key))
         return super(FloatSet, self).__getitem__(key)  # integer case
-        
 
     # python2 compatibility function
     def __getslice__(self, start, stop):
