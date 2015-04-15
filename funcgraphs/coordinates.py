@@ -88,10 +88,12 @@ class LocationSpecifier2D(object):
         self._coord = (self.from_polar(r, theta + angle) + origin).z
 
 
+def is_real(x): return isinstance(x, numbers.Real)
+
+
 def check_components_are_real(x, y):
     """Check that both x and y are real numbers, if not raise error"""
-    isreal = lambda ob: isinstance(ob, numbers.Real)
-    if not(isreal(x) and isreal(y)):
+    if not(is_real(x) and is_real(y)):
         raise TypeError(
             ("Both coordinates must be real numbers, "
              "received %s, %s") % (type(x).__name__, type(y).__name__)
@@ -141,9 +143,11 @@ class Point(LocationSpecifier2D):
         return self.z
 
 
+def array_is_real(arr): return issubclass(arr.dtype.type, numbers.Real)
+
+
 def check_coords_are_real(x, y):
     """Check that x and y are real valued arrays"""
-    array_is_real = lambda arr: issubclass(arr.dtype.type, numbers.Real)
     if not(array_is_real(x) and array_is_real(y)):
         raise TypeError(
             ("Both coordinates must be real valued, received"

@@ -31,10 +31,17 @@ def monotone_subsequences(seq, comparison):
         term_prev = term
     yield subseq
 
-increasing_subsequences = lambda seq: monotone_subsequences(seq, gt)
-nondecreasing_subsequences = lambda seq: monotone_subsequences(seq, ge)
-decreasing_subsequences = lambda seq: monotone_subsequences(seq, lt)
-nonincreasing_subsequences = lambda seq: monotone_subsequences(seq, le)
+
+def increasing_subsequences(seq): return monotone_subsequences(seq, gt)
+
+
+def nondecreasing_subsequences(seq): return monotone_subsequences(seq, ge)
+
+
+def decreasing_subsequences(seq): return monotone_subsequences(seq, lt)
+
+
+def nonincreasing_subsequences(seq): return monotone_subsequences(seq, le)
 
 
 def startswith(seq, cond):

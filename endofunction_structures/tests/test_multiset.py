@@ -57,11 +57,15 @@ class MultisetTests(unittest.TestCase):
 
     def test_most_common(self):
         abra = Multiset('abracadabra')
-        sort_key = lambda e: (-e[1], e[0])
         abra_counts = [('a', 5), ('b', 2), ('r', 2), ('c', 1), ('d', 1)]
-        self.assertEqual(sorted(abra.most_common(), key=sort_key), abra_counts)
-        self.assertEqual(sorted(abra.most_common(3), key=sort_key),
-                         abra_counts[:3])
+        self.assertEqual(
+            sorted(abra.most_common(), key=lambda e: (-e[1], e[0])),
+            abra_counts
+        )
+        self.assertEqual(
+            sorted(abra.most_common(3), key=lambda e: (-e[1], e[0])),
+            abra_counts[:3]
+        )
         self.assertEqual(Multiset('abcaba').most_common(3),
                          [('a', 3), ('b', 2), ('c', 1)])
 

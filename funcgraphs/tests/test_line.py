@@ -12,11 +12,13 @@ from ..coordinates import Point
 from ..line import *
 
 
+def lsort(l): return sorted([(l.p1.x, l.p1.y), (l.p2.x, l.p2.y)])
+
+
 class LineTests(unittest.TestCase):
 
     def assertLinesEqual(self, l1, l2):
         """Test two line segments contain the same points."""
-        lsort = lambda l: sorted([(l.p1.x, l.p1.y), (l.p2.x, l.p2.y)])
         l1_points = lsort(l1)
         l2_points = lsort(l2)
         for p, q in zip(l1_points, l2_points):

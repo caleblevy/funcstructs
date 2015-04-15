@@ -32,7 +32,9 @@ class RootedTree(multiset.Multiset):
             raise TypeError("subtrees must be rooted trees")
         return self
 
-    __bool__ = __nonzero__ = lambda self: True  # roots make trees nonempty
+    def __bool__(self): return True  # All trees have roots, thus aren't empty
+
+    __nonzero__ = __bool__
 
     def _str(self):
         strings = []
@@ -88,8 +90,9 @@ class LevelTree(tuple):
 
     def branch_sequences(self):
         """Return each major subbranch of a tree."""
-        isroot = lambda node: node == self[0] + 1
-        for branch in subsequences.startswith(self[1:], isroot):
+        for branch in subsequences.startswith(
+                self[1:],
+                lambda node: node == self[0] + 1):
             yield branch
 
     def subtree_sequences(self):

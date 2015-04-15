@@ -28,8 +28,11 @@ Min16 = -Max16
 Zero = np.float16(0)
 One = np.float16(1)
 
-nextfloat = lambda f: np.nextafter(f, Inf, dtype=np.float16)
-prevfloat = lambda f: np.nextafter(f, -Inf, dtype=np.float16)
+
+def nextfloat(f): return np.nextafter(f, Inf, dtype=np.float16)
+
+
+def prevfloat(f): return np.nextafter(f, -Inf, dtype=np.float16)
 
 
 class FloatSet(tuple):

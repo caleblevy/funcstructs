@@ -124,7 +124,8 @@ def partition_numbers_upto(N):
             P[n] += (-1)**abs((k-1)) * P[n-k*(3*k+1)//2]
     return P
 
-partition_number = lambda n: partition_numbers_upto(n)[-1]
+
+def partition_number(n): return partition_numbers_upto(n)[-1]
 
 
 def max_length_partitions(n, k):

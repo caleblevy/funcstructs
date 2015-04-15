@@ -177,9 +177,10 @@ def attachment_forests(t, l):
 def component_groups(c, l, m):
     """ Enumerate ways to make rooted trees from c free nodes and attach them
     to a group of m cycles of length l. """
-    iterfunc = lambda y: attachment_forests(y-1, l)
     for partition in direct_unordered_attachments(c, m):
-        for cycle_group in productrange.unordered_product(partition, iterfunc):
+        for cycle_group in productrange.unordered_product(
+                partition,
+                lambda y: attachment_forests(y-1, l)):
             yield cycle_group
 
 
