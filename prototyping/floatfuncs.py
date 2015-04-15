@@ -60,10 +60,12 @@ class FloatSet(tuple):
         return self.__class__(tuple(other) + tuple(self))
 
     def __getitem__(self, key):
-        if isinstance(key, numbers.Integral):  # Most common case first
-            return super(FloatSet, self).__getitem__(key)
+        if isinstance(key, np.float16):
+            return self._intmap[key]
         elif isinstance(key, slice):
             return self.__class__(super(FloatSet, self).__getitem__(key))
+        return super(FloatSet, self).__getitem__(key)  # integer case
+        
 
     # python2 compatibility function
     def __getslice__(self, start, stop):
@@ -75,10 +77,10 @@ class FloatSet(tuple):
         fi = [_sentinal] * len(self)
         for x, y in f.items():
             try:
-                fi[self._intmap[x]] = self._intmap[y]
+                fi[self[x]] = self[y]
             except KeyError:
                 if np.isnan(y):
-                    fi[self._intmap[x]] = self._intmap[NaN]
+                    fi[self[x]] = self[NaN]
                 else:
                     raise
         if _sentinal in fi:
@@ -122,7 +124,7 @@ FiniteNonNegatives = NonNegatives[:-1]
 FiniteNegatives = Negatives[1:]
 FiniteNonPositives = NonPositives[1:]
 
-UnitInterval = NonNegatives[:NonNegatives._intmap[One]+1]
+UnitInterval = NonNegatives[:NonNegatives[One]+1]
 Finites = FiniteNegatives + FiniteNonNegatives
 NonNan = Negatives + NonNegatives
 Floats = (NaN, ) + NonNan
