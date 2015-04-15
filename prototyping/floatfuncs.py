@@ -7,6 +7,7 @@
 """Module for computing conjugacy classes of self mappings on floating point
 numbers."""
 
+import numbers
 import unittest
 
 import numpy as np
@@ -58,6 +59,13 @@ class FloatSet(tuple):
     def __radd__(self, other):
         return self.__class__(tuple(other) + tuple(self))
 
+    def __getitem__(self, key):
+        if isinstance(key, numbers.Integral):  # Most common case first
+            return super(FloatSet, self).__getitem__(key)
+        elif isinstance(key, slice):
+            return self.__class__(super(FloatSet, self).__getitem__(key))
+
+    # python2 compatibility function
     def __getslice__(self, start, stop):
         return self.__class__(super(FloatSet, self).__getslice__(start, stop))
 
