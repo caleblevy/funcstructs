@@ -46,10 +46,32 @@ def iteration_time(gen, *args, **kwargs):
     return tot
 
 
+def mapping_time(gen, mapfunc, setupfunc=None, mapname=None, setupname=None,
+                 printing=True):
+    """Array of times to apply mapfuc to each element in gen."""
+    map_times = []
+    for el in gen:
+        ob = el if setupfunc is None else setupfunc(el)
+        ts = time()
+        mapfunc(ob)
+        tf = time()
+        tim = tf - ts
+        if printing:
+            setupstr = object_name(setupfunc) + "(%s)" % el
+            call_sig = object_name(mapfunc) + "(%s)" % setupstr
+            print("%s: %s seconds" % (call_sig, tim))
+        map_times.append(tim)
+    return map_times
+
+
 if __name__ == '__main__':
     from endofunction_structures import *
     iteration_time(levypartitions.fixed_lex_partitions(100, 40))
     iteration_time(EndofunctionStructures(12))
     iteration_time(EndofunctionStructures, 12)
-    iteration_time(PartitionForests, [2,2,3,5])
+    iteration_time(PartitionForests, [2, 2, 3, 5])
     iteration_time(productrange.productrange, -2, [2, 2, 2, 3, 5], step=2)
+
+    def flattree(n): return Endofunction([0]*n)
+
+    mapping_time(range(1, 2000), Endofunction.cycles.fget, flattree)
