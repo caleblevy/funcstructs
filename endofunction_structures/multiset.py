@@ -7,7 +7,7 @@
 """ Data structure for representing a multiset - also known as a bag, or
 unordered tuple. """
 
-from collections import Counter
+import collections
 import operator
 
 from sympy.utilities.iterables import multiset_partitions
@@ -16,7 +16,7 @@ from memoized_property import memoized_property
 from . import counts
 
 
-class Multiset(Counter):
+class Multiset(collections.Counter):
     """ Multiset is represented as a dictionary (hash table) whose keys are the
     elements of the set and values are the multiplicities. Multiset is
     immutable, and thus suitable for use as a dictionary key. """
