@@ -4,7 +4,7 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-from operator import gt, ge, le, lt
+import operator
 import itertools
 
 
@@ -32,16 +32,20 @@ def monotone_subsequences(seq, comparison):
     yield subseq
 
 
-def increasing_subsequences(seq): return monotone_subsequences(seq, gt)
+def increasing_subsequences(seq):
+    return monotone_subsequences(seq, operator.gt)
 
 
-def nondecreasing_subsequences(seq): return monotone_subsequences(seq, ge)
+def nondecreasing_subsequences(seq):
+    return monotone_subsequences(seq, operator.ge)
 
 
-def decreasing_subsequences(seq): return monotone_subsequences(seq, lt)
+def decreasing_subsequences(seq):
+    return monotone_subsequences(seq, operator.lt)
 
 
-def nonincreasing_subsequences(seq): return monotone_subsequences(seq, le)
+def nonincreasing_subsequences(seq):
+    return monotone_subsequences(seq, operator.le)
 
 
 def startswith(seq, cond):
