@@ -38,13 +38,13 @@ def compositions(n):
     comp = [n]
     while comp:
         yield comp
-        J = len(comp)
-        for K in range(J-1, -1, -1):
+        j = len(comp)
+        for k in range(j-1, -1, -1):
             # Keep descending (backwards) until hitting a component you can
             # subtract from
-            if comp[K] > 1:
-                comp[K] -= 1
-                comp.append(J-K)
+            if comp[k] > 1:
+                comp[k] -= 1
+                comp.append(j-k)
                 break
             # Haven't hit a 1, pop the last element, and step back
             comp.pop()
