@@ -111,7 +111,7 @@ class Endofunction(tuple):
     @memoized_property
     def cycles(self):
         """Return the set of f's cycles"""
-        return frozenset(tuple(cycle) for cycle in self.enumerate_cycles())
+        return frozenset(map(tuple, self.enumerate_cycles()))
 
     @memoized_property
     def limitset(self):
