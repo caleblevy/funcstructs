@@ -53,7 +53,8 @@ class MultisetTests(unittest.TestCase):
         """Check that we record the correct number of elements."""
         ms = Multiset('abracadabra')
         self.assertEqual(5, ms['a'])
-        self.assertEqual(0, ms['x'])
+        with self.assertRaises(KeyError):
+            self.assertEqual(0, ms['x'])
 
     def test_most_common(self):
         abra = Multiset('abracadabra')

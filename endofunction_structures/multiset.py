@@ -11,15 +11,16 @@ import collections
 import operator
 
 from sympy.utilities.iterables import multiset_partitions
-from memoized_property import memoized_property
 
 from . import counts
 
 
-class Multiset(collections.Counter):
+class Multiset(dict):
     """ Multiset is represented as a dictionary (hash table) whose keys are the
     elements of the set and values are the multiplicities. Multiset is
     immutable, and thus suitable for use as a dictionary key. """
+
+    __slots__ = ()
 
     def __new__(cls, iterable=None):
         if isinstance(iterable, cls):
@@ -30,7 +31,7 @@ class Multiset(collections.Counter):
                 dict.__setitem__(self, el, self.get(el, 0) + 1)
         return self
 
-    def __init__(*args, **kwargs):
+    def __init__(self, *args, **kwargs):
         pass  # Override Counter.__init__ to avoid call to self.update()
 
     # Disable all inherited mutating methods. Based on answers from
@@ -64,17 +65,15 @@ class Multiset(collections.Counter):
         raise TypeError("{0} is immutable and does not support item assignment"
                         .format(self.__class__.__name__))
 
-    # Override Counter len; length of a multiset is total number of elements.
-
+    # length of a multiset includes multiplicities
     def __len__(self):
         return sum(self.values())
 
-    @memoized_property
-    def _hash(self):
-        return hash(frozenset(self.items()))
+    # Iterate through all elements; return multiple copies if present.
+    __iter__ = collections.Counter.__dict__['elements']
 
     def __hash__(self):
-        return self._hash
+        return hash(frozenset(self.items()))
 
     def __repr__(self):
         """ The string representation is a call to the constructor given a
@@ -111,15 +110,13 @@ class Multiset(collections.Counter):
     def unique_elements(self):
         return self.keys()
 
-    def __iter__(self):
-        """Iterate through all elements; return multiple copies if present."""
-        return self.elements()
-
     def split(self):
         """ Splits the multiset into element-multiplicity pairs. """
         y = list(self.keys())
         d = [self[el] for el in y]
         return y, d
+
+    most_common = collections.Counter.__dict__['most_common']
 
     def sort_split(self):
         y = []
