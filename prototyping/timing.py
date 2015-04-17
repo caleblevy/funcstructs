@@ -10,12 +10,18 @@ from __future__ import print_function
 
 from time import time
 
+from numpy import log2
 import matplotlib.pyplot as plt
 
 from endofunction_structures.productrange import parse_ranges
 
+__all__ = (
+    "iteration_time", "mapping_time", "mapping_plots"
+    "flattree", "identity", "talltree", "balanced_binary_tree"
+)
 
-def call_string(*args, **kwargs):
+
+def _call_string(*args, **kwargs):
     """Return format of args and kwargs as viewed when typed out"""
     arg_strings = []
     for arg in args:
@@ -25,7 +31,7 @@ def call_string(*args, **kwargs):
     return "(%s)" % ', '.join(arg_strings)
 
 
-def object_name(ob):
+def _object_name(ob):
     """Return name of ob."""
     try:
         return ob.__name__
@@ -36,10 +42,10 @@ def object_name(ob):
 def iteration_time(gen, *args, **kwargs):
     """Time to exhaust gen. If gen is callable, time gen(*args, **kwargs)."""
     printing = kwargs.pop('printing', True)
-    call_sig = object_name(gen)
+    call_sig = _object_name(gen)
     if callable(gen):
         gen = gen(*args, **kwargs)
-        call_sig += call_string(*args, **kwargs)
+        call_sig += _call_string(*args, **kwargs)
     ts = time()
     for i, el in enumerate(gen, start=1):
         pass
@@ -51,9 +57,9 @@ def iteration_time(gen, *args, **kwargs):
 
 
 def _map_setup_call_sig(mapfunc, setupfunc):
-    call_sig = object_name(mapfunc) + "(%s)"
+    call_sig = _object_name(mapfunc) + "(%s)"
     if setupfunc is not None:
-        call_sig %= object_name(setupfunc) + "(%s)"
+        call_sig %= _object_name(setupfunc) + "(%s)"
     return call_sig
 
 
@@ -107,7 +113,6 @@ def mapping_plots(*args, **kwargs):
         call_sig = _map_setup_call_sig(mapfunc, setupfunc)
         plotfuncs.append((mapfunc, setupfunc, call_sig))
     plt.figure()
-    ax = plt.gca()
     plt.xlabel('n')
     for mapfunc, setupfunc, call_sig in plotfuncs:
         plt.plot(
@@ -116,7 +121,33 @@ def mapping_plots(*args, **kwargs):
             label=call_sig % 'n'
         )
     plt.legend(loc='upper left')
-    plt.show()
+    plt.draw()
+
+
+def flattree(n):
+    """Tree with all non-root nodes connected directly to root"""
+    return Endofunction([0]*n)
+
+
+def identity(n):
+    """Endofunction corresponding to f[x] == x for x in f.domain"""
+    return Endofunction(range(n))
+
+
+def talltree(n):
+    """Endofunction with f[0] == 0 and f[n] == n-1 for n in f.domain"""
+    return Endofunction([0] + list(range(n)))
+
+
+def balanced_binary_tree(n):
+    """Produce a balanced binary tree of height n."""
+    h = int(log2(n)) + 1
+    tree = [h]
+    while h-1:
+        h -= 1
+        tree *= 2
+        tree = [h] + tree
+    return Endofunction(OrderedTree(tree))
 
 
 if __name__ == '__main__':
@@ -126,8 +157,6 @@ if __name__ == '__main__':
     iteration_time(EndofunctionStructures, 12)
     iteration_time(PartitionForests, [2, 2, 3, 5])
     iteration_time(productrange.productrange, -2, [2, 2, 2, 3, 5], step=2)
-
-    def flattree(n): return Endofunction([0]*n)
 
     mapping_time(range(1, 2000), Endofunction.cycles.fget, flattree)
     mapping_time(range(1, 2000), sum, range)
@@ -141,12 +170,13 @@ if __name__ == '__main__':
         printing=True
     )
 
-    def identity(n): return Endofunction(range(n))
-
     mapping_plots(
         20, 2000,
         (Endofunction.cycles.fget, randfunc),
         (Endofunction.cycles.fget, identity),
         (Endofunction.cycles.fget, randperm),
+        (Endofunction.cycles.fget, talltree),
+        (Endofunction.cycles.fget, balanced_binary_tree),
         printing=True
     )
+    plt.show()
