@@ -32,7 +32,7 @@ class Multiset(dict):
         return self
 
     def __init__(self, *args, **kwargs):
-        pass  # Override Counter.__init__ to avoid call to self.update()
+        pass  # Override dict.__init__ to avoid call to self.update()
 
     # Disable all inherited mutating methods. Based on answers from
     #    http://stackoverflow.com/questions/1151658/python-hashable-dicts
