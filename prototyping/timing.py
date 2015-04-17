@@ -10,6 +10,10 @@ from __future__ import print_function
 
 from time import time
 
+import matplotlib.pyplot as plt
+
+from endofunction_structures.productrange import parse_ranges
+
 
 def call_string(*args, **kwargs):
     """Return format of args and kwargs as viewed when typed out"""
@@ -46,10 +50,17 @@ def iteration_time(gen, *args, **kwargs):
     return tot
 
 
-def mapping_time(gen, mapfunc, setupfunc=None, mapname=None, setupname=None,
-                 printing=True):
+def _map_setup_call_sig(mapfunc, setupfunc):
+    call_sig = object_name(mapfunc) + "(%s)"
+    if setupfunc is not None:
+        call_sig %= object_name(setupfunc) + "(%s)"
+    return call_sig
+
+
+def mapping_time(gen, mapfunc, setupfunc=None, printing=True):
     """Array of times to apply mapfuc to each element in gen."""
     map_times = []
+    call_sig = _map_setup_call_sig(mapfunc, setupfunc)
     for el in gen:
         ob = el if setupfunc is None else setupfunc(el)
         ts = time()
@@ -57,11 +68,55 @@ def mapping_time(gen, mapfunc, setupfunc=None, mapname=None, setupname=None,
         tf = time()
         tim = tf - ts
         if printing:
-            setupstr = object_name(setupfunc) + "(%s)" % el
-            call_sig = object_name(mapfunc) + "(%s)" % setupstr
-            print("%s: %s seconds" % (call_sig, tim))
+            print("%s: %s seconds" % (call_sig % el, tim))
         map_times.append(tim)
     return map_times
+
+
+def _split_ranges_from_funcs(args):
+    """Extract numbers from args, turn them into range, return list of rest"""
+    ranges = []
+    args = list(reversed(args))
+    while args:
+        arg = args.pop()
+        if not isinstance(arg, int):
+            break
+        ranges.append(arg)
+    ranges[0] += 1
+    if len(ranges) > 1:
+        ranges[1] += 1
+    return range(*ranges), [arg] + list(reversed(args))
+
+
+def _unpack_mapfuncs(funcs):
+    """If a func in funcs is not paired with setup, return pair with None"""
+    for func in funcs:
+        if callable(func):
+            yield func, None
+        else:
+            yield func
+
+
+def mapping_plots(*args, **kwargs):
+    """Plots of everything in mapfuncs"""
+    plotrange, funcs = _split_ranges_from_funcs(args)
+    printing = kwargs.pop('printing', False)
+    plotfuncs = []
+    for func in _unpack_mapfuncs(funcs):
+        mapfunc, setupfunc = func
+        call_sig = _map_setup_call_sig(mapfunc, setupfunc)
+        plotfuncs.append((mapfunc, setupfunc, call_sig))
+    plt.figure()
+    ax = plt.gca()
+    plt.xlabel('n')
+    for mapfunc, setupfunc, call_sig in plotfuncs:
+        plt.plot(
+            plotrange,
+            mapping_time(plotrange, mapfunc, setupfunc, printing),
+            label=call_sig % 'n'
+        )
+    plt.legend(loc='upper left')
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -75,3 +130,23 @@ if __name__ == '__main__':
     def flattree(n): return Endofunction([0]*n)
 
     mapping_time(range(1, 2000), Endofunction.cycles.fget, flattree)
+    mapping_time(range(1, 2000), sum, range)
+    mapping_time(range(1, 2000), range)
+
+    mapping_plots(2000, (sum, range), range, printing=True)
+    mapping_plots(
+        20, 2000,
+        (Endofunction.cycles.fget, randfunc),
+        (periodicity, randfunc),
+        printing=True
+    )
+
+    def identity(n): return Endofunction(range(n))
+
+    mapping_plots(
+        20, 2000,
+        (Endofunction.cycles.fget, randfunc),
+        (Endofunction.cycles.fget, identity),
+        (Endofunction.cycles.fget, randperm),
+        printing=True
+    )
