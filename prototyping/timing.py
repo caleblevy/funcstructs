@@ -9,14 +9,16 @@
 from __future__ import print_function
 
 from time import time
+import gc
 
 from numpy import log2
 import matplotlib.pyplot as plt
 
+from endofunction_structures import *
 from endofunction_structures.productrange import parse_ranges
 
 __all__ = (
-    "iteration_time", "mapping_time", "mapping_plots"
+    "iteration_time", "mapping_time", "mapping_plots",
     "flattree", "identity", "talltree", "balanced_binary_tree"
 )
 
@@ -46,10 +48,12 @@ def iteration_time(gen, *args, **kwargs):
     if callable(gen):
         gen = gen(*args, **kwargs)
         call_sig += _call_string(*args, **kwargs)
+    gc.disable()
     ts = time()
     for i, el in enumerate(gen, start=1):
         pass
     tf = time()
+    gc.enable()
     tot = tf - ts
     if printing:
         print("Enumerated %s items from %s in %s seconds" % (i, call_sig, tot))
@@ -67,6 +71,7 @@ def mapping_time(gen, mapfunc, setupfunc=None, printing=True):
     """Array of times to apply mapfuc to each element in gen."""
     map_times = []
     call_sig = _map_setup_call_sig(mapfunc, setupfunc)
+    gc.disable()
     for el in gen:
         ob = el if setupfunc is None else setupfunc(el)
         ts = time()
@@ -76,6 +81,7 @@ def mapping_time(gen, mapfunc, setupfunc=None, printing=True):
         if printing:
             print("%s: %s seconds" % (call_sig % el, tim))
         map_times.append(tim)
+    gc.enable()
     return map_times
 
 
@@ -151,7 +157,6 @@ def balanced_binary_tree(n):
 
 
 if __name__ == '__main__':
-    from endofunction_structures import *
     iteration_time(levypartitions.fixed_lex_partitions(100, 40))
     iteration_time(EndofunctionStructures(12))
     iteration_time(EndofunctionStructures, 12)
