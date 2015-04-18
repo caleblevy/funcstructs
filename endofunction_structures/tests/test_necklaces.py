@@ -140,7 +140,7 @@ class FixedContentNecklaceTests(unittest.TestCase):
         dic[a] = 1
         dic[FixedContentNecklaces([3, 1, 1, 2, 1])] = 2
         self.assertEqual(len(dic), 1)
-        necks = set(a)
+        set(a)
         dic[a] += 1
         self.assertEqual(len(dic), 1)
         dic[FixedContentNecklaces([4, 4, 3, 2, 1])] = 7

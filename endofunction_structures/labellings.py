@@ -11,7 +11,6 @@ import itertools
 from . import counts
 from . import multiset
 from . import necklaces
-from . import rootedtrees
 from . import endofunctions
 from . import productrange
 

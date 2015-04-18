@@ -6,6 +6,8 @@
 
 import unittest
 
+from endofunction_structures.necklaces import Necklace
+from endofunction_structures.rootedtrees import DominantTree
 from endofunction_structures.funcstructs import *
 
 
@@ -14,17 +16,17 @@ class FuncstructTests(unittest.TestCase):
     def test_func_form(self):
         """Convert struct to func and back, and check we get the same thing."""
         struct = Funcstruct([
-            necklaces.Necklace([
-                rootedtrees.DominantTree([1, 2, 3]),
-                rootedtrees.DominantTree([1, 2, 2])
+            Necklace([
+                DominantTree([1, 2, 3]),
+                DominantTree([1, 2, 2])
             ]),
-            necklaces.Necklace([
-                rootedtrees.DominantTree([1, 2])
+            Necklace([
+                DominantTree([1, 2])
             ]),
-            necklaces.Necklace([
-                rootedtrees.DominantTree([1, 2, 2]),
-                rootedtrees.DominantTree([1]),
-                rootedtrees.DominantTree([1, 2, 2])
+            Necklace([
+                DominantTree([1, 2, 2]),
+                DominantTree([1]),
+                DominantTree([1, 2, 2])
             ])
         ])
         self.assertEqual(
@@ -75,10 +77,6 @@ class FuncstructTests(unittest.TestCase):
         )
 
     def test_repr(self):
-
-        from endofunction_structures.necklaces import Necklace
-        from endofunction_structures.rootedtrees import DominantTree
-
         struct = Funcstruct(endofunctions.randfunc(30))
         self.assertEqual(struct, eval(repr(struct)))
         node_counts = [3, 5, 10, 50]

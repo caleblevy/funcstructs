@@ -23,12 +23,12 @@ def periodicity(strand):
     cyclic rotations. Algorithm proposed by Meng Wang (wangmeng@berkeley.edu)
     runs in O(len(strand)). """
     n = len(strand)
-    if n in [0, 1]:
+    if n in {0, 1}:
         return n
     seed = []
     l = p = 1
     while p != n:
-        while not factorization.isdivisor(l, n):
+        while n % l:
             l += 1
         p = l
         seed.extend(strand[len(seed):p])
@@ -93,7 +93,7 @@ def simple_fixed_content(a, content, t, p, k):
     # archive Volume 301 , Issue 1-3, May 2003, which may be found in the
     # references.
     n = len(a)
-    if t > n and not(n % p):
+    if t > n and not n % p:
         yield a
     else:
         for j in range(a[t-p-1], k):
@@ -128,18 +128,18 @@ class FixedContentNecklaces(object):
         return self.__class__.__name__+'(%s)' % list(self.beads)
 
     def count_by_period(self):
-        """ Returns a list whose kth element is the number of necklaces
-        corresponding to the input set of beads with k distinct rotations. """
-        k = len(self.partition)
-        N = sum(self.partition)
+        """Returns a list whose kth element is the number of necklaces
+        corresponding to the input set of beads with k distinct rotations.
+        """
+        n = sum(self.partition)
         # Each period must be a divisor of the gcd of the multiplicities.
         w = functools.reduce(fractions.gcd, self.partition)
-        baseperiod = N//w
+        baseperiod = n//w
         factors = factorization.divisors(w)
         mults = [0] * (factors[-1] + 1)
         # Find the multiplicity of each period.
         for factor in factors:
-            n = period = baseperiod * factor
+            period = baseperiod * factor
             # The number of character permutations which are periodic in any
             # divisor of factor is simply the multinomial coefficient
             # corresponding to the subset of the multiplicity partition

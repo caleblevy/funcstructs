@@ -75,9 +75,8 @@ class MultisetPolynomialTests(unittest.TestCase):
         # Ensure the addition is abelian
         a = MultisetPolynomial([1, 2])
         b = MultisetPolynomial([3, 4])
-        c1 = MultisetPolynomial([5, [6, 7]])
-        c2 = MultisetPolynomial([[7, 6], 5])
-        self.assertEqual(a+b+c1, c1+a+b)
+        c = MultisetPolynomial([5, [6, 7]])
+        self.assertEqual(a+b+c, c+a+b)
         # Test that zero is additive identity
         self.assertEqual(
             MultisetPolynomial([1, 2]),

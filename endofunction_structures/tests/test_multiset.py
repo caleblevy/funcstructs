@@ -122,11 +122,11 @@ class MultisetTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             abra.clear()
         with self.assertRaises(TypeError):
-            key = abra.pop('a')
+            abra.pop('a')
         with self.assertRaises(TypeError):
-            item = abra.popitem()
+            abra.popitem()
         with self.assertRaises(TypeError):
-            k = abra.setdefault('f', 1)
+            abra.setdefault('f', 1)
         with self.assertRaises(TypeError):
             abra.update(abra)
         self.assertEqual(Multiset('abracadabra'), abra)

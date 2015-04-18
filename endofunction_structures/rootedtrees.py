@@ -28,11 +28,12 @@ class RootedTree(multiset.Multiset):
         if isinstance(subtrees, cls):
             return subtrees
         self = super(RootedTree, cls).__new__(cls, subtrees)
-        if not all(isinstance(tree, cls) for tree in self.unique_elements()):
+        if not all(isinstance(tree, cls) for tree in self.keys()):
             raise TypeError("subtrees must be rooted trees")
         return self
 
-    def __bool__(self): return True  # All trees have roots, thus aren't empty
+    def __bool__(self):
+        return True  # All trees have roots, thus aren't empty
 
     __nonzero__ = __bool__
 

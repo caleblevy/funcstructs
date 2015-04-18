@@ -125,7 +125,8 @@ def partition_numbers_upto(N):
     return P
 
 
-def partition_number(n): return partition_numbers_upto(n)[-1]
+def partition_number(n):
+    return partition_numbers_upto(n)[-1]
 
 
 def max_length_partitions(n, k):

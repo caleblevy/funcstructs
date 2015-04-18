@@ -13,15 +13,18 @@ class ProductrangeTest(unittest.TestCase):
 
     def test_productrange(self):
         """Test number of outputs in the product range is correct."""
-        begins = [[1], None,   0,      1,      [1]*4,   [3]*4,  (1, 2, 3, 3)]
-        ends = [[0],   [4]*4,  [4]*4,  [7]*3,  [10]*4,  [6]*4,  (2, 4, 8, 10)]
-        steps = [None, 1,      None,   2,      3,       None,   (1, 1, 2, 2)]
-        numels = [0,   4**4,   4**4,   3**3,   3**4,    3**4,   1*2*3*4]
-
-        begins.extend([(1, 2, 3), (1, 2, 3)])
-        ends.extend([(-9, 9, 9),  (9, -9, 9)])
-        steps.extend([(-3, 3, 3), (3, -3, 3)])
-        numels.extend([4*3*2,     4*3*2])
-        for n, b, e, s in zip(numels, begins, ends, steps):
-            self.assertEqual(n, len(list(productrange(b, e, s))))
-            self.assertEqual(n, len(list(rev_range(b, e, s))))
+        # Columns are numel, begin, end, step
+        ranges = [
+            (0, [1], [0], None),
+            (4**4, None, [4]*4, None),
+            (4**4, 0, [4]*4, None),
+            (3**3, 1, [7]*3, 2),
+            (3**4, [1]*4, [10]*4, 3),
+            (3**4, [3]*4, [6]*4, None),
+            (1*2*3*4, (1, 2, 3, 3), (2, 4, 8, 10), (1, 1, 2, 2)),
+            (4*3*2, (1, 2, 3), (-9, 9, 9), (-3, 3, 3)),
+            (4*3*2, (1, 2, 3), (9, -9, 9), (3, -3, 3))
+        ]
+        for num, begin, end, step in ranges:
+            self.assertEqual(num, len(list(productrange(begin, end, step))))
+            self.assertEqual(num, len(list(rev_range(begin, end, step))))

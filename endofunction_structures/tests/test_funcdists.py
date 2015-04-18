@@ -17,21 +17,18 @@ class EndofunctionTest(unittest.TestCase):
             np.array([
                 [3, 9],
                 [18, 12],
-                [6, 6]],
-                dtype=object),
+                [6, 6]], dtype=object),
             np.array([
                 [4, 40, 64],
                 [84, 120, 96],
                 [144, 72, 72],
-                [24, 24, 24]],
-                dtype=object),
+                [24, 24, 24]], dtype=object),
             np.array([
                 [5, 205, 505, 625],
                 [300, 1060, 1120, 1000],
                 [1500, 1260, 900, 900],
                 [1200, 480, 480, 480],
-                [120, 120, 120, 120]],
-                dtype=object)
+                [120, 120, 120, 120]], dtype=object)
         ]
         for dist in iterdists:
             n = dist.shape[0]

@@ -5,7 +5,6 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 import operator
-import itertools
 
 
 def monotone_subsequences(seq, comparison):

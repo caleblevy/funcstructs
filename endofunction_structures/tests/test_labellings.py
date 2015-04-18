@@ -6,6 +6,7 @@
 
 import unittest
 
+from endofunction_structures import rootedtrees
 from endofunction_structures.labellings import *
 
 

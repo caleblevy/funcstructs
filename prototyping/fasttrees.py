@@ -15,17 +15,17 @@ from .timing import *
 
 def node_levels(func, x):
     """Return the levels of all nodes in the subtree attached to x"""
-    level_queue = collections.deque([x])
-    level_stop = x
+    node_queue = collections.deque([x])
+    jump_node = x
     level_map = {}
     level = 1
-    while level_queue:
-        x = level_queue.popleft()
+    while node_queue:
+        x = node_queue.popleft()
         level_map[x] = level
-        level_queue.extend(func.attached_treenodes[x])
-        if x == level_stop and level_queue:
+        node_queue.extend(func.attached_treenodes[x])
+        if x == jump_node and node_queue:
             level += 1
-            level_stop = level_queue[-1]
+            jump_node = node_queue[-1]
     return level_map
 
 

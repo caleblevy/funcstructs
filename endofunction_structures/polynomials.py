@@ -7,7 +7,6 @@
 """ Enumerate and produce polynomials of various kinds. """
 
 import functools
-import itertools
 import collections
 
 import numpy as np
@@ -149,9 +148,10 @@ class MultisetPolynomial(object):
             return self.__class__(self.cpart + other.cpart)
         elif other == 0:
             return self
-        raise TypeError("Cannot perform arithmetic with %s and %s" % (
-            self.__class__.__name__,
-            other.__class__.__name__)
+        raise TypeError(
+            "Cannot perform arithmetic with %s and %s" % (
+                self.__class__.__name__, other.__class__.__name__
+            )
         )
 
     def __radd__(self, other):
@@ -168,9 +168,10 @@ class MultisetPolynomial(object):
             return self
         elif other == 0:
             return 0
-        raise TypeError("Cannot perform arithmetic with %s and %s" % (
-            self.__class__.__name__,
-            other.__class__.__name__)
+        raise TypeError(
+            "Cannot perform arithmetic with %s and %s" % (
+                self.__class__.__name__, other.__class__.__name__
+            )
         )
 
     def __rmul__(self, other):
@@ -178,7 +179,7 @@ class MultisetPolynomial(object):
 
     def __pow__(self, n):
         cp = 1
-        for i in range(n):
+        for _ in range(n):
             cp *= self
         return cp
 

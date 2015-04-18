@@ -153,9 +153,7 @@ def funcstruct_enumerator(n):
     for forest in rootedtrees.ForestEnumerator(n):
         for mpart in forest.partitions():
             for struct in productrange.unordered_product(
-                mpart,
-                necklaces.FixedContentNecklaces
-            ):
+                    mpart, necklaces.FixedContentNecklaces):
                 yield Funcstruct(struct, n)
 
 
@@ -206,11 +204,11 @@ class EndofunctionStructures(object):
         self.cycle_type = multiset.Multiset(cycle_type)
 
     def __repr__(self):
-        struct_string = self.__class__.__name__+'('+str(self.n)
+        es_string = self.__class__.__name__+'('+str(self.n)
         if self.cycle_type:
-            struct_string += ', '+repr(cycle_type)
-        struct_string += ')'
-        return struct_string
+            es_string += ', '+repr(self.cycle_type)
+        es_string += ')'
+        return es_string
 
     def __hash__(self):
         return hash(tuple([self.n, self.cycle_type]))

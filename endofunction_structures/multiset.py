@@ -107,9 +107,6 @@ class Multiset(dict):
                     strings.append(format_single.format(elem=elem))
             return '{%s}' % ', '.join(strings)
 
-    def unique_elements(self):
-        return self.keys()
-
     def split(self):
         """ Splits the multiset into element-multiplicity pairs. """
         y = list(self.keys())

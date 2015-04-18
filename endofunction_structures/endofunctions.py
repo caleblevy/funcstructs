@@ -8,6 +8,7 @@
 finite set into itself. """
 
 import random
+import numbers
 
 import numpy as np
 from memoized_property import memoized_property
@@ -154,7 +155,7 @@ class Endofunction(tuple):
 
 def randfunc(n):
     """ Return a random endofunction on n elements. """
-    return Endofunction([random.randrange(n) for I in range(n)])
+    return Endofunction([random.randrange(n) for _ in range(n)])
 
 
 class SymmetricFunction(Endofunction):
@@ -203,8 +204,8 @@ class TransformationMonoid(object):
     """Set of all endofunctions on n elements."""
 
     def __init__(self, set_size):
-        if set_size < 1:
-            raise ValueError("Set must have at least one element.")
+        if not isinstance(set_size, int) or set_size < 1:
+            raise TypeError("Sets must have positive integer size.")
         self.n = set_size
 
     def __hash__(self):
@@ -229,7 +230,7 @@ class TransformationMonoid(object):
 
     def __contains__(self, other):
         if isinstance(other, Endofunction):
-            return self.n == other._n
+            return self.n == other.n
         return False
 
     def __repr__(self):
