@@ -53,15 +53,6 @@ def divisors(n, factors={}):
     return factors[n]
 
 
-def ceildiv(a, b):
-    """Does long integer division taking the ceiling instead of the floor"""
-    return -(-a // b)
-
-
-def isdivisor(d, n):
-    return ceildiv(n, d) == n//d
-
-
 def totient(n):
     """Return the totient using the fancy prime formula."""
     return int(n*counts.prod(
