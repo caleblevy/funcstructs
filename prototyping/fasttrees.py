@@ -6,23 +6,26 @@ Caleb Levy, 2015.
 
 from __future__ import print_function
 
+import collections
+
 from endofunction_structures import *
 
 from .timing import *
 
 
-def node_levels(func, y=5):
-    """Return the levels of all nodes in the subtree attached to y"""
-    preim = {y}
+def node_levels(func, x):
+    """Return the levels of all nodes in the subtree attached to x"""
+    level_queue = collections.deque([x])
+    level_stop = x
+    level_map = {}
     level = 1
-    level_map = {y: level}
-    while preim:
-        level += 1
-        nextim = set()
-        for x in preim:
-            nextim.update(func.attached_treenodes[x])
-        level_map.update({node: level for node in nextim})
-        preim = set(nextim)
+    while level_queue:
+        x = level_queue.popleft()
+        level_map[x] = level
+        level_queue.extend(func.attached_treenodes[x])
+        if x == level_stop and level_queue:
+            level += 1
+            level_stop = level_queue[-1]
     return level_map
 
 
@@ -41,7 +44,7 @@ def tree_sequence(func, x):
 if __name__ == '__main__':
     t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
     f = Endofunction([i-1 for i in [5, 4, 6, 6, 4, 6, 9, 3, 8]])
-    l = node_levels(f)
+    l = node_levels(f, 5)
     print(f.tree_form() == t)
     print('\nlevels:')
     for i in range(len(f)):
@@ -62,6 +65,10 @@ if __name__ == '__main__':
         f.attached_treenodes
         return f
 
+    def level_tree(f):
+        for x in f.limitset:
+            node_levels(f, x)
+
     def stack_tree(f):
         for x in f.limitset:
             tree_sequence(f, x)
@@ -70,10 +77,16 @@ if __name__ == '__main__':
         for x in f.limitset:
             f._attached_level_sequence(x)
 
+    def ordered_tree(f):
+        for x in f.limitset:
+            f.attached_tree(x)
+
     mapping_plots(
         4000,
         (stack_tree, cached_func),
         (rec_tree, cached_func),
+        (level_tree, cached_func),
+        (ordered_tree, cached_func),
         printing=True
     )
     import matplotlib.pyplot as plt
