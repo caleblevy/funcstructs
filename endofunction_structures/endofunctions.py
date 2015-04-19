@@ -8,7 +8,6 @@
 finite set into itself. """
 
 import random
-import numbers
 
 import numpy as np
 from memoized_property import memoized_property
