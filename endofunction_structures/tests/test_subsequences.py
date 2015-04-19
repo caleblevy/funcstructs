@@ -6,7 +6,14 @@
 
 import unittest
 
-from endofunction_structures.subsequences import *
+from endofunction_structures.subsequences import (
+    increasing_subsequences,
+    decreasing_subsequences,
+    nonincreasing_subsequences,
+    nondecreasing_subsequences,
+    startswith,
+    endswith
+)
 
 
 class SubsequenceTests(unittest.TestCase):
@@ -47,7 +54,6 @@ class SubsequenceTests(unittest.TestCase):
 
     def test_startswith(self):
         """Make sure leading subsequence terms satisfy the given criterion"""
-
         startseqs = [
             [[1, 2, 3, 3, 2, 3], [1, 2], [1], [1, 2, 2], [1, 2]],
             [[2, 2, 3, 3, 4, 2]],

@@ -6,8 +6,15 @@
 
 import unittest
 
-from endofunction_structures.endofunctions import *
+
 from endofunction_structures.rootedtrees import OrderedTree
+
+from endofunction_structures.endofunctions import (
+    Endofunction,
+    SymmetricFunction,
+    TransformationMonoid,
+    randfunc, randperm,
+)
 
 
 class EndofunctionTests(unittest.TestCase):

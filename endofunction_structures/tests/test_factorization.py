@@ -5,9 +5,13 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 import unittest
-import math
 
-from endofunction_structures.factorization import *
+from endofunction_structures.factorization import (
+    prime_factorization,
+    prime_divisors,
+    divisors,
+    totient
+)
 
 
 class FactorizationTests(unittest.TestCase):
@@ -32,19 +36,7 @@ class FactorizationTests(unittest.TestCase):
                    4, 4, 2, 8, 3, 4, 4, 6, 2, 8]
         for i, count in enumerate(A000005, start=1):
             self.assertEqual(count, len(divisors(i)))
-            self.assertEqual(count, len(divisors(i)))
-
-    def test_ceildiv(self):
-        N = 20
-        divrange = list(range(-N, 0))+list(range(1, N+1))
-        for i in divrange:
-            for j in divrange:
-                self.assertEqual(ceildiv(i, j), math.ceil(1.*i/j))
-
-    def test_isdivisor(self):
-        for i in range(1, 20):
-            for j in range(1, 20):
-                self.assertEqual(j in divisors(i), isdivisor(j, i))
+            self.assertEqual(count, len(divisors(i)))  # test caching
 
     def test_totient(self):
         """OEIS A000010: number of relatively prime smaller integers."""

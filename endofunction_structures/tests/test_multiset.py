@@ -6,7 +6,7 @@
 
 import unittest
 
-from endofunction_structures.multiset import *
+from endofunction_structures.multiset import Multiset
 
 
 def compare_Multiset_string(b):

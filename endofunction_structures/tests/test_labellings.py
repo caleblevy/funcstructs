@@ -4,10 +4,18 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
+import itertools
 import unittest
 
-from endofunction_structures import rootedtrees
-from endofunction_structures.labellings import *
+from endofunction_structures import productrange, rootedtrees, counts
+
+from endofunction_structures.labellings import (
+    equipartitions, equipartition_count,
+    ordered_partitions, ordered_partition_count,
+    set_partitions, set_partition_count,
+    cycle_labellings, cycle_index,
+    tree_labellings
+)
 
 
 class LabellingTests(unittest.TestCase):
@@ -32,45 +40,56 @@ class LabellingTests(unittest.TestCase):
     def test_ordered_partition_counts(self):
         """Check we produce the correct number of ordered partitions."""
         for partition in self.partitions:
-            self.assertEqual(ordered_partition_count(partition),
-                             len(set(ordered_partitions(partition))))
+            self.assertEqual(
+                ordered_partition_count(partition),
+                len(set(ordered_partitions(partition)))
+            )
 
     def test_ordered_partition_lengths(self):
         """Check that each ordered partition is a partition S"""
         for partition in self.partitions:
             n = sum(partition)
             for division in ordered_partitions(partition):
-                s = set(itertools.chain.from_iterable(division))
-                self.assertEqual(n, len(s))
+                self.assertEqual(n, len(set(productrange.flatten(division))))
 
     def test_set_partition_counts(self):
         """Check we produce the correct number of set partitions"""
         for partition in self.partitions:
-            self.assertEqual(set_partition_count(partition),
-                             len(set(set_partitions(partition))))
-        self.assertEqual(set_partition_count([3, 3, 2], 9),
-                         len(set(set_partitions([3, 3, 2], 9))))
-
-        self.assertEqual(len(set(set_partitions([2, 2], 5))),
-                         len(set(set_partitions([2, 2, 1]))))
+            self.assertEqual(
+                set_partition_count(partition),
+                len(set(set_partitions(partition)))
+            )
+        self.assertEqual(
+            set_partition_count([3, 3, 2], 9),
+            len(set(set_partitions([3, 3, 2], 9)))
+        )
+        self.assertEqual(
+            len(set(set_partitions([2, 2], 5))),
+            len(set(set_partitions([2, 2, 1])))
+        )
 
     def test_set_partition_lengths(self):
         """Check that each ordered partition is a partition S"""
         for partition in self.partitions:
             n = sum(partition)
             for division in set_partitions(partition):
-                s = set(itertools.chain.from_iterable(division))
-                self.assertEqual(n, len(s))
+                self.assertEqual(n, len(set(productrange.flatten(division))))
 
     def test_cycle_labellings(self):
         """Test that we produce the correct number of cycle labellings."""
         for partition in self.partitions:
-            self.assertEqual(cycle_index(partition),
-                             len(frozenset(cycle_labellings(partition))))
-        self.assertEqual(cycle_index([3, 3, 2], 9),
-                         len(frozenset(cycle_labellings([3, 3, 2], 9))))
-        self.assertEqual(len(frozenset(cycle_labellings([2, 2], 5))),
-                         len(frozenset(cycle_labellings([2, 2, 1]))))
+            self.assertEqual(
+                cycle_index(partition),
+                len(frozenset(cycle_labellings(partition)))
+            )
+        self.assertEqual(
+            cycle_index([3, 3, 2], 9),
+            len(frozenset(cycle_labellings([3, 3, 2], 9)))
+        )
+        self.assertEqual(
+            len(frozenset(cycle_labellings([2, 2], 5))),
+            len(frozenset(cycle_labellings([2, 2, 1])))
+        )
 
     trees = [
         rootedtrees.DominantTree([1, 2, 3, 3, 2, 3, 3, 2]),

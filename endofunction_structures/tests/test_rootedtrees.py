@@ -6,8 +6,16 @@
 
 import unittest
 
-from endofunction_structures.rootedtrees import *
-from endofunction_structures.endofunctions import Endofunction
+from endofunction_structures import endofunctions, counts
+
+from endofunction_structures.rootedtrees import (
+    RootedTree, unordered_tree,
+    OrderedTree,
+    DominantTree,
+    TreeEnumerator,
+    ForestEnumerator,
+    PartitionForests
+)
 
 
 class TreeEnumerationTests(unittest.TestCase):
@@ -44,8 +52,8 @@ class TreeEnumerationTests(unittest.TestCase):
             for partition in partitions(n+1):
                 forests.update(PartitionForests(partition))
                 forest_count += PartitionForests(partition).cardinality
-            self.assertEqual(self.A000081[n+1], len(forests))
-            self.assertEqual(self.A000081[n+1], forest_count)
+            self.assertEqual(count, len(forests))
+            self.assertEqual(count, forest_count)
 
     def test_tree_degeneracy(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
@@ -79,6 +87,10 @@ class TreeTests(unittest.TestCase):
         T2 = unordered_tree(range(1, 5))
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
+
+    def test_rooted_tree_bool(self):
+        self.assertTrue(RootedTree())
+        self.assertTrue(RootedTree([RootedTree()]))
 
     def test_reprs(self):
         TreeSeqs = [[1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5],
@@ -121,7 +133,7 @@ class TreeTests(unittest.TestCase):
         """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
-                treefunc = Endofunction(tree)
+                treefunc = endofunctions.Endofunction(tree)
                 for _ in range(10):
                     rtreefunc = treefunc.randconj()
                     self.assertEqual(tree, rtreefunc.tree_form())

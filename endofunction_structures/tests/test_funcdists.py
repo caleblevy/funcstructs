@@ -6,7 +6,18 @@
 
 import unittest
 
-from endofunction_structures.funcdists import *
+import numpy as np
+
+from endofunction_structures import counts
+
+from endofunction_structures.funcdists import (
+    iterdist_brute,
+    iterdist_funcstruct, iterdist,
+    imagedist_composition, imagedist_recurse,
+    nCk_grid,
+    powergrid,
+    limitdist_composition, limitdist_direct, limitdist_recurse
+)
 
 
 class EndofunctionTest(unittest.TestCase):
@@ -65,8 +76,8 @@ class EndofunctionTest(unittest.TestCase):
         ]
         for dist in A101817:
             n = len(dist)
-            self.assertSequenceEqual(dist, imagedist_composition(n))
             self.assertSequenceEqual(dist, list(iterdist(n)[:, 0]))
+            self.assertSequenceEqual(dist, imagedist_composition(n))
             self.assertSequenceEqual(dist, imagedist_recurse(n))
 
     def test_binomial_grid(self):
@@ -101,7 +112,7 @@ class EndofunctionTest(unittest.TestCase):
         ]
         for dist in A066324:
             n = len(dist)
+            self.assertSequenceEqual(dist, list(iterdist(n)[:, -1]))
             self.assertSequenceEqual(dist, limitdist_composition(n))
             self.assertSequenceEqual(dist, limitdist_direct(n))
             self.assertSequenceEqual(dist, limitdist_recurse(n))
-            self.assertSequenceEqual(dist, list(iterdist(n)[:, -1]))

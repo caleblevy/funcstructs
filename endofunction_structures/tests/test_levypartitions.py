@@ -6,7 +6,14 @@
 
 import unittest
 
-from endofunction_structures.levypartitions import *
+from PADS import IntegerPartitions
+
+from endofunction_structures.levypartitions import (
+    isqrt,
+    minimal_partition,
+    fixed_lex_partitions,
+    partition_number
+)
 
 
 class LevyPartitionTests(unittest.TestCase):

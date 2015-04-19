@@ -6,9 +6,14 @@
 
 import unittest
 
-from endofunction_structures.polynomials import *
-from endofunction_structures import counts
-from endofunction_structures.multiset import Multiset
+from endofunction_structures import counts, multiset
+
+from endofunction_structures.polynomials import (
+    monomial_symmetric_polynomial,
+    FOIL,
+    MultisetPolynomial,
+    multisets_with_multiplicities
+)
 
 
 class PolynomialTests(unittest.TestCase):
@@ -64,7 +69,9 @@ class MultisetPolynomialTests(unittest.TestCase):
 
     def test_repr(self):
         a = MultisetPolynomial([[1, 2, 3, 3], [1, 2, 3, 3], [1, 2]])
-        self.assertEqual(a, eval(repr(a)))
+        self.assertEqual(a, eval(repr(a), globals(), {
+            'Multiset': multiset.Multiset
+        }))
 
     def test_addition(self):
         """Test the addition obeys ring properties"""

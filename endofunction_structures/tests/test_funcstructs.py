@@ -6,9 +6,20 @@
 
 import unittest
 
-from endofunction_structures.necklaces import Necklace
-from endofunction_structures.rootedtrees import DominantTree
-from endofunction_structures.funcstructs import *
+import numpy as np
+
+from endofunction_structures import (
+    counts,
+    endofunctions,
+    necklaces,
+    rootedtrees
+)
+
+from endofunction_structures.funcstructs import (
+    Funcstruct,
+    EndofunctionStructures,
+    partition_funcstructs
+)
 
 
 class FuncstructTests(unittest.TestCase):
@@ -16,17 +27,17 @@ class FuncstructTests(unittest.TestCase):
     def test_func_form(self):
         """Convert struct to func and back, and check we get the same thing."""
         struct = Funcstruct([
-            Necklace([
-                DominantTree([1, 2, 3]),
-                DominantTree([1, 2, 2])
+            necklaces.Necklace([
+                rootedtrees.DominantTree([1, 2, 3]),
+                rootedtrees.DominantTree([1, 2, 2])
             ]),
-            Necklace([
-                DominantTree([1, 2])
+            necklaces.Necklace([
+                rootedtrees.DominantTree([1, 2])
             ]),
-            Necklace([
-                DominantTree([1, 2, 2]),
-                DominantTree([1]),
-                DominantTree([1, 2, 2])
+            necklaces.Necklace([
+                rootedtrees.DominantTree([1, 2, 2]),
+                rootedtrees.DominantTree([1]),
+                rootedtrees.DominantTree([1, 2, 2])
             ])
         ])
         self.assertEqual(
@@ -38,7 +49,7 @@ class FuncstructTests(unittest.TestCase):
         """Check methods for computing structure image paths are equivalent."""
         for i in range(1, 8):
             for struct in EndofunctionStructures(i):
-                sim = endofunctions.Endofunction(struct.func_form()).imagepath
+                sim = struct.func_form().imagepath
                 fim = struct.imagepath
                 np.testing.assert_array_equal(sim, fim)
 
@@ -77,8 +88,13 @@ class FuncstructTests(unittest.TestCase):
         )
 
     def test_repr(self):
+        # Bring classes directly into namespace for eval
+        eval_map = {
+            'DominantTree': rootedtrees.DominantTree,
+            'Necklace': necklaces.Necklace
+        }
         struct = Funcstruct(endofunctions.randfunc(30))
-        self.assertEqual(struct, eval(repr(struct)))
+        self.assertEqual(struct, eval(repr(struct), globals(), eval_map))
         node_counts = [3, 5, 10, 50]
         for n in node_counts:
             structs = EndofunctionStructures(n)

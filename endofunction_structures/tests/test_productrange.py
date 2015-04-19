@@ -6,7 +6,7 @@
 
 import unittest
 
-from endofunction_structures.productrange import *
+from endofunction_structures.productrange import productrange, rev_range
 
 
 class ProductrangeTest(unittest.TestCase):

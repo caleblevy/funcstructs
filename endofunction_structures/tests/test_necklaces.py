@@ -6,7 +6,14 @@
 
 import unittest
 
-from endofunction_structures.necklaces import *
+from PADS import Lyndon
+
+from endofunction_structures import factorization
+from endofunction_structures.necklaces import (
+    periodicity,
+    Necklace,
+    FixedContentNecklaces
+)
 
 
 class PeriodicityTest(unittest.TestCase):
@@ -80,7 +87,6 @@ class NecklaceTests(unittest.TestCase):
 class FixedContentNecklaceTests(unittest.TestCase):
 
     def test_from_partition(self):
-        """Ensure """
         p1 = [3, 3, 2]
         p2 = [4, 4, 4, 3, 3, 2, 1, 1]
         p3 = [24, 36]
