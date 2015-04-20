@@ -17,10 +17,8 @@ import matplotlib.pyplot as plt
 from endofunction_structures import *
 from endofunction_structures.productrange import parse_ranges
 
-__all__ = (
-    "iteration_time", "mapping_time", "mapping_plots",
-    "flattree", "identity", "talltree", "balanced_binary_tree"
-)
+
+show = plt.show
 
 
 def _call_string(*args, **kwargs):
@@ -145,6 +143,11 @@ def talltree(n):
     return Endofunction([0] + list(range(n)))
 
 
+def bigcycle(n):
+    """Cyclic permutation of range(n)"""
+    return Endofunction(list(range(1, n)) + [0])
+
+
 def balanced_binary_tree(n):
     """Produce a balanced binary tree of height n."""
     h = int(log2(n)) + 1
@@ -154,6 +157,11 @@ def balanced_binary_tree(n):
         tree *= 2
         tree = [h] + tree
     return Endofunction(OrderedTree(tree))
+
+
+def scattered_tree(n):
+    """Tree with a big cycle and things attached"""
+    return Endofunction(bigcycle(n//2)+talltree(n-n//2))
 
 
 if __name__ == '__main__':
@@ -176,12 +184,14 @@ if __name__ == '__main__':
     )
 
     mapping_plots(
-        20, 2000,
+        20, 2500,
         (Endofunction.cycles.fget, randfunc),
         (Endofunction.cycles.fget, identity),
         (Endofunction.cycles.fget, randperm),
         (Endofunction.cycles.fget, talltree),
         (Endofunction.cycles.fget, balanced_binary_tree),
+        (Endofunction.cycles.fget, bigcycle),
+        (Endofunction.cycles.fget, scattered_tree),
         printing=True
     )
     plt.show()
