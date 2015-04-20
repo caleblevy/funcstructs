@@ -4,7 +4,6 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-
 """ Functions for iterating over dynamically nested loops. """
 
 import itertools
