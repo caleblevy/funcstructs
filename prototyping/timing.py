@@ -89,9 +89,10 @@ def _split_ranges_from_funcs(args):
     args = list(reversed(args))
     while args:
         arg = args.pop()
-        if not isinstance(arg, int):
+        if not isinstance(arg, (int, type(None))):
             break
-        ranges.append(arg)
+        if arg:
+            ranges.append(arg)
     ranges[0] += 1
     if len(ranges) > 1:
         ranges[1] += 1
