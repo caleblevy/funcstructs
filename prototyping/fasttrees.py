@@ -29,18 +29,6 @@ def node_levels(func, x, ordered=False):
     return level_map
 
 
-def tree_sequence(func, x):
-    """Return the level sequence of the tree attached to x from func"""
-    level_map = node_levels(func, x)
-    node_stack = [x]
-    level_sequence = []
-    while node_stack:
-        x = node_stack.pop()
-        level_sequence.append(level_map[x])
-        node_stack.extend(func.attached_treenodes[x])
-    return level_sequence
-
-
 def nodekeys(func, node):
     level_map = node_levels(func, node, ordered=True)
     node_keys = collections.defaultdict(list)  # sorting key assigned to nodes
@@ -76,19 +64,27 @@ def nodekeys(func, node):
     return node_keys
 
 
-def sorted_tree_sequence(func, x):
+def attached_treenodes(func, x, node_keys=False):
+    if not node_keys:
+        return func.attached_treenodes[x]
+    else:
+        return sorted(func.attached_treenodes[x], key=node_keys.get)
+
+
+def tree_sequence(func, x, _node_keys=False):
     """Return the level sequence of the tree attached to x from func"""
     level_map = node_levels(func, x)
     node_stack = [x]
     level_sequence = []
-    node_keys = nodekeys(func, x)
     while node_stack:
         x = node_stack.pop()
         level_sequence.append(level_map[x])
-        node_stack.extend(
-            sorted(func.attached_treenodes[x], key=node_keys.get)
-        )
+        node_stack.extend(attached_treenodes(func, x, _node_keys))
     return level_sequence
+
+
+def sorted_tree_sequence(func, x):
+    return tree_sequence(func, x, _node_keys=nodekeys(func, x))
 
 
 class TestTreeSequences(unittest.TestCase):
@@ -103,7 +99,6 @@ class TestTreeSequences(unittest.TestCase):
         t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
         f = Endofunction(Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7]))
         l = DominantTree(tree_sequence(f, 5))
-        lsort = OrderedTree(sorted_tree_sequence(f, 5))
         self.assertEqual(t, l)
 
     def test_sorting(self):
@@ -125,14 +120,16 @@ class TestTreeSequences(unittest.TestCase):
             )
 
 
+def cached_func(n):
+    f = randfunc(n)
+    f.cycles
+    f.limitset
+    f.preimage
+    f.attached_treenodes
+    return f
+
+
 def conversion_times(start, stop=None, step=None):
-    def cached_func(n):
-        f = randfunc(n)
-        f.cycles
-        f.limitset
-        f.preimage
-        f.attached_treenodes
-        return f
 
     def level_tree(f):
         for x in f.limitset:
@@ -156,10 +153,29 @@ def conversion_times(start, stop=None, step=None):
     show()
 
 
-def ordered_tree(f):
-    for x in f.limitset:
-        f.attached_tree(x)
+def ordering_times(start, stop=None, step=None):
+
+    def recursive_order(f):
+        for x in f.limitset:
+            f.attached_tree(x)
+
+    def stack_order(f):
+        for x in f.limitset:
+            sorted_tree_sequence(f, x)
+
+    mapping_plots(
+        start, stop, step,
+        (recursive_order, talltree),
+        (stack_order, talltree),
+        (recursive_order, randfunc),
+        (stack_order, randfunc),
+        printing=True
+    )
+
+    show()
 
 
 if __name__ == '__main__':
+    conversion_times(3000)
+    ordering_times(500)
     unittest.main()
