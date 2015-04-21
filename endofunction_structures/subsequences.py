@@ -5,6 +5,7 @@
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
 import operator
+import functools
 
 
 def monotone_subsequences(seq, comparison):
@@ -31,20 +32,14 @@ def monotone_subsequences(seq, comparison):
     yield subseq
 
 
-def increasing_subsequences(seq):
-    return monotone_subsequences(seq, operator.gt)
+def runner(comparison):
+    """Generator function factory for monotone subsequences."""
+    return functools.partial(monotone_subsequences, comparison=comparison)
 
-
-def nondecreasing_subsequences(seq):
-    return monotone_subsequences(seq, operator.ge)
-
-
-def decreasing_subsequences(seq):
-    return monotone_subsequences(seq, operator.lt)
-
-
-def nonincreasing_subsequences(seq):
-    return monotone_subsequences(seq, operator.le)
+increasing_subsequences = runner(operator.gt)
+nondecreasing_subsequences = runner(operator.ge)
+decreasing_subsequences = runner(operator.lt)
+nonincreasing_subsequences = runner(operator.le)
 
 
 def startswith(seq, cond):
