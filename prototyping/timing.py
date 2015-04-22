@@ -8,8 +8,9 @@
 
 from __future__ import print_function
 
-from time import time
 import gc
+import contextlib
+from time import time
 
 from numpy import log2
 import matplotlib.pyplot as plt
@@ -19,6 +20,16 @@ from endofunction_structures.productrange import parse_ranges
 
 
 show = plt.show
+
+
+@contextlib.contextmanager
+def gcoff():
+    """Turn of garbage collection inside the block"""
+    gc.disable()
+    try:
+        yield
+    finally:
+        gc.enable()
 
 
 def _call_string(*args, **kwargs):
@@ -46,12 +57,11 @@ def iteration_time(gen, *args, **kwargs):
     if callable(gen):
         gen = gen(*args, **kwargs)
         call_sig += _call_string(*args, **kwargs)
-    gc.disable()
-    ts = time()
-    for i, el in enumerate(gen, start=1):
-        pass
-    tf = time()
-    gc.enable()
+    with gcoff():
+        ts = time()
+        for i, el in enumerate(gen, start=1):
+            pass
+        tf = time()
     tot = tf - ts
     if printing:
         print("Enumerated %s items from %s in %s seconds" % (i, call_sig, tot))
@@ -69,17 +79,16 @@ def mapping_time(gen, mapfunc, setupfunc=None, printing=True):
     """Array of times to apply mapfuc to each element in gen."""
     map_times = []
     call_sig = _map_setup_call_sig(mapfunc, setupfunc)
-    gc.disable()
-    for el in gen:
-        ob = el if setupfunc is None else setupfunc(el)
-        ts = time()
-        mapfunc(ob)
-        tf = time()
-        tim = tf - ts
-        if printing:
-            print("%s: %s seconds" % (call_sig % el, tim))
-        map_times.append(tim)
-    gc.enable()
+    with gcoff():
+        for el in gen:
+            ob = el if setupfunc is None else setupfunc(el)
+            ts = time()
+            mapfunc(ob)
+            tf = time()
+            tim = tf - ts
+            if printing:
+                print("%s: %s seconds" % (call_sig % el, tim))
+            map_times.append(tim)
     return map_times
 
 
