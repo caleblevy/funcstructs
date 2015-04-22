@@ -135,7 +135,7 @@ class TreeTests(unittest.TestCase):
             for tree in TreeEnumerator(n):
                 treefunc = endofunctions.Endofunction(tree)
                 for _ in range(10):
-                    rtreefunc = treefunc.randconj()
+                    rtreefunc = endofunctions.randconj(treefunc)
                     self.assertEqual(tree, rtreefunc.tree_form())
 
     def test_rootedtree_conversion(self):

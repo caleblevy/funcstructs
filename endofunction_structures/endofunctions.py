@@ -151,10 +151,6 @@ class Endofunction(tuple):
         root = cycles[0][0]
         return rootedtrees.DominantTree(self.attached_tree(root))
 
-    def randconj(self):
-        """Return a random conjugate of f."""
-        return randperm(len(self)).conj(self)
-
 
 def randfunc(n):
     """ Return a random endofunction on n elements. """
@@ -197,6 +193,11 @@ def randperm(n):
     r = list(range(n))  # Explicitly call list for python 3 compatibility.
     random.shuffle(r)
     return SymmetricFunction(r)
+
+
+def randconj(f):
+    """Return a random conjugate of f."""
+    return randperm(len(f)).conj(f)
 
 
 class TransformationMonoid(object):
