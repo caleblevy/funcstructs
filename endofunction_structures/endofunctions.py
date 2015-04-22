@@ -39,9 +39,13 @@ class Endofunction(tuple):
         funcstring += str(len(self)-1)+"->"+str(self[-1])+'])'
         return funcstring
 
-    def __call__(self, other):
-        """f(g) <==> Endofunction(f[g[x]] for x in g.domain)"""
+    def __mul__(self, other):
+        """f * g <==> Endofunction(f[g[x]] for x in g.domain)"""
         return Endofunction([self[x] for x in other])
+
+    def __rmul__(self, other):
+        """f.__rmul__(g) = g * f"""
+        return Endofunction([other[x] for x in self])
 
     @memoized_property
     def domain(self):
@@ -66,7 +70,7 @@ class Endofunction(tuple):
         f = self
         card_prev = len(self)
         for it in range(1, len(self)-1):
-            f = f(self)
+            f *= self
             card = len(f.image)
             cardinalities.append(card)
             # Save some time; if we have reached the fixed set, return.
@@ -85,8 +89,8 @@ class Endofunction(tuple):
         # Iterate by self-composing, akin to exponentiation by squaring.
         for it in component_iterates:
             if it == '1':
-                f_iter = f_iter(f)
-            f = f(f)
+                f_iter *= f
+            f *= f
         return f_iter
 
     def enumerate_cycles(self):
@@ -173,28 +177,24 @@ class SymmetricFunction(Endofunction):
         else:
             return Endofunction.__pow__(self.inverse, -n)
 
-    def __mul__(self, other):
-        """Multiply notation for symmetric group."""
-        return SymmetricFunction(self(other))
-
     @memoized_property
     def inverse(self):
         """ Returns the inverse of a permutation of range(n). Code taken
         directly from: "Inverting permutations in Python" at
         http://stackoverflow.com/a/9185908. """
         inv = [0] * len(self)
-        for i, p in enumerate(self):
-            inv[p] = i
+        for x, y in enumerate(self):
+            inv[y] = x
         return self.__class__(inv)
 
     def conj(self, func):
         """Conjugate a function f by a permutation."""
-        return self.inverse(func)(self)
+        return self.inverse * func * self
 
 
 def randperm(n):
     """Returns a random permutation of range(n)."""
-    r = list(range(n))  # Explicitly call ist for python 3 compatibility.
+    r = list(range(n))  # Explicitly call list for python 3 compatibility.
     random.shuffle(r)
     return SymmetricFunction(r)
 
