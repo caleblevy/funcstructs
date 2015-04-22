@@ -42,7 +42,7 @@ decreasing_subsequences = runner(operator.lt)
 nonincreasing_subsequences = runner(operator.le)
 
 
-def startswith(seq, cond):
+def startswith(seq, start):
     """ Given a sequence seq and boolean function of a single input cond,
     returns a generator of subsequences such that a new subsequence begins if
     and only if cond is true for the first element in the subsequence. If cond
@@ -51,7 +51,7 @@ def startswith(seq, cond):
         return
     subseq = []
     for el in seq:
-        if cond(el) and subseq:
+        if el == start and subseq:
             yield subseq
             subseq = [el]
         else:
@@ -59,7 +59,7 @@ def startswith(seq, cond):
     yield subseq
 
 
-def endswith(seq, cond):
+def endswith(seq, end):
     """ Return a generator returning subsequences of seq each ending with an
     element satisfying the boolean lambda function cond. """
     if not seq:
@@ -67,8 +67,8 @@ def endswith(seq, cond):
     subseq = []
     for el in seq:
         subseq.append(el)
-        if cond(el):
+        if el == end:
             yield subseq
             subseq = []
-    if not cond(el):
+    if el != end:
         yield subseq

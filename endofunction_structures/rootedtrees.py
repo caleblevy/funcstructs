@@ -91,9 +91,7 @@ class LevelTree(tuple):
 
     def branch_sequences(self):
         """Return each major subbranch of a tree."""
-        for branch in subsequences.startswith(
-                self[1:],
-                lambda node: node == self[0] + 1):
+        for branch in subsequences.startswith(self[1:], self[0]+1):
             yield branch
 
     def subtree_sequences(self):

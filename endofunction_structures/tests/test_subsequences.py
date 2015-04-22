@@ -66,10 +66,7 @@ class SubsequenceTests(unittest.TestCase):
         ]
 
         for seq, subseq in zip(self.seqs, startseqs):
-            self.assertSequenceEqual(
-                subseq,
-                list(startswith(seq, lambda x: x == 1))
-            )
+            self.assertSequenceEqual(subseq, list(startswith(seq, 1)))
 
     def test_endswith(self):
         """Make sure final subsequence terms satisfy the given criterion."""
@@ -86,7 +83,4 @@ class SubsequenceTests(unittest.TestCase):
         ]
 
         for seq, subseq in zip(self.seqs, endseqs):
-            self.assertSequenceEqual(
-                subseq,
-                list(endswith(seq, lambda x: x == 1))
-            )
+            self.assertSequenceEqual(subseq, list(endswith(seq, 1)))
