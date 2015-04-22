@@ -138,7 +138,7 @@ class Funcstruct(multiset.Multiset):
         cardinalities = np.array([0]+[0]*(self.n-2), dtype=object)
         for tree in productrange.flatten(self):
             cardinalities += 1
-            for subseq in subsequences.increasing_subsequences(tree):
+            for subseq in subsequences.increasing(tree):
                 k = len(subseq) - 1
                 k -= 1 if subseq[0] is 1 else 0
                 if k > 0:

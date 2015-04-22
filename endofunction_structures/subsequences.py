@@ -8,7 +8,7 @@ import operator
 import functools
 
 
-def monotone_subsequences(seq, comparison):
+def runs(seq, comparison):
     """ Given an iterable seq and a comparison function, returns a generator of
     the subsequences of seq such that comparison(seq[I],seq[I+1]) holds for
     0<=I<=len(seq)-1.
@@ -34,12 +34,12 @@ def monotone_subsequences(seq, comparison):
 
 def runner(comparison):
     """Generator function factory for monotone subsequences."""
-    return functools.partial(monotone_subsequences, comparison=comparison)
+    return functools.partial(runs, comparison=comparison)
 
-increasing_subsequences = runner(operator.gt)
-nondecreasing_subsequences = runner(operator.ge)
-decreasing_subsequences = runner(operator.lt)
-nonincreasing_subsequences = runner(operator.le)
+increasing = runner(operator.gt)
+nondecreasing = runner(operator.ge)
+decreasing = runner(operator.lt)
+nonincreasing = runner(operator.le)
 
 
 def startswith(seq, start):

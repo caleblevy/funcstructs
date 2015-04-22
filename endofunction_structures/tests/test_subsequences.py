@@ -7,12 +7,7 @@
 import unittest
 
 from endofunction_structures.subsequences import (
-    increasing_subsequences,
-    decreasing_subsequences,
-    nonincreasing_subsequences,
-    nondecreasing_subsequences,
-    startswith,
-    endswith
+    increasing, decreasing, nonincreasing, nondecreasing, startswith, endswith
 )
 
 
@@ -43,14 +38,14 @@ class SubsequenceTests(unittest.TestCase):
         noninc = [[1], [2], [3], [4, 3, 3, 2], [3], [4], [5, 4], [5, 3, 3, 2],
                   [3], [4], [5], [6, 5, 5, 5, 5]]
 
-        self.assertSequenceEqual(inc, list(increasing_subsequences(seq)))
-        self.assertSequenceEqual(nondec, list(nondecreasing_subsequences(seq)))
-        self.assertSequenceEqual(dec, list(decreasing_subsequences(seq)))
-        self.assertSequenceEqual(noninc, list(nonincreasing_subsequences(seq)))
+        self.assertSequenceEqual(inc, list(increasing(seq)))
+        self.assertSequenceEqual(nondec, list(nondecreasing(seq)))
+        self.assertSequenceEqual(dec, list(decreasing(seq)))
+        self.assertSequenceEqual(noninc, list(nonincreasing(seq)))
 
         inc2 = [1, 2, 3, 4, 5]
         # Test the end isn't double counted.
-        self.assertSequenceEqual([inc2], list(increasing_subsequences(inc2)))
+        self.assertSequenceEqual([inc2], list(increasing(inc2)))
 
     def test_startswith(self):
         """Make sure leading subsequence terms satisfy the given criterion"""

@@ -32,7 +32,7 @@ def node_levels(func, x, ordered=False):
 def nodekeys(func, node):
     level_map = node_levels(func, node, ordered=True)
     node_keys = collections.defaultdict(list)  # sorting key assigned to nodes
-    levels = subsequences.monotone_subsequences(
+    levels = subsequences.runs(
         reversed(list(level_map.keys())),
         lambda x, y: level_map[x] == level_map[y]  # break at level change
     )
@@ -54,7 +54,7 @@ def nodekeys(func, node):
         # Make copy of sorting keys; they will be overwritten in the loop
         sorting_keys = list(map(node_keys.get, sorted_nodes))
         # Overwrite sorting keys to prevent accumulation of nested lists
-        for run in subsequences.monotone_subsequences(
+        for run in subsequences.runs(
                     zip(sorted_nodes, sorting_keys),
                     lambda x, y: x[1] == y[1]):
             sort_value += 1
