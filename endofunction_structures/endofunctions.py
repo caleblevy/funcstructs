@@ -185,7 +185,18 @@ class SymmetricFunction(Endofunction):
 
     def conj(self, func):
         """Conjugate a function f by a permutation."""
-        return self.inverse * func * self
+        # Order of conjugation matters. Take the trees:
+        #   1   2          a   b
+        #    \ /    <==>    \ /
+        #     3              c
+        # whose nodes may be mapped to each other by:
+        #   s(1) = a
+        #   s(2) = b
+        #   s(3) = c.
+        # If f(1) = f(2) = f(3) = 3, and g(a) = g(b) = g(c) = c, then f is
+        # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
+        # way to get *to* g.
+        return self * func * self.inverse
 
 
 def randperm(n):
