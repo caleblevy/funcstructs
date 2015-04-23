@@ -225,23 +225,3 @@ class EndofunctionStructures(enumerable.Enumerable):
                 product_terms.append(s)
             tot += counts.prod(product_terms)
         return int(tot)
-
-    def iterdist(self):
-        """ Every labelling of a function structure shares the same image path,
-        thus we may calculate iteration distributions by enumerating all
-        endofunction structure image paths and scaling them by their
-        multiplicities.
-
-        TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
-        investigate possibility that a<=4, and add writeup to the repository.
-        """
-        if self.n == 1:
-            return np.array([1], dtype=object)
-        M = np.zeros((self.n, self.n-1), dtype=object)
-        nfac = counts.factorial(self.n)
-        for struct in self:
-            mult = nfac//struct.degeneracy
-            im = struct.imagepath
-            for it, card in enumerate(im):
-                M[card-1, it] += mult
-        return M
