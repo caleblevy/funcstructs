@@ -23,6 +23,7 @@ from . import factorization
 from . import compositions
 from . import endofunctions
 from . import productrange
+from . import enumerable
 
 
 def chunks(l, n):
@@ -195,35 +196,16 @@ def funcstruct_enumerator(n):
                 yield struct
 
 
-class EndofunctionStructures(object):
+class EndofunctionStructures(enumerable.Enumerable):
     """Represents the class of all endofunction structures."""
 
     def __init__(self, node_count, cycle_type=None):
-        self.n = node_count
-        self.cycle_type = multiset.Multiset(cycle_type)
-
-    def __repr__(self):
-        es_string = self.__class__.__name__+'('+str(self.n)
-        if self.cycle_type:
-            es_string += ', '+repr(self.cycle_type)
-        es_string += ')'
-        return es_string
-
-    def __hash__(self):
-        return hash(tuple([self.n, self.cycle_type]))
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.n == other.n and self.cycle_type == other.cycle_type
-        return False
-
-    def __ne__(self, other):
-        return not self == other
+        super(EndofunctionStructures, self).__init__(node_count, cycle_type)
 
     def __iter__(self):
-        if not self.cycle_type:
+        if not self.partition:
             return funcstruct_enumerator(self.n)
-        return cycle_type_funcstructs(self.n, self.cycle_type)
+        return cycle_type_funcstructs(self.n, self.partition)
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes. Iterates
