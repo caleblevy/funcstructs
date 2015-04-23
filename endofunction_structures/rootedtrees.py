@@ -16,6 +16,7 @@ from . import subsequences
 from . import multiset
 from . import factorization
 from . import productrange
+from . import enumerable
 
 
 class RootedTree(multiset.Multiset):
@@ -215,31 +216,13 @@ class DominantTree(LevelTree):
         return deg
 
 
-class TreeEnumerator(object):
+class TreeEnumerator(enumerable.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
-
-    __slots__ = ['n', '_cardinality']
 
     def __init__(self, node_count):
         if node_count < 1:
             raise ValueError("Every tree requires at least one node.")
-        self.n = node_count
-
-    def __hash__(self):
-        return hash(self.n)
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.n == other.n
-        return False
-
-    def __ne__(self, other):
-        return not self == other
-
-    __le__ = None
-
-    def __repr__(self):
-        return self.__class__.__name__+'(%s)' % self.n
+        super(TreeEnumerator, self).__init__(node_count)
 
     def __iter__(self):
         """Generates the dominant representatives of each unordered tree in
@@ -286,13 +269,11 @@ class TreeEnumerator(object):
 class ForestEnumerator(TreeEnumerator):
     """Represents the class of collections of rooted trees on n nodes."""
 
-    __slots__ = ['n', '_cardinality']
-
     def __init__(self, node_count):
-        self.n = node_count + 1
+        super(ForestEnumerator, self).__init__(node_count+1)
 
     def __repr__(self):
-        return self.__class__.__name__+'(%s)' % (self.n - 1)
+        return self.__class__.__name__+'(%s)' % (self.n-1)
 
     def __iter__(self):
         """Any rooted tree on n+1 nodes can be identically described as a
