@@ -111,9 +111,9 @@ class EndofunctionTests(unittest.TestCase):
         tree"""
         tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = Endofunction([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
-        self.assertEqual(func, Endofunction(tree))
+        self.assertEqual(func, Endofunction.from_tree(tree))
         with self.assertRaises(ValueError):
-            SymmetricFunction(OrderedTree([0]+list(range(5))))
+            SymmetricFunction.from_tree(OrderedTree([0]+list(range(5))))
 
     def test_keyability(self):
         dic = {}

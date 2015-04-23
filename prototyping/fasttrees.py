@@ -97,13 +97,13 @@ class TestTreeSequences(unittest.TestCase):
                 DominantTree(tree_sequence(g, x))
             )
         t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
-        f = Endofunction(Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7]))
+        f = Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7])
         l = DominantTree(tree_sequence(f, 5))
         self.assertEqual(t, l)
 
     def test_sorting(self):
         t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
-        f = Endofunction(Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7]))
+        f = Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7])
         lsort = OrderedTree(sorted_tree_sequence(f, 5))
         self.assertEqual(t, lsort)
         g = randfunc(100)

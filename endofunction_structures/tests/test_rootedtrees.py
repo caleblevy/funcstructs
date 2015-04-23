@@ -133,7 +133,7 @@ class TreeTests(unittest.TestCase):
         """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
-                treefunc = endofunctions.Endofunction(tree)
+                treefunc = endofunctions.Endofunction.from_tree(tree)
                 for _ in range(10):
                     rtreefunc = endofunctions.randconj(treefunc)
                     self.assertEqual(tree, rtreefunc.tree_form())

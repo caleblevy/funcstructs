@@ -203,7 +203,7 @@ def translation_keys(tree):
     bin_widths = list(map(len, ind_groups))
     indperm = endofunctions.SymmetricFunction(productrange.flatten(ind_groups))
     translation_sequence = indperm.inverse.conj(
-        endofunctions.Endofunction(tree)
+        endofunctions.Endofunction.from_tree(tree)
     )
     return bin_widths, translation_sequence
 

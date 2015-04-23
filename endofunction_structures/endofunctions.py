@@ -23,9 +23,12 @@ class Endofunction(tuple):
     def __new__(cls, func):
         if isinstance(func, cls):
             return func
-        elif isinstance(func, rootedtrees.LevelTree):
-            func = func.labelled_sequence()
         return tuple.__new__(cls, func)
+
+    @classmethod
+    def from_tree(cls, tree):
+        """Make an endofunction representing a tree."""
+        return cls(tree.labelled_sequence())
 
     def __repr__(self):
         return self.__class__.__name__+'(%s)' % list(self)
