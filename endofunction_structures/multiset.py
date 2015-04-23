@@ -10,8 +10,6 @@ unordered tuple. """
 import collections
 import operator
 
-from sympy.utilities.iterables import multiset_partitions
-
 from . import counts
 
 
@@ -126,9 +124,3 @@ class Multiset(dict):
     def degeneracy(self):
         """ Number of different representations of the same multiset. """
         return counts.factorial_prod(self.values())
-
-    def partitions(self):
-        """ Yield partitions of a multiset, each one being a multiset of
-        multisets. """
-        for mpart in multiset_partitions(list(self)):
-            yield self.__class__(self.__class__(m) for m in mpart)
