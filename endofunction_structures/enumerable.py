@@ -35,6 +35,8 @@ class Enumerable(collections.Iterable):
         enumstr = self.__class__.__name__ + '('
         if self.n is not None:
             enumstr += str(self.n)
+            if self.partition:
+                enumstr += ', '
         if self.partition:
-            enumstr += ', %s' % list(self.partition)
+            enumstr += repr(list(self.partition))
         return enumstr + ')'

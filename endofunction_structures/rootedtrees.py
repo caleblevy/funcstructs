@@ -285,26 +285,14 @@ class ForestEnumerator(TreeEnumerator):
             yield tree.chop()
 
 
-class PartitionForests(object):
+class PartitionForests(enumerable.Enumerable):
     """Collections of rooted trees with sizes specified by partitions."""
 
-    __slots__ = ['partition', '_cardinality']
-
     def __init__(self, partition):
-        self.partition = multiset.Multiset(partition)
+        super(PartitionForests, self).__init__(None, partition)
 
-    def __hash__(self):
-        return hash(self.partition)
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.partition == other.partition
-        return False
-
-    def __ne__(self, other):
-        return not self == other
-
-    __le__ = None
+    def __iter__(self):
+        return productrange.unordered_product(self.partition, TreeEnumerator)
 
     @memoized_property
     def cardinality(self):
@@ -313,9 +301,3 @@ class PartitionForests(object):
             n = TreeEnumerator(y).cardinality
             l *= counts.nCWRk(n, r)
         return l
-
-    def __iter__(self):
-        return productrange.unordered_product(self.partition, TreeEnumerator)
-
-    def __repr__(self):
-        return self.__class__.__name__+'(%s)' % list(self.partition)
