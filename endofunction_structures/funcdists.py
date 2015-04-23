@@ -36,7 +36,13 @@ from . import compositions
 
 
 def iterdist_brute(n):
-    return endofunctions.TransformationMonoid(n).iterdist()
+    """ Calculate iterdist by enumerating all endofunction image paths."""
+    M = np.zeros((n, n-1), dtype=object)
+    for f in endofunctions.TransformationMonoid(n):
+        im = f.imagepath
+        for it, card in enumerate(im):
+            M[card-1, it] += 1
+    return M
 
 
 def iterdist_funcstruct(n, cycle_type=None):

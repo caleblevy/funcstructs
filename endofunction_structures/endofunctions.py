@@ -9,7 +9,6 @@ finite set into itself. """
 
 import random
 
-import numpy as np
 from memoized_property import memoized_property
 
 from . import productrange
@@ -234,12 +233,3 @@ class TransformationMonoid(enumerable.Enumerable):
         if isinstance(other, Endofunction):
             return self.n == other.n
         return False
-
-    def iterdist(self):
-        """ Calculate iterdist by enumerating all endofunction image paths."""
-        M = np.zeros((self.n, self.n-1), dtype=object)
-        for f in self:
-            im = f.imagepath
-            for it, card in enumerate(im):
-                M[card-1, it] += 1
-        return M
