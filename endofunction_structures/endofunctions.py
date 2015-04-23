@@ -14,6 +14,7 @@ from memoized_property import memoized_property
 
 from . import productrange
 from . import rootedtrees
+from . import enumerable
 
 
 class Endofunction(tuple):
@@ -214,26 +215,13 @@ def randconj(f):
     return randperm(len(f)).conj(f)
 
 
-class TransformationMonoid(object):
+class TransformationMonoid(enumerable.Enumerable):
     """Set of all endofunctions on n elements."""
 
     def __init__(self, set_size):
         if not isinstance(set_size, int) or set_size < 1:
             raise TypeError("Sets must have positive integer size.")
-        self.n = set_size
-
-    def __hash__(self):
-        return hash(self.n)
-
-    def __eq__(self, other):
-        if isinstance(other, type(self)):
-            return self.n == other.n
-        return False
-
-    def __ne__(self, other):
-        return not self == other
-
-    __lt__ = None
+        super(TransformationMonoid, self).__init__(set_size)
 
     def __iter__(self):
         for func in productrange.productrange([self.n] * self.n):
@@ -246,9 +234,6 @@ class TransformationMonoid(object):
         if isinstance(other, Endofunction):
             return self.n == other.n
         return False
-
-    def __repr__(self):
-        return self.__class__.__name__+'(%s)' % self.n
 
     def iterdist(self):
         """ Calculate iterdist by enumerating all endofunction image paths."""
