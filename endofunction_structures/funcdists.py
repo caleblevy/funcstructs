@@ -4,7 +4,7 @@
 # contained herein are described in the LICENSE file included with this
 # project. For more information please contact me at caleb.levy@berkeley.edu.
 
-""" Let S be a finite set with N elements; i.e. |S|=N. There are N^N
+"""Let S be a finite set with N elements; i.e. |S|=N. There are N^N
 endofunctions defined on this set.
 
 For a given endofunction f, its image will have n=|f(S)| elements for 1 <= n <=
@@ -25,7 +25,8 @@ horrendous, but it enables us to get up to n=16 before being intolerably slow.
 
 Various special cases can be done much faster. This distribution of (first
 iterate) image sizes can be done in O(n^2) and the distribution of last iterate
-image sizes set can be O(n) (and has a lovely closed form formula). """
+image sizes set can be O(n) (and has a lovely closed form formula).
+"""
 
 import numpy as np
 
@@ -36,13 +37,12 @@ from . import compositions
 
 
 def iterdist_brute(n):
-    """ Calculate iterdist by enumerating all endofunction image paths."""
-    M = np.zeros((n, n-1), dtype=object)
+    """Calculate iterdist by enumerating all endofunction image paths."""
+    dist = np.zeros((n, n-1), dtype=object)
     for f in endofunctions.TransformationMonoid(n):
-        im = f.imagepath
-        for it, card in enumerate(im):
-            M[card-1, it] += 1
-    return M
+        for it, card in enumerate(f.imagepath):
+            dist[card-1, it] += 1
+    return dist
 
 
 def iterdist_funcstruct(n, cycle_type=None):
@@ -56,84 +56,81 @@ def iterdist_funcstruct(n, cycle_type=None):
     if n == 1:
         c = 0 if(cycle_type or sum(cycle_type) != 1) else 1
         return np.array([c], dtype=object)
-    M = np.zeros((n, n-1), dtype=object)
+    dist = np.zeros((n, n-1), dtype=object)
     nfac = counts.factorial(n)
     for struct in funcstructs.EndofunctionStructures(n, cycle_type):
         mult = nfac//struct.degeneracy
         for it, card in enumerate(struct.imagepath):
-            M[card-1, it] += mult
-    return M
+            dist[card-1, it] += mult
+    return dist
 
 iterdist = iterdist_funcstruct
 
 
 def imagedist_composition(n):
-    """ Produces left column of iterdist using integer compositions in O(2^n)
+    """Produces left column of iterdist using integer compositions in O(2^n)
     operations. The idea of the algorithm comes from a binary tree.
 
-    TODO: place writeup in the notes. """
-
+    TODO: place writeup in the notes.
+    """
     if n == 1:
-        return [1]
-
-    F = [0]*n
+        return tuple([1])
+    dist = [0]*n
     for comp in compositions.binary_compositions(n):
         val = n
         rep = 1
-        for I in comp:
-            if not I:
+        for i in comp:
+            if not i:
                 val *= rep
             else:
-                val *= n - rep
+                val *= n-rep
                 rep += 1
-        F[rep-1] += val
-    return F
+        dist[rep-1] += val
+    return tuple(dist)
 
 
-def imagedists_upto(N):
-    """ Left column of iterdist. This uses a recursion relation to run in
-    O(n^2) time. This is the fastest method I know of and probably the fastest
-    there is. Idea is a modified special case of the generalized monomial
-    symmetric polynomial algorithm.
+def imagedists_upto(n):
+    """Left column of iterdist. This uses a recursion relation to run in O(n^2)
+    time. It is the fastest method I know of and likely the fastest there is.
+    The idea behind it is a modified special form of the monomial symmetric
+    polynomial algorithm.
 
-
-    # TODO - place writeup in the nodes. """
-    FD = np.zeros((N, N), dtype=object)
-    for n in range(N):
-        FD[0, n] = FD[n, n] = 1
-        for I in range(n):
-            FD[I, n] = FD[I-1, n-1] + (I+1)*FD[I, n-1]
-
-    for n in range(N):
-        for I in range(n+1):
-            FD[I, n] *= counts.factorial(n+1)//counts.factorial(n-I)
-
-    return FD
+    # TODO: place writeup in the nodes.
+    """
+    dist = np.zeros((n, n), dtype=object)
+    for i in range(n):
+        dist[0, i] = dist[i, i] = 1
+        for j in range(i):
+            dist[j, i] = dist[j-1, i-1] + (j+1)*dist[j, i-1]
+    for i in range(n):
+        for j in range(i+1):
+            dist[j, i] *= counts.factorial(i+1)//counts.factorial(i-j)
+    return dist
 
 imagedist_recurse = imagedist = lambda n: list(imagedists_upto(n)[:, -1])
 
 
-def nCk_grid(N):
-    """nCk(n,k) == nCk_table[n,k] for 0 <= k <= n <= N"""
-    binomial_coeffs = np.zeros((N+1, N+1), dtype=object)
-    for I in range(N+1):
-        for J in range(N+1):
-            if J > I:
+def nCk_grid(n):
+    """nCk(i, j) == nCk_table[i, j] for 0 <= j <= i <= m. """
+    binomial_coeffs = np.zeros((n+1, n+1), dtype=object)
+    for i in range(n+1):
+        for j in range(n+1):
+            if j > i:
                 continue
-            binomial_coeffs[I, J] = counts.nCk(I, J)
+            binomial_coeffs[i, j] = counts.nCk(i, j)
     return binomial_coeffs
 
 
-def powergrid(N):
-    """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""
-    base = np.arange(N+1, dtype=object)
+def powergrid(n):
+    """i**j == powergrid[i, j] for 0 <= i, j <= n. Note 0**0 defined as 1."""
+    base = np.arange(n+1, dtype=object)
     bases, exponents = np.meshgrid(base, base)
     exponentials = bases**exponents
     return exponentials.T
 
 
-def limitdist_composition(N):
-    """ Right column of iterdist. Idea of the algorithm is the calculate the
+def limitdist_composition(n):
+    """Right column of iterdist. Idea of the algorithm is the calculate the
     number of functions corresponding to each level path (distribution of nodes
     by height), which happens to correspond with compositions of a number.
 
@@ -148,42 +145,42 @@ def limitdist_composition(N):
     for the general case, and failed, since there may be many image paths
     corresponding to a given level path; conversely one image path may be found
     from functions of many different image paths. """
-    L = [0]*N
+    dist = [0]*n
     # Memoize these lookups; saves a lot of time.
-    exponentials = powergrid(N)
-    binomial_coefficients = nCk_grid(N)
-    for comp in compositions.compositions(N):
-        val = 1
-        for J in range(1, len(comp)):
-            val *= exponentials[comp[J-1], comp[J]]
-            val *= binomial_coefficients[sum(comp[J:]), comp[J]]
-        L[comp[0]-1] += val
-    for n in range(N, 0, -1):
-        L[n-1] *= counts.factorial(N)//counts.factorial(N-n)
-    return L
+    exponentials = powergrid(n)
+    binomial_coefficients = nCk_grid(n)
+    for comp in compositions.compositions(n):
+        count = 1
+        for i in range(1, len(comp)):
+            count *= exponentials[comp[i-1], comp[i]]
+            count *= binomial_coefficients[sum(comp[i:]), comp[i]]
+        dist[comp[0]-1] += count
+    for i in range(n, 0, -1):
+        dist[i-1] *= counts.factorial(n)//counts.factorial(n-i)
+    return tuple(dist)
 
 
 def limitset_count(n, k):
-    """ Analytic expression for the number of endofunctions on n nodes whose
-    cycle decomposition contains k elements. """
+    """Analytic expression for the number of endofunctions on n nodes whose
+    cycle decompositions contain k elements. """
     return k*n**(n-k)*counts.factorial(n-1)//counts.factorial(n-k)
 
 
 def limitdist_direct(n):
     """Exact formula for the right-hand column of iterdist(n)"""
-    return [limitset_count(n, k) for k in range(1, n+1)]
+    return tuple(limitset_count(n, k) for k in range(1, n+1))
 
 
 def limitdist_recurse(n):
-    """ Faster way to find the limitdist which reduces duplication of work. I
+    """Faster way to find the limitdist which reduces duplication of work. I
     discovered the above two formulas from this recursion relation, which I
     derived empirically from the output of limitdist_composition.
 
-    TODO: derive and writeup the equivalence of these algorithms. """
-
-    L = [n**(n-1)]+[0]*(n-1)
+    TODO: derive and writeup the equivalence of these algorithms.
+    """
+    dist = [n**(n-1)]+[0]*(n-1)
     for k in range(1, n):
-        L[k] = (L[k-1]*(k+1)*(n-k))//(k*n)
-    return L
+        dist[k] = (dist[k-1]*(k+1)*(n-k))//(k*n)
+    return tuple(dist)
 
 limitdist = limitdist_recurse
