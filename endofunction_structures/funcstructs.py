@@ -147,16 +147,6 @@ class Funcstruct(multiset.Multiset):
         return cardinalities
 
 
-def funcstruct_enumerator(n):
-    """Enumerate endofunction structures on n elements. Equalivalent to all
-    conjugacy classes in TransformationMonoid(n)."""
-    for forest in rootedtrees.ForestEnumerator(n):
-        for mpart in forest.partitions():
-            for struct in productrange.unordered_product(
-                    mpart, necklaces.FixedContentNecklaces):
-                yield Funcstruct(struct, n)
-
-
 def direct_unordered_attachments(t, l):
     """Enumerate the ways of directly attaching t unlabelled free nodes to l
     unlabelled nodes."""
@@ -196,6 +186,15 @@ def cycle_type_funcstructs(n, cycle_type):
             yield Funcstruct(productrange.flatten(bundle), n)
 
 
+def funcstruct_enumerator(n):
+    """Enumerate endofunction structures on n elements. Equalivalent to all
+    conjugacy classes in TransformationMonoid(n)."""
+    for i in range(1, n+1):
+        for partition in levypartitions.partitions(i):
+            for struct in cycle_type_funcstructs(n, partition):
+                yield struct
+
+
 class EndofunctionStructures(object):
     """Represents the class of all endofunction structures."""
 
@@ -224,8 +223,7 @@ class EndofunctionStructures(object):
     def __iter__(self):
         if not self.cycle_type:
             return funcstruct_enumerator(self.n)
-        else:
-            return cycle_type_funcstructs(self.n, self.cycle_type)
+        return cycle_type_funcstructs(self.n, self.cycle_type)
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes. Iterates
@@ -265,10 +263,3 @@ class EndofunctionStructures(object):
             for it, card in enumerate(im):
                 M[card-1, it] += mult
         return M
-
-
-def partition_funcstructs(n):
-    for i in range(1, n+1):
-        for partition in levypartitions.partitions(i):
-            for struct in EndofunctionStructures(n, partition):
-                yield struct

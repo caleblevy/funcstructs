@@ -18,7 +18,6 @@ from endofunction_structures import (
 from endofunction_structures.funcstructs import (
     Funcstruct,
     EndofunctionStructures,
-    partition_funcstructs
 )
 
 
@@ -56,12 +55,9 @@ class FuncstructTests(unittest.TestCase):
     def test_struct_counts(self):
         """OEIS A001372: Number of self-mapping patterns."""
         A001372 = [1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
-        for i, count in enumerate(A001372):
-            s = set()
-            s.update(EndofunctionStructures(i+1))
-            s.update(partition_funcstructs(i+1))
-            self.assertEqual(count, len(s))
-            self.assertEqual(count, EndofunctionStructures(i+1).cardinality())
+        for n, count in enumerate(A001372, start=1):
+            self.assertEqual(count, len(set(EndofunctionStructures(n))))
+            self.assertEqual(count, EndofunctionStructures(n).cardinality())
 
     def test_degeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
