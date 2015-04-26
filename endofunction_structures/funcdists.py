@@ -1,9 +1,3 @@
-# Copyright (C) 2013, 2014 and 2015 Caleb Levy - All Rights Reserved.
-#
-# The terms of use, license and copyright information for the code and ideas
-# contained herein are described in the LICENSE file included with this
-# project. For more information please contact me at caleb.levy@berkeley.edu.
-
 """Let S be a finite set with N elements; i.e. |S|=N. There are N^N
 endofunctions defined on this set.
 
@@ -26,6 +20,8 @@ horrendous, but it enables us to get up to n=16 before being intolerably slow.
 Various special cases can be done much faster. This distribution of (first
 iterate) image sizes can be done in O(n^2) and the distribution of last iterate
 image sizes set can be O(n) (and has a lovely closed form formula).
+
+Caleb Levy, 2013, 2014 and 2015.
 """
 
 import numpy as np

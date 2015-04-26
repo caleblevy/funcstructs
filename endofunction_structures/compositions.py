@@ -1,10 +1,4 @@
-# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
-#
-# The terms of use, license and copyright information for the code and ideas
-# contained herein are described in the LICENSE file included with this
-# project. For more information please contact me at caleb.levy@berkeley.edu.
-
-""" A composition of an integer N is an ordered tuple of positive integers
+"""A composition of an integer N is an ordered tuple of positive integers
 which sum to N, for example:
 
     4 = 4
@@ -23,7 +17,10 @@ One can see a clear correspondence between compositions of N and the subsets of
 a set with N-1 elements. Simply list N zeros in a row; every way to draw
 dividing lines between the zeros is a different composition. These correspond
 to binary digits of numbers of length up to N-1. There are thus 2^(N-1)
-compositions of N. """
+compositions of N.
+
+Caleb Levy, 2014 and 2015.
+"""
 
 from . import productrange
 

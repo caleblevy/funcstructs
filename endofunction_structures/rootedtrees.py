@@ -1,12 +1,8 @@
-# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
-#
-# The terms of use, license and copyright information for the code and ideas
-# contained herein are described in the LICENSE file included with this
-# project. For more information please contact me at caleb.levy@berkeley.edu.
-
 """Algorithms for representing and enumerating unlabelled rooted trees:
 connected directed graphs with a single length-one cycle and nodes of
 out-degree one. A forest is any collection of rooted trees.
+
+Caleb Levy, 2014 and 2015.
 """
 
 from memoized_property import memoized_property

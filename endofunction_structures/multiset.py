@@ -1,11 +1,8 @@
-# Copyright (C) 2014-2015 Caleb Levy - All Rights Reserved.
-#
-# The terms of use, license and copyright information for the code and ideas
-# contained herein are described in the LICENSE file included with this
-# project. For more information please contact me at caleb.levy@berkeley.edu.
+"""Data structure for representing a multiset - also known as a bag, or
+unordered tuple.
 
-""" Data structure for representing a multiset - also known as a bag, or
-unordered tuple. """
+Caleb Levy, 2014 and 2015.
+"""
 
 import collections
 import operator
