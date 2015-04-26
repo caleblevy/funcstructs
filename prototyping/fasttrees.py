@@ -150,7 +150,6 @@ def conversion_times(start, stop=None, step=None):
         (level_tree, cached_func),
         printing=True
     )
-    show()
 
 
 def ordering_times(start, stop=None, step=None):
@@ -172,10 +171,21 @@ def ordering_times(start, stop=None, step=None):
         printing=True
     )
 
-    show()
+
+def treecalc_times(start, stop=None, step=None):
+    def tall_dom_tree(n):
+        return DominantTree(range(1, n+2), preordered=True)
+
+    mapping_plots(
+        start, stop, step,
+        (DominantTree.degeneracy, tall_dom_tree),
+        printing=True
+    )
 
 
 if __name__ == '__main__':
-    conversion_times(3000)
+    treecalc_times(500)
+    conversion_times(2000)
     ordering_times(500)
+    show()
     unittest.main()
