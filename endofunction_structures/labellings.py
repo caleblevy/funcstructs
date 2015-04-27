@@ -15,22 +15,21 @@ from . import productrange
 def _equipartitions(S, b):
     n = len(S)
     if b == 1 or n == 1:
-        yield [frozenset(S)]
+        yield [tuple(S)]
     else:
         marked_el = (S.pop(), )
-        for first_combo in itertools.combinations(S, n//b-1):
-            for remaining_combos in _equipartitions(S - set(first_combo), b-1):
-                yield [frozenset(marked_el + first_combo)] + remaining_combos
+        for first in itertools.combinations(S, n//b-1):
+            for remaining in _equipartitions(S.difference(first), b-1):
+                yield [marked_el + first] + remaining
 
 
 def equipartitions(S, b):
-    """Evenly split a set of items into unordered bins of unordered elements"""
-
+    """Partitions of S into b of equally sized unordered bins."""
     S = set(S)
     if len(S) % b:
         raise ValueError("items must divide evenly")
     for division in _equipartitions(S, b):
-        yield frozenset(division)
+        yield frozenset(map(frozenset, division))
 
 
 def equipartition_count(n, b):
@@ -49,41 +48,38 @@ def equipartition_count(n, b):
     return counts.factorial(n)//(counts.factorial(b)*counts.factorial(n//b)**b)
 
 
-def _ordered_partitions(S, partition):
-    if len(partition) == 1:
+def _ordered_divisions(S, part):
+    if len(part) == 1:
         yield [tuple(S)]
     else:
-        for first in itertools.combinations(S, partition[0]):
-            for remaining in _ordered_partitions(S-set(first), partition[1:]):
+        for first in itertools.combinations(S, part[0]):
+            for remaining in _ordered_divisions(S.difference(first), part[1:]):
                 yield [first] + remaining
 
 
-def ordered_partitions(partition, S=None):
+def ordered_divisions(partition, S=None):
     """Enumerate ordered partitions of a set; i.e. order of the elements in
     each bin does not matter, but if the same bin is found in two different
     locations, it is a different ordered partition. Bin sizes are fixed and
     ordered according to partition."""
     partition = list(partition)
     if S is None:
-        S = range(sum(partition))
-    elif isinstance(S, int):
+        S = sum(partition)
+    if isinstance(S, int):
         S = range(S)
-    S = set(S)
     if not len(S) == sum(partition):
         raise ValueError("partition must sum to size of set")
-    for p in _ordered_partitions(S, partition):
-        yield tuple(frozenset(s) for s in p)
+    for p in _ordered_divisions(set(S), partition):
+        yield tuple(map(frozenset, p))
 
 
-def ordered_partition_count(partition, n=None):
-    """Number of ordered combinations into the given partition. """
-    return counts.multinomial_coefficient(partition, n)
+ordered_division_count = counts.multinomial_coefficient
 
 
 def _set_partitions(S, partition):
     lengths, mults = multiset.Multiset(partition).sort_split()
     # clm[i] is the number of nodes situated in some bin of size l[i].
-    for odiv in _ordered_partitions(S, [l*m for l, m in zip(lengths, mults)]):
+    for odiv in _ordered_divisions(S, [l*m for l, m in zip(lengths, mults)]):
         strand = []
         for m, c in zip(mults, odiv):
             strand.append(_equipartitions(set(c), m))
@@ -94,15 +90,12 @@ def _set_partitions(S, partition):
 def set_partitions(partition, S=None):
     """Unordered allocations of a set amongst a partition of bin sizes."""
     if S is None:
-        S = range(sum(partition))
-    elif isinstance(S, int):
+        S = sum(partition)
+    if isinstance(S, int):
         S = range(S)
-    else:
-        S = set(S)
-
     for subset in itertools.combinations(S, sum(partition)):
         for p in _set_partitions(set(subset), partition):
-            yield frozenset(frozenset(s) for s in p)
+            yield frozenset(map(frozenset, p))
 
 
 def set_partition_count(partition, n=None):
@@ -136,12 +129,13 @@ def _cycle_permutations(cycle):
     start = min(cycle)
     cycle.remove(start)
     for p in itertools.permutations(cycle):
+        # The cycles are necklaces: they start with the minimal element, and
+        # all elements are unique, hence they are lexicographically minimal.
         yield necklaces.Necklace((start, ) + p, preordered=True)
 
 
 def cycle_labellings(partition, S=None):
-    """Given a conjugacy class of symmetric functions find all ways to label
-    the cycle using the input set."""
+    """Enumerate cycles with cycle type partition and labels from S"""
     for upd in set_partitions(partition, S):
         for cycle_group in itertools.product(*map(_cycle_permutations, upd)):
             yield frozenset(cycle_group)
@@ -221,7 +215,7 @@ def tree_labellings(tree):
     n = len(tree)
     bin_widths, translation_sequence = translation_keys(tree)
     func = [0] * n
-    for combo in _ordered_partitions(set(range(n)), bin_widths):
+    for combo in _ordered_divisions(set(range(n)), bin_widths):
         c = productrange.flatten(combo)
         for i in range(n):
             func[c[i]] = c[translation_sequence[i]]

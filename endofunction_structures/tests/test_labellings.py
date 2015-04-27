@@ -5,7 +5,7 @@ from endofunction_structures import productrange, rootedtrees, counts
 
 from endofunction_structures.labellings import (
     equipartitions, equipartition_count,
-    ordered_partitions, ordered_partition_count,
+    ordered_divisions, ordered_division_count,
     set_partitions, set_partition_count,
     cycle_labellings, cycle_index,
     tree_labellings
@@ -19,10 +19,12 @@ class LabellingTests(unittest.TestCase):
     def test_equipartition_counts(self):
         """ Check that we produce the correct number of equipartitions. """
         for n, b in self.split_sets:
-            self.assertEqual(equipartition_count(n, b),
-                             len(frozenset(equipartitions(range(n), b))))
+            self.assertEqual(
+                equipartition_count(n, b),
+                len(set(equipartitions(range(n), b)))
+            )
 
-    def test_even_division_lengths(self):
+    def test_equipartition_lengths(self):
         """Make sure each equipartition is a partition of the original set"""
         for n, b in self.split_sets:
             for division in equipartitions(range(n), b):
@@ -31,19 +33,19 @@ class LabellingTests(unittest.TestCase):
 
     partitions = [[3, 3, 2, 1], [3, 3, 4], [3, 3, 2, 2], [2, 2, 1]]
 
-    def test_ordered_partition_counts(self):
+    def test_ordered_division_counts(self):
         """Check we produce the correct number of ordered partitions."""
         for partition in self.partitions:
             self.assertEqual(
-                ordered_partition_count(partition),
-                len(set(ordered_partitions(partition)))
+                ordered_division_count(partition),
+                len(set(ordered_divisions(partition)))
             )
 
-    def test_ordered_partition_lengths(self):
+    def test_ordered_division_lengths(self):
         """Check that each ordered partition is a partition S"""
         for partition in self.partitions:
             n = sum(partition)
-            for division in ordered_partitions(partition):
+            for division in ordered_divisions(partition):
                 self.assertEqual(n, len(set(productrange.flatten(division))))
 
     def test_set_partition_counts(self):
