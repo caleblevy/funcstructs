@@ -10,7 +10,6 @@ import functools
 from memoized_property import memoized_property
 from PADS import Lyndon
 
-from . import multiset
 from . import factorization
 from . import counts
 from . import enumerable
