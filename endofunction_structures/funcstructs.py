@@ -70,7 +70,7 @@ class Funcstruct(multiset.Multiset):
         return self
 
     @classmethod
-    def from_endofunction(cls, f):
+    def from_func(cls, f):
         cycles = []
         for cycle in f.cycles:
             strand = []

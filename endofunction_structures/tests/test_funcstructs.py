@@ -35,7 +35,7 @@ class FuncstructTests(unittest.TestCase):
         ])
         self.assertEqual(
             struct,
-            Funcstruct.from_endofunction(struct.func_form())
+            Funcstruct.from_func(struct.func_form())
         )
 
     def test_imagepath(self):
