@@ -130,7 +130,7 @@ class TreeTests(unittest.TestCase):
                 treefunc = endofunctions.Endofunction.from_tree(tree)
                 for _ in range(10):
                     rtreefunc = endofunctions.randconj(treefunc)
-                    self.assertEqual(tree, rtreefunc.tree_form())
+                    self.assertEqual(tree, DominantTree.from_func(rtreefunc))
 
     def test_rootedtree_conversion(self):
         """Test conversion between rooted and unordered trees is seamless."""

@@ -131,6 +131,16 @@ class LevelTree(tuple):
             grafting_point[height-1] = node
         return labelling
 
+    @classmethod
+    def from_func(cls, func, node=None):
+        # If node is node, test if function has tree structure and return it
+        if node is None:
+            cycles = list(func.cycles)
+            if len(cycles) != 1 or len(cycles[0]) != 1:
+                raise ValueError("Function structure is not a rooted tree")
+            node = cycles[0][0]
+        return cls(func._attached_level_sequence(node))
+
 
 class OrderedTree(LevelTree):
     """An unlabelled ordered tree represented by its level sequence."""

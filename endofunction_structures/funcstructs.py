@@ -75,7 +75,7 @@ class Funcstruct(multiset.Multiset):
         for cycle in f.cycles:
             strand = []
             for el in cycle:
-                strand.append(f.attached_tree(el))
+                strand.append(rootedtrees.DominantTree.from_func(f, el))
             cycles.append(necklaces.Necklace(strand))
         return cls(cycles)
 

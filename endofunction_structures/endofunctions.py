@@ -9,7 +9,6 @@ import random
 from memoized_property import memoized_property
 
 from . import productrange
-from . import rootedtrees
 from . import enumerable
 
 
@@ -139,17 +138,6 @@ class Endofunction(tuple):
         for x in self.attached_treenodes[node]:
             level_sequence.extend(self._attached_level_sequence(x, level+1))
         return level_sequence
-
-    def attached_tree(self, node):
-        return rootedtrees.DominantTree(self._attached_level_sequence(node))
-
-    def tree_form(self):
-        """Test if a function has a tree structure and if so return it"""
-        cycles = list(self.cycles)
-        if len(cycles) != 1 or len(cycles[0]) != 1:
-            raise ValueError("Function structure is not a rooted tree")
-        root = cycles[0][0]
-        return rootedtrees.DominantTree(self.attached_tree(root))
 
 
 def randfunc(n):

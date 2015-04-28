@@ -93,7 +93,7 @@ class TestTreeSequences(unittest.TestCase):
         g = randfunc(100)
         for x in g.limitset:
             self.assertEqual(
-                g.attached_tree(x),
+                DominantTree.from_func(g, x),
                 DominantTree(tree_sequence(g, x))
             )
         t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
@@ -110,12 +110,12 @@ class TestTreeSequences(unittest.TestCase):
         for x in g.limitset:
             # First ensure same tree structure
             self.assertEqual(
-                g.attached_tree(x),
+                DominantTree.from_func(g, x),
                 DominantTree(sorted_tree_sequence(g, x))
             )
             # Check that the ordering is the same
             self.assertEqual(
-                g.attached_tree(x),
+                DominantTree.from_func(g, x),
                 OrderedTree(sorted_tree_sequence(g, x))
             )
 
@@ -156,7 +156,7 @@ def ordering_times(start, stop=None, step=None):
 
     def recursive_order(f):
         for x in f.limitset:
-            f.attached_tree(x)
+            DominantTree.from_func(f, x)
 
     def stack_order(f):
         for x in f.limitset:

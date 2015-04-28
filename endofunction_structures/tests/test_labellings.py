@@ -104,4 +104,4 @@ class LabellingTests(unittest.TestCase):
         """Ensure each endofunction is a representation of the original."""
         for tree in self.trees:
             for f in itertools.islice(tree_labellings(tree), 5040):
-                self.assertEqual(tree, f.tree_form())
+                self.assertEqual(tree, rootedtrees.DominantTree.from_func(f))
