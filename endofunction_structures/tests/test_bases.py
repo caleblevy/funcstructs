@@ -51,6 +51,7 @@ class TupleTests(unittest.TestCase):
                     s = y + x
 
     def test_addition_override(self):
+        """Make sure subclasses can properly override their parents' __add__"""
         class D(self.C):
             def __add__(self, other):
                 return D(tuple.__add__(self, other))
@@ -77,3 +78,8 @@ class TupleTests(unittest.TestCase):
         """Make sure Tuples have __slots__ and don't have __dict__."""
         self.assertTrue(hasattr(self.t, '__slots__'))
         self.assertFalse(hasattr(self.t, '__dict__'))
+
+    def test_repr(self):
+        """Make sure subclasses have appropriate repr"""
+        for x in self.tups:
+            self.assertEqual(x, eval(repr(x), {x.__class__.__name__: type(x)}))
