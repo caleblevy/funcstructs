@@ -7,7 +7,6 @@ Caleb Levy, 2014 and 2015.
 import fractions
 import functools
 
-from memoized_property import memoized_property
 from PADS import Lyndon
 
 from . import factorization
@@ -69,7 +68,7 @@ class Necklace(bases.Tuple):
             strand = Lyndon.SmallestRotation(strand)
         return super(Necklace, cls).__new__(cls, strand)
 
-    @memoized_property
+    @property
     def period(self):
         return periodicity(self)
 

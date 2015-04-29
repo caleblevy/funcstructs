@@ -5,8 +5,6 @@ out-degree one. A forest is any collection of rooted trees.
 Caleb Levy, 2014 and 2015.
 """
 
-from memoized_property import memoized_property
-
 from . import counts
 from . import subsequences
 from . import multiset
@@ -245,7 +243,7 @@ class TreeEnumerator(bases.Enumerable):
                     tree[i] = tree[i-(p-q)]
                 yield DominantTree(tree, preordered=True)
 
-    @memoized_property
+    @property
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm
         featured without derivation in Finch, S. R. "Otter's Tree Enumeration
@@ -292,7 +290,7 @@ class PartitionForests(bases.Enumerable):
     def __iter__(self):
         return productrange.unordered_product(self.partition, TreeEnumerator)
 
-    @memoized_property
+    @property
     def cardinality(self):
         l = 1
         for y, r in self.partition.items():
