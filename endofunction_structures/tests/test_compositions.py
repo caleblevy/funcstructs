@@ -1,11 +1,8 @@
 import unittest
 
-from endofunction_structures import counts
+from .. import counts
 
-from endofunction_structures.compositions import (
-    compositions,
-    weak_compositions
-)
+from ..compositions import compositions, weak_compositions
 
 
 class CompositionTests(unittest.TestCase):

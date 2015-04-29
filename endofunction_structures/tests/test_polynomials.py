@@ -1,8 +1,8 @@
 import unittest
 
-from endofunction_structures import counts, multiset
+from .. import counts, multiset
 
-from endofunction_structures.polynomials import (
+from ..polynomials import (
     monomial_symmetric_polynomial,
     FOIL,
     MultisetPolynomial,

@@ -2,13 +2,9 @@ import unittest
 
 from PADS import Lyndon
 
-from endofunction_structures import factorization
+from .. import factorization
 
-from endofunction_structures.necklaces import (
-    periodicity,
-    Necklace,
-    FixedContentNecklaces
-)
+from ..necklaces import periodicity, Necklace, FixedContentNecklaces
 
 
 class PeriodicityTest(unittest.TestCase):

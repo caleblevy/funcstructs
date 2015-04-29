@@ -2,9 +2,9 @@ import unittest
 
 import numpy as np
 
-from endofunction_structures import counts
+from .. import counts
 
-from endofunction_structures.funcdists import (
+from ..funcdists import (
     iterdist_brute,
     iterdist_funcstruct, iterdist,
     imagedist_composition, imagedist_recurse,

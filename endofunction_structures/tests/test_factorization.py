@@ -1,6 +1,6 @@
 import unittest
 
-from endofunction_structures.factorization import (
+from ..factorization import (
     prime_factorization,
     prime_divisors,
     divisors,

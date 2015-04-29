@@ -1,9 +1,9 @@
 import unittest
 import itertools
 
-from endofunction_structures import productrange, rootedtrees, counts
+from .. import counts, productrange, rootedtrees
 
-from endofunction_structures.labellings import (
+from ..labellings import (
     equipartitions, equipartition_count,
     ordered_divisions, ordered_division_count,
     set_partitions, set_partition_count,

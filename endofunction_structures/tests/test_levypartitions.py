@@ -2,7 +2,7 @@ import unittest
 
 from PADS import IntegerPartitions
 
-from endofunction_structures.levypartitions import (
+from ..levypartitions import (
     isqrt,
     minimal_partition,
     fixed_lex_partitions,

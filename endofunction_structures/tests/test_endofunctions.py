@@ -1,8 +1,8 @@
 import unittest
 
-from endofunction_structures.rootedtrees import OrderedTree
+from ..rootedtrees import OrderedTree
 
-from endofunction_structures.endofunctions import (
+from ..endofunctions import (
     Endofunction,
     SymmetricFunction,
     TransformationMonoid,

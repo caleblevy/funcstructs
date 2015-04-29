@@ -1,8 +1,8 @@
 import unittest
 
-from endofunction_structures import endofunctions, counts
+from .. import counts, endofunctions
 
-from endofunction_structures.rootedtrees import (
+from ..rootedtrees import (
     RootedTree, unordered_tree,
     OrderedTree,
     DominantTree,

@@ -1,7 +1,9 @@
 import unittest
 
-from endofunction_structures.subsequences import (
-    increasing, decreasing, nonincreasing, nondecreasing, startswith, endswith
+from ..subsequences import (
+    increasing, decreasing, nonincreasing, nondecreasing,
+    startswith,
+    endswith
 )
 
 

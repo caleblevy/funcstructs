@@ -2,17 +2,9 @@ import unittest
 
 import numpy as np
 
-from endofunction_structures import (
-    counts,
-    endofunctions,
-    necklaces,
-    rootedtrees
-)
+from .. import counts, endofunctions, necklaces, rootedtrees
 
-from endofunction_structures.funcstructs import (
-    Funcstruct,
-    EndofunctionStructures,
-)
+from ..funcstructs import Funcstruct, EndofunctionStructures
 
 
 class FuncstructTests(unittest.TestCase):
