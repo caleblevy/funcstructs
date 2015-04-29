@@ -12,7 +12,7 @@ from PADS import Lyndon
 
 from . import factorization
 from . import counts
-from . import enumerable
+from . import bases
 
 
 def periodicity(strand):
@@ -103,7 +103,7 @@ def simple_fixed_content(a, content, t, p, k):
                 content[j] += 1
 
 
-class FixedContentNecklaces(enumerable.Enumerable):
+class FixedContentNecklaces(bases.Enumerable):
     """ Representation of the set of necklaces of fixed content; i.e. a fixed
     pool of beads from which to form necklaces. """
 

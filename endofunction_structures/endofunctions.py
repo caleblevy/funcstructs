@@ -9,7 +9,7 @@ import random
 from memoized_property import memoized_property
 
 from . import productrange
-from . import enumerable
+from . import bases
 
 
 class Endofunction(tuple):
@@ -199,7 +199,7 @@ def randconj(f):
     return randperm(len(f)).conj(f)
 
 
-class TransformationMonoid(enumerable.Enumerable):
+class TransformationMonoid(bases.Enumerable):
     """Set of all endofunctions on n elements."""
 
     def __init__(self, set_size):

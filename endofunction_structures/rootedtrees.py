@@ -12,7 +12,7 @@ from . import subsequences
 from . import multiset
 from . import factorization
 from . import productrange
-from . import enumerable
+from . import bases
 
 
 class RootedTree(multiset.Multiset):
@@ -222,7 +222,7 @@ class DominantTree(LevelTree):
         return deg
 
 
-class TreeEnumerator(enumerable.Enumerable):
+class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, node_count):
@@ -291,7 +291,7 @@ class ForestEnumerator(TreeEnumerator):
             yield tree.chop()
 
 
-class PartitionForests(enumerable.Enumerable):
+class PartitionForests(bases.Enumerable):
     """Collections of rooted trees with sizes specified by partitions."""
 
     def __init__(self, partition):

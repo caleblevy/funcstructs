@@ -1,6 +1,6 @@
 import unittest
 
-from ..enumerable import Tuple
+from ..bases import Tuple
 
 
 class TupleTests(unittest.TestCase):
@@ -90,6 +90,6 @@ class TupleTests(unittest.TestCase):
         self.assertEqual(dic[self.c], 'a')
 
     def test_slotted(self):
-        """Make sure Tuples have __slots__ and not __dict__."""
+        """Make sure Tuples have __slots__ and don't have __dict__."""
         self.assertTrue(hasattr(self.t, '__slots__'))
         self.assertFalse(hasattr(self.t, '__dict__'))

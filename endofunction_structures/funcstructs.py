@@ -20,7 +20,7 @@ from . import factorization
 from . import compositions
 from . import endofunctions
 from . import productrange
-from . import enumerable
+from . import bases
 
 
 def chunks(l, n):
@@ -193,7 +193,7 @@ def funcstruct_enumerator(n):
                 yield struct
 
 
-class EndofunctionStructures(enumerable.Enumerable):
+class EndofunctionStructures(bases.Enumerable):
     """Represents the class of all endofunction structures."""
 
     def __init__(self, node_count, cycle_type=None):
