@@ -43,7 +43,7 @@ def periodicity(strand):
     return len(seed)
 
 
-class Necklace(tuple):
+class Necklace(bases.Tuple):
     """A necklace is the lexicographically smallest representative of a class
     of n-character strings equivalent under rotation (orbits of the set of
     n-character strings under the action of the cyclic group). For example the
@@ -65,16 +65,13 @@ class Necklace(tuple):
         Input content is normalized to smallest rotation unless preordered is
         set to true. Only use this option if you can (mathematically) prove
         that your input is in lexicographically smallest form."""
-        if not preordered:
+        if not(preordered or isinstance(strand, cls)):
             strand = Lyndon.SmallestRotation(strand)
         return super(Necklace, cls).__new__(cls, strand)
 
     @memoized_property
     def period(self):
         return periodicity(self)
-
-    def __repr__(self):
-        return self.__class__.__name__+"(%s)" % list(self)
 
     def degeneracy(self):
         """Number of distinct representations of the same necklace."""

@@ -73,7 +73,7 @@ class RootedTree(multiset.Multiset):
         return DominantTree(self._ordered_level_sequence())
 
 
-class LevelTree(tuple):
+class LevelTree(bases.Tuple):
     """Data structure for representing ordered trees by a level sequence: a
     listing of each node's height above the root produced in depth-first
     traversal order. The tree is reconstructed by connecting each node to

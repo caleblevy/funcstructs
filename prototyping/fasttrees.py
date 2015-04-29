@@ -105,7 +105,7 @@ class TestTreeSequences(unittest.TestCase):
         t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
         f = Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7])
         lsort = OrderedTree(sorted_tree_sequence(f, 5))
-        self.assertEqual(t, lsort)
+        self.assertEqual(t, DominantTree(lsort, preordered=True))
         g = randfunc(100)
         for x in g.limitset:
             # First ensure same tree structure
@@ -116,7 +116,7 @@ class TestTreeSequences(unittest.TestCase):
             # Check that the ordering is the same
             self.assertEqual(
                 DominantTree.from_func(g, x),
-                OrderedTree(sorted_tree_sequence(g, x))
+                DominantTree(sorted_tree_sequence(g, x), preordered=True)
             )
 
 

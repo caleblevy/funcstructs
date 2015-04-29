@@ -12,22 +12,14 @@ from . import productrange
 from . import bases
 
 
-class Endofunction(tuple):
+class Endofunction(bases.Tuple):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
-
-    def __new__(cls, func):
-        if isinstance(func, cls):
-            return func
-        return tuple.__new__(cls, func)
 
     @classmethod
     def from_tree(cls, tree):
         """Make an endofunction representing a tree."""
         return cls(tree.labelled_sequence())
-
-    def __repr__(self):
-        return self.__class__.__name__+'(%s)' % list(self)
 
     def __str__(self):
         funcstring = self.__class__.__name__+'(['

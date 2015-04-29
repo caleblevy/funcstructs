@@ -88,9 +88,9 @@ class EndofunctionTests(unittest.TestCase):
 
         for perm in permlist:
             e = SymmetricFunction(range(len(perm)))
-            self.assertEqual(e, perm * perm.inverse)
-            self.assertEqual(e, perm.inverse * perm)
-            self.assertEqual(perm, perm.inverse.inverse)
+            self.assertSequenceEqual(e, perm * perm.inverse)
+            self.assertSequenceEqual(e, perm.inverse * perm)
+            self.assertSequenceEqual(perm, perm.inverse.inverse)
 
     def test_conjugation(self):
         """Test that conjugation is invertible, with the obvious inverse."""
@@ -119,9 +119,9 @@ class EndofunctionTests(unittest.TestCase):
         self.assertEqual(len(dic), 2)
         c = SymmetricFunction(range(10))
         dic[c] = 7
-        self.assertEqual(len(dic), 2)
+        self.assertEqual(len(dic), 3)
         dic[c.inverse] = 2
-        self.assertEqual(len(dic), 2)
+        self.assertEqual(len(dic), 3)
         self.assertEqual(dic[c], 2)
         t = TransformationMonoid(7)
         self.assertEqual(1, len(set([t, t, TransformationMonoid(7)])))
