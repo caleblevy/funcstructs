@@ -5,11 +5,7 @@ Caleb Levy, 2015.
 
 import itertools
 
-from . import counts
-from . import multiset
-from . import necklaces
-from . import endofunctions
-from . import productrange
+from . import counts, endofunctions, multiset, necklaces, productrange
 
 
 def _equipartitions(S, b):

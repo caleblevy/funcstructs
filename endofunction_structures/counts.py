@@ -3,9 +3,9 @@
 Caleb Levy, 2015.
 """
 
-from math import factorial
-import operator
 import functools
+import operator
+from math import factorial
 
 
 def prod(iterable):

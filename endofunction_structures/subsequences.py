@@ -1,7 +1,7 @@
 """Caleb Levy, 2015."""
 
-import operator
 import functools
+import operator
 
 
 def runs(seq, comparison):

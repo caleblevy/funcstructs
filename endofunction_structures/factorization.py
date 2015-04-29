@@ -5,9 +5,7 @@ Caleb Levy, 2014 and 2015.
 
 import fractions
 
-from . import counts
-from . import multiset
-from . import productrange
+from . import counts, multiset, productrange
 
 
 def prime_factorization(n):

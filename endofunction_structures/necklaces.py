@@ -9,9 +9,7 @@ import functools
 
 from PADS import Lyndon
 
-from . import factorization
-from . import counts
-from . import bases
+from . import bases, counts, factorization
 
 
 def periodicity(strand):

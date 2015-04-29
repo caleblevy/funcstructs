@@ -8,8 +8,7 @@ import random
 
 from memoized_property import memoized_property
 
-from . import productrange
-from . import bases
+from . import bases, productrange
 
 
 class Endofunction(bases.Tuple):

@@ -5,12 +5,14 @@ out-degree one. A forest is any collection of rooted trees.
 Caleb Levy, 2014 and 2015.
 """
 
-from . import counts
-from . import subsequences
-from . import multiset
-from . import factorization
-from . import productrange
-from . import bases
+from . import (
+    bases,
+    counts,
+    factorization,
+    multiset,
+    productrange,
+    subsequences
+)
 
 
 class RootedTree(multiset.Multiset):

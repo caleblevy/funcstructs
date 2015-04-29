@@ -26,10 +26,7 @@ Caleb Levy, 2013, 2014 and 2015.
 
 import numpy as np
 
-from . import counts
-from . import funcstructs
-from . import endofunctions
-from . import compositions
+from . import compositions, counts, endofunctions, funcstructs
 
 
 def iterdist_brute(n):
