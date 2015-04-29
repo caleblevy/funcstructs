@@ -8,11 +8,6 @@ import itertools
 from . import multiset
 
 
-def flatten(lol):
-    """Flatten a list of lists."""
-    return list(itertools.chain.from_iterable(lol))
-
-
 def parse_ranges(begin, end, step):
     """ If begin == end == None then begin is treated as end and step is set by
     default to 1 and begin to 0. If begin and step are integers they are
@@ -106,4 +101,4 @@ def unordered_product(mset, iterfunc):
     for y, d in mset.items():
         strands.append(itertools.combinations_with_replacement(iterfunc(y), d))
     for bundle in itertools.product(*strands):
-        yield multiset.Multiset(flatten(bundle))
+        yield multiset.Multiset(itertools.chain.from_iterable(bundle))

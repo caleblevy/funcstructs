@@ -25,6 +25,11 @@ from . import (
 )
 
 
+def _flatten(lol):
+    """Flatten a list of lists."""
+    return list(itertools.chain.from_iterable(lol))
+
+
 def _chunks(l, n):
     """ Yield successive n-sized chunks from l. """
     for i in range(0, len(l), n):
@@ -68,7 +73,7 @@ class Funcstruct(multiset.Multiset):
         if precounted is not None:
             self.n = precounted
         else:
-            self.n = len(productrange.flatten(productrange.flatten(cycles)))
+            self.n = len(_flatten(_flatten(self)))
         return self
 
     @classmethod
@@ -110,10 +115,9 @@ class Funcstruct(multiset.Multiset):
         """ Convert function structure to canonical form by filling in numbers
         from 0 to n-1 on the cycles and trees. """
         # Find the tree form of non-cyclic nodes
-        cycles = list(self)
         tree_start = 0
         func = []
-        for tree in productrange.flatten(cycles):
+        for tree in itertools.chain.from_iterable(self):
             l = len(tree)
             tree_perm = range(tree_start, tree_start+l)
             func_tree = tree.labelled_sequence(tree_perm)
@@ -121,9 +125,9 @@ class Funcstruct(multiset.Multiset):
             tree_start += l
         # Permute the cyclic nodes to form the cycle decomposition
         cycle_start = 0
-        for cycle in cycles:
+        for cycle in self:
             node_prev = node = 0
-            cycle_len = len(productrange.flatten(cycle))
+            cycle_len = len(_flatten(cycle))
             for tree in cycle:
                 node += len(tree)
                 func[cycle_start+node_prev] = cycle_start + (node % cycle_len)
@@ -136,7 +140,7 @@ class Funcstruct(multiset.Multiset):
         """ Given an endofunction structure funcstruct, compute the image path
         directly without conversion to a particular endofunction. """
         cardinalities = np.array([0]+[0]*(self.n-2), dtype=object)
-        for tree in productrange.flatten(self):
+        for tree in itertools.chain.from_iterable(self):
             cardinalities += 1
             for subseq in subsequences.increasing(tree):
                 k = len(subseq) - 1
@@ -183,7 +187,7 @@ def cycle_type_funcstructs(n, cycle_type):
         for c, l, m in zip(composition, lengths, multiplicities):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in itertools.product(*cycle_groups):
-            yield Funcstruct(productrange.flatten(bundle), n)
+            yield Funcstruct(itertools.chain.from_iterable(bundle), n)
 
 
 def funcstruct_enumerator(n):

@@ -1,7 +1,7 @@
 import unittest
 import itertools
 
-from .. import counts, productrange, rootedtrees
+from .. import counts, rootedtrees
 
 from ..labellings import (
     equipartitions, equipartition_count,
@@ -46,7 +46,8 @@ class LabellingTests(unittest.TestCase):
         for partition in self.partitions:
             n = sum(partition)
             for division in ordered_divisions(partition):
-                self.assertEqual(n, len(set(productrange.flatten(division))))
+                self.assertEqual(
+                    n, len(set(itertools.chain.from_iterable(division))))
 
     def test_set_partition_counts(self):
         """Check we produce the correct number of set partitions"""
@@ -69,7 +70,8 @@ class LabellingTests(unittest.TestCase):
         for partition in self.partitions:
             n = sum(partition)
             for division in set_partitions(partition):
-                self.assertEqual(n, len(set(productrange.flatten(division))))
+                self.assertEqual(
+                    n, len(set(itertools.chain.from_iterable(division))))
 
     def test_cycle_labellings(self):
         """Test that we produce the correct number of cycle labellings."""

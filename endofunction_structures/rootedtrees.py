@@ -5,6 +5,8 @@ out-degree one. A forest is any collection of rooted trees.
 Caleb Levy, 2014 and 2015.
 """
 
+from itertools import chain
+
 from . import (
     bases,
     counts,
@@ -158,7 +160,8 @@ class OrderedTree(LevelTree):
         for branch in self.branches():
             branch_list.append(branch._dominant_sequence())
         branch_list.sort(reverse=True)
-        return [self[0]] + productrange.flatten(branch_list)
+        # Must make list, else they won't be sorted properly
+        return list(chain([self[0]], chain.from_iterable(branch_list)))
 
     def canonical_form(self):
         """Return a dominant tree type."""

@@ -5,7 +5,7 @@ Caleb Levy, 2015.
 
 import itertools
 
-from . import counts, endofunctions, multiset, necklaces, productrange
+from . import counts, endofunctions, multiset, necklaces
 
 
 def _equipartitions(S, b):
@@ -188,10 +188,10 @@ def translation_keys(tree):
     to translate each combination into an endofunction."""
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
-    indperm = endofunctions.SymmetricFunction(productrange.flatten(ind_groups))
+    indperm = endofunctions.SymmetricFunction(
+        itertools.chain.from_iterable(ind_groups))
     translation_sequence = indperm.inverse.conj(
-        endofunctions.Endofunction.from_tree(tree)
-    )
+        endofunctions.Endofunction.from_tree(tree))
     return bin_widths, translation_sequence
 
 
@@ -212,7 +212,7 @@ def tree_labellings(tree):
     bin_widths, translation_sequence = translation_keys(tree)
     func = [0] * n
     for combo in _ordered_divisions(set(range(n)), bin_widths):
-        c = productrange.flatten(combo)
+        c = list(itertools.chain.from_iterable(combo))
         for i in range(n):
             func[c[i]] = c[translation_sequence[i]]
         yield endofunctions.Endofunction(func)

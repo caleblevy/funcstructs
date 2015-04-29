@@ -4,6 +4,7 @@ into itself.
 Caleb Levy, 2015.
 """
 
+import itertools
 import random
 
 from memoized_property import memoized_property
@@ -110,7 +111,7 @@ class Endofunction(bases.Tuple):
     @memoized_property
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
-        return frozenset(productrange.flatten(self.cycles))
+        return frozenset(itertools.chain.from_iterable(self.cycles))
 
     @memoized_property
     def attached_treenodes(self):
