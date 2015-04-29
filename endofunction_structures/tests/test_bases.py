@@ -22,22 +22,6 @@ class TupleTests(unittest.TestCase):
     tups = [tup, t, a, b, c]
     c_mirrors = list(map(C, tups))  # Test instantiation works
 
-    def test_identity(self):
-        """Ensure identity is being handled property"""
-        n = len(self.tups)
-        for i in range(n-1):
-            el = self.tups[i+1]
-            self.assertIs(el, Tuple(el))
-            self.assertIs(el, el.__class__(el))
-            self.assertIsNot(self.tups[i], self.c_mirrors[i])
-
-        for i in range(n):
-            for j in range(n):
-                if i == j:
-                    self.assertIs(self.c_mirrors[i], self.c_mirrors[j])
-                else:
-                    self.assertIsNot(self.c_mirrors[i], self.c_mirrors[j])
-
     def test_equality(self):
         """Test different derived classes from Tuple compare unequal"""
         q = (2, 2, 3)
@@ -45,12 +29,12 @@ class TupleTests(unittest.TestCase):
         n = len(self.tups)
         for i in range(n):
             for j in range(n):
+                self.assertEqual(self.c_mirrors[i], self.c_mirrors[j])
+                self.assertNotEqual(self.tups[i], others[j])
                 if i == j:
                     self.assertEqual(self.tups[i], self.tups[j])
                 else:
                     self.assertNotEqual(self.tups[i], self.tups[j])
-                self.assertEqual(self.c_mirrors[i], self.c_mirrors[j])
-                self.assertNotEqual(self.tups[i], others[j])
 
     def test_disabled_operations(self):
         """Make sure Tuples cannot be added or duplicated"""

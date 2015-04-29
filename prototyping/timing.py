@@ -168,7 +168,7 @@ def balanced_binary_tree(n):
 
 def scattered_tree(n):
     """Tree with a big cycle and things attached"""
-    return Endofunction(bigcycle(n//2)+talltree(n-n//2))
+    return Endofunction(list(bigcycle(n//2))+list(talltree(n-n//2)))
 
 
 if __name__ == '__main__':

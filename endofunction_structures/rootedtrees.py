@@ -83,13 +83,9 @@ class LevelTree(bases.Tuple):
     def __new__(cls, *args, **kwargs):
         raise NotImplementedError("LevelTree should not be invoked directly")
 
-    def __repr__(self):
-        return self.__class__.__name__+"(%s)" % list(self)
-
     def branch_sequences(self):
         """Return each major subbranch of a tree."""
-        for branch in subsequences.startswith(self[1:], self[0]+1):
-            yield branch
+        return subsequences.startswith(self[1:], self[0]+1)
 
     def subtree_sequences(self):
         """Generate the main subtrees of self in order."""
@@ -146,9 +142,7 @@ class OrderedTree(LevelTree):
     """An unlabelled ordered tree represented by its level sequence."""
 
     def __new__(cls, level_sequence):
-        if isinstance(level_sequence, cls):
-            return level_sequence
-        return tuple.__new__(cls, level_sequence)
+        return super(LevelTree, cls).__new__(cls, level_sequence)
 
     def branches(self):
         for branch in self.branch_sequences():
@@ -188,11 +182,9 @@ class DominantTree(LevelTree):
     """
 
     def __new__(cls, level_sequence, preordered=False):
-        if isinstance(level_sequence, cls):
-            return level_sequence
-        if not preordered:
+        if not(preordered or isinstance(level_sequence, cls)):
             level_sequence = dominant_sequence(level_sequence)
-        return tuple.__new__(cls, level_sequence)
+        return super(LevelTree, cls).__new__(cls, level_sequence)
 
     def branches(self):
         for branch in self.branch_sequences():

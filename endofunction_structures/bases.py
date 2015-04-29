@@ -14,11 +14,6 @@ class Tuple(tuple):
 
     __slots__ = ()
 
-    def __new__(cls, iterable=()):
-        if isinstance(iterable, cls):
-            return iterable  # No need to duplicate immutable objects
-        return tuple.__new__(cls, iterable)
-
     def __repr__(self):
         return self.__class__.__name__+'(%s)' % list(self)
 
