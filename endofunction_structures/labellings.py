@@ -3,9 +3,21 @@
 Caleb Levy, 2015.
 """
 
-import itertools
+from itertools import chain, combinations, permutations, product
+from math import factorial
 
-from . import counts, endofunctions, multiset, necklaces
+from .counts import multinomial_coefficient as ordered_division_count
+from .endofunctions import Endofunction, SymmetricFunction
+from .multiset import Multiset
+from .necklaces import Necklace
+
+__all__ = [
+    "equipartitions", "equipartition_count",
+    "ordered_divisions", "ordered_division_count",
+    "set_partitions", "set_partition_count",
+    "cycle_labellings", "cycle_index",
+    "tree_labellings"
+]
 
 
 def _equipartitions(S, b):
@@ -14,7 +26,7 @@ def _equipartitions(S, b):
         yield [tuple(S)]
     else:
         marked_el = (S.pop(), )
-        for first in itertools.combinations(S, n//b-1):
+        for first in combinations(S, n//b-1):
             for remaining in _equipartitions(S.difference(first), b-1):
                 yield [marked_el + first] + remaining
 
@@ -41,14 +53,14 @@ def equipartition_count(n, b):
     Each combination of combinations will thus have (n/b)!**b * b! distinct
     representations. """
 
-    return counts.factorial(n)//(counts.factorial(b)*counts.factorial(n//b)**b)
+    return factorial(n) // (factorial(b) * factorial(n//b)**b)
 
 
 def _ordered_divisions(S, part):
     if len(part) == 1:
         yield [tuple(S)]
     else:
-        for first in itertools.combinations(S, part[0]):
+        for first in combinations(S, part[0]):
             for remaining in _ordered_divisions(S.difference(first), part[1:]):
                 yield [first] + remaining
 
@@ -69,18 +81,15 @@ def ordered_divisions(partition, S=None):
         yield tuple(map(frozenset, p))
 
 
-ordered_division_count = counts.multinomial_coefficient
-
-
 def _set_partitions(S, partition):
-    lengths, mults = multiset.Multiset(partition).sort_split()
+    lengths, mults = Multiset(partition).sort_split()
     # clm[i] is the number of nodes situated in some bin of size l[i].
     for odiv in _ordered_divisions(S, [l*m for l, m in zip(lengths, mults)]):
         strand = []
         for m, c in zip(mults, odiv):
             strand.append(_equipartitions(set(c), m))
-        for bundle in itertools.product(*strand):
-            yield itertools.chain.from_iterable(bundle)
+        for bundle in product(*strand):
+            yield chain.from_iterable(bundle)
 
 
 def set_partitions(partition, S=None):
@@ -89,7 +98,7 @@ def set_partitions(partition, S=None):
         S = sum(partition)
     if isinstance(S, int):
         S = range(S)
-    for subset in itertools.combinations(S, sum(partition)):
+    for subset in combinations(S, sum(partition)):
         for p in _set_partitions(set(subset), partition):
             yield frozenset(map(frozenset, p))
 
@@ -108,13 +117,12 @@ def set_partition_count(partition, n=None):
     Alternatively it is the cycle index divided by the factorial of one less
     than each cycle length, including multiplicity, since here permutation
     order does not matter. """
-
-    partition = multiset.Multiset(partition)
+    partition = Multiset(partition)
     if n is None:
         n = sum(partition)
-    count = counts.factorial(n)
+    count = factorial(n)
     for l, m in zip(*partition.split()):
-        count //= counts.factorial(l)**m * counts.factorial(m)
+        count //= factorial(l)**m * factorial(m)
     return count
 
 
@@ -124,28 +132,28 @@ def _cycle_permutations(cycle):
     cycle = set(cycle)
     start = min(cycle)
     cycle.remove(start)
-    for p in itertools.permutations(cycle):
+    for p in permutations(cycle):
         # The cycles are necklaces: they start with the minimal element, and
         # all elements are unique, hence they are lexicographically minimal.
-        yield necklaces.Necklace((start, ) + p, preordered=True)
+        yield Necklace((start, )+p, preordered=True)
 
 
 def cycle_labellings(partition, S=None):
     """Enumerate cycles with cycle type partition and labels from S"""
     for upd in set_partitions(partition, S):
-        for cycle_group in itertools.product(*map(_cycle_permutations, upd)):
+        for cycle_group in product(*map(_cycle_permutations, upd)):
             yield frozenset(cycle_group)
 
 
 def cycle_index(partition, n=None):
     """Found by multiplying the set partition count by the product of the
     number of permutations of each cycle."""
-    partition = multiset.Multiset(partition)
+    partition = Multiset(partition)
     if n is None:
         n = sum(partition)
-    count = counts.factorial(n)
+    count = factorial(n)
     for l, m in zip(*partition.split()):
-        count //= l**m * counts.factorial(m)
+        count //= l**m * factorial(m)
     return count
 
 
@@ -161,7 +169,7 @@ def branch_inds(tree):
 def branch_groups(tree):
     """Yield, in order, tree's unique branches, and all nodes to which an
     instance of that branch is attached."""
-    branches, mults = multiset.Multiset(tree.branches()).sort_split()
+    branches, mults = Multiset(tree.branches()).sort_split()
     branches = iter(branches[::-1])
     mults.reverse()
     indset = branch_inds(tree)[::-1]
@@ -188,10 +196,8 @@ def translation_keys(tree):
     to translate each combination into an endofunction."""
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
-    indperm = endofunctions.SymmetricFunction(
-        itertools.chain.from_iterable(ind_groups))
-    translation_sequence = indperm.inverse.conj(
-        endofunctions.Endofunction.from_tree(tree))
+    indperm = SymmetricFunction(chain.from_iterable(ind_groups)).inverse
+    translation_sequence = indperm.conj(Endofunction.from_tree(tree))
     return bin_widths, translation_sequence
 
 
@@ -212,7 +218,7 @@ def tree_labellings(tree):
     bin_widths, translation_sequence = translation_keys(tree)
     func = [0] * n
     for combo in _ordered_divisions(set(range(n)), bin_widths):
-        c = list(itertools.chain.from_iterable(combo))
+        c = list(chain.from_iterable(combo))
         for i in range(n):
             func[c[i]] = c[translation_sequence[i]]
-        yield endofunctions.Endofunction(func)
+        yield Endofunction(func)
