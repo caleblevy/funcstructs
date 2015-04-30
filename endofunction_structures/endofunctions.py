@@ -32,11 +32,8 @@ class Endofunction(bases.Tuple):
 
     def __mul__(self, other):
         """f * g <==> Endofunction(f[g[x]] for x in g.domain)"""
-        return Endofunction([self[x] for x in other])
-
-    def __rmul__(self, other):
-        """f.__rmul__(g) = g * f"""
-        return Endofunction([other[x] for x in self])
+        # f * g becomes a function on g's domain, so it inherits class of g
+        return other.__class__(self[x] for x in other)
 
     @memoized_property
     def domain(self):
@@ -134,7 +131,7 @@ class Endofunction(bases.Tuple):
 
 def randfunc(n):
     """ Return a random endofunction on n elements. """
-    return Endofunction([random.randrange(n) for _ in range(n)])
+    return Endofunction(random.randrange(n) for _ in range(n))
 
 
 class SymmetricFunction(Endofunction):
@@ -142,9 +139,13 @@ class SymmetricFunction(Endofunction):
 
     def __new__(cls, func):
         self = super(SymmetricFunction, cls).__new__(cls, func)
-        if not len(self) == len(self.image):
+        if len(self) != len(self.image):
             raise ValueError("This function is not invertible.")
         return self
+
+    def __rmul__(self, other):
+        """s.__rmul__(f) = f * s"""
+        return other.__class__(other[x] for x in self)
 
     def __pow__(self, n):
         """Symmetric functions allow us to take inverses."""
@@ -155,16 +156,16 @@ class SymmetricFunction(Endofunction):
 
     @memoized_property
     def inverse(self):
-        """ Returns the inverse of a permutation of range(n). Code taken
-        directly from: "Inverting permutations in Python" at
-        http://stackoverflow.com/a/9185908. """
-        inv = [0] * len(self)
+        """s.inverse <==> s**-1"""
+        # Code taken directly from: "Inverting permutations in Python" at
+        # http://stackoverflow.com/a/9185908.
+        inv = [0]*len(self)
         for x, y in enumerate(self):
             inv[y] = x
         return self.__class__(inv)
 
-    def conj(self, func):
-        """Conjugate a function f by a permutation."""
+    def conj(self, f):
+        """s.conj(f) <==> s * f * s.inverse"""
         # Order of conjugation matters. Take the trees:
         #   1   2          a   b
         #    \ /    <==>    \ /
@@ -176,7 +177,10 @@ class SymmetricFunction(Endofunction):
         # If f(1) = f(2) = f(3) = 3, and g(a) = g(b) = g(c) = c, then f is
         # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
         # way to get *to* g.
-        return self * func * self.inverse
+        g = [0]*len(f)
+        for x, y in enumerate(self):
+            g[y] = self[f[x]]
+        return f.__class__(g)
 
 
 def randperm(n):
