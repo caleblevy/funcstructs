@@ -166,4 +166,4 @@ class FixedContentNecklaces(bases.Enumerable):
         for strand in self.sfc():
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
-            yield Necklace([self.elements[i] for i in strand], preordered=True)
+            yield Necklace((self.elements[i] for i in strand), preordered=True)
