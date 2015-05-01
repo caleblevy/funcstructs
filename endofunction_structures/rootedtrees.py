@@ -75,34 +75,41 @@ class RootedTree(multiset.Multiset):
         return DominantTree(self._ordered_level_sequence())
 
 
-class LevelTree(bases.Tuple):
+class OrderedTree(bases.Tuple):
     """Data structure for representing ordered trees by a level sequence: a
     listing of each node's height above the root produced in depth-first
     traversal order. The tree is reconstructed by connecting each node to
     previous one directly below its height.
     """
 
-    def __new__(cls, *args, **kwargs):
-        raise NotImplementedError("LevelTree should not be invoked directly")
+    @classmethod
+    def from_func(cls, func, node=None):
+        # If node is node, test if function has tree structure and return it
+        if node is None:
+            cycles = list(func.cycles)
+            if len(cycles) != 1 or len(cycles[0]) != 1:
+                raise ValueError("Function structure is not a rooted tree")
+            node = cycles[0][0]
+        return cls(func._attached_level_sequence(node))
 
-    def branch_sequences(self):
-        """Return each major subbranch of a tree."""
+    def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)
 
-    def subtree_sequences(self):
-        """Generate the main subtrees of self in order."""
-        for branch_sequence in self.branch_sequences():
+    def _subtree_sequences(self):
+        for branch_sequence in self._branch_sequences():
             yield [node-1 for node in branch_sequence]
 
     def bracket_form(self):
-        """Return a representation of the rooted tree via nested lists."""
-        if not self.branch_sequences():
+        """Return a representation of the rooted tree via nested lists. This is
+        a novelty method, and should not be used for anything serious.
+        """
+        if not self._branch_sequences():
             return []
         return [subtree.bracket_form() for subtree in self.subtrees()]
 
     def unordered(self):
         """Return the unordered tree corresponding to the rooted tree."""
-        if not self.branch_sequences():
+        if not self._branch_sequences():
             return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
@@ -129,30 +136,19 @@ class LevelTree(bases.Tuple):
             grafting_point[height-1] = node
         return labelling
 
-    @classmethod
-    def from_func(cls, func, node=None):
-        # If node is node, test if function has tree structure and return it
-        if node is None:
-            cycles = list(func.cycles)
-            if len(cycles) != 1 or len(cycles[0]) != 1:
-                raise ValueError("Function structure is not a rooted tree")
-            node = cycles[0][0]
-        return cls(func._attached_level_sequence(node))
-
-
-class OrderedTree(LevelTree):
-    """An unlabelled ordered tree represented by its level sequence."""
-
-    def __new__(cls, level_sequence):
-        return super(LevelTree, cls).__new__(cls, level_sequence)
-
     def branches(self):
-        for branch in self.branch_sequences():
+        """Return each major subbranch of a tree."""
+        for branch in self._branch_sequences():
             yield self.__class__(branch)
 
     def subtrees(self):
-        for subtree in self.subtree_sequences():
+        """Generate the main subtrees of self in order."""
+        for subtree in self._subtree_sequences():
             yield self.__class__(subtree)
+
+    def chop(self):
+        """Return a multiset of the input tree's main sub branches."""
+        return multiset.Multiset(self.subtrees())
 
     def _dominant_sequence(self):
         """Return the dominant rooted tree corresponding to self."""
@@ -163,22 +159,13 @@ class OrderedTree(LevelTree):
         # Must make list, else they won't be sorted properly
         return list(chain([self[0]], chain.from_iterable(branch_list)))
 
-    def canonical_form(self):
-        """Return a dominant tree type."""
-        return DominantTree(self)
-
-
-def dominant_sequence(level_sequence):
-    """Return the dominant form of a level sequence."""
-    return OrderedTree(level_sequence)._dominant_sequence()
-
 
 def unordered_tree(level_sequence):
     """Return the unordered tree corresponding to the given level sequence."""
     return OrderedTree(level_sequence).unordered()
 
 
-class DominantTree(LevelTree):
+class DominantTree(OrderedTree):
     """A dominant tree is the ordering of an unordered tree with
     lexicographically largest level sequence. It is formed by placing all
     subtrees in dominant form and then putting them in descending order.
@@ -186,21 +173,17 @@ class DominantTree(LevelTree):
 
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
-            level_sequence = dominant_sequence(level_sequence)
-        return super(LevelTree, cls).__new__(cls, level_sequence)
+            level_sequence = OrderedTree(level_sequence)._dominant_sequence()
+        return super(DominantTree, cls).__new__(cls, level_sequence)
 
     def branches(self):
-        for branch in self.branch_sequences():
+        for branch in self._branch_sequences():
             # Subtrees of dominant trees are dominantly ordered by construction
             yield self.__class__(branch, preordered=True)
 
     def subtrees(self):
-        for subtree in self.subtree_sequences():
+        for subtree in self._subtree_sequences():
             yield self.__class__(subtree, preordered=True)
-
-    def chop(self):
-        """Return a multiset of the input tree's main sub branches."""
-        return multiset.Multiset(self.subtrees())
 
     def degeneracy(self):
         """The number of representations of each labelling of the unordered
@@ -267,14 +250,13 @@ class TreeEnumerator(bases.Enumerable):
         return T[-1]
 
 
-class ForestEnumerator(TreeEnumerator):
+class ForestEnumerator(bases.Enumerable):
     """Represents the class of collections of rooted trees on n nodes."""
 
     def __init__(self, node_count):
-        super(ForestEnumerator, self).__init__(node_count+1)
-
-    def __repr__(self):
-        return self.__class__.__name__+'(%s)' % (self.n-1)
+        if node_count < 0:
+            raise ValueError("A forest requires a number of nodes.")
+        super(ForestEnumerator, self).__init__(node_count)
 
     def __iter__(self):
         """Any rooted tree on n+1 nodes can be identically described as a
@@ -282,8 +264,12 @@ class ForestEnumerator(TreeEnumerator):
         root. To enumerate all collections of rooted trees on n nodes, we may
         enumerate all rooted trees on n+1 nodes, chopping them at the base.
         """
-        for tree in super(ForestEnumerator, self).__iter__():
+        for tree in TreeEnumerator(self.n+1):
             yield tree.chop()
+
+    @property
+    def cardinality(self):
+        return TreeEnumerator(self.n+1).cardinality
 
 
 class PartitionForests(bases.Enumerable):
