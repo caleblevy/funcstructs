@@ -3,7 +3,7 @@ import unittest
 from .. import counts, endofunctions
 
 from ..rootedtrees import (
-    RootedTree, unordered_tree,
+    RootedTree,
     OrderedTree,
     DominantTree,
     TreeEnumerator,
@@ -77,8 +77,9 @@ class TreeEnumerationTests(unittest.TestCase):
 class TreeTests(unittest.TestCase):
 
     def test_rooted_tree_strings(self):
-        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        T2 = unordered_tree(range(1, 5))
+        T = RootedTree.from_levels(
+            [1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T2 = RootedTree.from_levels(range(1, 5))
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
@@ -91,7 +92,7 @@ class TreeTests(unittest.TestCase):
                     [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
                     range(1, 5)]
         for seq in TreeSeqs:
-            T_unordered = unordered_tree(seq)
+            T_unordered = RootedTree.from_levels(seq)
             T_ordered = OrderedTree(seq)
             T_dominant = DominantTree(seq)
             self.assertEqual(T_unordered, eval(repr(T_unordered)))
