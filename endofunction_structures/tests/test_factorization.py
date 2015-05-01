@@ -1,11 +1,6 @@
 import unittest
 
-from ..factorization import (
-    prime_factorization,
-    prime_divisors,
-    divisors,
-    totient
-)
+from ..factorization import prime_factorization, prime_divisors, divisors
 
 
 class FactorizationTests(unittest.TestCase):
@@ -31,10 +26,3 @@ class FactorizationTests(unittest.TestCase):
         for i, count in enumerate(A000005, start=1):
             self.assertEqual(count, len(divisors(i)))
             self.assertEqual(count, len(divisors(i)))  # test caching
-
-    def test_totient(self):
-        """OEIS A000010: number of relatively prime smaller integers."""
-        values = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4, 10, 4, 12, 6, 8, 8, 16, 6, 18,
-                  8, 12, 10, 22, 8, 20, 12, 18]
-        for i, val in enumerate(values, start=1):
-            self.assertEqual(val, totient(i))

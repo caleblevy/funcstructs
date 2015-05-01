@@ -3,8 +3,6 @@
 Caleb Levy, 2014 and 2015.
 """
 
-import fractions
-
 from . import counts, multiset, productrange
 
 
@@ -46,10 +44,3 @@ def divisors(n, factors={}):
     if n not in factors:
         factors[n] = list(_divisor_gen(n))
     return factors[n]
-
-
-def totient(n):
-    """Return the totient using the fancy prime formula."""
-    return int(n*counts.prod(
-        (1-fractions.Fraction(1, p) for p in prime_divisors(n))
-    ))
