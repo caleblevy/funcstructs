@@ -16,6 +16,9 @@ from . import (
     subsequences
 )
 
+__all__ = ["RootedTree", "OrderedTree", "DominantTree", "TreeEnumerator",
+           "ForestEnumerator", "PartitionForests"]
+
 
 class RootedTree(multiset.Multiset):
     """An unlabelled, unordered rooted tree; i.e. the ordering of the subtrees
