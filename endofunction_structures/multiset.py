@@ -9,6 +9,18 @@ import operator
 
 from . import counts
 
+__all__ = ["Multiset"]
+
+
+@classmethod
+def _raise_unassignable(cls, *args, **kwargs):
+    raise TypeError('%r does not support item assignment' % cls.__name__)
+
+
+@classmethod
+def _raise_undeleteable(cls, *args, **kwargs):
+    raise TypeError('%r does not support item deletion' % cls.__name__)
+
 
 class Multiset(dict):
     """ Multiset is represented as a dictionary (hash table) whose keys are the
@@ -29,36 +41,11 @@ class Multiset(dict):
     def __init__(self, *args, **kwargs):
         pass  # Override dict.__init__ to avoid call to self.update()
 
-    # Disable all inherited mutating methods. Based on answers from
-    #    http://stackoverflow.com/questions/1151658/python-hashable-dicts
+    # Disable all inherited mutating methods. Based on brownie's ImmutableDict
 
-    def __setitem__(self, key, value):
-        raise TypeError("{0} is immutable and does not support item assignment"
-                        .format(self.__class__.__name__))
+    __setitem__ = setdefault = update = _raise_unassignable
 
-    def __delitem__(self, key):
-        raise TypeError("{0} is immutable and does not support item removal"
-                        .format(self.__class__.__name__))
-
-    def clear(self):
-        raise TypeError("{0} is immutable and does not support item removal"
-                        .format(self.__class__.__name__))
-
-    def pop(self, *args, **kwargs):
-        raise TypeError("{0} is immutable and does not support item removal"
-                        .format(self.__class__.__name__))
-
-    def popitem(self, *args, **kwargs):
-        raise TypeError("{0} is immutable and does not support item removal"
-                        .format(self.__class__.__name__))
-
-    def setdefault(self, *args, **kwargs):
-        raise TypeError("{0} is immutable and does not support item assignment"
-                        .format(self.__class__.__name__))
-
-    def update(self, *args, **kwargs):
-        raise TypeError("{0} is immutable and does not support item assignment"
-                        .format(self.__class__.__name__))
+    __delitem__ = clear = pop = popitem = _raise_undeleteable
 
     # length of a multiset includes multiplicities
     def __len__(self):
