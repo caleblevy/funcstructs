@@ -26,6 +26,8 @@ class RootedTree(multiset.Multiset):
     characterize a rooted tree strictly by the multiset of its subtrees.
     """
 
+    __slots__ = ()
+
     def __new__(cls, subtrees=None):
         if isinstance(subtrees, cls):
             return subtrees
@@ -89,6 +91,8 @@ class OrderedTree(bases.Tuple):
     traversal order. The tree is reconstructed by connecting each node to
     previous one directly below its height.
     """
+
+    __slots__ = ()
 
     @classmethod
     def from_func(cls, func, node=None):
@@ -173,6 +177,8 @@ class DominantTree(OrderedTree):
     lexicographically largest level sequence. It is formed by placing all
     subtrees in dominant form and then putting them in descending order.
     """
+
+    __slots__ = ()
 
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
