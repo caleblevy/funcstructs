@@ -7,9 +7,44 @@ Caleb Levy, 2015.
 import itertools
 import random
 
-from memoized_property import memoized_property
-
 from . import bases, productrange
+
+__all__ = [
+    "cached_property",
+    "Endofunction", "SymmetricFunction",
+    "randfunc", "randperm", "randconj",
+    "TransformationMonoid"
+]
+
+
+# Modification of werkzeug.cached_property
+class cached_property(property):
+
+    """A decorator that converts a function into a lazy property.  The
+    function wrapped is called the first time to retrieve the result
+    and then that calculated result is used the next time you access
+    the value::
+        class Foo(object):
+            @cached_property
+            def foo(self):
+                # calculate something important here
+                return 42
+    The class has to have a `__dict__` in order for this property to
+    work.
+    """
+
+    # implementation detail: A subclass of python's builtin property
+    # decorator, we override __get__ to check for a cached value. If one
+    # choses to invoke __get__ by hand the property will still work as
+    # expected because the lookup logic is replicated in __get__ for
+    # manual invocation.
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        if self.fget.__name__ not in obj.__dict__:
+            obj.__dict__[self.fget.__name__] = self.fget(obj)
+        return obj.__dict__[self.fget.__name__]
 
 
 class Endofunction(bases.Tuple):
@@ -35,15 +70,15 @@ class Endofunction(bases.Tuple):
         # f * g becomes a function on g's domain, so it inherits class of g
         return other.__class__(self[x] for x in other)
 
-    @memoized_property
+    @cached_property
     def domain(self):
         return frozenset(range(len(self)))
 
-    @memoized_property
+    @cached_property
     def image(self):
         return frozenset(self)
 
-    @memoized_property
+    @cached_property
     def preimage(self):
         """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
         preim = [set() for _ in range(len(self))]
@@ -51,7 +86,7 @@ class Endofunction(bases.Tuple):
             preim[self[x]].add(x)
         return tuple(map(frozenset, preim))
 
-    @memoized_property
+    @cached_property
     def imagepath(self):
         """f.imagepath[n] <==> len(set(f**n)) for n in range(1, len(f))"""
         cardinalities = [len(self.image)]
@@ -100,17 +135,17 @@ class Endofunction(bases.Tuple):
                     yield cycle
                     CycleEls.update(cycle)
 
-    @memoized_property
+    @cached_property
     def cycles(self):
         """Return the set of f's cycles"""
         return frozenset(map(tuple, self.enumerate_cycles()))
 
-    @memoized_property
+    @cached_property
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
         return frozenset(itertools.chain.from_iterable(self.cycles))
 
-    @memoized_property
+    @cached_property
     def attached_treenodes(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
         descendants = [set() for _ in range(len(self))]
@@ -154,7 +189,7 @@ class SymmetricFunction(Endofunction):
         else:
             return Endofunction.__pow__(self.inverse, -n)
 
-    @memoized_property
+    @cached_property
     def inverse(self):
         """s.inverse <==> s**-1"""
         # Code taken directly from: "Inverting permutations in Python" at
