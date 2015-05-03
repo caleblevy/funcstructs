@@ -17,7 +17,9 @@ __all__ = [
 ]
 
 
-# Modification of werkzeug.cached_property
+# Modification of werkzeug.cached_property. Here we have chosen not to
+# implement a setter for stronger interface guarantees that the properties will
+# not change.
 class cached_property(property):
 
     """A decorator that converts a function into a lazy property.  The
@@ -54,7 +56,7 @@ class Endofunction(bases.Tuple):
     @classmethod
     def from_tree(cls, tree):
         """Make an endofunction representing a tree."""
-        return cls(tree.labelled_sequence())
+        return cls(tree._labelling())
 
     def __str__(self):
         funcstring = self.__class__.__name__+'(['

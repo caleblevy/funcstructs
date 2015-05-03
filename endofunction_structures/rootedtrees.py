@@ -121,6 +121,19 @@ class OrderedTree(bases.Tuple):
         """Return the unordered tree corresponding to the rooted tree."""
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
+    def _labelling(self):
+        yield 0
+        height_prev = 1
+        grafting_point = {0: 0}  # Most recent node found at height h.
+        for node, height in enumerate(self[1:], start=1):
+            if height > height_prev:
+                yield grafting_point[height_prev-1]
+                height_prev += 1
+            else:
+                yield grafting_point[height-2]
+                height_prev = height
+            grafting_point[height-1] = node
+
     def labelled_sequence(self, labels=None):
         """Return an endofunction whose structure corresponds to the rooted
         tree. The root is 0 by default, but can be permuted according to a
@@ -128,21 +141,7 @@ class OrderedTree(bases.Tuple):
         """
         if labels is None:
             labels = range(len(self))
-        height = max(self)
-        labelling = [0]*len(self)
-        labelling[0] = labels[0]
-        height_prev = 1
-        # Most recent node found at height h. Where to graft the next node to.
-        grafting_point = [0]*height
-        for node, height in enumerate(self[1:], start=1):
-            if height > height_prev:
-                labelling[node] = labels[grafting_point[height_prev-1]]
-                height_prev += 1
-            else:
-                labelling[node] = labels[grafting_point[height-2]]
-                height_prev = height
-            grafting_point[height-1] = node
-        return labelling
+        return (labels[x] for x in self._labelling())
 
     def branches(self):
         """Return each major subbranch of a tree."""
