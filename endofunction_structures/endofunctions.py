@@ -246,8 +246,3 @@ class TransformationMonoid(bases.Enumerable):
 
     def __len__(self):
         return self.n ** self.n
-
-    def __contains__(self, f):
-        if isinstance(f, Endofunction):
-            return len(f) == self.n
-        return False
