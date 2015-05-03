@@ -66,16 +66,18 @@ class Endofunction(bases.Tuple):
         return funcstring
 
     def __mul__(self, other):
-        """f * g <==> Endofunction(f[g[x]] for x in g.domain)"""
+        """(f * g)[x] <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
         return other.__class__(self[x] for x in other)
 
     @cached_property
     def domain(self):
+        """The set of objects for which f[x] is defined"""
         return frozenset(range(len(self)))
 
     @cached_property
     def image(self):
+        """f.image <==> {f[x] for x in f.domain}"""
         return frozenset(self)
 
     @cached_property
@@ -88,7 +90,7 @@ class Endofunction(bases.Tuple):
 
     @cached_property
     def imagepath(self):
-        """f.imagepath[n] <==> len(set(f**n)) for n in range(1, len(f))"""
+        """f.imagepath[n] <==> len((f**n).image)"""
         cardinalities = [len(self.image)]
         f = self
         card_prev = len(self)
@@ -219,7 +221,7 @@ class SymmetricFunction(Endofunction):
 
 
 def randperm(n):
-    """Returns a random permutation of range(n)."""
+    """Return a random permutation of range(n)."""
     r = list(range(n))  # Explicitly call list for python 3 compatibility.
     random.shuffle(r)
     return SymmetricFunction(r)
@@ -245,7 +247,7 @@ class TransformationMonoid(bases.Enumerable):
     def __len__(self):
         return self.n ** self.n
 
-    def __contains__(self, other):
-        if isinstance(other, Endofunction):
-            return self.n == other.n
+    def __contains__(self, f):
+        if isinstance(f, Endofunction):
+            return len(f) == self.n
         return False
