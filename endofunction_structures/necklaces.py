@@ -53,6 +53,8 @@ class Necklace(bases.Tuple):
     Different necklaces may have different periodicity, as seen above.
     """
 
+    __slots__ = ()
+
     def __new__(cls, strand, preordered=False):
         """Initialize the necklace. Items in the necklace must be hashable
         (immutable), otherwise the equivalence class could change
