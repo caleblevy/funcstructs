@@ -49,7 +49,7 @@ class TreeEnumerationTests(unittest.TestCase):
             self.assertEqual(count, len(forests))
             self.assertEqual(count, forest_count)
 
-    def test_tree_degeneracy(self):
+    def test_tree_degeneracies(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
@@ -61,33 +61,19 @@ class TreeEnumerationTests(unittest.TestCase):
             self.assertEqual(n**(n-1), labelled_treecount)
             self.assertEqual(n**(n-1), rooted_treecount)
 
-    def test_equality(self):
-        node_counts = [4, 5, 6, 10]
-        enumerators = [TreeEnumerator, ForestEnumerator]
-        for n in node_counts:
-            for enum1 in enumerators:
-                for m in node_counts:
-                    for enum2 in enumerators:
-                        if n == m and enum1 == enum2:
-                            self.assertEqual(enum1(n), enum2(m))
-                        else:
-                            self.assertNotEqual(enum1(n), enum2(m))
-
 
 class TreeTests(unittest.TestCase):
 
     def test_rooted_tree_strings(self):
+        """Ensure Unordered trees are properly formatted."""
         T = RootedTree.from_levels(
             [1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
         T2 = RootedTree.from_levels(range(1, 5))
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
-    def test_rooted_tree_bool(self):
-        self.assertTrue(RootedTree())
-        self.assertTrue(RootedTree([RootedTree()]))
-
     def test_reprs(self):
+        """Test repr(Tree) == Tree for various trees."""
         TreeSeqs = [[1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5],
                     [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
                     range(1, 5)]
