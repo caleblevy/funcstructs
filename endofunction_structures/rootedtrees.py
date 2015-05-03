@@ -115,14 +115,10 @@ class OrderedTree(bases.Tuple):
         """Return a representation of the rooted tree via nested lists. This is
         a novelty method, and should not be used for anything serious.
         """
-        if not self._branch_sequences():
-            return []
         return [subtree.bracket_form() for subtree in self.subtrees()]
 
     def unordered(self):
         """Return the unordered tree corresponding to the rooted tree."""
-        if not self._branch_sequences():
-            return RootedTree()
         return RootedTree(subtree.unordered() for subtree in self.subtrees())
 
     def labelled_sequence(self, labels=None):
