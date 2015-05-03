@@ -125,3 +125,11 @@ class TreeTests(unittest.TestCase):
         RT = T.unordered()
         TRT = RT.ordered_form()
         self.assertEqual(T, TRT)
+
+    def test_height_groups(self):
+        """Test nodes are grouped correctly by their height"""
+        T = OrderedTree([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
+        hg = [[0], [1, 14], [2, 3, 13, 15], [4, 5, 6, 11, 12], [7, 10], [8, 9]]
+        for height, group in enumerate(T.height_groups(), start=1):
+            self.assertSequenceEqual(hg[height-1], group)
+            self.assertEqual(height, list(set(map(T.__getitem__, group)))[0])

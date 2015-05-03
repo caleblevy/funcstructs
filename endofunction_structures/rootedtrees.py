@@ -113,8 +113,7 @@ class OrderedTree(bases.Tuple):
 
     def bracket_form(self):
         """Return a representation of the rooted tree via nested lists. This is
-        a novelty method, and should not be used for anything serious.
-        """
+        a novelty method, and should not be used for anything serious."""
         return [subtree.bracket_form() for subtree in self.subtrees()]
 
     def unordered(self):
@@ -133,6 +132,14 @@ class OrderedTree(bases.Tuple):
                 yield grafting_point[height-2]
                 height_prev = height
             grafting_point[height-1] = node
+
+    def height_groups(self):
+        """Return nodes grouped by height above the root in breadth-first
+        traversal order."""
+        height_groups = [[] for _ in range(max(self))]
+        for node, height in enumerate(self):
+            height_groups[height-1].append(node)
+        return height_groups
 
     def labelled_sequence(self, labels=None):
         """Return an endofunction whose structure corresponds to the rooted
