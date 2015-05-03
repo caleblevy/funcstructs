@@ -71,8 +71,8 @@ def attached_treenodes(func, x, node_keys=False):
         return sorted(func.attached_treenodes[x], key=node_keys.get)
 
 
-def tree_sequence(func, x, _node_keys=False):
-    """Return the level sequence of the tree attached to x from func"""
+def _tree_sequence(func, x, _node_keys=False):
+    """Return the dominant sequence of the tree attached to x from func"""
     level_map = node_levels(func, x)
     node_stack = [x]
     level_sequence = []
@@ -84,7 +84,24 @@ def tree_sequence(func, x, _node_keys=False):
 
 
 def sorted_tree_sequence(func, x):
-    return tree_sequence(func, x, _node_keys=nodekeys(func, x))
+    return _tree_sequence(func, x, _node_keys=nodekeys(func, x))
+
+
+def tree_sequence(func, x):
+    """Return the level sequence of the tree attached to x from func"""
+    node_stack = [x]
+    level_sequence = []
+    level = 1
+    node_levels = {x: level}
+    while node_stack:
+        x = node_stack.pop()
+        level = node_levels[x]
+        level_sequence.append(level)
+        level += 1
+        for y in func.attached_treenodes[x]:
+            node_stack.append(y)
+            node_levels[y] = level
+    return level_sequence
 
 
 class TestTreeSequences(unittest.TestCase):
