@@ -132,3 +132,4 @@ class TreeTests(unittest.TestCase):
         for height, group in enumerate(T.height_groups(), start=1):
             self.assertSequenceEqual(hg[height-1], group)
             self.assertEqual(height, list(set(map(T.__getitem__, group)))[0])
+        self.assertEqual(hg, OrderedTree([t-1 for t in T]).height_groups())
