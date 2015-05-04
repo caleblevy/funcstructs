@@ -67,27 +67,20 @@ class Multiset(dict):
         element is raised to the power of the multiplicity if it is greater
         than 1. """
         if len(self) == 0:
-            return '{class_name}()'.format(class_name=self.__class__.__name__)
-        else:
-            format_single = '{elem!r}'
-            format_mult = '{elem!r}^{mult}'
-            strings = []
-            for elem, mult in self.items():
-                # Hack to make nested multisets print in bracket form.
-                if isinstance(elem, self.__class__):
-                    mstring = str(elem)
-                    if mult > 1:
-                        mstring += '^%s' % mult
-                    strings.append(mstring)
-                    continue
-                if mult > 1:
-                    strings.append(format_mult.format(elem=elem, mult=mult))
-                else:
-                    strings.append(format_single.format(elem=elem))
-            return '{%s}' % ', '.join(strings)
+            return self.__class__.__name__ + '()'
+        contents = []
+        for el, mult in self.items():
+            if isinstance(el, self.__class__):
+                el_str = str(el)
+            else:
+                el_str = repr(el)
+            if mult > 1:
+                el_str += '^%s' % mult
+            contents.append(el_str)
+        return '{%s}' % ', '.join(contents)
 
     def split(self):
-        """ Splits the multiset into element-multiplicity pairs. """
+        """Splits the multiset into element-multiplicity pairs."""
         y = list(self.keys())
         d = [self[el] for el in y]
         return y, d
@@ -95,6 +88,7 @@ class Multiset(dict):
     most_common = collections.Counter.__dict__['most_common']
 
     def sort_split(self):
+        """Same as Multiset.split with both lists sorted by elements"""
         y = []
         d = []
         for elem, mult in sorted(self.items(), key=operator.itemgetter(0)):
@@ -103,5 +97,5 @@ class Multiset(dict):
         return y, d
 
     def degeneracy(self):
-        """ Number of different representations of the same multiset. """
+        """Number of different representations of the same multiset."""
         return counts.factorial_prod(self.values())
