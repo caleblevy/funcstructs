@@ -18,7 +18,7 @@ def node_levels(func, x, ordered=False):
     node_queue = collections.deque([x])
     jump_node = x
     level_map = {} if not ordered else collections.OrderedDict()
-    level = 1
+    level = 0
     while node_queue:
         x = node_queue.popleft()
         level_map[x] = level
@@ -91,7 +91,7 @@ def tree_sequence(func, x):
     """Return the level sequence of the tree attached to x from func"""
     node_stack = [x]
     level_sequence = []
-    level = 1
+    level = 0
     node_levels = {x: level}
     while node_stack:
         x = node_stack.pop()
@@ -113,13 +113,13 @@ class TestTreeSequences(unittest.TestCase):
                 DominantTree.from_func(g, x),
                 DominantTree(tree_sequence(g, x))
             )
-        t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
+        t = DominantTree([0, 1, 2, 3, 4, 1, 2, 3, 2])
         f = Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7])
         l = DominantTree(tree_sequence(f, 5))
         self.assertEqual(t, l)
 
     def test_sorting(self):
-        t = DominantTree([1, 2, 3, 4, 5, 2, 3, 4, 3])
+        t = DominantTree([0, 1, 2, 3, 4, 1, 2, 3, 2])
         f = Endofunction([4, 3, 5, 5, 3, 5, 8, 2, 7])
         lsort = OrderedTree(sorted_tree_sequence(f, 5))
         self.assertEqual(t, DominantTree(lsort, preordered=True))

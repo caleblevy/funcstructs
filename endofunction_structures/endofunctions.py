@@ -159,7 +159,7 @@ class Endofunction(bases.Tuple):
                     descendants[x].add(f)
         return tuple(map(frozenset, descendants))
 
-    def _attached_level_sequence(self, node, level=1):
+    def _attached_level_sequence(self, node, level=0):
         """Return the level sequence of the rooted tree formed from the graph
         of all noncyclic nodes whose iteration paths pass through node"""
         level_sequence = [level]

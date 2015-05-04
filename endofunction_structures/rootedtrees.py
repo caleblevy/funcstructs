@@ -232,8 +232,9 @@ class DominantTree(OrderedTree):
 class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
-    def __init__(self, node_count):
+    def __init__(self, node_count, root_height=0):
         super(TreeEnumerator, self).__init__(node_count, None, 1)
+        self.__root_height = root_height
 
     def __iter__(self):
         """Generates the dominant representatives of each unordered tree in
@@ -244,7 +245,7 @@ class TreeEnumerator(bases.Enumerable):
         "Constant time generation of rooted trees." Siam Journal of
         Computation, Vol. 9, No. 4. November 1980.
         """
-        tree = list(range(1, self.n+1))
+        tree = list(range(self.__root_height, self.n+self.__root_height))
         yield DominantTree(tree, preordered=True)
         if self.n > 2:
             while tree[1] != tree[2]:
@@ -293,7 +294,7 @@ class ForestEnumerator(bases.Enumerable):
 
     @property
     def cardinality(self):
-        return TreeEnumerator(self.n+1).cardinality
+        return TreeEnumerator(self.n+1, -1).cardinality
 
 
 class PartitionForests(bases.Enumerable):

@@ -144,7 +144,7 @@ class Funcstruct(multiset.Multiset):
             cardinalities += 1
             for subseq in subsequences.increasing(tree):
                 k = len(subseq) - 1
-                k -= 1 if subseq[0] is 1 else 0
+                k -= 1 if subseq[0] is 0 else 0
                 if k > 0:
                     # Microoptimization: memoize the calls to range
                     cardinalities[:k] += range(k, 0, -1)

@@ -14,16 +14,16 @@ class FuncstructTests(unittest.TestCase):
         """Convert struct to func and back, and check we get the same thing."""
         struct = Funcstruct([
             necklaces.Necklace([
-                rootedtrees.DominantTree([1, 2, 3]),
-                rootedtrees.DominantTree([1, 2, 2])
+                rootedtrees.DominantTree([0, 1, 2]),
+                rootedtrees.DominantTree([0, 1, 1])
             ]),
             necklaces.Necklace([
-                rootedtrees.DominantTree([1, 2])
+                rootedtrees.DominantTree([0, 1])
             ]),
             necklaces.Necklace([
-                rootedtrees.DominantTree([1, 2, 2]),
-                rootedtrees.DominantTree([1]),
-                rootedtrees.DominantTree([1, 2, 2])
+                rootedtrees.DominantTree([0, 1, 1]),
+                rootedtrees.DominantTree([0]),
+                rootedtrees.DominantTree([0, 1, 1])
             ])
         ])
         self.assertEqual(

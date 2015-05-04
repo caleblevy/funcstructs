@@ -182,7 +182,7 @@ def branch_groups(tree):
 
 def label_groups(tree):
     """ Order in which we label and group the nodes of the rooted tree. """
-    if tree[0] == 1:
+    if tree[0] == 0:
         yield [0]
     for subtree, inds in branch_groups(tree):
         yield inds
