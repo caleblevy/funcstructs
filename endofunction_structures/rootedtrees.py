@@ -118,16 +118,16 @@ class OrderedTree(bases.Tuple):
 
     def _labelling(self):
         yield 0
-        height_prev = 1
+        height_prev = self[0]
         grafting_point = {0: 0}  # Most recent node found at height h.
         for node, height in enumerate(self[1:], start=1):
             if height > height_prev:
-                yield grafting_point[height_prev-1]
+                yield grafting_point[height_prev-self[0]]
                 height_prev += 1
             else:
-                yield grafting_point[height-2]
+                yield grafting_point[height-self[1]]
                 height_prev = height
-            grafting_point[height-1] = node
+            grafting_point[height-self[0]] = node
 
     def labelled_sequence(self, labels=None):
         """Return an endofunction whose structure corresponds to the rooted

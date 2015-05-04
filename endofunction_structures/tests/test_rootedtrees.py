@@ -114,9 +114,8 @@ class TreeTests(unittest.TestCase):
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
                 treefunc = endofunctions.Endofunction.from_tree(tree)
-                for _ in range(10):
-                    rtreefunc = endofunctions.randconj(treefunc)
-                    self.assertEqual(tree, DominantTree.from_func(rtreefunc))
+                rtreefunc = endofunctions.randconj(treefunc)
+                self.assertEqual(tree, DominantTree.from_func(rtreefunc))
 
     def test_rootedtree_conversion(self):
         """Test conversion between rooted and unordered trees is seamless."""
@@ -132,4 +131,18 @@ class TreeTests(unittest.TestCase):
         for height, group in enumerate(T.height_groups(), start=1):
             self.assertSequenceEqual(hg[height-1], group)
             self.assertEqual(height, list(set(map(T.__getitem__, group)))[0])
-        self.assertEqual(hg, OrderedTree([t-1 for t in T]).height_groups())
+
+    def test_height_independence(self):
+        """Check that tree methods are unaffected by root height"""
+        T = OrderedTree([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
+        hg = list(T.height_groups())
+        lt = list(T.labelled_sequence())
+        for i in range(-7, 7):
+            self.assertSequenceEqual(
+                hg,
+                list(OrderedTree([t-i for t in T]).height_groups())
+            )
+            self.assertSequenceEqual(
+                lt,
+                list(OrderedTree([t-i for t in T]).labelled_sequence())
+            )
