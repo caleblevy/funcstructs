@@ -37,10 +37,10 @@ class RootedTree(multiset.Multiset):
             raise TypeError("subtrees must be rooted trees")
         return self
 
-    @staticmethod
-    def from_levels(level_sequence):
-        """Return the unordered tree corresponding to the level sequence."""
-        return OrderedTree(level_sequence).unordered()
+    @classmethod
+    def from_leveltree(cls, tree):
+        """Return the unordered tree corresponding to the ordered tree."""
+        return tree.traverse_map(cls)
 
     def __bool__(self):
         return True  # All trees have roots, thus aren't empty
@@ -112,14 +112,9 @@ class OrderedTree(bases.Tuple):
         for branch_sequence in self._branch_sequences():
             yield [node-1 for node in branch_sequence]
 
-    def bracket_form(self):
-        """Return a representation of the rooted tree via nested lists. This is
-        a novelty method, and should not be used for anything serious."""
-        return [branch.bracket_form() for branch in self.branches()]
-
-    def unordered(self):
-        """Return the unordered tree corresponding to the rooted tree."""
-        return RootedTree(branch.unordered() for branch in self.branches())
+    def traverse_map(self, mapping=list):
+        """Apply mapping to the sequence of mapping applied to the subtrees."""
+        return mapping(tree.traverse_map(mapping) for tree in self.branches())
 
     def _labelling(self):
         yield 0
@@ -203,6 +198,11 @@ class OrderedTree(bases.Tuple):
         branch_list.sort(reverse=True)
         # Must make list, else they won't be sorted properly
         return list(chain([self[0]], chain.from_iterable(branch_list)))
+
+
+def unordered_tree(level_sequence):
+    """Return the unordered tree corresponding to the level sequence."""
+    return RootedTree.from_leveltree(OrderedTree(level_sequence))
 
 
 class DominantTree(OrderedTree):

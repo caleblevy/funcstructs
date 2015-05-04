@@ -3,7 +3,7 @@ import unittest
 from .. import counts, endofunctions
 
 from ..rootedtrees import (
-    RootedTree,
+    RootedTree, unordered_tree,
     OrderedTree,
     DominantTree,
     TreeEnumerator,
@@ -57,7 +57,7 @@ class TreeEnumerationTests(unittest.TestCase):
             nfac = counts.factorial(n)
             for tree in TreeEnumerator(n):
                 labelled_treecount += nfac//tree.degeneracy()
-                rooted_treecount += nfac//tree.unordered().degeneracy()
+                rooted_treecount += nfac//unordered_tree(tree).degeneracy()
             self.assertEqual(n**(n-1), labelled_treecount)
             self.assertEqual(n**(n-1), rooted_treecount)
 
@@ -66,9 +66,8 @@ class TreeTests(unittest.TestCase):
 
     def test_rooted_tree_strings(self):
         """Ensure Unordered trees are properly formatted."""
-        T = RootedTree.from_levels(
-            [1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        T2 = RootedTree.from_levels(range(1, 5))
+        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T2 = unordered_tree(range(1, 5))
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
@@ -78,7 +77,7 @@ class TreeTests(unittest.TestCase):
                     [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
                     range(1, 5)]
         for seq in TreeSeqs:
-            T_unordered = RootedTree.from_levels(seq)
+            T_unordered = unordered_tree(seq)
             T_ordered = OrderedTree(seq)
             T_dominant = DominantTree(seq)
             self.assertEqual(T_unordered, eval(repr(T_unordered)))
@@ -95,7 +94,7 @@ class TreeTests(unittest.TestCase):
             pforests = PartitionForests(partition)
             self.assertEqual(pforests, eval(repr(pforests)))
 
-    def test_bracket_form(self):
+    def test_traverse_map(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
             OrderedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 4]),
@@ -108,7 +107,7 @@ class TreeTests(unittest.TestCase):
             [[[[[], [], [], [], []]]], []]
         )
         for tree, nest in zip(trees, nestedforms):
-            self.assertSequenceEqual(nest, tree.bracket_form())
+            self.assertSequenceEqual(nest, tree.traverse_map())
 
     def test_treefuncs(self):
         """Tests attached tree nodes and canonical_treeorder in one go."""
@@ -122,7 +121,7 @@ class TreeTests(unittest.TestCase):
     def test_rootedtree_conversion(self):
         """Test conversion between rooted and unordered trees is seamless."""
         T = DominantTree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        RT = T.unordered()
+        RT = RootedTree.from_leveltree(T)
         TRT = RT.ordered_form()
         self.assertEqual(T, TRT)
 
