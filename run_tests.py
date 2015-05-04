@@ -6,10 +6,12 @@ import unittest
 test_finder = unittest.TestLoader()
 test_runner = unittest.TextTestRunner()
 
-test_finder.discover('.')
-print("\nTesting endofunction_structures:")
-test_runner.run(test_finder.discover('./endofunction_structures'))
-print("\nTesting funcgraphs:")
-test_runner.run(test_finder.discover('./funcgraphs'))
-print("\nTesting prototypes:")
-test_runner.run(test_finder.discover('./prototyping', pattern='*.py'))
+
+if __name__ == '__main__':
+    test_finder.discover('.')
+    print("\nTesting endofunction_structures:")
+    test_runner.run(test_finder.discover('./endofunction_structures'))
+    print("\nTesting funcgraphs:")
+    test_runner.run(test_finder.discover('./funcgraphs'))
+    print("\nTesting prototypes:")
+    test_runner.run(test_finder.discover('./prototyping', pattern='*.py'))
