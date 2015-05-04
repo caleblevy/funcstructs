@@ -159,7 +159,7 @@ class EnumerableTests(unittest.TestCase):
         for i, e in enumerate(self.enums):
             dic[e] = i
         elen = len(dic)
-        dic[EndofunctionStructures(100, [3, 3, 2])] = 2100
+        dic[EndofunctionStructures(100, [3, 3, 2])] = -2100
         self.assertEqual(elen, len(dic))
         self.assertIn(-2100, dic.values())
         dic[EndofunctionStructures(10)] = 1
