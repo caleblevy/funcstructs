@@ -246,9 +246,7 @@ class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, node_count):
-        if node_count < 1:
-            raise ValueError("Every tree requires at least one node.")
-        super(TreeEnumerator, self).__init__(node_count)
+        super(TreeEnumerator, self).__init__(node_count, None, 1)
 
     def __iter__(self):
         """Generates the dominant representatives of each unordered tree in
@@ -278,8 +276,7 @@ class TreeEnumerator(bases.Enumerable):
         """Returns the number of rooted tree structures on n nodes. Algorithm
         featured without derivation in Finch, S. R. "Otter's Tree Enumeration
         Constants." Section 5.6 in "Mathematical Constants", Cambridge,
-        England: Cambridge University Press, pp. 295-316, 2003.
-        """
+        England: Cambridge University Press, pp. 295-316, 2003."""
         T = [0, 1] + [0]*(self.n - 1)
         for n in range(2, self.n + 1):
             for i in range(1, self.n):
@@ -296,9 +293,7 @@ class ForestEnumerator(bases.Enumerable):
     """Represents the class of collections of rooted trees on n nodes."""
 
     def __init__(self, node_count):
-        if node_count < 0:
-            raise ValueError("A forest requires a number of nodes.")
-        super(ForestEnumerator, self).__init__(node_count)
+        super(ForestEnumerator, self).__init__(node_count, None, 1)
 
     def __iter__(self):
         """Any rooted tree on n+1 nodes can be identically described as a

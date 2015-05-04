@@ -1,8 +1,9 @@
 import unittest
+from math import factorial
 
 import numpy as np
 
-from .. import counts, endofunctions, necklaces, rootedtrees
+from .. import endofunctions, necklaces, rootedtrees
 
 from ..funcstructs import Funcstruct, EndofunctionStructures
 
@@ -48,13 +49,13 @@ class FuncstructTests(unittest.TestCase):
     def test_degeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
         for i in range(1, 8):
-            fac = counts.factorial(i)
+            fac = factorial(i)
             func_count = 0
             for struct in EndofunctionStructures(i):
                 func_count += fac//struct.degeneracy
             self.assertEqual(i**i, func_count)
 
-    def test_partition_order_unimportant(self):
+    def test_partition_order_is_unimportant(self):
         """Test for equivalence of Funcstruct representations."""
         self.assertEqual(
             EndofunctionStructures(10, [3, 3, 2]),
@@ -70,25 +71,10 @@ class FuncstructTests(unittest.TestCase):
         )
 
     def test_repr(self):
-        # Bring classes directly into namespace for eval
+        """Ensure an endofunction structure evaluates to itself"""
         eval_map = {
             'DominantTree': rootedtrees.DominantTree,
             'Necklace': necklaces.Necklace
         }
         struct = Funcstruct(endofunctions.randfunc(30))
         self.assertEqual(struct, eval(repr(struct), globals(), eval_map))
-        node_counts = [3, 5, 10, 50]
-        for n in node_counts:
-            structs = EndofunctionStructures(n)
-            self.assertEqual(structs, eval(repr(structs)))
-        s = EndofunctionStructures([10, [2, 2, 3]])
-        self.assertEqual(s, eval(repr(s)))
-
-    def test_keyability(self):
-        dic = {}
-        a = EndofunctionStructures(10)
-        dic[a] = 1
-        dic[EndofunctionStructures(10, [10])] = 2
-        self.assertEqual(len(dic), 2)
-        dic[EndofunctionStructures(10)] += 1
-        self.assertEqual(len(dic), 2)

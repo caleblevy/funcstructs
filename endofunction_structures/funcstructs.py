@@ -203,7 +203,7 @@ class EndofunctionStructures(bases.Enumerable):
     """Represents the class of all endofunction structures."""
 
     def __init__(self, node_count, cycle_type=None):
-        super(EndofunctionStructures, self).__init__(node_count, cycle_type)
+        super(EndofunctionStructures, self).__init__(node_count, cycle_type, 0)
 
     def __iter__(self):
         if not self.partition:

@@ -238,9 +238,7 @@ class TransformationMonoid(bases.Enumerable):
     """Set of all endofunctions on n elements."""
 
     def __init__(self, set_size):
-        if not isinstance(set_size, int) or set_size < 1:
-            raise TypeError("Sets must have positive integer size.")
-        super(TransformationMonoid, self).__init__(set_size)
+        super(TransformationMonoid, self).__init__(set_size, None, 0)
 
     def __iter__(self):
         for func in productrange.productrange([self.n] * self.n):

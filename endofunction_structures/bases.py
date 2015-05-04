@@ -1,4 +1,4 @@
-"""Base classes for implementing endofunction_structures.
+"""Base classes for implementing endofunction structures.
 
 Caleb Levy, 2015.
 """
@@ -18,6 +18,7 @@ class Tuple(tuple):
         return self.__class__.__name__+'(%s)' % list(self)
 
     def __eq__(self, other):
+        """Tuples are equal iff they are of the same type and content"""
         if type(self) is type(other):
             return tuple.__eq__(self, other)
         return False
@@ -50,21 +51,33 @@ class Enumerable(collections.Iterable):
     by integers and partitions"""
 
     @abc.abstractmethod
-    def __init__(self, n, partition=None):
-        self.n = n
-        self.partition = multiset.Multiset(partition)
+    def __init__(self, n, partition, lower_bound=-float('inf')):
+        """Enumerator parametrized by an integer greater than lower_bound and
+        multiset of objects."""
+        if n is not None and n < lower_bound:
+            raise ValueError(
+                "Cannot define %r on %s nodes" % (self.__class__.__name__, n))
+        self.__n = n
+        self.__partition = multiset.Multiset(partition)
+
+    @property
+    def n(self):
+        """Integer parameter, if any."""
+        return self.__n
+
+    @property
+    def partition(self):
+        """Multiset parameter, if any."""
+        return self.__partition
 
     def __eq__(self, other):
-        # tuple.__add__ can handle inherited tuples
+        """Enumerables are equal iff they have the same type and paremeters"""
         if type(self) is type(other):
             return self.n == other.n and self.partition == other.partition
         return False
 
     def __ne__(self, other):
         return not self == other
-
-    def __lt__(self, other):
-        return NotImplemented
 
     def __hash__(self):
         return hash((self.n, self.partition))

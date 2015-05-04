@@ -50,30 +50,6 @@ class NecklaceTests(unittest.TestCase):
         """Test that our hash is rotationally invariant"""
         self.assertEqual(hash(Necklace([1, 2, 3])), hash(Necklace([3, 1, 2])))
 
-    def test_repr(self):
-        n = Necklace([1, 2, 3, 1, 2, 3])
-        self.assertEqual(n, eval(repr(n)))
-
-    def test_keyability(self):
-        dic = {}
-        neck = Necklace([1, 2, 3, 1, 2, 3])
-        dic[neck] = 1
-        dic[neck] += 1
-        self.assertEqual(1, len(dic))
-        self.assertEqual(dic[neck], 2)
-
-        neck2 = Necklace([3, 1, 2, 3, 1, 2])
-        dic[neck2] += 1
-        self.assertEqual(dic[neck], 3)
-        self.assertEqual(1, len(dic))
-
-        neck3 = Necklace([3, 2, 1, 3, 2, 1])
-        with self.assertRaises(KeyError):
-            dic[neck3] += 1
-
-        dic[neck3] = 7
-        self.assertEqual(2, len(dic))
-
 
 class FixedContentNecklaceTests(unittest.TestCase):
 
@@ -125,20 +101,9 @@ class FixedContentNecklaceTests(unittest.TestCase):
             self.assertEqual(0, count)
 
     def test_ordering(self):
+        """Test necklaces are lexicographically sorted"""
         necks = FixedContentNecklaces([1]*1 + [2]*2 + [3]*3)
         for necklace in necks:
             necklace = list(necklace)
             normalized_necklace = Lyndon.SmallestRotation(necklace)
             self.assertSequenceEqual(normalized_necklace, necklace)
-
-    def test_keyability(self):
-        dic = dict()
-        a = FixedContentNecklaces([1, 1, 1, 2, 3])
-        dic[a] = 1
-        dic[FixedContentNecklaces([3, 1, 1, 2, 1])] = 2
-        self.assertEqual(len(dic), 1)
-        set(a)
-        dic[a] += 1
-        self.assertEqual(len(dic), 1)
-        dic[FixedContentNecklaces([4, 4, 3, 2, 1])] = 7
-        self.assertEqual(len(dic), 2)

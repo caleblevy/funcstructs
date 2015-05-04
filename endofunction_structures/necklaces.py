@@ -106,7 +106,15 @@ class FixedContentNecklaces(bases.Enumerable):
     def __init__(self, content):
         """Form a generator of all necklaces with beads of a given multiset."""
         super(FixedContentNecklaces, self).__init__(None, content)
-        self.elements, self.multiplicities = self.partition.sort_split()
+        self.__elements, self.__multiplicities = self.partition.sort_split()
+
+    @property
+    def elements(self):
+        return self.__elements
+
+    @property
+    def multiplicities(self):
+        return self.__multiplicities
 
     @classmethod
     def from_partition(cls, partition):

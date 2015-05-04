@@ -15,6 +15,7 @@ class EndofunctionTests(unittest.TestCase):
     # Imagepath Tests
 
     def test_iterate(self):
+        """Test Endofunctions can be properly iterated"""
         sigma = Endofunction([1, 2, 3, 0, 5, 6, 4])  # Perm (0,1,2,3)(4,5,6)
         identity = Endofunction(range(7))
         for I in range(1, 11):  # Order of cycle is 12
@@ -107,21 +108,3 @@ class EndofunctionTests(unittest.TestCase):
         self.assertEqual(func, Endofunction.from_tree(tree))
         with self.assertRaises(ValueError):
             SymmetricFunction.from_tree(OrderedTree(range(1, 6)))
-
-    def test_keyability(self):
-        dic = {}
-        a = Endofunction(range(10))
-        b = Endofunction([0, 0]+list(range(8)))
-        dic[a] = 1
-        dic[Endofunction(range(10))] += 1
-        self.assertEqual(len(dic), 1)
-        dic[b] = 2
-        self.assertEqual(len(dic), 2)
-        c = SymmetricFunction(range(10))
-        dic[c] = 7
-        self.assertEqual(len(dic), 3)
-        dic[c.inverse] = 2
-        self.assertEqual(len(dic), 3)
-        self.assertEqual(dic[c], 2)
-        t = TransformationMonoid(7)
-        self.assertEqual(1, len(set([t, t, TransformationMonoid(7)])))
