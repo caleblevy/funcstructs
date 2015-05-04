@@ -188,7 +188,7 @@ class OrderedTree(bases.Tuple):
 
     def chop(self):
         """Return a multiset of the input tree's main sub branches."""
-        return multiset.Multiset(self.subtrees())
+        return multiset.Multiset(self.branches())
 
     def _dominant_sequence(self):
         """Return the dominant rooted tree corresponding to self."""
