@@ -1,11 +1,13 @@
 import unittest
+import collections
+import random
 
 from ..multiset import Multiset
 
 
-def compare_Multiset_string(b):
-    s = str(b)
-    return set(s.lstrip('{').rstrip('}').split(', '))
+def string_components(b):
+    """Compare multiset strings efficiently"""
+    return set(str(b).lstrip('{').rstrip('}').split(', '))
 
 
 class MultisetTests(unittest.TestCase):
@@ -15,35 +17,55 @@ class MultisetTests(unittest.TestCase):
         basemultiset('abracadabra')        # create from an Iterable
     """
 
+    abra = Multiset("abracadabra")
+    nest = Multiset([1, 2, 2, 3, 3, abra, abra])
+    empty = Multiset()
+    nest2 = Multiset([nest, empty, 4])
+
+    msets = [abra, nest, empty, nest2]
+
     def test_init(self):
         """Test the multiset initializer"""
-        b = Multiset('abracadabra')
-        self.assertTrue(b['a'] == 5)
-        self.assertTrue(b['b'] == 2)
-        self.assertTrue(b['r'] == 2)
-        self.assertTrue(b['c'] == 1)
-        self.assertTrue(b['d'] == 1)
-        b2 = Multiset(b)
-        self.assertTrue(b2 == b)
+        mcounts = [
+            {'a': 5, 'b': 2, 'r': 2, 'c': 1, 'd': 1},
+            {1: 1, 2: 2, 3: 2, self.abra: 2},
+            {},
+            {self.nest: 1, self.empty: 1, 4: 1}
+        ]
+        for count, mset in zip(mcounts, self.msets):
+            for el, mult in count.items():
+                self.assertEqual(mult, mset[el])
+                # Ensure multisets return themselves
+                self.assertEqual(mult, Multiset(mset)[el])
 
     def test_repr(self):
         """Test that eval(repr(self)) == self"""
-        ms = Multiset()
-        self.assertTrue(ms == eval(repr(ms)))
-        ms = Multiset('abracadabra')
-        self.assertTrue(ms == eval(repr(ms)))
+        for mset in self.msets:
+            self.assertEqual(mset, eval(repr(mset)))
+
+    def test_equality(self):
+        """Test Multisets are equal iff their elements are equal"""
+        for i, ms1 in enumerate(self.msets):
+            mdup = list(ms1)
+            # Test subsets do not compare equal
+            if mdup:
+                mdup.append(mdup[0])
+                self.assertNotEqual(ms1, Multiset(mdup))
+            for j, ms2 in enumerate(self.msets):
+                if i == j:
+                    self.assertEqual(ms1, ms2)
+                else:
+                    self.assertNotEqual(ms1, ms2)
 
     def test_str(self):
-        abra = Multiset('abracadabra')
-        self.assertSequenceEqual(str(Multiset()), 'Multiset()')
-        self.assertTrue("'a'^5" in str(abra))
-        self.assertTrue("'b'^2" in str(abra))
-        self.assertTrue("'c'" in str(abra))
-        abra_elems = set(("'a'^5", "'b'^2", "'r'^2", "'c'", "'d'"))
-        self.assertEqual(compare_Multiset_string(Multiset('abracadabra')),
-                         abra_elems)
+        """Test string behaves according to specification"""
+        self.assertSequenceEqual('Multiset()', str(self.empty))
+        self.assertEqual(
+            {"'a'^5", "'b'^2", "'r'^2", "'c'", "'d'"},
+            string_components(self.abra)
+        )
 
-    def test_count(self):
+    def test_keying(self):
         """Check that we record the correct number of elements."""
         ms = Multiset('abracadabra')
         self.assertEqual(5, ms['a'])
@@ -51,62 +73,64 @@ class MultisetTests(unittest.TestCase):
             self.assertEqual(0, ms['x'])
 
     def test_most_common(self):
-        abra = Multiset('abracadabra')
-        abra_counts = [('a', 5), ('b', 2), ('r', 2), ('c', 1), ('d', 1)]
+        """Test inherited method most_common behaves correctly"""
+        a = collections.Counter(list(self.abra))
+        b = collections.Counter(list(self.nest))
+        self.assertEqual(a.most_common(1), self.abra.most_common(1))
         self.assertEqual(
-            sorted(abra.most_common(), key=lambda e: (-e[1], e[0])),
-            abra_counts
+            set(a.most_common()[1:3]),
+            set(self.abra.most_common()[1:3])
         )
         self.assertEqual(
-            sorted(abra.most_common(3), key=lambda e: (-e[1], e[0])),
-            abra_counts[:3]
+            set(b.most_common(3)),
+            set(self.nest.most_common(3))
         )
-        self.assertEqual(Multiset('abcaba').most_common(3),
-                         [('a', 3), ('b', 2), ('c', 1)])
 
     def test_len(self):
-        """Check the number of elements in our multisets."""
-        self.assertEqual(0, len(Multiset()))
-        self.assertEqual(3, len(Multiset('abc')))
-        self.assertEqual(4, len(Multiset('aaba')))
+        """Check number of elements in our multisets including multiplicity."""
+        for mset, count in zip(self.msets, [11, 7, 0, 3]):
+            self.assertEqual(count, len(mset))
+            self.assertEqual(count, len(list(mset)))
+
+    def test_dict_methods(self):
+        """Test that the keys, values and items methods are unaffected by
+        overridden iter."""
+        for mset, items_count in zip(self.msets, [5, 4, 0, 3]):
+            self.assertEqual(items_count, len(mset.values()))
+            self.assertEqual(items_count, len(mset.items()))
+            self.assertEqual(items_count, len(mset.keys()))
+            self.assertEqual(items_count, len(set(mset.items())))
+            self.assertEqual(items_count, len(set(mset.keys())))
 
     def test_contains(self):
         """Verify that we can test if an object is a member of a multiset."""
-        self.assertTrue('a' in Multiset('bbac'))
-        self.assertFalse('a' in Multiset())
-        self.assertFalse('a' in Multiset('missing letter'))
+        self.assertIn('a', Multiset('bbac'))
+        self.assertNotIn('a', Multiset())
+        self.assertNotIn('a', Multiset('missing letter'))
 
-    def test_hash(self):
-        bag_with_empty_tuple = Multiset([()])
-        self.assertEqual(hash(bag_with_empty_tuple), hash(Multiset([()])))
-        self.assertEqual(hash(Multiset('aabc')), hash(Multiset('baca')))
-        self.assertEqual(hash(Multiset('ba')), hash(Multiset(('ab'))))
-        self.assertEqual(hash(Multiset('badce')), hash(Multiset(('dbeac'))))
+    def test_shuffling_invarience(self):
+        """Test Multisets and hashes are invarient under element shuffling"""
+        for mset in self.msets:
+            shuffled = list(mset)
+            random.shuffle(shuffled)
+            self.assertEqual(mset, Multiset(shuffled))
+            self.assertEqual(hash(mset), hash(Multiset(shuffled)))
 
     def test_keyability(self):
-        """
-        Since Multiset is mutable and FronzeMultiset is hashable, the second
-        should be usable for dictionary keys and the second should raise a key
-        or value error when used as a key or placed in a set.
-        """
-        b = Multiset([1, 1, 2, 3])  # prototypical frozen multiset.
-
-        c = Multiset([4, 4, 5, 5, b, b])  # make sure we can nest them
-        d = Multiset([4, Multiset([1, 3, 2, 1]), 4, 5, b, 5])
-        self.assertEqual(c, d)  # Make sure both constructions work.
-
+        """Check that Multisets can be properly used as keys"""
         dic = {}
-        dic[b] = 3
-        dic[c] = 5
-        dic[d] = 7
-        self.assertEqual(len(dic), 2)  # Make sure no duplicates in dictionary.
-
-        # Test commutativity of multiset instantiation.
-        self.assertEqual(Multiset([4, 4, 5, 5, c]), Multiset([4, 5, d, 4, 5]))
+        for i, mset in enumerate(self.msets):
+            dic[mset] = i
+        self.assertEqual(4, len(dic))
+        dic[Multiset("baracadabra")] = -7
+        self.assertEqual(4, len(dic))
+        self.assertEqual(-7, dic[self.abra])
+        dic[7] = 42
+        self.assertEqual(5, len(set(dic)))
 
     def test_immutability(self):
         """Test that all inherited mutating methods have been disabled."""
-        abra = Multiset('abracadabra')
+        abra = self.abra
         with self.assertRaises(TypeError):
             abra['a'] += 1
         with self.assertRaises(TypeError):
@@ -126,19 +150,13 @@ class MultisetTests(unittest.TestCase):
         self.assertEqual(Multiset('abracadabra'), abra)
 
     def test_split(self):
-        """ Test that the indices of the elements and multiplicities
-        correspond. """
-        abra = Multiset("abracadabra")
-        y, d = abra.split()
-        for el in y:
-            self.assertEqual(abra[el], d[y.index(el)])
+        """Test that the indices of elements and multiplicities correspond."""
+        for mset in self.msets:
+            y, d = mset.split()
+            for i, el in enumerate(y):
+                self.assertEqual(mset[el], d[i])
 
     def test_degeneracy(self):
-        abra = Multiset("abracadabra")
-        self.assertEqual(120*2*2, abra.degeneracy())
-
-    def test_from_map(self):
-        """Check that we can form a multiset from a map."""
-        fromit = Multiset(('a', 'b', 'b'))
-        frommap = Multiset(fromit)
-        self.assertEqual(frommap, fromit)
+        """Test multiset degeneracies reflect multiset permutations"""
+        for mset, deg in zip(self.msets, [120*2*2, 2*2*2, 1, 1]):
+            self.assertEqual(deg, mset.degeneracy())

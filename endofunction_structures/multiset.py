@@ -60,10 +60,7 @@ class Multiset(dict):
     def __repr__(self):
         """ The string representation is a call to the constructor given a
         tuple containing all of the elements. """
-        if len(self) == 0:
-            return '{0}()'.format(self.__class__.__name__)
-        format_str = '{cls}({tup!r})'
-        return format_str.format(cls=self.__class__.__name__, tup=tuple(self))
+        return "%s(%s)" % (self.__class__.__name__, list(self))
 
     def __str__(self):
         """The printable string appears just like a set, except that each
