@@ -108,9 +108,14 @@ class OrderedTree(bases.Tuple):
     def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)
 
-    def _subtree_sequences(self):
-        for branch_sequence in self._branch_sequences():
-            yield [node-1 for node in branch_sequence]
+    def branches(self):
+        """Return each major subbranch of a tree."""
+        for branch in self._branch_sequences():
+            yield self.__class__(branch)
+
+    def chop(self):
+        """Return a multiset of the input tree's main sub branches."""
+        return multiset.Multiset(self.branches())
 
     def traverse_map(self, mapping=list):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
@@ -176,20 +181,6 @@ class OrderedTree(bases.Tuple):
             previous_level = level
         return node_keys
 
-    def branches(self):
-        """Return each major subbranch of a tree."""
-        for branch in self._branch_sequences():
-            yield self.__class__(branch)
-
-    def subtrees(self):
-        """Generate the main subtrees of self in order."""
-        for subtree in self._subtree_sequences():
-            yield self.__class__(subtree)
-
-    def chop(self):
-        """Return a multiset of the input tree's main sub branches."""
-        return multiset.Multiset(self.branches())
-
     def _dominant_sequence(self):
         """Return the dominant rooted tree corresponding to self."""
         branch_list = []
@@ -222,10 +213,6 @@ class DominantTree(OrderedTree):
         for branch in self._branch_sequences():
             # Subtrees of dominant trees are dominantly ordered by construction
             yield self.__class__(branch, preordered=True)
-
-    def subtrees(self):
-        for subtree in self._subtree_sequences():
-            yield self.__class__(subtree, preordered=True)
 
     def degeneracy(self):
         """The number of representations of each labelling of the unordered
