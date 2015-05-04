@@ -76,7 +76,7 @@ class RootedTree(multiset.Multiset):
             deg *= subtree.degeneracy()**mult
         return deg
 
-    def _ordered_level_sequence(self, level=1):
+    def _ordered_level_sequence(self, level=0):
         level_sequence = [level]
         for tree in self:
             level_sequence.extend(tree._ordered_level_sequence(level+1))

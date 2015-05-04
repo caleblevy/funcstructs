@@ -97,9 +97,9 @@ class TreeTests(unittest.TestCase):
     def test_traverse_map(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
-            OrderedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 4]),
-            OrderedTree([1, 2, 3, 4, 5, 6, 4, 2, 3, 3]),
-            OrderedTree([1, 2, 3, 4, 5, 5, 5, 5, 5, 2]),
+            OrderedTree([0, 1, 2, 3, 4, 5, 3, 1, 2, 3]),
+            OrderedTree([0, 1, 2, 3, 4, 5, 3, 1, 2, 2]),
+            OrderedTree([0, 1, 2, 3, 4, 4, 4, 4, 4, 1]),
         ]
         nestedforms = (
             [[[[[[]]], []]], [[[]]]],
@@ -119,17 +119,17 @@ class TreeTests(unittest.TestCase):
 
     def test_rootedtree_conversion(self):
         """Test conversion between rooted and unordered trees is seamless."""
-        T = DominantTree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T = DominantTree([0, 1, 2, 3, 4, 4, 3, 4, 4, 1, 2, 3, 4, 3, 3, 4, 4])
         RT = RootedTree.from_leveltree(T)
         TRT = RT.ordered_form()
         self.assertEqual(T, TRT)
 
     def test_height_groups(self):
         """Test nodes are grouped correctly by their height"""
-        T = OrderedTree([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
+        T = OrderedTree([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])
         hg = [[0], [1, 14], [2, 3, 13, 15], [4, 5, 6, 11, 12], [7, 10], [8, 9]]
-        for height, group in enumerate(T.height_groups(), start=1):
-            self.assertSequenceEqual(hg[height-1], group)
+        for height, group in enumerate(T.height_groups()):
+            self.assertSequenceEqual(hg[height], group)
             self.assertEqual(height, list(set(map(T.__getitem__, group)))[0])
 
     def test_height_independence(self):
@@ -137,12 +137,11 @@ class TreeTests(unittest.TestCase):
         T = OrderedTree([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
         hg = list(T.height_groups())
         lt = list(T.labelled_sequence())
+        bf = T.traverse_map()
+        deg = DominantTree(T).degeneracy()
         for i in range(-7, 7):
-            self.assertSequenceEqual(
-                hg,
-                list(OrderedTree([t-i for t in T]).height_groups())
-            )
-            self.assertSequenceEqual(
-                lt,
-                list(OrderedTree([t-i for t in T]).labelled_sequence())
-            )
+            offset_tree = OrderedTree([t-i for t in T])
+            self.assertSequenceEqual(hg, list(offset_tree.height_groups()))
+            self.assertSequenceEqual(lt, list(offset_tree.labelled_sequence()))
+            self.assertEqual(bf, offset_tree.traverse_map())
+            self.assertEqual(deg, DominantTree(offset_tree).degeneracy())

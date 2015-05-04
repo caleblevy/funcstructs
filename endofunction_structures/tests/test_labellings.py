@@ -90,8 +90,8 @@ class LabellingTests(unittest.TestCase):
         )
 
     trees = [
-        rootedtrees.DominantTree(t-1 for t in [1, 2, 3, 3, 2, 3, 3, 2]),
-        rootedtrees.DominantTree(t-1 for t in [1, 2, 3, 3, 2, 3, 3, 4, 5])
+        rootedtrees.DominantTree([0, 1, 2, 2, 1, 2, 2, 1]),
+        rootedtrees.DominantTree([0, 1, 2, 2, 1, 2, 2, 3, 4])
     ]
 
     def test_tree_label_count(self):
