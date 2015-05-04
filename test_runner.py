@@ -15,3 +15,4 @@ if __name__ == '__main__':
     test_runner.run(test_finder.discover('./funcgraphs'))
     print("\nTesting prototypes:")
     test_runner.run(test_finder.discover('./prototyping', pattern='*.py'))
+    print("\n")
