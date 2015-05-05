@@ -66,9 +66,6 @@ class RootedTree(multiset.Multiset):
     def __str__(self):
         return self.__class__.__name__+"(%s)" % self._str()
 
-    def __repr__(self):
-        return self.__class__.__name__+"(%s)" % list(self)
-
     def degeneracy(self):
         """Return #(nodes)!/#(labellings)"""
         deg = super(RootedTree, self).degeneracy()
