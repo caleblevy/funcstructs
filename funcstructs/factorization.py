@@ -38,8 +38,6 @@ def _divisor_gen(n):
         yield counts.prod([p**e for p, e in zip(primes, exponents)])
 
 
-def divisors(n, factors={}):
+def divisors(n):
     """Return all integer divisors n."""
-    if n not in factors:
-        factors[n] = tuple(_divisor_gen(n))
-    return factors[n]
+    return tuple(_divisor_gen(n))
