@@ -17,12 +17,12 @@ from . import (
     endofunctions,
     factorization,
     levypartitions,
-    multiset,
-    necklaces,
     productrange,
-    rootedtrees,
     subsequences
 )
+from .multiset import Multiset
+from .necklaces import Necklace, FixedContentNecklaces
+from .rootedtrees import RootedTree, DominantTree, PartitionForests
 
 
 def _flatten(lol):
@@ -38,7 +38,7 @@ def _chunks(l, n):
 
 def _indent_treestring(tree, second_indent, end):
     """Format a rooted tree string with indents. """
-    treestr = str(rootedtrees.RootedTree.from_leveltree(tree))
+    treestr = str(RootedTree.from_leveltree(tree))
     treestr_list = [treestr[:end]]
     for s in _chunks(treestr[end:], end-second_indent):
         treestr_list.append(' '*second_indent+s)
@@ -59,7 +59,7 @@ def _structstring(func, cycle_prefix=2, cycle_suffix=2, tree_indent=4, end=78):
     return ''.join(fstrs)
 
 
-class Funcstruct(multiset.Multiset):
+class Funcstruct(Multiset):
     """ An endofunction structure may be represented as a forest of trees,
     grouped together in multisets corresponding to cycle decompositions of the
     final set (the subset of its domain on which it is invertible). The
@@ -82,14 +82,9 @@ class Funcstruct(multiset.Multiset):
         for cycle in f.cycles:
             strand = []
             for el in cycle:
-                strand.append(rootedtrees.DominantTree.from_func(f, el))
-            cycles.append(necklaces.Necklace(strand))
+                strand.append(DominantTree.from_func(f, el))
+            cycles.append(Necklace(strand))
         return cls(cycles)
-
-    __lt__ = None
-
-    def __repr__(self):
-        return self.__class__.__name__+'(%s)' % list(self)
 
     def __str__(self):
         return _structstring(self)
@@ -115,14 +110,12 @@ class Funcstruct(multiset.Multiset):
         """ Convert function structure to canonical form by filling in numbers
         from 0 to n-1 on the cycles and trees. """
         # Find the tree form of non-cyclic nodes
-        tree_start = 0
         func = []
+        root_node = 0
         for tree in itertools.chain.from_iterable(self):
             l = len(tree)
-            tree_perm = range(tree_start, tree_start+l)
-            func_tree = tree.labelled_sequence(tree_perm)
-            func.extend(func_tree)
-            tree_start += l
+            func.extend(tree.labelled_sequence(range(root_node, root_node+l)))
+            root_node += l
         # Permute the cyclic nodes to form the cycle decomposition
         cycle_start = 0
         for cycle in self:
@@ -161,8 +154,8 @@ def attachment_forests(t, l):
     """Enumerate all ways to make rooted trees from t free nodes and attach
     them to a a cycle of length l."""
     for partition in direct_unordered_attachments(t, l):
-        for forest in rootedtrees.PartitionForests(partition):
-            for necklace in necklaces.FixedContentNecklaces(forest):
+        for forest in PartitionForests(partition):
+            for necklace in FixedContentNecklaces(forest):
                 yield necklace
 
 
@@ -190,7 +183,7 @@ def cycle_type_funcstructs(n, cycle_type):
             yield Funcstruct(itertools.chain.from_iterable(bundle), n)
 
 
-def funcstruct_enumerator(n):
+def integer_funcstructs(n):
     """Enumerate endofunction structures on n elements. Equalivalent to all
     conjugacy classes in TransformationMonoid(n)."""
     for i in range(1, n+1):
@@ -200,15 +193,17 @@ def funcstruct_enumerator(n):
 
 
 class EndofunctionStructures(bases.Enumerable):
-    """Represents the class of all endofunction structures."""
+    """Enumerator of endofunction structures consisting of n nodes, optionally
+    restricted to a given cycle type."""
 
     def __init__(self, node_count, cycle_type=None):
         super(EndofunctionStructures, self).__init__(node_count, cycle_type, 0)
 
     def __iter__(self):
         if not self.partition:
-            return funcstruct_enumerator(self.n)
-        return cycle_type_funcstructs(self.n, self.partition)
+            return integer_funcstructs(self.n)
+        else:
+            return cycle_type_funcstructs(self.n, self.partition)
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes. Iterates
@@ -219,7 +214,7 @@ class EndofunctionStructures(bases.Enumerable):
         tot = 0
         for b in levypartitions.tuple_partitions(self.n):
             product_terms = []
-            for i in range(1, len(b)):
+            for i in range(1, self.n+1):
                 s = 0
                 for j in factorization.divisors(i):
                     s += j * b[j]
