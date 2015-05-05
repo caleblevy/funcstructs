@@ -6,16 +6,11 @@ from ..multiset import Multiset
 
 
 def string_components(b):
-    """Compare multiset strings efficiently"""
+    """Compare multiset strings."""
     return set(str(b).lstrip('{').rstrip('}').split(', '))
 
 
 class MultisetTests(unittest.TestCase):
-    """
-    Test properties of Multiset objects. Tests tend to be of two forms:
-        basemultiset()                     # create empty set
-        basemultiset('abracadabra')        # create from an Iterable
-    """
 
     abra = Multiset("abracadabra")
     nest = Multiset([1, 2, 2, 3, 3, abra, abra])
