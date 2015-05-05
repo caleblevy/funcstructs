@@ -1,7 +1,8 @@
 import unittest
 import itertools
+import math
 
-from .. import counts, rootedtrees
+from .. import rootedtrees
 
 from ..labellings import (
     equipartitions, equipartition_count,
@@ -98,7 +99,7 @@ class LabellingTests(unittest.TestCase):
         """Ensure each tree has the correct number of representations"""
         for tree in self.trees:
             self.assertEqual(
-                counts.factorial(len(tree))//tree.degeneracy(),
+                math.factorial(len(tree))//tree.degeneracy(),
                 len(set(tree_labellings(tree)))
             )
 

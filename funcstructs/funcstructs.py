@@ -5,15 +5,15 @@ of outdegree one.
 Caleb Levy, 2014 and 2015.
 """
 
-import fractions
+from fractions import Fraction
 import itertools
+from math import factorial
 
 import numpy as np
 
 from . import (
     bases,
     compositions,
-    counts,
     endofunctions,
     factorization,
     levypartitions,
@@ -213,13 +213,9 @@ class EndofunctionStructures(bases.Enumerable):
         original reference."""
         tot = 0
         for b in levypartitions.tuple_partitions(self.n):
-            product_terms = []
+            p = 1
             for i in range(1, self.n+1):
-                s = 0
-                for j in factorization.divisors(i):
-                    s += j * b[j]
-                s **= b[i]
-                s *= fractions.Fraction(i, 1)**(-b[i])/counts.factorial(b[i])
-                product_terms.append(s)
-            tot += counts.prod(product_terms)
+                s = sum(j*b[j] for j in factorization.divisors(i))
+                p *= s**b[i] * Fraction(i, 1)**(-b[i])/factorial(b[i])
+            tot += p
         return int(tot)

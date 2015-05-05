@@ -1,6 +1,7 @@
 import unittest
+import math
 
-from .. import counts, endofunctions
+from .. import endofunctions
 
 from ..rootedtrees import (
     RootedTree, unordered_tree,
@@ -54,7 +55,7 @@ class TreeEnumerationTests(unittest.TestCase):
         for n in range(1, len(self.A000081)):
             labelled_treecount = 0
             rooted_treecount = 0
-            nfac = counts.factorial(n)
+            nfac = math.factorial(n)
             for tree in TreeEnumerator(n):
                 labelled_treecount += nfac//tree.degeneracy()
                 rooted_treecount += nfac//unordered_tree(tree).degeneracy()

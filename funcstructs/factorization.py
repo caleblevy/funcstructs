@@ -32,10 +32,10 @@ def prime_divisors(n):
 def _divisor_gen(n):
     # Refactoring of "What is the best way to get all the divisors of a number"
     # at http://stackoverflow.com/a/171784.
-    factors, powers = multiset.Multiset(prime_factorization(n)).split()
+    primes, multiplicities = multiset.Multiset(prime_factorization(n)).split()
     # Since factors are prime, each partition of powers is a different divisor.
-    for power_combo in productrange.productrange([m+1 for m in powers]):
-        yield counts.prod([factors[i]**p for i, p in enumerate(power_combo)])
+    for exponents in productrange.productrange([m+1 for m in multiplicities]):
+        yield counts.prod([p**e for p, e in zip(primes, exponents)])
 
 
 def divisors(n, factors={}):
