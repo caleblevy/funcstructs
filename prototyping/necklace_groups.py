@@ -2,7 +2,7 @@
 
 import unittest
 
-from endofunction_structures import (
+from funcstructs import (
     counts,
     polynomials,
     levypartitions,

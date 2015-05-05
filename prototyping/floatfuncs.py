@@ -9,7 +9,7 @@ import unittest
 
 import numpy as np
 
-from endofunction_structures import *
+from funcstructs import *
 
 __all__ = [
     "Inf", "Zero", "One", "NaN", "Min16", "Max16",

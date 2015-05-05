@@ -9,7 +9,7 @@ from __future__ import print_function
 import collections
 import unittest
 
-from endofunction_structures import *
+from funcstructs import *
 from .timing import *
 
 

@@ -1,6 +1,6 @@
 import unittest
 
-from endofunction_structures import(
+from .. import(
     TreeEnumerator, ForestEnumerator, PartitionForests,
     EndofunctionStructures, TransformationMonoid,
     FixedContentNecklaces

@@ -12,7 +12,7 @@ from time import time
 from numpy import log2
 import matplotlib.pyplot as plt
 
-from endofunction_structures import *
+from funcstructs import *
 
 
 show = plt.show
