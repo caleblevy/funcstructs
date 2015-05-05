@@ -66,8 +66,6 @@ class Multiset(dict):
         """The printable string appears just like a set, except that each
         element is raised to the power of the multiplicity if it is greater
         than 1. """
-        if len(self) == 0:
-            return self.__class__.__name__ + '()'
         contents = []
         for el, mult in self.items():
             if isinstance(el, self.__class__):

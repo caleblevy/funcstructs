@@ -54,7 +54,7 @@ class MultisetTests(unittest.TestCase):
 
     def test_str(self):
         """Test string behaves according to specification"""
-        self.assertSequenceEqual('Multiset()', str(self.empty))
+        self.assertSequenceEqual('{}', str(self.empty))
         self.assertEqual(
             {"'a'^5", "'b'^2", "'r'^2", "'c'", "'d'"},
             string_components(self.abra)
