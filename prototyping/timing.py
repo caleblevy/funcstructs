@@ -13,7 +13,6 @@ from numpy import log2
 import matplotlib.pyplot as plt
 
 from endofunction_structures import *
-from endofunction_structures.productrange import parse_ranges
 
 
 show = plt.show

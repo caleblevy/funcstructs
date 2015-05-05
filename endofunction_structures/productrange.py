@@ -7,11 +7,13 @@ import itertools
 
 from . import multiset
 
+__all__ = ["productrange", "rev_range", "unordered_product"]
 
-def parse_ranges(begin, end, step):
-    """ If begin == end == None then begin is treated as end and step is set by
+
+def _parse_ranges(begin, end, step):
+    """If begin == end == None then begin is treated as end and step is set by
     default to 1 and begin to 0. If begin and step are integers they are
-    transformed into begin = [begin]*len(end) and step = [step]*len(end). """
+    transformed into begin = [begin]*len(end) and step = [step]*len(end)."""
     if end is None:
         begin, end = end, begin
     # If start is not iterable, it is either an int or none.
@@ -24,66 +26,55 @@ def parse_ranges(begin, end, step):
     return begin, end, step
 
 
+def _product_sets(b, e, s):
+    """List of ranges over which the product will be taken"""
+    return [range(i, j, k) for i, j, k in zip(*_parse_ranges(b, e, s))]
+
+
 def productrange(begin, end=None, step=None):
-    """ Nice wrapper for itertools.product. Give it a tuple of starts, stops
-    and increments and it will return the nested for loop coresponding to them.
-    I.E. if begin = (r1, r2, ..., rn), end = (s1, s2, ..., sn) and step = (t1,
-    t2, ..., tn) then
-
-        for tup in productrange(begin, end, step):
-            yield tup
-
-    is equivalent to:
-
-        for I1 in range(r1, s1, t1):
-          for I2 in range(r2, s2, t2):
-            ...
-              for In in range(rn, sn, tn):
-                yield tuple([I1, I2, ..., In])
+    """Nice wrapper for itertools.product. Accepts a tuple of starts, stops and
+    increments and it will return the nested for loop corresponding to them.
+    If:
+        begin = (r1, r2, ..., rm)
+        end = (s1, s2, ..., sm)
+        step = (t1, t2, ..., tm)
+    then:
+        productrange(begin, end, step) <==> [(i1, i2, ..., im)
+                                             for i1 in range(r1, s1, t1)
+                                               for i2 in range(r2, s2, t2)
+                                                 ...
+                                                   for im in range(rm, sm, tm)]
     """
-    b, e, s = parse_ranges(begin, end, step)
-    return itertools.product(*[range(i, j, k) for i, j, k in zip(b, e, s)])
+    return itertools.product(*_product_sets(begin, end, step))
 
 
 def rev_range(begin, end=None, step=None):
-    """ Reverse iteration order for productrange. If begin, end and step are
-    as for productrange, then
-
-        for tup in rev_range(begin, end, step):
-            yield tup
-
-    is equivalent to:
-
-        for In in range(rn, sn, tn):
-          ...
-            for I2 in range(r2, s2, t2):
-              for I1 in range(r1, s1, t1):
-                yield tuple([I1, I2, ..., In])
-
-    Note that set(rev_range(**inputs)) == set(productrange(**inputs)). Code
-    originally inspired by:
-        http://www.mathworks.com/matlabcentral/answers/79986#answer_89700. """
-
-    begin, end, step = parse_ranges(begin, end, step)
-    if not all([len(range(I, J, K)) for I, J, K in zip(begin, end, step)]):
+    """Reverse iteration order for productrange, i.e.
+        rev_range(begin, end, step) <==> [(i1, i2, ..., im)
+                                          for in in range(rm, sm, tm)
+                                            ...
+                                              for i2 in range(r2, s2, t2)
+                                                for i1 in range(r1, s1, t1)]
+    Code originally inspired by:
+        http://www.mathworks.com/matlabcentral/answers/79986#answer_89700."""
+    b, e, s = _parse_ranges(begin, end, step)
+    if not all(map(len, _product_sets(b, e, s))):
         return
-    end = [abs(I) for I in end]
-    l = len(end)
-    V = list(begin)
+    e = list(map(abs, e))
+    vec = list(b)
     go = True
     while go:
-        yield V
-        V[0] += step[0]
-        # If (>=) <=> (if not <)
-        if abs(V[0]) >= end[0]:
-            V[0] = begin[0]
+        yield vec
+        vec[0] += s[0]
+        if abs(vec[0]) >= e[0]:
+            vec[0] = b[0]
             go = False
-            for I in range(1, l):
-                V[I] += step[I]
-                if abs(V[I]) < end[I]:
+            for i in range(1, len(e)):
+                vec[i] += s[i]
+                if abs(vec[i]) < e[i]:
                     go = True
                     break
-                V[I] = begin[I]
+                vec[i] = b[i]
 
 
 def unordered_product(mset, iterfunc):
