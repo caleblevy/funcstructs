@@ -13,8 +13,6 @@ from .combinat import factorial_prod
 __all__ = ["Multiset"]
 
 
-# functions publicly accessed through combinat are defined here so that
-# structures.core is self-contained.
 @classmethod
 def _raise_unassignable(cls, *args, **kwargs):
     raise TypeError('%r does not support item assignment' % cls.__name__)
