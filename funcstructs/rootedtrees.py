@@ -13,7 +13,6 @@ from . import (
     combinat,
     factorization,
     multiset,
-    productrange,
     subsequences
 )
 
@@ -301,7 +300,7 @@ class PartitionForests(bases.Enumerable):
         super(PartitionForests, self).__init__(None, partition)
 
     def __iter__(self):
-        return productrange.unordered_product(self.partition, TreeEnumerator)
+        return combinat.unordered_product(self.partition, TreeEnumerator)
 
     @property
     def cardinality(self):
