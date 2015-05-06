@@ -3,7 +3,7 @@ Coding style for endofunction-structures
 - All code is pep8
     * This means the following command produces *NO* output:
 
-            pep8 . --exclude=PADS,untracked
+            pep8 funcstructs
 
     * This **DOES INCLUDE** the 79 character per line limit (newlines count).
     * Unit tests also must be pep8
@@ -12,8 +12,8 @@ Coding style for endofunction-structures
 
     * This means both of the following should produce no errors or warnings
 
-            python2 test_runner.py
-            python3 test_runner.py
+            python2 funcstructs/test_runner.py
+            python3 funcstructs/test_runner.py
 
     * The module **six** is not allowed; dependencies should be minimized
 
