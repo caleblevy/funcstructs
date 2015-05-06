@@ -6,7 +6,7 @@ Caleb Levy, 2015.
 from itertools import chain, combinations, permutations, product
 from math import factorial
 
-from .counts import multinomial_coefficient as ordered_division_count
+from .combinat import multinomial_coefficient as ordered_division_count
 from .endofunctions import Endofunction, SymmetricFunction
 from .multiset import Multiset
 from .necklaces import Necklace

@@ -11,7 +11,7 @@ finally:
 # Supporting modules
 from . import (
     compositions,
-    counts,
+    combinat,
     factorization,
     labellings,
     levypartitions,

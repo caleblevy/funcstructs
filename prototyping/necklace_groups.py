@@ -3,7 +3,7 @@
 import unittest
 
 from funcstructs import (
-    counts,
+    combinat,
     polynomials,
     levypartitions,
     necklaces
@@ -27,7 +27,7 @@ def period_combo_count(necklace_counts, combo):
     """Number of necklaces from a combination of periods"""
     val = 1
     for period, mult in combo.items():
-        val *= counts.nCWRk(necklace_counts[period], mult)
+        val *= combinat.nCWRk(necklace_counts[period], mult)
     return val
 
 
@@ -44,7 +44,7 @@ class NecklaceGroupTests(unittest.TestCase):
         necks = [[1]*4+[2]*4+[3]*4, [0]*24+[1]*36]
         for n in necks:
             self.assertEqual(
-                counts.nCWRk(sum(count_by_period(n)), 4),
+                combinat.nCWRk(sum(count_by_period(n)), 4),
                 sum(i for _, i in necklace_groups_by_period_combo(n, 4))
             )
 

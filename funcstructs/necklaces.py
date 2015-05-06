@@ -9,7 +9,7 @@ import functools
 
 from PADS import Lyndon
 
-from . import bases, counts, factorization
+from . import bases, combinat, factorization
 
 
 def periodicity(strand):
@@ -141,7 +141,7 @@ class FixedContentNecklaces(bases.Enumerable):
             # corresponding to the subset of the multiplicity partition
             # featuring 1/factor of each kind of the original partiton's
             # elements.
-            mults[factor] = counts.multinomial_coefficient(
+            mults[factor] = combinat.multinomial_coefficient(
                 [(i*factor)//w for i in self.multiplicities]
             )
             # To enusre mults[factor] gives the number of character

@@ -10,7 +10,7 @@ from itertools import chain
 
 from . import (
     bases,
-    counts,
+    combinat,
     factorization,
     multiset,
     productrange,
@@ -308,5 +308,5 @@ class PartitionForests(bases.Enumerable):
         l = 1
         for y, r in self.partition.items():
             n = TreeEnumerator(y).cardinality
-            l *= counts.nCWRk(n, r)
+            l *= combinat.nCWRk(n, r)
         return l

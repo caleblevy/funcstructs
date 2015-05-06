@@ -24,9 +24,11 @@ image sizes set can be O(n) (and has a lovely closed form formula).
 Caleb Levy, 2013, 2014 and 2015.
 """
 
+from math import factorial
+
 import numpy as np
 
-from . import compositions, counts, endofunctions, _funcstructs
+from . import compositions, combinat, endofunctions, _funcstructs
 
 
 def iterdist_brute(n):
@@ -50,7 +52,7 @@ def iterdist_funcstruct(n, cycle_type=None):
         c = 0 if(cycle_type or sum(cycle_type) != 1) else 1
         return np.array([c], dtype=object)
     dist = np.zeros((n, n-1), dtype=object)
-    nfac = counts.factorial(n)
+    nfac = factorial(n)
     for struct in _funcstructs.EndofunctionStructures(n, cycle_type):
         mult = nfac//struct.degeneracy
         for it, card in enumerate(struct.imagepath):
@@ -97,7 +99,7 @@ def imagedists_upto(n):
             dist[j, i] = dist[j-1, i-1] + (j+1)*dist[j, i-1]
     for i in range(n):
         for j in range(i+1):
-            dist[j, i] *= counts.factorial(i+1)//counts.factorial(i-j)
+            dist[j, i] *= factorial(i+1)//factorial(i-j)
     return dist
 
 imagedist_recurse = imagedist = lambda n: list(imagedists_upto(n)[:, -1])
@@ -110,7 +112,7 @@ def nCk_grid(n):
         for j in range(n+1):
             if j > i:
                 continue
-            binomial_coeffs[i, j] = counts.nCk(i, j)
+            binomial_coeffs[i, j] = combinat.nCk(i, j)
     return binomial_coeffs
 
 
@@ -149,14 +151,14 @@ def limitdist_composition(n):
             count *= binomial_coefficients[sum(comp[i:]), comp[i]]
         dist[comp[0]-1] += count
     for i in range(n, 0, -1):
-        dist[i-1] *= counts.factorial(n)//counts.factorial(n-i)
+        dist[i-1] *= factorial(n)//factorial(n-i)
     return tuple(dist)
 
 
 def limitset_count(n, k):
     """Analytic expression for the number of endofunctions on n nodes whose
     cycle decompositions contain k elements. """
-    return k*n**(n-k)*counts.factorial(n-1)//counts.factorial(n-k)
+    return k*n**(n-k)*factorial(n-1)//factorial(n-k)
 
 
 def limitdist_direct(n):

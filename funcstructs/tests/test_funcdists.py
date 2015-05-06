@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from .. import counts
+from .. import combinat
 
 from ..funcdists import (
     iterdist_brute,
@@ -80,7 +80,7 @@ class EndofunctionTest(unittest.TestCase):
         binomial_coeffs = nCk_grid(N)
         for n in range(N+1):
             for k in range(n+1):
-                self.assertEqual(counts.nCk(n, k), binomial_coeffs[n, k])
+                self.assertEqual(combinat.nCk(n, k), binomial_coeffs[n, k])
 
     def test_power_grid(self):
         """I**J == powergrid[I,J] for 0 <= I, J <= N. Note 0^0 defined as 1."""

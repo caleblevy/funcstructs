@@ -3,7 +3,7 @@
 Caleb Levy, 2014 and 2015.
 """
 
-from . import counts, multiset, productrange
+from . import combinat, multiset, productrange
 
 __all__ = ["prime_factorization", "divisors"]
 
@@ -31,7 +31,7 @@ def _divisor_gen(n):
     primes, multiplicities = multiset.Multiset(prime_factorization(n)).split()
     # Since factors are prime, each partition of powers is a different divisor.
     for exponents in productrange.productrange([m+1 for m in multiplicities]):
-        yield counts.prod(p**e for p, e in zip(primes, exponents))
+        yield combinat.prod(p**e for p, e in zip(primes, exponents))
 
 
 def divisors(n):

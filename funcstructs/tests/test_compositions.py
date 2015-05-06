@@ -1,6 +1,6 @@
 import unittest
 
-from .. import counts
+from .. import combinat
 
 from ..compositions import compositions, weak_compositions
 
@@ -25,7 +25,7 @@ class CompositionTests(unittest.TestCase):
         for n in range(1, 5):
             for k in range(1, 10):
                 self.assertEqual(
-                    counts.nCk(n+k-1, k-1),
+                    combinat.nCk(n+k-1, k-1),
                     len(list(weak_compositions(n, k)))
                 )
 

@@ -1,6 +1,6 @@
 import unittest
 
-from .. import counts, multiset
+from .. import combinat, multiset
 
 from ..polynomials import (
     monomial_symmetric_polynomial,
@@ -15,7 +15,7 @@ class PolynomialTests(unittest.TestCase):
     def test_foil(self):
         """Check binomial coefficients."""
         for n in range(20):
-            binomial_coeffs = [counts.nCk(n, k) for k in range(n+1)]
+            binomial_coeffs = [combinat.nCk(n, k) for k in range(n+1)]
             self.assertSequenceEqual(binomial_coeffs, FOIL([-1]*n))
 
     def test_monomial_symmetric_polynomial(self):
