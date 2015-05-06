@@ -13,7 +13,8 @@ from . import (
     combinat,
     factorization,
     multiset,
-    subsequences
+    subsequences,
+    utils
 )
 
 __all__ = ["RootedTree", "OrderedTree", "DominantTree", "TreeEnumerator",
@@ -184,7 +185,7 @@ class OrderedTree(bases.Tuple):
             branch_list.append(branch._dominant_sequence())
         branch_list.sort(reverse=True)
         # Must make list, else they won't be sorted properly
-        return list(chain([self[0]], chain.from_iterable(branch_list)))
+        return list(chain([self[0]], utils.flatten(branch_list)))
 
 
 def unordered_tree(level_sequence):
@@ -300,7 +301,7 @@ class PartitionForests(bases.Enumerable):
         super(PartitionForests, self).__init__(None, partition)
 
     def __iter__(self):
-        return combinat.unordered_product(self.partition, TreeEnumerator)
+        return multiset.unordered_product(self.partition, TreeEnumerator)
 
     @property
     def cardinality(self):

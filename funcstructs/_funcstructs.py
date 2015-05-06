@@ -13,21 +13,16 @@ import numpy as np
 
 from . import (
     bases,
-    combinat,
     compositions,
     endofunctions,
     factorization,
     levypartitions,
-    subsequences
+    subsequences,
 )
-from .multiset import Multiset
+from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import RootedTree, DominantTree, PartitionForests
-
-
-def _flatten(lol):
-    """Flatten a list of lists."""
-    return list(itertools.chain.from_iterable(lol))
+from .utils import flatten
 
 
 def _chunks(l, n):
@@ -73,7 +68,7 @@ class Funcstruct(Multiset):
         if precounted is not None:
             self.n = precounted
         else:
-            self.n = len(_flatten(_flatten(self)))
+            self.n = len(list(flatten(flatten(self))))
         return self
 
     @classmethod
@@ -112,7 +107,7 @@ class Funcstruct(Multiset):
         # Find the tree form of non-cyclic nodes
         func = []
         root_node = 0
-        for tree in itertools.chain.from_iterable(self):
+        for tree in flatten(self):
             l = len(tree)
             func.extend(tree.labelled_sequence(range(root_node, root_node+l)))
             root_node += l
@@ -120,7 +115,7 @@ class Funcstruct(Multiset):
         cycle_start = 0
         for cycle in self:
             node_prev = node = 0
-            cycle_len = len(_flatten(cycle))
+            cycle_len = len(list(flatten(cycle)))
             for tree in cycle:
                 node += len(tree)
                 func[cycle_start+node_prev] = cycle_start + (node % cycle_len)
@@ -133,7 +128,7 @@ class Funcstruct(Multiset):
         """ Given an endofunction structure funcstruct, compute the image path
         directly without conversion to a particular endofunction. """
         cardinalities = np.array([0]+[0]*(self.n-2), dtype=object)
-        for tree in itertools.chain.from_iterable(self):
+        for tree in flatten(self):
             cardinalities += 1
             for subseq in subsequences.increasing(tree):
                 k = len(subseq) - 1
@@ -163,7 +158,7 @@ def component_groups(c, l, m):
     """ Enumerate ways to make rooted trees from c free nodes and attach them
     to a group of m cycles of length l. """
     for partition in direct_unordered_attachments(c, m):
-        for cycle_group in combinat.unordered_product(
+        for cycle_group in unordered_product(
                 partition,
                 lambda y: attachment_forests(y-1, l)):
             yield cycle_group
@@ -180,7 +175,7 @@ def cycle_type_funcstructs(n, cycle_type):
         for c, l, m in zip(composition, lengths, multiplicities):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in itertools.product(*cycle_groups):
-            yield Funcstruct(itertools.chain.from_iterable(bundle), n)
+            yield Funcstruct(flatten(bundle), n)
 
 
 def integer_funcstructs(n):

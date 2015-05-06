@@ -3,13 +3,14 @@
 Caleb Levy, 2015.
 """
 
-from itertools import chain, combinations, permutations, product
+from itertools import combinations, permutations, product
 from math import factorial
 
 from .combinat import multinomial_coefficient as ordered_division_count
 from .endofunctions import Endofunction, SymmetricFunction
 from .multiset import Multiset
 from .necklaces import Necklace
+from .utils import flatten
 
 __all__ = [
     "equipartitions", "equipartition_count",
@@ -89,7 +90,7 @@ def _set_partitions(S, partition):
         for m, c in zip(mults, odiv):
             strand.append(_equipartitions(set(c), m))
         for bundle in product(*strand):
-            yield chain.from_iterable(bundle)
+            yield flatten(bundle)
 
 
 def set_partitions(partition, S=None):
@@ -196,8 +197,8 @@ def translation_keys(tree):
     to translate each combination into an endofunction."""
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
-    indperm = SymmetricFunction(chain.from_iterable(ind_groups)).inverse
-    translation_sequence = indperm.conj(Endofunction.from_tree(tree))
+    translation_sequence = SymmetricFunction(flatten(ind_groups)).inverse.conj(
+        Endofunction.from_tree(tree))
     return bin_widths, translation_sequence
 
 
@@ -218,7 +219,7 @@ def tree_labellings(tree):
     bin_widths, translation_sequence = translation_keys(tree)
     func = [0] * n
     for combo in _ordered_divisions(set(range(n)), bin_widths):
-        c = list(chain.from_iterable(combo))
+        c = list(flatten(combo))
         for i in range(n):
             func[c[i]] = c[translation_sequence[i]]
         yield Endofunction(func)

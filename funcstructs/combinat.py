@@ -3,14 +3,14 @@
 Caleb Levy, 2015.
 """
 
-import itertools
 from math import factorial
 
-from .multiset import (
-    Multiset,
-    _prod as prod,
-    _factorial_prod as factorial_prod
-)
+from .utils import prod
+
+
+def factorial_prod(iterable):
+    """Product of factorial of elements in an iterable."""
+    return prod(factorial(i) for i in iterable)
 
 
 def nCk(n, k):
@@ -34,21 +34,3 @@ def nCWRk(n, r):
         val *= n + r - i
         val //= i
     return val
-
-
-def unordered_product(mset, iterfunc):
-    """Given a multiset of inputs to an iterable, and iterfunc, returns all
-    unordered combinations of elements from iterfunc applied to each el. It is
-    equivalent to:
-
-        set(Multiset(p) for p in product([iterfunc(i) for i in mset]))
-
-    except it runs through each element once. This program makes the
-    assumptions that no two members of iterfunc(el) are the same, and that if
-    el1 != el2 then iterfunc(el1) and iterfunc(el2) are mutually disjoint."""
-    mset = Multiset(mset)
-    strands = []
-    for y, d in mset.items():
-        strands.append(itertools.combinations_with_replacement(iterfunc(y), d))
-    for bundle in itertools.product(*strands):
-        yield Multiset(itertools.chain.from_iterable(bundle))
