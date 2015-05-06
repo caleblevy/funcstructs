@@ -3,19 +3,9 @@
 Caleb Levy, 2015.
 """
 
-import functools
-import operator
 from math import factorial
 
-
-def prod(iterable):
-    """Product of all items in an iterable."""
-    return functools.reduce(operator.mul, iterable, 1)
-
-
-def factorial_prod(iterable):
-    """Product of factorial of elements in an iterable."""
-    return prod(factorial(i) for i in iterable)
+from .multiset import _prod as prod, _factorial_prod as factorial_prod
 
 
 def nCk(n, k):

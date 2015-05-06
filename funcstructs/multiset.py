@@ -5,11 +5,23 @@ Caleb Levy, 2014 and 2015.
 """
 
 import collections
+import functools
+import math
 import operator
 
-from . import counts
-
 __all__ = ["Multiset"]
+
+
+# functions publicly accessed through combinat are defined here so that
+# structures.core is self-contained.
+def _prod(iterable):
+    """Product of all items in an iterable."""
+    return functools.reduce(operator.mul, iterable, 1)
+
+
+def _factorial_prod(iterable):
+    """Product of factorial of elements in an iterable."""
+    return _prod(math.factorial(i) for i in iterable)
 
 
 @classmethod
@@ -96,4 +108,4 @@ class Multiset(dict):
 
     def degeneracy(self):
         """Number of different representations of the same multiset."""
-        return counts.factorial_prod(self.values())
+        return _factorial_prod(self.values())
