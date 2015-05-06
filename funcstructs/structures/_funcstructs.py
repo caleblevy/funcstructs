@@ -169,8 +169,7 @@ def cycle_type_funcstructs(n, cycle_type):
     type. """
     treenodes = n - sum(cycle_type)
     lengths, multiplicities = cycle_type.split()
-    l = len(lengths)
-    for composition in compositions.weak_compositions(treenodes, l):
+    for composition in compositions.weak_compositions(treenodes, len(lengths)):
         cycle_groups = []
         for c, l, m in zip(composition, lengths, multiplicities):
             cycle_groups.append(component_groups(c, l, m))
