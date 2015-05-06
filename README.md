@@ -1,8 +1,8 @@
-This repository is a collection of mathematical programs for exploring
-combinatorial problems and endofunction structures written primarily in python
-by Caleb Levy (caleb.levy@berkeley.edu).
+This is Funcstructs, a collection of mathematical programs implemented
+primarily in Python for exploring combinatorial problems involving endofunction
+structures. It was written by Caleb Levy (caleb.levy@berkeley.edu).
 
-The endofunction structures module is licensed under the MIT license:
+Funcstructs is licensed under the MIT license:
 
 Copyright (c) 2012-2015, Caleb Levy
 
