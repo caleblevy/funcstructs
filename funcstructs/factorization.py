@@ -5,7 +5,7 @@ Caleb Levy, 2014 and 2015.
 
 from . import counts, multiset, productrange
 
-__all__ = ["prime_factorization", "prime_divisors", "divisors"]
+__all__ = ["prime_factorization", "divisors"]
 
 
 def prime_factorization(n):
@@ -24,18 +24,14 @@ def prime_factorization(n):
     return multiset.Multiset(primfac)
 
 
-def prime_divisors(n):
-    """Return all prime factors of n"""
-    return prime_factorization(n).items()
-
-
 def _divisor_gen(n):
+    """Generate divisors of n"""
     # Refactoring of "What is the best way to get all the divisors of a number"
     # at http://stackoverflow.com/a/171784.
     primes, multiplicities = multiset.Multiset(prime_factorization(n)).split()
     # Since factors are prime, each partition of powers is a different divisor.
     for exponents in productrange.productrange([m+1 for m in multiplicities]):
-        yield counts.prod([p**e for p, e in zip(primes, exponents)])
+        yield counts.prod(p**e for p, e in zip(primes, exponents))
 
 
 def divisors(n):
