@@ -9,6 +9,7 @@ import itertools
 import operator
 
 from .combinat import factorial_prod
+from .utils import flatten
 
 __all__ = ["Multiset"]
 
@@ -115,4 +116,4 @@ def unordered_product(mset, iterfunc):
     for y, d in mset.items():
         strands.append(itertools.combinations_with_replacement(iterfunc(y), d))
     for bundle in itertools.product(*strands):
-        yield Multiset(itertools.chain.from_iterable(bundle))
+        yield Multiset(flatten(bundle))
