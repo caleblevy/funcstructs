@@ -3,8 +3,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from funcgraphs.coordinates import Point
-from funcgraphs.line import Line
+from funcstructs.graphs.coordinates import Point
+from funcstructs.graphs.line import Line
 
 
 def circle_points(n, r=1):
