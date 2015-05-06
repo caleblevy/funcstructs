@@ -26,7 +26,7 @@ from .endofunctions import (
     randfunc, randperm,
     TransformationMonoid
 )
-from .funcstructs import Funcstruct, EndofunctionStructures
+from ._funcstructs import Funcstruct, EndofunctionStructures
 from .multiset import Multiset
 from .necklaces import periodicity, Necklace, FixedContentNecklaces
 from .rootedtrees import (
