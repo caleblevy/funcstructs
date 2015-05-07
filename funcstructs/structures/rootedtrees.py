@@ -140,7 +140,7 @@ class OrderedTree(bases.Tuple):
         """Assign to each node a key for sorting"""
         node_keys = defaultdict(list)  # node_keys[node] <-> sort key for node
         levels = reversed(self.height_groups())
-        func = list(self._labelling())
+        func = list(endofunctions._level_func(self))
         previous_level = next(levels)
         # sort_value will increase to produce dominant tree
         sort_value = 1

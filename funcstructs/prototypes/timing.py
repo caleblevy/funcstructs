@@ -162,7 +162,7 @@ def balanced_binary_tree(n):
         h -= 1
         tree *= 2
         tree = [h] + tree
-    return Endofunction.from_tree(OrderedTree(tree))
+    return Endofunction.from_levels(OrderedTree(tree))
 
 
 def scattered_tree(n):

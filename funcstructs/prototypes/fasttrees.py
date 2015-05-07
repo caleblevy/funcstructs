@@ -142,7 +142,7 @@ def cached_func(n):
     f.cycles
     f.limitset
     f.preimage
-    f.attached_treenodes
+    f.acyclic_ancestors
     return f
 
 
