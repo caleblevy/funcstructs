@@ -39,9 +39,9 @@ class RootedTree(multiset.Multiset):
         return self
 
     @classmethod
-    def from_leveltree(cls, tree):
-        """Return the unordered tree corresponding to the ordered tree."""
-        return tree.traverse_map(cls)
+    def from_levels(cls, levels):
+        """Return the unordered tree corresponding to the level sequence."""
+        return OrderedTree(levels).traverse_map(cls)
 
     def __bool__(self):
         return True  # All trees have roots, thus aren't empty
@@ -174,11 +174,6 @@ class OrderedTree(bases.Tuple):
         branch_list.sort(reverse=True)
         # Must make list, else they won't be sorted properly
         return list(chain([self[0]], flatten(branch_list)))
-
-
-def unordered_tree(level_sequence):
-    """Return the unordered tree corresponding to the level sequence."""
-    return RootedTree.from_leveltree(OrderedTree(level_sequence))
 
 
 class DominantTree(OrderedTree):

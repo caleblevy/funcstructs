@@ -4,7 +4,7 @@ import math
 from .. import endofunctions
 
 from ..rootedtrees import (
-    RootedTree, unordered_tree,
+    RootedTree,
     OrderedTree,
     DominantTree,
     TreeEnumerator,
@@ -53,22 +53,23 @@ class TreeEnumerationTests(unittest.TestCase):
     def test_tree_degeneracies(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         for n in range(1, len(self.A000081)):
-            labelled_treecount = 0
-            rooted_treecount = 0
+            ordered_count = 0
+            rooted_count = 0
             nfac = math.factorial(n)
             for tree in TreeEnumerator(n):
-                labelled_treecount += nfac//tree.degeneracy()
-                rooted_treecount += nfac//unordered_tree(tree).degeneracy()
-            self.assertEqual(n**(n-1), labelled_treecount)
-            self.assertEqual(n**(n-1), rooted_treecount)
+                ordered_count += nfac//tree.degeneracy()
+                rooted_count += nfac//RootedTree.from_levels(tree).degeneracy()
+            self.assertEqual(n**(n-1), ordered_count)
+            self.assertEqual(n**(n-1), rooted_count)
 
 
 class TreeTests(unittest.TestCase):
 
     def test_rooted_tree_strings(self):
         """Ensure Unordered trees are properly formatted."""
-        T = unordered_tree([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        T2 = unordered_tree(range(1, 5))
+        T = RootedTree.from_levels(
+            [1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+        T2 = RootedTree.from_levels(range(1, 5))
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
@@ -78,7 +79,7 @@ class TreeTests(unittest.TestCase):
                     [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
                     range(1, 5)]
         for seq in TreeSeqs:
-            T_unordered = unordered_tree(seq)
+            T_unordered = RootedTree.from_levels(seq)
             T_ordered = OrderedTree(seq)
             T_dominant = DominantTree(seq)
             self.assertEqual(T_unordered, eval(repr(T_unordered)))
@@ -121,7 +122,7 @@ class TreeTests(unittest.TestCase):
     def test_rootedtree_conversion(self):
         """Test conversion between rooted and unordered trees is seamless."""
         T = DominantTree([0, 1, 2, 3, 4, 4, 3, 4, 4, 1, 2, 3, 4, 3, 3, 4, 4])
-        RT = RootedTree.from_leveltree(T)
+        RT = RootedTree.from_levels(T)
         TRT = RT.ordered_form()
         self.assertEqual(T, TRT)
 

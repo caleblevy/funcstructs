@@ -33,7 +33,7 @@ def _chunks(l, n):
 
 def _indent_treestring(tree, second_indent, end):
     """Format a rooted tree string with indents. """
-    treestr = str(RootedTree.from_leveltree(tree))
+    treestr = str(RootedTree.from_levels(tree))
     treestr_list = [treestr[:end]]
     for s in _chunks(treestr[end:], end-second_indent):
         treestr_list.append(' '*second_indent+s)
