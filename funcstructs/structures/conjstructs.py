@@ -109,7 +109,7 @@ class Funcstruct(Multiset):
         root_node = 0
         for tree in flatten(self):
             l = len(tree)
-            func.extend(tree.labelled_sequence(range(root_node, root_node+l)))
+            func.extend(tree.map_labelling(range(root_node, root_node+l)))
             root_node += l
         # Permute the cyclic nodes to form the cycle decomposition
         cycle_start = 0

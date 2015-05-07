@@ -137,12 +137,12 @@ class TreeTests(unittest.TestCase):
         """Check that tree methods are unaffected by root height"""
         T = OrderedTree([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
         hg = list(T.height_groups())
-        lt = list(T.labelled_sequence())
+        lt = list(T.map_labelling())
         bf = T.traverse_map()
         deg = DominantTree(T).degeneracy()
         for i in range(-7, 7):
             offset_tree = OrderedTree([t-i for t in T])
             self.assertSequenceEqual(hg, list(offset_tree.height_groups()))
-            self.assertSequenceEqual(lt, list(offset_tree.labelled_sequence()))
+            self.assertSequenceEqual(lt, list(offset_tree.map_labelling()))
             self.assertEqual(bf, offset_tree.traverse_map())
             self.assertEqual(deg, DominantTree(offset_tree).degeneracy())

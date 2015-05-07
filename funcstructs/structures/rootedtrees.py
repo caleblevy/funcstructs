@@ -131,11 +131,11 @@ class OrderedTree(bases.Tuple):
                 height_prev = height
             grafting_point[height-self[0]] = node
 
-    def labelled_sequence(self, labels=None):
-        """Return an endofunction whose structure corresponds to the rooted
-        tree. The root is 0 by default, but can be permuted according to a
-        specified labelling.
-        """
+    def map_labelling(self, labels=None):
+        """Viewing the ordered level sequence as an implicit mapping of each
+        node to the most recent node of the next lowest level, return the
+        sequence of elements that each node is mapped to. If labels is given,
+        func_labelling[n] -> labels[func_labelling[n]]. """
         if labels is None:
             labels = range(len(self))
         return (labels[x] for x in self._labelling())
