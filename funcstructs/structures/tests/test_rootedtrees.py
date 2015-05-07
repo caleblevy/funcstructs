@@ -73,7 +73,7 @@ class TreeTests(unittest.TestCase):
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
 
-    def test_reprs(self):
+    def test_tree_reprs(self):
         """Test repr(Tree) == Tree for various trees."""
         TreeSeqs = [[1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5],
                     [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
@@ -85,16 +85,6 @@ class TreeTests(unittest.TestCase):
             self.assertEqual(T_unordered, eval(repr(T_unordered)))
             self.assertEqual(T_ordered, eval(repr(T_ordered)))
             self.assertEqual(T_dominant, eval(repr(T_dominant)))
-        node_count = [4, 5, 6, 10]
-        for n in node_count:
-            trees = TreeEnumerator(n)
-            forests = ForestEnumerator(n)
-            self.assertEqual(trees, eval(repr(trees)))
-            self.assertEqual(forests, eval(repr(forests)))
-        partitions = [[4, 4, 3], [4, 3, 4], [2, 2, 2, 6]]
-        for partition in partitions:
-            pforests = PartitionForests(partition)
-            self.assertEqual(pforests, eval(repr(pforests)))
 
     def test_traverse_map(self):
         """Test the bracket representation of these rooted trees."""
