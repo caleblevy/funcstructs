@@ -158,7 +158,7 @@ def conversion_times(start, stop=None, step=None):
 
     def rec_tree(f):
         for x in f.limitset:
-            f._attached_level_sequence(x)
+            OrderedTree.from_func(f, x)
 
     mapping_plots(
         start, stop, step,

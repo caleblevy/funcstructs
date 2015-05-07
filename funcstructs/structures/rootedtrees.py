@@ -24,6 +24,25 @@ __all__ = [
 ]
 
 
+def _graph_tree(graph, root=0, keys=None):
+    """Return the level sequence of the ordered tree formed such that graph[x]
+    are the nodes attached to x."""
+    if keys is not None:
+        graph = [sorted(attachments, key=keys.get) for attachments in graph]
+    node_stack = [root]
+    level = 0
+    node_levels = {root: level}
+    while node_stack:
+        x = node_stack.pop()
+        level = node_levels[x]
+        yield level
+        level += 1
+        for y in graph[x]:
+            node_stack.append(y)
+            # Need to compute even for dominant tree, since levels will change
+            node_levels[y] = level
+
+
 class OrderedTree(bases.Tuple):
     """Data structure for representing ordered trees by a level sequence: a
     listing of each node's height above the root produced in depth-first
@@ -34,14 +53,16 @@ class OrderedTree(bases.Tuple):
     __slots__ = ()
 
     @classmethod
-    def from_func(cls, func, node=None):
-        # If node is node, test if function has tree structure and return it
-        if node is None:
-            cycles = list(func.cycles)
-            if len(cycles) != 1 or len(cycles[0]) != 1:
+    def from_func(cls, func, root=None):
+        """Return the level sequence of the rooted tree formed from the graph
+        of all noncyclic nodes whose iteration paths pass through node. If no
+        node is specified, and the function does not have a unique cyclic
+        element, a ValueError is raised."""
+        if root is None:
+            root = next(iter(func.limitset))
+            if len(func.limitset) != 1:
                 raise ValueError("Function structure is not a rooted tree")
-            node = cycles[0][0]
-        return cls(func._attached_level_sequence(node))
+        return cls(_graph_tree(func.acyclic_ancestors, root))
 
     def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)

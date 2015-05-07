@@ -141,14 +141,6 @@ class Endofunction(bases.Tuple):
                     descendants[x].add(f)
         return tuple(map(frozenset, descendants))
 
-    def _attached_level_sequence(self, node, level=0):
-        """Return the level sequence of the rooted tree formed from the graph
-        of all noncyclic nodes whose iteration paths pass through node"""
-        level_sequence = [level]
-        for x in self.acyclic_ancestors[node]:
-            level_sequence.extend(self._attached_level_sequence(x, level+1))
-        return level_sequence
-
 
 def randfunc(n):
     """ Return a random endofunction on n elements. """
