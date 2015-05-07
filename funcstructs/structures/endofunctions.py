@@ -7,8 +7,8 @@ Caleb Levy, 2015.
 import itertools
 import random
 
-from .utils import cached_property
 from . import bases, productrange
+from .utils import cached_property
 
 __all__ = [
     "Endofunction", "SymmetricFunction",
