@@ -18,70 +18,10 @@ from . import (
 )
 from .utils import flatten
 
-__all__ = ["RootedTree", "OrderedTree", "DominantTree", "TreeEnumerator",
-           "ForestEnumerator", "PartitionForests"]
-
-
-class RootedTree(multiset.Multiset):
-    """An unlabelled, unordered rooted tree; i.e. the ordering of the subtrees
-    is unimportant. Since there is nothing to distinguish the nodes, we
-    characterize a rooted tree strictly by the multiset of its subtrees.
-    """
-
-    __slots__ = ()
-
-    def __new__(cls, subtrees=None):
-        if isinstance(subtrees, cls):
-            return subtrees
-        self = super(RootedTree, cls).__new__(cls, subtrees)
-        if not all(isinstance(tree, cls) for tree in self.keys()):
-            raise TypeError("subtrees must be rooted trees")
-        return self
-
-    @classmethod
-    def from_levels(cls, levels):
-        """Return the unordered tree corresponding to the level sequence."""
-        return OrderedTree(levels).traverse_map(cls)
-
-    def __bool__(self):
-        return True  # All trees have roots, thus aren't empty
-
-    __nonzero__ = __bool__
-
-    def _str(self):
-        strings = []
-        for subtree in sorted(self.keys(), reverse=1):
-            # Hack to make tree print with multiplicity exponents.
-            mult = self[subtree]
-            tree_string = subtree._str()
-            if mult > 1:
-                tree_string += '^%s' % mult
-            strings.append(tree_string)
-        return '{%s}' % ', '.join(strings)
-
-    def __lt__(self, other):
-        if isinstance(other, type(self)):
-            return self.ordered_form() < other.ordered_form()
-        return NotImplemented
-
-    def __str__(self):
-        return self.__class__.__name__+"(%s)" % self._str()
-
-    def degeneracy(self):
-        """Return #(nodes)!/#(labellings)"""
-        deg = super(RootedTree, self).degeneracy()
-        for subtree, mult in self.items():
-            deg *= subtree.degeneracy()**mult
-        return deg
-
-    def _ordered_level_sequence(self, level=0):
-        level_sequence = [level]
-        for tree in self:
-            level_sequence.extend(tree._ordered_level_sequence(level+1))
-        return level_sequence
-
-    def ordered_form(self):
-        return DominantTree(self._ordered_level_sequence())
+__all__ = [
+    "OrderedTree", "DominantTree", "RootedTree",
+    "TreeEnumerator", "ForestEnumerator", "PartitionForests"
+]
 
 
 class OrderedTree(bases.Tuple):
@@ -207,6 +147,68 @@ class DominantTree(OrderedTree):
         for subtree, mult in logs.items():
             deg *= subtree.degeneracy()**mult
         return deg
+
+
+class RootedTree(multiset.Multiset):
+    """An unlabelled, unordered rooted tree; i.e. the ordering of the subtrees
+    is unimportant. Since there is nothing to distinguish the nodes, we
+    characterize a rooted tree strictly by the multiset of its subtrees.
+    """
+
+    __slots__ = ()
+
+    def __new__(cls, subtrees=None):
+        if isinstance(subtrees, cls):
+            return subtrees
+        self = super(RootedTree, cls).__new__(cls, subtrees)
+        if not all(isinstance(tree, cls) for tree in self.keys()):
+            raise TypeError("subtrees must be rooted trees")
+        return self
+
+    @classmethod
+    def from_levels(cls, levels):
+        """Return the unordered tree corresponding to the level sequence."""
+        return OrderedTree(levels).traverse_map(cls)
+
+    def __bool__(self):
+        return True  # All trees have roots, thus aren't empty
+
+    __nonzero__ = __bool__
+
+    def _str(self):
+        strings = []
+        for subtree in sorted(self.keys(), reverse=1):
+            # Hack to make tree print with multiplicity exponents.
+            mult = self[subtree]
+            tree_string = subtree._str()
+            if mult > 1:
+                tree_string += '^%s' % mult
+            strings.append(tree_string)
+        return '{%s}' % ', '.join(strings)
+
+    def __lt__(self, other):
+        if isinstance(other, type(self)):
+            return self.ordered_form() < other.ordered_form()
+        return NotImplemented
+
+    def __str__(self):
+        return self.__class__.__name__+"(%s)" % self._str()
+
+    def degeneracy(self):
+        """Return #(nodes)!/#(labellings)"""
+        deg = super(RootedTree, self).degeneracy()
+        for subtree, mult in self.items():
+            deg *= subtree.degeneracy()**mult
+        return deg
+
+    def _ordered_level_sequence(self, level=0):
+        level_sequence = [level]
+        for tree in self:
+            level_sequence.extend(tree._ordered_level_sequence(level+1))
+        return level_sequence
+
+    def ordered_form(self):
+        return DominantTree(self._ordered_level_sequence())
 
 
 class TreeEnumerator(bases.Enumerable):
