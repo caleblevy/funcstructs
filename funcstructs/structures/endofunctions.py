@@ -118,7 +118,7 @@ class Endofunction(bases.Tuple):
         return frozenset(itertools.chain.from_iterable(self.cycles))
 
     @cached_property
-    def attached_treenodes(self):
+    def acyclic_ancestors(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
         descendants = [set() for _ in range(len(self))]
         for x, inv_image in enumerate(self.preimage):
@@ -131,7 +131,7 @@ class Endofunction(bases.Tuple):
         """Return the level sequence of the rooted tree formed from the graph
         of all noncyclic nodes whose iteration paths pass through node"""
         level_sequence = [level]
-        for x in self.attached_treenodes[node]:
+        for x in self.acyclic_ancestors[node]:
             level_sequence.extend(self._attached_level_sequence(x, level+1))
         return level_sequence
 

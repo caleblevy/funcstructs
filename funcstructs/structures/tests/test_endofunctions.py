@@ -69,14 +69,12 @@ class EndofunctionTests(unittest.TestCase):
         for f in self.funcs:
             self.assertEqual(f.imagepath[-1], len(f.limitset))
 
-    def test_attached_treenodes_are_not_cyclic(self):
-        """Make sure attached_treenodes returns nodes not in cycles.."""
+    def test_acyclic_ancestors_are_not_cyclic(self):
+        """Make sure attached_treenodes returns nodes not in cycles."""
         for f in self.funcs:
-            lim = f.limitset
-            descendents = f.attached_treenodes
-            for preim in descendents:
-                for x in preim:
-                    self.assertNotIn(x, lim)
+            for invim in f.acyclic_ancestors:
+                for x in invim:
+                    self.assertNotIn(x, f.limitset)
 
     # Permutation Tests
 

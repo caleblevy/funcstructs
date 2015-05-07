@@ -22,7 +22,7 @@ def node_levels(func, x, ordered=False):
     while node_queue:
         x = node_queue.popleft()
         level_map[x] = level
-        node_queue.extend(func.attached_treenodes[x])
+        node_queue.extend(func.acyclic_ancestors[x])
         if x == jump_node and node_queue:
             level += 1
             jump_node = node_queue[-1]
@@ -68,7 +68,7 @@ def attached_treenodes(func, x, node_keys=False):
     if not node_keys:
         return func.attached_treenodes[x]
     else:
-        return sorted(func.attached_treenodes[x], key=node_keys.get)
+        return sorted(func.acyclic_ancestors[x], key=node_keys.get)
 
 
 def _tree_sequence(func, x, _node_keys=False):
@@ -98,7 +98,7 @@ def tree_sequence(func, x):
         level = node_levels[x]
         level_sequence.append(level)
         level += 1
-        for y in func.attached_treenodes[x]:
+        for y in func.acyclic_ancestors[x]:
             node_stack.append(y)
             node_levels[y] = level
     return level_sequence
