@@ -4,11 +4,10 @@ into itself.
 Caleb Levy, 2015.
 """
 
-import itertools
 import random
 
 from . import bases, productrange
-from .utils import cached_property
+from .utils import cached_property, flatten
 
 __all__ = [
     "Endofunction", "SymmetricFunction",
@@ -130,7 +129,7 @@ class Endofunction(bases.Tuple):
     @cached_property
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
-        return frozenset(itertools.chain.from_iterable(self.cycles))
+        return frozenset(flatten(self.cycles))
 
     @cached_property
     def acyclic_ancestors(self):
