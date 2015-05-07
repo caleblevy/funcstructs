@@ -21,12 +21,12 @@ from . import (
 )
 
 # Main data structures
+from .conjstructs import Funcstruct, EndofunctionStructures
 from .endofunctions import (
     Endofunction, SymmetricFunction,
     randfunc, randperm,
     TransformationMonoid
 )
-from ._funcstructs import Funcstruct, EndofunctionStructures
 from .multiset import Multiset
 from .necklaces import periodicity, Necklace, FixedContentNecklaces
 from .rootedtrees import (

@@ -28,7 +28,7 @@ from math import factorial
 
 import numpy as np
 
-from . import compositions, combinat, endofunctions, _funcstructs
+from . import compositions, combinat, conjstructs, endofunctions
 
 
 def iterdist_brute(n):
@@ -53,7 +53,7 @@ def iterdist_funcstruct(n, cycle_type=None):
         return np.array([c], dtype=object)
     dist = np.zeros((n, n-1), dtype=object)
     nfac = factorial(n)
-    for struct in _funcstructs.EndofunctionStructures(n, cycle_type):
+    for struct in conjstructs.EndofunctionStructures(n, cycle_type):
         mult = nfac//struct.degeneracy
         for it, card in enumerate(struct.imagepath):
             dist[card-1, it] += mult

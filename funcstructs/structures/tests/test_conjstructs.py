@@ -5,7 +5,7 @@ import numpy as np
 
 from .. import endofunctions, necklaces, rootedtrees
 
-from .._funcstructs import Funcstruct, EndofunctionStructures
+from ..conjstructs import Funcstruct, EndofunctionStructures
 
 
 class FuncstructTests(unittest.TestCase):
