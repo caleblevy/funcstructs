@@ -17,6 +17,20 @@ __all__ = [
 ]
 
 
+def _labelling(levels):
+    yield 0
+    height_prev = levels[0]
+    grafting_point = {0: 0}  # Most recent node found at height h.
+    for node, height in enumerate(levels[1:], start=1):
+        if height > height_prev:
+            yield grafting_point[height_prev-levels[0]]
+            height_prev += 1
+        else:
+            yield grafting_point[height-levels[1]]
+            height_prev = height
+        grafting_point[height-levels[0]] = node
+
+
 class Endofunction(bases.Tuple):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
@@ -24,7 +38,7 @@ class Endofunction(bases.Tuple):
     @classmethod
     def from_tree(cls, tree):
         """Make an endofunction representing a tree."""
-        return cls(tree._labelling())
+        return cls(_labelling(tree))
 
     def __str__(self):
         funcstring = self.__class__.__name__+'([\n'

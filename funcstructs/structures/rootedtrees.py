@@ -11,6 +11,7 @@ from itertools import chain
 from . import (
     bases,
     combinat,
+    endofunctions,
     factorization,
     multiset,
     subsequences,
@@ -118,19 +119,6 @@ class OrderedTree(bases.Tuple):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
         return mapping(tree.traverse_map(mapping) for tree in self.branches())
 
-    def _labelling(self):
-        yield 0
-        height_prev = self[0]
-        grafting_point = {0: 0}  # Most recent node found at height h.
-        for node, height in enumerate(self[1:], start=1):
-            if height > height_prev:
-                yield grafting_point[height_prev-self[0]]
-                height_prev += 1
-            else:
-                yield grafting_point[height-self[1]]
-                height_prev = height
-            grafting_point[height-self[0]] = node
-
     def map_labelling(self, labels=None):
         """Viewing the ordered level sequence as an implicit mapping of each
         node to the most recent node of the next lowest level, return the
@@ -138,7 +126,7 @@ class OrderedTree(bases.Tuple):
         func_labelling[n] -> labels[func_labelling[n]]. """
         if labels is None:
             labels = range(len(self))
-        return (labels[x] for x in self._labelling())
+        return (labels[x] for x in endofunctions._labelling(self))
 
     def height_groups(self):
         """Return nodes grouped by height above the root in breadth-first
