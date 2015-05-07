@@ -126,7 +126,7 @@ class OrderedTree(bases.Tuple):
         func_labelling[n] -> labels[func_labelling[n]]. """
         if labels is None:
             labels = range(len(self))
-        return (labels[x] for x in endofunctions._labelling(self))
+        return (labels[x] for x in endofunctions._level_func(self))
 
     def height_groups(self):
         """Return nodes grouped by height above the root in breadth-first

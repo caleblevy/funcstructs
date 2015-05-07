@@ -17,7 +17,8 @@ __all__ = [
 ]
 
 
-def _labelling(levels):
+def _level_func(levels):
+    """Return an endofunction corresponding to a sequence of levels"""
     yield 0
     height_prev = levels[0]
     grafting_point = {0: 0}  # Most recent node found at height h.
@@ -38,7 +39,7 @@ class Endofunction(bases.Tuple):
     @classmethod
     def from_tree(cls, tree):
         """Make an endofunction representing a tree."""
-        return cls(_labelling(tree))
+        return cls(_level_func(tree))
 
     def __str__(self):
         funcstring = self.__class__.__name__+'([\n'
