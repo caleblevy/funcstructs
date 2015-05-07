@@ -111,13 +111,16 @@ class TreeTests(unittest.TestCase):
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.traverse_map())
 
-    def test_treefuncs(self):
+    def test_from_func(self):
         """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
                 treefunc = endofunctions.Endofunction.from_levels(tree)
                 rtreefunc = endofunctions.randconj(treefunc)
                 self.assertEqual(tree, DominantTree.from_func(rtreefunc))
+        # Make sure non-tree structures are caught
+        with self.assertRaises(ValueError):
+            OrderedTree.from_func(endofunctions.Endofunction(range(10)))
 
     def test_rootedtree_conversion(self):
         """Test conversion between rooted and unordered trees is seamless."""
