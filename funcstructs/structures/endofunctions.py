@@ -27,12 +27,12 @@ class Endofunction(bases.Tuple):
         return cls(tree._labelling())
 
     def __str__(self):
-        funcstring = self.__class__.__name__+'(['
+        funcstring = self.__class__.__name__+'([\n'
         mapvals = []
-        for x, f in enumerate(self[:-1]):
-            mapvals.append(str(x)+'->'+str(f)+', ')
+        for x, y in enumerate(self[:-1]):
+            mapvals.append('\t'+str(x)+' -> '+str(y)+', \n')
         funcstring += ''.join(mapvals)
-        funcstring += str(len(self)-1)+"->"+str(self[-1])+'])'
+        funcstring += '\t'+str(len(self)-1)+" -> "+str(self[-1])+'\n])'
         return funcstring
 
     def __mul__(self, other):
@@ -54,8 +54,8 @@ class Endofunction(bases.Tuple):
     def preimage(self):
         """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
         preim = [set() for _ in range(len(self))]
-        for x in self.domain:
-            preim[self[x]].add(x)
+        for x, y in enumerate(self):
+            preim[y].add(x)
         return tuple(map(frozenset, preim))
 
     @cached_property
