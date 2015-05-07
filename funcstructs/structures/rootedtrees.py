@@ -14,8 +14,8 @@ from . import (
     factorization,
     multiset,
     subsequences,
-    utils
 )
+from .utils import flatten
 
 __all__ = ["RootedTree", "OrderedTree", "DominantTree", "TreeEnumerator",
            "ForestEnumerator", "PartitionForests"]
@@ -185,7 +185,7 @@ class OrderedTree(bases.Tuple):
             branch_list.append(branch._dominant_sequence())
         branch_list.sort(reverse=True)
         # Must make list, else they won't be sorted properly
-        return list(chain([self[0]], utils.flatten(branch_list)))
+        return list(chain([self[0]], flatten(branch_list)))
 
 
 def unordered_tree(level_sequence):
