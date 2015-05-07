@@ -37,7 +37,7 @@ class Endofunction(bases.Tuple):
     a list."""
 
     @classmethod
-    def from_tree(cls, tree):
+    def from_levels(cls, tree):
         """Make an endofunction representing a tree."""
         return cls(_level_func(tree))
 

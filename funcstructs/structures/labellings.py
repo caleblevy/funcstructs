@@ -198,7 +198,7 @@ def translation_keys(tree):
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
     translation_sequence = SymmetricFunction(flatten(ind_groups)).inverse.conj(
-        Endofunction.from_tree(tree))
+        Endofunction.from_levels(tree))
     return bin_widths, translation_sequence
 
 
