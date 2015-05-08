@@ -46,7 +46,7 @@ def funclevels_iterator(levels):
     levels = iter(levels)
     root = previous_level = next(levels)
     f = node = 0
-    yield node, previous_level, f  # node, height, and what it's mapped to
+    yield node, 0, f  # node, normalized height, and what it's mapped to
     grafting_point = {0: 0}
     for node, level in enumerate(levels, start=1):
         if level > previous_level:
@@ -81,16 +81,22 @@ def map_labelling(self, labels=None):
 def tree_properties(levels):
     """Return an endofunction corresponding to a sequence of levels"""
     func = []
-    height_groups = [[]]
+    hg = [[]]
     preim = defaultdict(set)
     for n, l, f in funclevels_iterator(levels):
         func.append(f)
         preim[f].add(n)
-        if l >= len(height_groups):
-            height_groups.append([])
-        height_groups[l].append(n)
+        if l >= len(hg):
+            hg.append([])
+        hg[l].append(n)
     preim[0].remove(0)
-    return func, preim, height_groups
+    return func, preim, hg
+
+
+def height_groups(self):
+    """Return nodes grouped by height above the root in breadth-first
+    traversal order."""
+    return tree_properties(self)[2]
 
 
 t = iter([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])

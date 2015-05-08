@@ -71,13 +71,7 @@ class OrderedTree(bases.Tuple):
 
     map_labelling = treefuncs.map_labelling
 
-    def height_groups(self):
-        """Return nodes grouped by height above the root in breadth-first
-        traversal order."""
-        height_groups = [[] for _ in range(max(self)-self[0]+1)]
-        for node, height in enumerate(self):
-            height_groups[height-self[0]].append(node)
-        return height_groups
+    height_groups = treefuncs.height_groups
 
     def _funcim(self):
         """Return both functional form and preimage from the same iterator"""
