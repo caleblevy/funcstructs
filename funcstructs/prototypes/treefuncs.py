@@ -7,6 +7,7 @@ from __future__ import print_function
 from collections import defaultdict
 
 
+# accessed in rootedtrees.OrderedTree.from_func
 @classmethod
 def from_func(cls, func, root=None):
     """Return the level sequence of the rooted tree formed from the graph of
@@ -58,6 +59,19 @@ def funclevels_iterator(levels):
         grafting_point[level-root] = node
 
 
+# accessed in rootedtrees.OrderedTree
+def map_labelling(self, labels=None):
+    """Viewing the ordered level sequence as an implicit mapping of each
+    node to the most recent node of the next lowest level, return the
+    sequence of elements that each node is mapped to. If labels is given,
+    func_labelling[n] -> labels[func_labelling[n]]. """
+    if labels is None:
+        labels = range(len(self))
+    for n, l, f in funclevels_iterator(self):
+        yield labels[f]
+
+
+# accessed in endofunctions.Endofunction.from_levels
 @classmethod
 def from_levels(cls, levels):
     """Make an endofunction representing a tree."""

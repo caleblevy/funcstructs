@@ -69,14 +69,7 @@ class OrderedTree(bases.Tuple):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
         return mapping(tree.traverse_map(mapping) for tree in self.branches())
 
-    def map_labelling(self, labels=None):
-        """Viewing the ordered level sequence as an implicit mapping of each
-        node to the most recent node of the next lowest level, return the
-        sequence of elements that each node is mapped to. If labels is given,
-        func_labelling[n] -> labels[func_labelling[n]]. """
-        if labels is None:
-            labels = range(len(self))
-        return (labels[x] for x in endofunctions._level_func(self))
+    map_labelling = treefuncs.map_labelling
 
     def height_groups(self):
         """Return nodes grouped by height above the root in breadth-first
