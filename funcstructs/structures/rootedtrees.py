@@ -6,7 +6,6 @@ Caleb Levy, 2014 and 2015.
 """
 
 from collections import defaultdict
-from itertools import chain
 
 from . import (
     bases,
@@ -16,7 +15,6 @@ from . import (
     multiset,
     subsequences,
 )
-from .utils import flatten
 
 __all__ = [
     "OrderedTree", "DominantTree", "RootedTree",
@@ -101,21 +99,14 @@ class OrderedTree(bases.Tuple):
         """Return both functional form and preimage from the same iterator"""
         f = []
         p = [[] for _ in self]
+        g = [[] for _ in range(max(self)-self[0]+1)]
         mapseq = endofunctions._level_func(self)
         f.append(next(mapseq))  # exclude first element from preimage
         for x, y in enumerate(mapseq, start=1):
             f.append(y)
             p[y].append(x)
-        return f, p
-
-    def _dominant_sequence(self):
-        """Return the dominant rooted tree corresponding to self."""
-        branch_list = []
-        for branch in self.branches():
-            branch_list.append(branch._dominant_sequence())
-        branch_list.sort(reverse=True)
-        # Must make list, else they won't be sorted properly
-        return list(chain([self[0]], flatten(branch_list)))
+            g[self[y]-self[0]].append(x)
+        return f, p, g
 
 
 def _dominant_keys(height_groups, func):
@@ -132,19 +123,17 @@ def _dominant_keys(height_groups, func):
         for x in previous_level:
             node_keys[func[x]].append(node_keys[x])
         # Sort attachments to nodes of level by value of their subtrees
-        for y in level:
-            node_keys[y].sort(reverse=True)
         # Make a sorted list copy, since iteration order matters
-        sorted_nodes = sorted(level, key=node_keys.get)
+        sorted_nodes = sorted(level, key=node_keys.__getitem__)
         # Make copy of sorting keys; they will be overwritten in the loop
-        sorting_keys = list(map(node_keys.get, sorted_nodes))
+        sorting_keys = map(node_keys.get, sorted_nodes)
         # Overwrite sorting keys to prevent accumulation of nested lists
         for run in subsequences.runs(zip(sorted_nodes, sorting_keys),
                                      lambda x, y: x[1] == y[1]):
             sort_value += 1
             for x in run:
                 node_keys[x[0]] = sort_value
-        previous_level = level
+        previous_level = reversed(sorted_nodes)
     return node_keys
 
 
@@ -158,7 +147,10 @@ class DominantTree(OrderedTree):
 
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
-            level_sequence = OrderedTree(level_sequence)._dominant_sequence()
+            ot = OrderedTree(level_sequence)
+            f, p, g = ot._funcim()
+            keys = _dominant_keys(g, f)
+            level_sequence = _graph_tree(p, 0, keys)
         return super(DominantTree, cls).__new__(cls, level_sequence)
 
     def branches(self):
