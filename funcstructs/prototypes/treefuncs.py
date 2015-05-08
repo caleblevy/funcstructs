@@ -4,7 +4,10 @@ Caleb Levy, 2015.
 """
 
 from __future__ import print_function
+
 from collections import defaultdict
+
+from ..structures.utils import flatten
 
 
 # accessed in rootedtrees.OrderedTree.from_func
@@ -93,10 +96,10 @@ def tree_properties(levels):
     return func, preim, hg
 
 
-def height_groups(self):
+def breadth_first_traversal(self):
     """Return nodes grouped by height above the root in breadth-first
     traversal order."""
-    return tree_properties(self)[2]
+    return flatten(tree_properties(self)[2])
 
 
 t = iter([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])

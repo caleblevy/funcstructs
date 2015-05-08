@@ -122,21 +122,23 @@ class TreeTests(unittest.TestCase):
     def test_height_groups(self):
         """Test nodes are grouped correctly by their height"""
         T = OrderedTree([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])
-        hg = [[0], [1, 14], [2, 3, 13, 15], [4, 5, 6, 11, 12], [7, 10], [8, 9]]
-        for height, group in enumerate(T.height_groups()):
-            self.assertSequenceEqual(hg[height], group)
-            self.assertEqual(height, list(set(map(T.__getitem__, group)))[0])
+        bft = [0, 1, 14, 2, 3, 13, 15, 4, 5, 6, 11, 12, 7, 10, 8, 9]
+        lp = T[0]
+        for reference, computed in zip(bft, T.breadth_first_traversal()):
+            self.assertEqual(reference, computed)
+            self.assertGreaterEqual(T[computed], T[lp])
+            lp = computed
 
     def test_height_independence(self):
         """Check that tree methods are unaffected by root height"""
         T = OrderedTree([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
-        hg = list(T.height_groups())
-        lt = list(T.map_labelling())
-        bf = T.traverse_map()
-        deg = DominantTree(T).degeneracy()
+        bft = list(T.breadth_first_traversal())
+        ml = list(T.map_labelling())
+        tm = T.traverse_map()
+        d = DominantTree(T).degeneracy()
         for i in range(-7, 7):
-            offset_tree = OrderedTree([t-i for t in T])
-            self.assertSequenceEqual(hg, list(offset_tree.height_groups()))
-            self.assertSequenceEqual(lt, list(offset_tree.map_labelling()))
-            self.assertEqual(bf, offset_tree.traverse_map())
-            self.assertEqual(deg, DominantTree(offset_tree).degeneracy())
+            ot = OrderedTree([t-i for t in T])
+            self.assertSequenceEqual(bft, list(ot.breadth_first_traversal()))
+            self.assertSequenceEqual(ml, list(ot.map_labelling()))
+            self.assertEqual(tm, ot.traverse_map())
+            self.assertEqual(d, DominantTree(ot).degeneracy())

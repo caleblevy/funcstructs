@@ -71,7 +71,7 @@ class OrderedTree(bases.Tuple):
 
     map_labelling = treefuncs.map_labelling
 
-    height_groups = treefuncs.height_groups
+    breadth_first_traversal = treefuncs.breadth_first_traversal
 
     def _funcim(self):
         """Return both functional form and preimage from the same iterator"""
