@@ -58,6 +58,12 @@ def funclevels_iterator(levels):
         grafting_point[level-root] = node
 
 
+@classmethod
+def from_levels(cls, levels):
+    """Make an endofunction representing a tree."""
+    return cls(f for n, l, f in funclevels_iterator(levels))
+
+
 def tree_properties(levels):
     """Return an endofunction corresponding to a sequence of levels"""
     func = []

@@ -8,6 +8,7 @@ import random
 
 from . import bases, productrange
 from .utils import cached_property, flatten
+from ..prototypes import treefuncs
 
 __all__ = [
     "Endofunction", "SymmetricFunction",
@@ -36,10 +37,7 @@ class Endofunction(bases.Tuple):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
 
-    @classmethod
-    def from_levels(cls, tree):
-        """Make an endofunction representing a tree."""
-        return cls(_level_func(tree))
+    from_levels = treefuncs.from_levels
 
     def __str__(self):
         funcstring = self.__class__.__name__+'([\n'
