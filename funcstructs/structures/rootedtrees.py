@@ -15,6 +15,7 @@ from . import (
     multiset,
     subsequences,
 )
+from ..prototypes import treefuncs
 
 __all__ = [
     "OrderedTree", "DominantTree", "RootedTree",
@@ -50,17 +51,7 @@ class OrderedTree(bases.Tuple):
 
     __slots__ = ()
 
-    @classmethod
-    def from_func(cls, func, root=None):
-        """Return the level sequence of the rooted tree formed from the graph
-        of all noncyclic nodes whose iteration paths pass through node. If no
-        node is specified, and the function does not have a unique cyclic
-        element, a ValueError is raised."""
-        if root is None:
-            root = next(iter(func.limitset))
-            if len(func.limitset) != 1:
-                raise ValueError("Function structure is not a rooted tree")
-        return cls(_graph_tree(func.acyclic_ancestors, root))
+    from_func = treefuncs.from_func
 
     def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)

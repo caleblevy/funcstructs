@@ -7,14 +7,17 @@ from __future__ import print_function
 from collections import defaultdict
 
 
-def levels_from_func(func, root=None):
-    """Return function level iterator"""
+@classmethod
+def from_func(cls, func, root=None):
+    """Return the level sequence of the rooted tree formed from the graph of
+    all noncyclic nodes whose iteration paths pass through node. If no node is
+    specified, and the function does not have a unique cyclic element, a
+    ValueError is raised."""
     if root is None:
         root = next(iter(func.limitset))
         if len(func.limitset) != 1:
             raise ValueError("Function structure is not a rooted tree")
-    for level in levels_from_preim(func.acylic_ancestors, root):
-        yield level
+    return cls(levels_from_preim(func.acyclic_ancestors, root))
 
 
 def levels_from_preim(graph, root=0, keys=None):
