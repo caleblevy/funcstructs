@@ -100,12 +100,13 @@ class OrderedTree(bases.Tuple):
         f = []
         p = [[] for _ in self]
         g = [[] for _ in range(max(self)-self[0]+1)]
+        g[0].append(0)
         mapseq = endofunctions._level_func(self)
         f.append(next(mapseq))  # exclude first element from preimage
         for x, y in enumerate(mapseq, start=1):
             f.append(y)
             p[y].append(x)
-            g[self[y]-self[0]].append(x)
+            g[self[y]-self[0]+1].append(x)
         return f, p, g
 
 
