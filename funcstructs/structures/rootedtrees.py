@@ -97,6 +97,17 @@ class OrderedTree(bases.Tuple):
             height_groups[height-self[0]].append(node)
         return height_groups
 
+    def _funcim(self):
+        """Return both functional form and preimage from the same iterator"""
+        f = []
+        p = [[] for _ in self]
+        mapseq = endofunctions._level_func(self)
+        f.append(next(mapseq))  # exclude first element from preimage
+        for x, y in enumerate(mapseq, start=1):
+            f.append(y)
+            p[y].append(x)
+        return f, p
+
     def _dominant_sequence(self):
         """Return the dominant rooted tree corresponding to self."""
         branch_list = []
