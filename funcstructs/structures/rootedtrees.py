@@ -97,36 +97,6 @@ class OrderedTree(bases.Tuple):
             height_groups[height-self[0]].append(node)
         return height_groups
 
-    def _node_keys(self):
-        """Assign to each node a key for sorting"""
-        node_keys = defaultdict(list)  # node_keys[node] <-> sort key for node
-        levels = reversed(self.height_groups())
-        func = list(endofunctions._level_func(self))
-        previous_level = next(levels)
-        # sort_value will increase to produce dominant tree
-        sort_value = 1
-        for x in previous_level:
-            node_keys[x] = sort_value  # Top nodes are all identical
-        for level in levels:
-            # enumerate for connections from previous level to current
-            for x in previous_level:
-                node_keys[func[x]].append(node_keys[x])
-            # Sort attachments to nodes of level by value of their subtrees
-            for y in level:
-                node_keys[y].sort(reverse=True)
-            # Make a sorted list copy, since iteration order matters
-            sorted_nodes = sorted(level, key=node_keys.get)
-            # Make copy of sorting keys; they will be overwritten in the loop
-            sorting_keys = list(map(node_keys.get, sorted_nodes))
-            # Overwrite sorting keys to prevent accumulation of nested lists
-            for run in subsequences.runs(zip(sorted_nodes, sorting_keys),
-                                         lambda x, y: x[1] == y[1]):
-                sort_value += 1
-                for x in run:
-                    node_keys[x[0]] = sort_value
-            previous_level = level
-        return node_keys
-
     def _dominant_sequence(self):
         """Return the dominant rooted tree corresponding to self."""
         branch_list = []
@@ -135,6 +105,36 @@ class OrderedTree(bases.Tuple):
         branch_list.sort(reverse=True)
         # Must make list, else they won't be sorted properly
         return list(chain([self[0]], flatten(branch_list)))
+
+
+def _dominant_keys(height_groups, func):
+    """Assign to each node a key for sorting"""
+    node_keys = defaultdict(list)  # node_keys[node] <-> sort key for node
+    levels = reversed(height_groups)
+    previous_level = next(levels)
+    # sort_value will increase to produce dominant tree
+    sort_value = 1
+    for x in previous_level:
+        node_keys[x] = sort_value  # Top nodes are all identical
+    for level in levels:
+        # enumerate for connections from previous level to current
+        for x in previous_level:
+            node_keys[func[x]].append(node_keys[x])
+        # Sort attachments to nodes of level by value of their subtrees
+        for y in level:
+            node_keys[y].sort(reverse=True)
+        # Make a sorted list copy, since iteration order matters
+        sorted_nodes = sorted(level, key=node_keys.get)
+        # Make copy of sorting keys; they will be overwritten in the loop
+        sorting_keys = list(map(node_keys.get, sorted_nodes))
+        # Overwrite sorting keys to prevent accumulation of nested lists
+        for run in subsequences.runs(zip(sorted_nodes, sorting_keys),
+                                     lambda x, y: x[1] == y[1]):
+            sort_value += 1
+            for x in run:
+                node_keys[x[0]] = sort_value
+        previous_level = level
+    return node_keys
 
 
 class DominantTree(OrderedTree):
