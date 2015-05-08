@@ -55,8 +55,15 @@ def funclevels_iterator(levels):
         else:
             f = grafting_point[level-root-1]
             previous_level = level
-        yield node, level, f
+        yield node, level-root, f
         grafting_point[level-root] = node
+
+
+# accessed in endofunctions.Endofunction.from_levels
+@classmethod
+def from_levels(cls, levels):
+    """Make an endofunction representing a tree."""
+    return cls(f for n, l, f in funclevels_iterator(levels))
 
 
 # accessed in rootedtrees.OrderedTree
@@ -71,21 +78,16 @@ def map_labelling(self, labels=None):
         yield labels[f]
 
 
-# accessed in endofunctions.Endofunction.from_levels
-@classmethod
-def from_levels(cls, levels):
-    """Make an endofunction representing a tree."""
-    return cls(f for n, l, f in funclevels_iterator(levels))
-
-
 def tree_properties(levels):
     """Return an endofunction corresponding to a sequence of levels"""
     func = []
-    height_groups = defaultdict(list)
+    height_groups = [[]]
     preim = defaultdict(set)
     for n, l, f in funclevels_iterator(levels):
         func.append(f)
         preim[f].add(n)
+        if l >= len(height_groups):
+            height_groups.append([])
         height_groups[l].append(n)
     preim[0].remove(0)
     return func, preim, height_groups
