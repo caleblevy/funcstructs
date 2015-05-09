@@ -22,25 +22,6 @@ __all__ = [
 ]
 
 
-def _graph_tree(graph, root=0, keys=None):
-    """Return the level sequence of the ordered tree formed such that graph[x]
-    are the nodes attached to x."""
-    if keys is not None:
-        graph = [sorted(attachments, key=keys.get) for attachments in graph]
-    node_stack = [root]
-    level = 0
-    node_levels = {root: level}
-    while node_stack:
-        x = node_stack.pop()
-        level = node_levels[x]
-        yield level
-        level += 1
-        for y in graph[x]:
-            node_stack.append(y)
-            # Need to compute even for dominant tree, since levels will change
-            node_levels[y] = level
-
-
 class OrderedTree(bases.Tuple):
     """Data structure for representing ordered trees by a level sequence: a
     listing of each node's height above the root produced in depth-first
@@ -71,21 +52,6 @@ class OrderedTree(bases.Tuple):
     map_labelling = treefuncs.map_labelling
 
     breadth_first_traversal = treefuncs.breadth_first_traversal
-
-    def _funcim(self):
-        """Return both functional form and preimage from the same iterator"""
-        f = []
-        p = [[] for _ in self]
-        g = [[] for _ in range(max(self)-self[0]+1)]
-        g[0].append(0)
-        mapseq = treefuncs.funclevels_iterator(self)
-        next(mapseq)
-        f.append(0)  # exclude first element from preimage
-        for x, _, y in mapseq:
-            f.append(y)
-            p[y].append(x)
-            g[self[y]-self[0]+1].append(x)
-        return f, p, g
 
 
 def _dominant_keys(height_groups, func):
@@ -126,10 +92,9 @@ class DominantTree(OrderedTree):
 
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
-            ot = OrderedTree(level_sequence)
-            f, p, g = ot._funcim()
+            f, p, g = treefuncs.tree_properties(level_sequence)
             keys = _dominant_keys(g, f)
-            level_sequence = _graph_tree(p, 0, keys)
+            level_sequence = treefuncs.levels_from_preim(p, 0, keys)
         return super(DominantTree, cls).__new__(cls, level_sequence)
 
     def branches(self):
