@@ -8,13 +8,14 @@ Caleb Levy, 2014 and 2015.
 from collections import defaultdict
 
 from . import (
-    _treefuncs,
     bases,
     combinat,
     factorization,
     multiset,
     subsequences,
 )
+from . import _treefuncs
+from .utils import flatten
 
 __all__ = [
     "OrderedTree", "DominantTree", "RootedTree",
@@ -70,7 +71,9 @@ class OrderedTree(bases.Tuple):
         for n, l, f in _treefuncs.funclevels_iterator(self):
             yield labels[f]
 
-    breadth_first_traversal = _treefuncs.breadth_first_traversal
+    def breadth_first_traversal(self):
+        """Return nodes in breadth-first traversal order"""
+        return flatten(_treefuncs.tree_properties(self)[2])
 
 
 def _dominant_keys(height_groups, func):

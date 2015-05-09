@@ -7,8 +7,6 @@ from __future__ import print_function
 
 from collections import defaultdict
 
-from .utils import flatten
-
 
 def levels_from_preim(graph, root=0, keys=None):
     """Return the level sequence of the ordered tree formed such that graph[x]
@@ -61,12 +59,6 @@ def tree_properties(levels):
         hg[l].append(n)
     preim[0].pop(0)
     return func, preim, hg
-
-
-def breadth_first_traversal(self):
-    """Return nodes grouped by height above the root in breadth-first
-    traversal order."""
-    return flatten(tree_properties(self)[2])
 
 
 t = iter([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])
