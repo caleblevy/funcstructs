@@ -5,8 +5,6 @@ out-degree one. A forest is any collection of rooted trees.
 Caleb Levy, 2014 and 2015.
 """
 
-from collections import defaultdict
-
 from . import (
     bases,
     combinat,
@@ -78,7 +76,8 @@ class OrderedTree(bases.Tuple):
 
 def _dominant_keys(height_groups, func):
     """Assign to each node a key for sorting"""
-    node_keys = defaultdict(list)  # node_keys[node] <-> sort key for node
+    node_keys = [0]*len(func)  # node_keys[node] <-> sort key for node
+    attachments = [[] for _ in range(len(func))]  # Used for degeneracy
     levels = reversed(height_groups)
     previous_level = next(levels)
     # sort_value will increase to produce dominant tree
@@ -88,12 +87,12 @@ def _dominant_keys(height_groups, func):
     for level in levels:
         # enumerate for connections from previous level to current
         for x in previous_level:
-            node_keys[func[x]].append(node_keys[x])
+            attachments[func[x]].append(node_keys[x])
         # Sort attachments to nodes of level by value of their subtrees
         # Make a sorted list copy, since iteration order matters
-        sorted_nodes = sorted(level, key=node_keys.__getitem__)
+        sorted_nodes = sorted(level, key=attachments.__getitem__)
         # Make copy of sorting keys; they will be overwritten in the loop
-        sorting_keys = map(node_keys.get, sorted_nodes)
+        sorting_keys = map(attachments.__getitem__, sorted_nodes)
         # Overwrite sorting keys to prevent accumulation of nested lists
         for run in subsequences.runs(zip(sorted_nodes, sorting_keys),
                                      lambda x, y: x[1] == y[1]):
@@ -101,7 +100,7 @@ def _dominant_keys(height_groups, func):
             for x in run:
                 node_keys[x[0]] = sort_value
         previous_level = reversed(sorted_nodes)
-    return node_keys
+    return node_keys, attachments
 
 
 class DominantTree(OrderedTree):
@@ -115,7 +114,7 @@ class DominantTree(OrderedTree):
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
             f, p, g = _treefuncs.treefunc_properties(level_sequence)
-            keys = _dominant_keys(g, f)
+            keys = _dominant_keys(g, f)[0]
             level_sequence = _treefuncs.levels_from_preim(p, 0, keys)
         return super(DominantTree, cls).__new__(cls, level_sequence)
 
