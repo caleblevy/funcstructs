@@ -5,6 +5,8 @@ out-degree one. A forest is any collection of rooted trees.
 Caleb Levy, 2014 and 2015.
 """
 
+from itertools import groupby
+
 from . import (
     bases,
     combinat,
@@ -77,29 +79,22 @@ class OrderedTree(bases.Tuple):
 def _dominant_keys(height_groups, func):
     """Assign to each node a key for sorting"""
     node_keys = [0]*len(func)  # node_keys[node] <-> sort key for node
-    attachments = [[] for _ in range(len(func))]  # Used for degeneracy
-    levels = reversed(height_groups)
-    previous_level = next(levels)
+    attachments = [[] for _ in func]  # Used for degeneracy
+    previous_level = []
     # sort_value will increase to produce dominant tree
-    sort_value = 1
-    for x in previous_level:
-        node_keys[x] = sort_value  # Top nodes are all identical
-    for level in levels:
+    sort_value = len(func)
+    for level in reversed(height_groups):
         # enumerate for connections from previous level to current
         for x in previous_level:
             attachments[func[x]].append(node_keys[x])
         # Sort attachments to nodes of level by value of their subtrees
-        # Make a sorted list copy, since iteration order matters
-        sorted_nodes = sorted(level, key=attachments.__getitem__)
-        # Make copy of sorting keys; they will be overwritten in the loop
-        sorting_keys = map(attachments.__getitem__, sorted_nodes)
+        level.sort(key=attachments.__getitem__, reverse=True)
         # Overwrite sorting keys to prevent accumulation of nested lists
-        for run in subsequences.runs(zip(sorted_nodes, sorting_keys),
-                                     lambda x, y: x[1] == y[1]):
-            sort_value += 1
+        for _, run in groupby(level, attachments.__getitem__):
+            sort_value -= 1
             for x in run:
-                node_keys[x[0]] = sort_value
-        previous_level = reversed(sorted_nodes)
+                node_keys[x] = sort_value
+        previous_level = level
     return node_keys, attachments
 
 
