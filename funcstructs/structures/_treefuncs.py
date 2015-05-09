@@ -3,15 +3,13 @@
 Caleb Levy, 2015.
 """
 
-from collections import defaultdict
-
 
 def levels_from_preim(graph, root=0, keys=None):
     """Return the level sequence of the ordered tree formed such that graph[x]
     are the nodes attached to x."""
     if keys is not None:
-        for x in graph:
-            graph[x].sort(key=keys.__getitem__)
+        for connections in graph:
+            connections.sort(key=keys.__getitem__)
     node_stack = [root]
     level = 0
     node_levels = {root: level}
@@ -50,9 +48,10 @@ def treefunc_properties(levels):
     breadth-first traversal order grouped by height."""
     func = []
     hg = [[]]
-    preim = defaultdict(list)
+    preim = []
     for n, l, f in funclevels_iterator(levels):
         func.append(f)
+        preim.append([])
         preim[f].append(n)
         if l >= len(hg):
             hg.append([])
