@@ -10,20 +10,6 @@ from collections import defaultdict
 from .utils import flatten
 
 
-# accessed in rootedtrees.OrderedTree.from_func
-@classmethod
-def from_func(cls, func, root=None):
-    """Return the level sequence of the rooted tree formed from the graph of
-    all noncyclic nodes whose iteration paths pass through node. If no node is
-    specified, and the function does not have a unique cyclic element, a
-    ValueError is raised."""
-    if root is None:
-        root = next(iter(func.limitset))
-        if len(func.limitset) != 1:
-            raise ValueError("Function structure is not a rooted tree")
-    return cls(levels_from_preim(func.acyclic_ancestors, root))
-
-
 def levels_from_preim(graph, root=0, keys=None):
     """Return the level sequence of the ordered tree formed such that graph[x]
     are the nodes attached to x."""
@@ -60,18 +46,6 @@ def funclevels_iterator(levels):
             previous_level = level
         yield node, level-root, f
         grafting_point[level-root] = node
-
-
-# accessed in rootedtrees.OrderedTree
-def map_labelling(self, labels=None):
-    """Viewing the ordered level sequence as an implicit mapping of each
-    node to the most recent node of the next lowest level, return the
-    sequence of elements that each node is mapped to. If labels is given,
-    func_labelling[n] -> labels[func_labelling[n]]. """
-    if labels is None:
-        labels = range(len(self))
-    for n, l, f in funclevels_iterator(self):
-        yield labels[f]
 
 
 def tree_properties(levels):

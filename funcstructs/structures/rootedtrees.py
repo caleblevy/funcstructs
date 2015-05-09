@@ -31,7 +31,18 @@ class OrderedTree(bases.Tuple):
 
     __slots__ = ()
 
-    from_func = _treefuncs.from_func
+    @classmethod
+    def from_func(cls, func, root=None):
+        """Return the level sequence of the rooted tree formed from the graph
+        of all noncyclic nodes whose iteration paths pass through node. If no
+        node is specified, and the function does not have a unique cyclic
+        element, a ValueError is raised."""
+        if root is None:
+            root = next(iter(func.limitset))
+            if len(func.limitset) != 1:
+                raise ValueError("Function structure is not a rooted tree")
+        # Must have separate method for endofunction since default is level seq
+        return cls(_treefuncs.levels_from_preim(func.acyclic_ancestors, root))
 
     def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)
@@ -49,7 +60,15 @@ class OrderedTree(bases.Tuple):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
         return mapping(tree.traverse_map(mapping) for tree in self.branches())
 
-    map_labelling = _treefuncs.map_labelling
+    def map_labelling(self, labels=None):
+        """Viewing the ordered level sequence as an implicit mapping of each
+        node to the most recent node of the next lowest level, return the
+        sequence of elements that each node is mapped to. If labels is given,
+        func_labelling[n] -> labels[func_labelling[n]]. """
+        if labels is None:
+            labels = range(len(self))
+        for n, l, f in _treefuncs.funclevels_iterator(self):
+            yield labels[f]
 
     breadth_first_traversal = _treefuncs.breadth_first_traversal
 
