@@ -73,7 +73,7 @@ class OrderedTree(bases.Tuple):
 
     def breadth_first_traversal(self):
         """Return nodes in breadth-first traversal order"""
-        return flatten(_treefuncs.tree_properties(self)[2])
+        return flatten(_treefuncs.treefunc_properties(self)[2])
 
 
 def _dominant_keys(height_groups, func):
@@ -114,7 +114,7 @@ class DominantTree(OrderedTree):
 
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
-            f, p, g = _treefuncs.tree_properties(level_sequence)
+            f, p, g = _treefuncs.treefunc_properties(level_sequence)
             keys = _dominant_keys(g, f)
             level_sequence = _treefuncs.levels_from_preim(p, 0, keys)
         return super(DominantTree, cls).__new__(cls, level_sequence)

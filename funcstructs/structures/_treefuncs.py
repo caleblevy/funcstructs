@@ -44,7 +44,7 @@ def funclevels_iterator(levels):
         grafting_point[level-root] = node
 
 
-def tree_properties(levels):
+def treefunc_properties(levels):
     """Return an endofunction corresponding to a sequence of levels"""
     func = []
     hg = [[]]
