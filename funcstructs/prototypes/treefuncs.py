@@ -85,14 +85,14 @@ def tree_properties(levels):
     """Return an endofunction corresponding to a sequence of levels"""
     func = []
     hg = [[]]
-    preim = defaultdict(set)
+    preim = defaultdict(list)
     for n, l, f in funclevels_iterator(levels):
         func.append(f)
-        preim[f].add(n)
+        preim[f].append(n)
         if l >= len(hg):
             hg.append([])
         hg[l].append(n)
-    preim[0].remove(0)
+    preim[0].pop(0)
     return func, preim, hg
 
 
