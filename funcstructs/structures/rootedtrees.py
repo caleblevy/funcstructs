@@ -8,13 +8,13 @@ Caleb Levy, 2014 and 2015.
 from collections import defaultdict
 
 from . import (
+    _treefuncs,
     bases,
     combinat,
     factorization,
     multiset,
     subsequences,
 )
-from ..prototypes import treefuncs
 
 __all__ = [
     "OrderedTree", "DominantTree", "RootedTree",
@@ -31,7 +31,7 @@ class OrderedTree(bases.Tuple):
 
     __slots__ = ()
 
-    from_func = treefuncs.from_func
+    from_func = _treefuncs.from_func
 
     def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)
@@ -49,9 +49,9 @@ class OrderedTree(bases.Tuple):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
         return mapping(tree.traverse_map(mapping) for tree in self.branches())
 
-    map_labelling = treefuncs.map_labelling
+    map_labelling = _treefuncs.map_labelling
 
-    breadth_first_traversal = treefuncs.breadth_first_traversal
+    breadth_first_traversal = _treefuncs.breadth_first_traversal
 
 
 def _dominant_keys(height_groups, func):
@@ -92,9 +92,9 @@ class DominantTree(OrderedTree):
 
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
-            f, p, g = treefuncs.tree_properties(level_sequence)
+            f, p, g = _treefuncs.tree_properties(level_sequence)
             keys = _dominant_keys(g, f)
-            level_sequence = treefuncs.levels_from_preim(p, 0, keys)
+            level_sequence = _treefuncs.levels_from_preim(p, 0, keys)
         return super(DominantTree, cls).__new__(cls, level_sequence)
 
     def branches(self):

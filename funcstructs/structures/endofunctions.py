@@ -6,9 +6,8 @@ Caleb Levy, 2015.
 
 import random
 
-from . import bases, productrange
+from . import _treefuncs, bases, productrange
 from .utils import cached_property, flatten
-from ..prototypes import treefuncs
 
 __all__ = [
     "Endofunction", "SymmetricFunction",
@@ -21,7 +20,7 @@ class Endofunction(bases.Tuple):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
 
-    from_levels = treefuncs.from_levels
+    from_levels = _treefuncs.from_levels
 
     def __str__(self):
         funcstring = self.__class__.__name__+'([\n'

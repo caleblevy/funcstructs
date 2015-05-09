@@ -7,7 +7,7 @@ from __future__ import print_function
 
 from collections import defaultdict
 
-from ..structures.utils import flatten
+from .utils import flatten
 
 
 # accessed in rootedtrees.OrderedTree.from_func
