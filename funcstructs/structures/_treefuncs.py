@@ -62,13 +62,6 @@ def funclevels_iterator(levels):
         grafting_point[level-root] = node
 
 
-# accessed in endofunctions.Endofunction.from_levels
-@classmethod
-def from_levels(cls, levels):
-    """Make an endofunction representing a tree."""
-    return cls(f for n, l, f in funclevels_iterator(levels))
-
-
 # accessed in rootedtrees.OrderedTree
 def map_labelling(self, labels=None):
     """Viewing the ordered level sequence as an implicit mapping of each
