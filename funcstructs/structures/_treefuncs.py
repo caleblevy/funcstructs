@@ -3,8 +3,6 @@
 Caleb Levy, 2015.
 """
 
-from __future__ import print_function
-
 from collections import defaultdict
 
 
@@ -59,7 +57,3 @@ def tree_properties(levels):
         hg[l].append(n)
     preim[0].pop(0)
     return func, preim, hg
-
-
-t = iter([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])
-print(tree_properties(t))
