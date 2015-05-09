@@ -64,6 +64,43 @@ def nodekeys(func, node):
     return node_keys
 
 
+def deg_keys(height_groups, func):
+    """Assign to each node a key for sorting"""
+    node_keys = collections.defaultdict(list)
+    levels = reversed(height_groups)
+    previous_level = next(levels)
+    # sort_value will increase to produce dominant tree
+    sort_value = 1
+    for x in previous_level:
+        node_keys[x] = sort_value  # Top nodes are all identical
+    for level in levels:
+        # enumerate for connections from previous level to current
+        for x in previous_level:
+            node_keys[func[x]].append(node_keys[x])
+        # Sort attachments to nodes of level by value of their subtrees
+        # Make a sorted list copy, since iteration order matters
+        sorted_nodes = sorted(level, key=node_keys.__getitem__)
+        # Make copy of sorting keys; they will be overwritten in the loop
+        sorting_keys = list(map(node_keys.get, sorted_nodes))
+        for key in sorting_keys:
+            yield key
+        # Overwrite sorting keys to prevent accumulation of nested lists
+        for run in subsequences.runs(zip(sorted_nodes, sorting_keys),
+                                     lambda x, y: x[1] == y[1]):
+            sort_value += 1
+            for x in run:
+                node_keys[x[0]] = sort_value
+        previous_level = reversed(sorted_nodes)
+
+
+def dominant_deg(tree):
+    f, p, g = structures._treefuncs.treefunc_properties(tree)
+    attachments = deg_keys(g, f)
+    msets = map(Multiset, attachments)
+    degs = map(Multiset.degeneracy, msets)
+    return structures.utils.prod(degs)
+
+
 def attached_treenodes(func, x, node_keys=False):
     if not node_keys:
         return func.attached_treenodes[x]
@@ -136,6 +173,14 @@ class TestTreeSequences(unittest.TestCase):
                 DominantTree(sorted_tree_sequence(g, x), preordered=True)
             )
 
+    def test_dominant_deg(self):
+        g = randfunc(200)
+        for x in g.limitset:
+            self.assertEqual(
+                DominantTree.from_func(g, x).degeneracy(),
+                dominant_deg(OrderedTree.from_func(g, x))
+            )
+
 
 def cached_func(n):
     f = randfunc(n)
@@ -193,9 +238,22 @@ def treecalc_times(start, stop=None, step=None):
     def tall_dom_tree(n):
         return DominantTree(range(1, n+2), preordered=True)
 
+    def recursive_deg(f):
+        for x in f.limitset:
+            t = DominantTree.from_func(f, x)
+            t.degeneracy()
+
+    def dom_deg(f):
+        for x in f.limitset:
+            t = OrderedTree.from_func(f, x)
+            dominant_deg(t)
+
     mapping_plots(
         start, stop, step,
         (DominantTree.degeneracy, tall_dom_tree),
+        (dominant_deg, tall_dom_tree),
+        (recursive_deg, randfunc),
+        (dom_deg, randfunc),
         printing=True
     )
 
