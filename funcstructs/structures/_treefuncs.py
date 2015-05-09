@@ -45,7 +45,9 @@ def funclevels_iterator(levels):
 
 
 def treefunc_properties(levels):
-    """Return an endofunction corresponding to a sequence of levels"""
+    """Given an ordered tree's level sequence, return an endofunction with the
+    tree's structure, that functions preimage, and the nodes of that tree in
+    breadth-first traversal order grouped by height."""
     func = []
     hg = [[]]
     preim = defaultdict(list)
@@ -55,5 +57,5 @@ def treefunc_properties(levels):
         if l >= len(hg):
             hg.append([])
         hg[l].append(n)
-    preim[0].pop(0)
+    preim[0].pop(0)  # Remove 0 to prevent infinite loop in levels_from_preim
     return func, preim, hg
