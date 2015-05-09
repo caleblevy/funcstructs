@@ -17,22 +17,6 @@ __all__ = [
 ]
 
 
-def _level_func(levels):
-    """Return an endofunction corresponding to a sequence of levels"""
-    yield 0
-    levels = iter(levels)
-    height_prev = root = next(levels)
-    grafting_point = {0: 0}  # Most recent node found at height h.
-    for node, height in enumerate(levels, start=1):
-        if height > height_prev:
-            yield grafting_point[height_prev-root]
-            height_prev += 1
-        else:
-            yield grafting_point[height-root-1]
-            height_prev = height
-        grafting_point[height-root] = node
-
-
 class Endofunction(bases.Tuple):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
