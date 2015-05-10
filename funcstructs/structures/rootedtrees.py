@@ -69,7 +69,7 @@ class OrderedTree(bases.Tuple):
         func_labelling[n] -> labels[func_labelling[n]]. """
         if labels is None:
             labels = range(len(self))
-        for n, l, f in _treefuncs.funclevels_iterator(self):
+        for _, _, f in _treefuncs.funclevels_iterator(self):
             yield labels[f]
 
     def breadth_first_traversal(self):

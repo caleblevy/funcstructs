@@ -24,7 +24,7 @@ class Endofunction(bases.Tuple):
     @classmethod
     def from_levels(cls, levels):
         """Make an endofunction representing a tree."""
-        return cls(f for n, l, f in _treefuncs.funclevels_iterator(levels))
+        return cls(f for _, _, f in _treefuncs.funclevels_iterator(levels))
 
     def __str__(self):
         funcstring = self.__class__.__name__+'([\n'
