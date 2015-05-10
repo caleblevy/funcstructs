@@ -128,14 +128,14 @@ class Funcstruct(Multiset):
         """ Given an endofunction structure funcstruct, compute the image path
         directly without conversion to a particular endofunction. """
         cardinalities = np.array([0]+[0]*(self.n-2), dtype=object)
-        for tree in flatten(self):
-            cardinalities += 1
-            for subseq in subsequences.increasing(tree):
-                k = len(subseq) - 1
-                k -= 1 if subseq[0] is 0 else 0
-                if k > 0:
-                    # Microoptimization: memoize the calls to range
-                    cardinalities[:k] += range(k, 0, -1)
+        for cycle, mult in self.items():
+            cardinalities += len(cycle)*mult
+            for tree in cycle:
+                for subseq in subsequences.increasing(tree):
+                    k = len(subseq) - 1
+                    k -= 1 if subseq[0] is 0 else 0
+                    if k > 0:
+                        cardinalities[:k] += range(k*mult, 0, -mult)
         return cardinalities
 
 
