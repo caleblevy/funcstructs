@@ -6,6 +6,7 @@ Caleb Levy, 2014 and 2015.
 """
 
 from itertools import groupby
+from math import factorial
 
 from . import (
     bases,
@@ -89,7 +90,8 @@ def _dominant_keys(height_groups, func, sort=True):
         # Sort nodes of current level lexicographically by the keys of their
         # children. Since nodes of the previous level are already sorted, we
         # need not sort the attachments themselves.
-        level.sort(key=attachments.__getitem__, reverse=True)
+        if sort is True:
+            level.sort(key=attachments.__getitem__, reverse=True)
         # Assign int keys to current level to prevent accumulating nested lists
         for _, run in groupby(level, attachments.__getitem__):
             sort_value -= 1
@@ -123,14 +125,13 @@ class DominantTree(OrderedTree):
         """The number of representations of each labelling of the unordered
         tree corresponding to self is found by multiplying the product of the
         degeneracies of all the subtrees by the degeneracy of the multiset
-        containing the rooted trees.
-
-        TODO: A writeup of this with diagrams will be in the notes.
-        """
-        logs = self.chop()
-        deg = logs.degeneracy()
-        for subtree, mult in logs.items():
-            deg *= subtree.degeneracy()**mult
+        containing the rooted trees."""
+        # TODO: A writeup of this with diagrams will be in the notes.
+        deg = 1
+        f, _, h = _treefuncs.treefunc_properties(self)
+        k = _dominant_keys(h, f, sort=False)
+        for _, g in groupby(list(flatten(h))[-1:0:-1], lambda x: (f[x], k[x])):
+            deg *= factorial(len(list(g)))
         return deg
 
 
