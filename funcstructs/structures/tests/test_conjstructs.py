@@ -76,5 +76,5 @@ class FuncstructTests(unittest.TestCase):
             'DominantTree': rootedtrees.DominantTree,
             'Necklace': necklaces.Necklace
         }
-        struct = Funcstruct(endofunctions.randfunc(30))
+        struct = Funcstruct.from_func(endofunctions.randfunc(30))
         self.assertEqual(struct, eval(repr(struct), globals(), eval_map))
