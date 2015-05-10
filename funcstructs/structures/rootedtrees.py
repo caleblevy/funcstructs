@@ -76,26 +76,27 @@ class OrderedTree(bases.Tuple):
         return flatten(_treefuncs.treefunc_properties(self)[2])
 
 
-def _dominant_keys(height_groups, func):
+def _dominant_keys(height_groups, func, sort=True):
     """Assign to each node a key for sorting"""
     node_keys = [0]*len(func)  # node_keys[node] <-> sort key for node
-    attachments = [[] for _ in func]  # Used for degeneracy
+    attachments = [[] for _ in func]  # attachments[x] <-> nodes attached to x
     previous_level = []
-    # sort_value will increase to produce dominant tree
     sort_value = len(func)
     for level in reversed(height_groups):
         # enumerate for connections from previous level to current
         for x in previous_level:
             attachments[func[x]].append(node_keys[x])
-        # Sort attachments to nodes of level by value of their subtrees
+        # Sort nodes of current level lexicographically by the keys of their
+        # children. Since nodes of the previous level are already sorted, we
+        # need not sort the attachments themselves.
         level.sort(key=attachments.__getitem__, reverse=True)
-        # Overwrite sorting keys to prevent accumulation of nested lists
+        # Assign int keys to current level to prevent accumulating nested lists
         for _, run in groupby(level, attachments.__getitem__):
             sort_value -= 1
             for x in run:
                 node_keys[x] = sort_value
         previous_level = level
-    return node_keys, attachments
+    return node_keys
 
 
 class DominantTree(OrderedTree):
@@ -109,7 +110,7 @@ class DominantTree(OrderedTree):
     def __new__(cls, level_sequence, preordered=False):
         if not(preordered or isinstance(level_sequence, cls)):
             f, p, g = _treefuncs.treefunc_properties(level_sequence)
-            keys = _dominant_keys(g, f)[0]
+            keys = _dominant_keys(g, f)
             level_sequence = _treefuncs.levels_from_preim(p, 0, keys)
         return super(DominantTree, cls).__new__(cls, level_sequence)
 
