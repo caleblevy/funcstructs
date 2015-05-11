@@ -117,7 +117,7 @@ class Funcstruct(Multiset):
 
     @property
     def imagepath(self):
-        """Image path of an endofunctions with the same structure."""
+        """Image path of an endofunction with the same structure."""
         cardinalities = np.array([self.n, 0]+[0]*(self.n-2), dtype=object)
         for cycle, mult in self.items():
             for tree in cycle:
