@@ -86,20 +86,18 @@ class Funcstruct(Multiset):
 
     @property
     def degeneracy(self):
-        """ The number of equivalent ways of labelling each endofunction with
-        unlabelled structure self.
-
-        The size of the conjugacy class of self is n!/self.degeneracy() """
+        """The number of ways to label a graph representing a particular
+        endofunction with the given structure."""
         # First the degeneracy from the permutations of arrangements of cycles
-        degeneracy = super(Funcstruct, self).degeneracy()
+        deg = super(Funcstruct, self).degeneracy()
         # Then account for the periodcity of each cycle
         for cycle, mult in self.items():
             cycledeg = cycle.degeneracy()
             # Finally the degeneracy of each rooted tree.
             for tree in cycle:
                 cycledeg *= tree.degeneracy()
-            degeneracy *= cycledeg ** mult
-        return degeneracy
+            deg *= cycledeg ** mult
+        return deg
 
     def func_form(self):
         """ Convert function structure to canonical form by filling in numbers
