@@ -100,31 +100,24 @@ class Funcstruct(Multiset):
         return deg
 
     def func_form(self):
-        """ Convert function structure to canonical form by filling in numbers
-        from 0 to n-1 on the cycles and trees. """
-        # Find the tree form of non-cyclic nodes
+        """Return a representative endofunction defined on range(n)."""
         func = []
-        root_node = 0
-        for tree in flatten(self):
-            l = len(tree)
-            func.extend(tree.map_labelling(range(root_node, root_node+l)))
-            root_node += l
-        # Permute the cyclic nodes to form the cycle decomposition
-        cycle_start = 0
+        root_node = end_node = 0
         for cycle in self:
-            node_prev = node = 0
-            cycle_len = len(list(flatten(cycle)))
+            cycle_start = len(func)
             for tree in cycle:
-                node += len(tree)
-                func[cycle_start+node_prev] = cycle_start + (node % cycle_len)
-                node_prev += len(tree)
-            cycle_start += cycle_len
+                end_node += len(tree)
+                # Form tree function labelled with the acyclic nodes
+                func.extend(tree.map_labelling(range(root_node, end_node)))
+                # Permute the cyclic nodes to form the cycle decomposition
+                func[root_node] = end_node
+                root_node = end_node
+            func[root_node-len(tree)] = cycle_start
         return endofunctions.Endofunction(func)
 
     @property
     def imagepath(self):
-        """ Given an endofunction structure funcstruct, compute the image path
-        directly without conversion to a particular endofunction. """
+        """Image path of an endofunctions with the same structure."""
         cardinalities = np.array([self.n, 0]+[0]*(self.n-2), dtype=object)
         for cycle, mult in self.items():
             for tree in cycle:
@@ -174,7 +167,7 @@ def cycle_type_funcstructs(n, cycle_type):
 
 
 def integer_funcstructs(n):
-    """Enumerate endofunction structures on n elements. Equalivalent to all
+    """Enumerate endofunction structures on n elements. Equivalent to all
     conjugacy classes in TransformationMonoid(n)."""
     for i in range(1, n+1):
         for partition in levypartitions.partitions(i):
