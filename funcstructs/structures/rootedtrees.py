@@ -110,7 +110,7 @@ class DominantTree(OrderedTree):
     __slots__ = ()
 
     def __new__(cls, level_sequence, preordered=False):
-        if not(preordered or isinstance(level_sequence, cls)):
+        if not preordered:
             f, p, g = _treefuncs.treefunc_properties(level_sequence)
             keys = _dominant_keys(g, f)
             level_sequence = _treefuncs.levels_from_preim(p, 0, keys)
@@ -145,8 +145,6 @@ class RootedTree(multiset.Multiset):
     __slots__ = ()
 
     def __new__(cls, subtrees=None):
-        if isinstance(subtrees, cls):
-            return subtrees
         self = super(RootedTree, cls).__new__(cls, subtrees)
         if not all(isinstance(tree, cls) for tree in self.keys()):
             raise TypeError("subtrees must be rooted trees")

@@ -62,8 +62,6 @@ class Funcstruct(Multiset):
     are the trees themselves. """
 
     def __new__(cls, cycles, precounted=None):
-        if isinstance(cycles, cls):
-            return cycles
         self = super(Funcstruct, cls).__new__(cls, cycles)
         if precounted is not None:
             self.n = precounted
