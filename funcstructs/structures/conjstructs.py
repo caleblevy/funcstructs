@@ -59,7 +59,7 @@ class Funcstruct(Multiset):
     grouped together in multisets corresponding to cycle decompositions of the
     final set (the subset of its domain on which it is invertible). The
     orderings of the trees in the multisets correspond to necklaces whose beads
-    are the trees themselves. """
+    are the trees themselves."""
 
     def __new__(cls, cycles, precounted=None):
         self = super(Funcstruct, cls).__new__(cls, cycles)

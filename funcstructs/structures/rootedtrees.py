@@ -50,7 +50,7 @@ class OrderedTree(bases.Tuple):
         return subsequences.startswith(self[1:], self[0]+1)
 
     def branches(self):
-        """Return each major subbranch of a tree."""
+        """Return the subtrees attached to the root."""
         for branch in self._branch_sequences():
             yield self.__class__(branch)
 
@@ -117,8 +117,10 @@ class DominantTree(OrderedTree):
         return super(DominantTree, cls).__new__(cls, level_sequence)
 
     def branches(self):
+        """Return the subtrees attached to the root. Subtrees of dominant trees
+        are dominantly ordered by construction, and are output in lexicographic
+        order."""
         for branch in self._branch_sequences():
-            # Subtrees of dominant trees are dominantly ordered by construction
             yield self.__class__(branch, preordered=True)
 
     def degeneracy(self):
@@ -193,6 +195,7 @@ class RootedTree(multiset.Multiset):
         return level_sequence
 
     def ordered_form(self):
+        """Return the dominant representative of the rooted tree."""
         return DominantTree(self._ordered_level_sequence())
 
 
