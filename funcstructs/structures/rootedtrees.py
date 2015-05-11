@@ -164,19 +164,16 @@ class RootedTree(multiset.Multiset):
 
     def _str(self):
         strings = []
-        for subtree in sorted(self.keys(), reverse=1):
-            # Hack to make tree print with multiplicity exponents.
+        for subtree in sorted(self.keys(),
+                              key=self.__class__.ordered_form,
+                              reverse=True):
+            # Print tree with multiplicity exponents.
             mult = self[subtree]
             tree_string = subtree._str()
             if mult > 1:
                 tree_string += '^%s' % mult
             strings.append(tree_string)
         return '{%s}' % ', '.join(strings)
-
-    def __lt__(self, other):
-        if isinstance(other, type(self)):
-            return self.ordered_form() < other.ordered_form()
-        return NotImplemented
 
     def __str__(self):
         return self.__class__.__name__+"(%s)" % self._str()
