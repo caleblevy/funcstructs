@@ -76,6 +76,10 @@ class OrderedTree(bases.Tuple):
         """Return nodes in breadth-first traversal order"""
         return flatten(_treefuncs.treefunc_properties(self)[2])
 
+    def attachments(self):
+        """Map of each node to the set of nodes attached to it in order."""
+        return _treefuncs.treefunc_properties(self)[1]
+
 
 def _dominant_keys(height_groups, func, sort=True):
     """Assign to each node a key for sorting"""
