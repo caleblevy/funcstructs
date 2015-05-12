@@ -41,12 +41,11 @@ def startswith(seq, start):
     returns a generator of subsequences such that a new subsequence begins if
     and only if cond is true for the first element in the subsequence. If cond
     is never true, returns the original sequence. """
-    seq = iter(seq)
-    el = next(seq)
-    subseq = [el]
+    subseq = []
     for el in seq:
         if el == start:
-            yield subseq
+            if subseq:
+                yield subseq
             subseq = [el]
         else:
             subseq.append(el)
