@@ -42,10 +42,14 @@ class Funcstruct(Multiset):
     def __new__(cls, cycles, precounted=None):
         self = super(Funcstruct, cls).__new__(cls, cycles)
         if precounted is not None:
-            self.n = precounted
+            self.__n = precounted
         else:
-            self.n = len(list(flatten(flatten(self))))
+            self.__n = len(list(flatten(flatten(self))))
         return self
+
+    def __len__(self):
+        """Number of nodes in the structure."""
+        return self.__n
 
     @classmethod
     def from_func(cls, f):
@@ -91,7 +95,7 @@ class Funcstruct(Multiset):
     @property
     def imagepath(self):
         """Image path of an endofunction with the same structure."""
-        cardinalities = np.array([self.n, 0]+[0]*(self.n-2), dtype=object)
+        cardinalities = [len(self), 0] + [0]*(len(self)-2)
         for cycle, mult in self.items():
             for tree in cycle:
                 for subseq in subsequences.increasing(tree[1:]):
