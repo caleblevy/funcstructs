@@ -133,7 +133,7 @@ class DominantTree(OrderedTree):
         f, _, h = _treefuncs.treefunc_properties(self)
         k = _dominant_keys(h, f, sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
-        for _, g in groupby(list(flatten(h))[-1:0:-1], lambda x: (f[x], k[x])):
+        for _, g in groupby(flatten(h), lambda x: (f[x], k[x])):
             deg *= factorial(len(list(g)))
         return deg
 
