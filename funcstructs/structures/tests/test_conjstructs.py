@@ -10,26 +10,24 @@ from ..conjstructs import Funcstruct, EndofunctionStructures
 
 class FuncstructTests(unittest.TestCase):
 
+    s = Funcstruct([
+        necklaces.Necklace([
+            rootedtrees.DominantTree([0, 1, 2]),
+            rootedtrees.DominantTree([0, 1, 1])
+        ]),
+        necklaces.Necklace([
+            rootedtrees.DominantTree([0, 1])
+        ]),
+        necklaces.Necklace([
+            rootedtrees.DominantTree([0, 1, 1]),
+            rootedtrees.DominantTree([0]),
+            rootedtrees.DominantTree([0, 1, 1])
+        ])
+    ])
+
     def test_func_form(self):
         """Convert struct to func and back, and check we get the same thing."""
-        struct = Funcstruct([
-            necklaces.Necklace([
-                rootedtrees.DominantTree([0, 1, 2]),
-                rootedtrees.DominantTree([0, 1, 1])
-            ]),
-            necklaces.Necklace([
-                rootedtrees.DominantTree([0, 1])
-            ]),
-            necklaces.Necklace([
-                rootedtrees.DominantTree([0, 1, 1]),
-                rootedtrees.DominantTree([0]),
-                rootedtrees.DominantTree([0, 1, 1])
-            ])
-        ])
-        self.assertEqual(
-            struct,
-            Funcstruct.from_func(struct.func_form())
-        )
+        self.assertEqual(self.s, Funcstruct.from_func(self.s.func_form()))
 
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""
@@ -55,19 +53,12 @@ class FuncstructTests(unittest.TestCase):
                 func_count += fac//struct.degeneracy
             self.assertEqual(i**i, func_count)
 
-    def test_partition_order_is_unimportant(self):
-        """Test for equivalence of Funcstruct representations."""
+    def test_len(self):
+        """Test Funcstruct properly overrides Multiset.__len__"""
+        self.assertEqual(15, len(self.s))
         self.assertEqual(
-            EndofunctionStructures(10, [3, 3, 2]),
-            EndofunctionStructures(10, [2, 3, 3])
-        )
-        self.assertNotEqual(
-            EndofunctionStructures(10),
-            EndofunctionStructures(10, [2, 2, 3])
-        )
-        self.assertNotEqual(
-            EndofunctionStructures(11, [3, 3, 3]),
-            EndofunctionStructures(10, [3, 3, 3])
+            30,
+            len(Funcstruct.from_func(endofunctions.randfunc(30)))
         )
 
     def test_repr(self):
