@@ -1,6 +1,8 @@
 import unittest
 import math
 
+from PADS import IntegerPartitions
+
 from .. import endofunctions
 
 from ..rootedtrees import (
@@ -20,37 +22,27 @@ class TreeEnumerationTests(unittest.TestCase):
 
     def test_tree_counts(self):
         """OEIS A000081: number of unlabelled rooted trees on N nodes."""
-        for n, count in enumerate(self.A000081):
-            trees = set()
-            for tree in TreeEnumerator(n+1):
-                trees.add(tree)
-                trees.add(tree)
-            self.assertEqual(count, len(trees))
-            self.assertEqual(count, TreeEnumerator(n+1).cardinality)
+        for n, count in enumerate(self.A000081, start=1):
+            self.assertEqual(count, len(set(TreeEnumerator(n))))
+            self.assertEqual(count, TreeEnumerator(n).cardinality)
 
     def test_forest_counts(self):
         """Check len(ForestEnumerator(N))==A000081(N+1)"""
-        for n, count in enumerate(self.A000081[1:]):
-            forests = set()
-            for forest in ForestEnumerator(n+1):
-                forests.add(forest)
-                forests.add(forest)
-            self.assertEqual(count, len(forests))
-            self.assertEqual(count, ForestEnumerator(n+1).cardinality)
+        for n, count in enumerate(self.A000081[1:], start=1):
+            intforests = set(ForestEnumerator(n))
+            intforestcount = ForestEnumerator(n).cardinality
+            pforests = set()
+            pforestcount = 0
+            for part in IntegerPartitions.partitions(n):
+                pforests.update(PartitionForests(part))
+                pforestcount += PartitionForests(part).cardinality
+            self.assertEqual(count, len(intforests))
+            self.assertEqual(count, len(pforests))
+            self.assertEqual(count, intforestcount)
+            self.assertEqual(count, pforestcount)
+            self.assertEqual(intforests, pforests)
 
-    def test_partition_forest_counts(self):
-        """Check alternate way of enumerating forests."""
-        from PADS.IntegerPartitions import partitions
-        for n, count in enumerate(self.A000081[1:]):
-            forests = set()
-            forest_count = 0
-            for partition in partitions(n+1):
-                forests.update(PartitionForests(partition))
-                forest_count += PartitionForests(partition).cardinality
-            self.assertEqual(count, len(forests))
-            self.assertEqual(count, forest_count)
-
-    def test_tree_degeneracies(self):
+    def test_labelling_counts(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         for n in range(1, len(self.A000081)):
             ordered_count = 0
@@ -63,28 +55,58 @@ class TreeEnumerationTests(unittest.TestCase):
             self.assertEqual(n**(n-1), rooted_count)
 
 
-class TreeTests(unittest.TestCase):
+class RootedTreeTests(unittest.TestCase):
 
-    def test_rooted_tree_strings(self):
+    L1 = [1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5]
+    L2 = range(1, 5)
+    L3 = [1, 2, 2, 3, 2, 3, 4, 2, 3, 4, 5]
+    R = RootedTree([
+        RootedTree(),
+        RootedTree(),
+        RootedTree([
+            RootedTree()
+        ])
+    ])
+
+    def test_str(self):
         """Ensure Unordered trees are properly formatted."""
-        T = RootedTree.from_levels(
-            [1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
-        T2 = RootedTree.from_levels(range(1, 5))
+        T = RootedTree.from_levels(self.L1)
+        T2 = RootedTree.from_levels(self.L2)
+        T3 = RootedTree.from_levels(self.L3)
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
+        # Test correctness of dominance ordering
+        self.assertEqual(str(T3), "RootedTree({{{{{}}}}, {{{}}}, {{}}, {}})")
 
-    def test_tree_reprs(self):
+    def test_len(self):
+        """Test len(RootedTree) returns correct number of nodes"""
+        for l in [self.L1, self.L2, self.L3]:
+            self.assertEqual(len(l), len(RootedTree.from_levels(l)))
+        self.assertEqual(5, len(self.R))
+
+    def test_repr(self):
         """Test repr(Tree) == Tree for various trees."""
-        TreeSeqs = [[1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5],
-                    [1, 2, 3, 4, 5, 4, 5, 5, 2, 3, 2, 3, 4, 4, 5, 6],
-                    range(1, 5)]
-        for seq in TreeSeqs:
-            T_unordered = RootedTree.from_levels(seq)
-            T_ordered = OrderedTree(seq)
-            T_dominant = DominantTree(seq)
-            self.assertEqual(T_unordered, eval(repr(T_unordered)))
-            self.assertEqual(T_ordered, eval(repr(T_ordered)))
-            self.assertEqual(T_dominant, eval(repr(T_dominant)))
+        for rt in map(RootedTree.from_levels, [self.L1, self.L2, self.L3]):
+            self.assertEqual(rt, eval(repr(rt)))
+        self.assertEqual(self.R, eval(repr(self.R)))
+
+    def test_ordered_form(self):
+        """Test conversion between rooted and unordered trees is seamless."""
+        for l in [self.L1, self.L2, self.L3]:
+            self.assertEqual(
+                DominantTree(l),
+                RootedTree.from_levels(l).ordered_form()
+            )
+
+
+class OrderedTreeTests(unittest.TestCase):
+
+    def test_dominance_ordering(self):
+        """Test DominantTree produces dominant ordering"""
+        self.assertSequenceEqual(
+            [0, 1, 2, 3, 4, 1, 2, 3, 1, 2, 1],
+            DominantTree([1, 2, 2, 3, 2, 3, 4, 2, 3, 4, 5])
+        )
 
     def test_traverse_map(self):
         """Test the bracket representation of these rooted trees."""
@@ -92,11 +114,16 @@ class TreeTests(unittest.TestCase):
             OrderedTree([0, 1, 2, 3, 4, 5, 3, 1, 2, 3]),
             OrderedTree([0, 1, 2, 3, 4, 5, 3, 1, 2, 2]),
             OrderedTree([0, 1, 2, 3, 4, 4, 4, 4, 4, 1]),
+            # Test different orderings
+            OrderedTree([0, 1, 1, 2, 1, 2, 3, 1, 2, 3]),
+            OrderedTree([0, 1, 2, 3, 1, 2, 3, 1, 2, 1])
         ]
         nestedforms = (
             [[[[[[]]], []]], [[[]]]],
             [[[[[[]]], []]], [[], []]],
-            [[[[[], [], [], [], []]]], []]
+            [[[[[], [], [], [], []]]], []],
+            [[], [[]], [[[]]], [[[]]]],
+            [[[[]]], [[[]]], [[]], []]
         )
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.traverse_map())
@@ -112,14 +139,7 @@ class TreeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             OrderedTree.from_func(endofunctions.Endofunction(range(10)))
 
-    def test_rootedtree_conversion(self):
-        """Test conversion between rooted and unordered trees is seamless."""
-        T = DominantTree([0, 1, 2, 3, 4, 4, 3, 4, 4, 1, 2, 3, 4, 3, 3, 4, 4])
-        RT = RootedTree.from_levels(T)
-        TRT = RT.ordered_form()
-        self.assertEqual(T, TRT)
-
-    def test_height_groups(self):
+    def test_breadth_first_traversal(self):
         """Test nodes are grouped correctly by their height"""
         T = OrderedTree([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])
         bft = [0, 1, 14, 2, 3, 13, 15, 4, 5, 6, 11, 12, 7, 10, 8, 9]
@@ -136,9 +156,11 @@ class TreeTests(unittest.TestCase):
         ml = list(T.map_labelling())
         tm = T.traverse_map()
         d = DominantTree(T).degeneracy()
+        rt = RootedTree.from_levels(T)
         for i in range(-7, 7):
             ot = OrderedTree([t-i for t in T])
             self.assertSequenceEqual(bft, list(ot.breadth_first_traversal()))
             self.assertSequenceEqual(ml, list(ot.map_labelling()))
             self.assertEqual(tm, ot.traverse_map())
             self.assertEqual(d, DominantTree(ot).degeneracy())
+            self.assertEqual(rt, RootedTree.from_levels(ot))
