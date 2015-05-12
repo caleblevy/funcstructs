@@ -11,21 +11,19 @@ def runs(seq, comparison):
 
     For example, if comparison is >=, then this returns nondecreasing
     subsequences, while comparison of > returns increasing. Equivalent to
-    sympy's runs() method. """
-    if not seq:
-        return
-    subseq = []
+    sympy's runs() method."""
+    seq = iter(seq)
+    term_prev = next(seq)
+    subseq = [term_prev]
     for term in seq:
-        if not subseq:
-            subseq = [term]
+        if comparison(term, term_prev):
+            subseq.append(term)
         else:
-            if comparison(term, term_prev):
-                subseq.append(term)
-            else:
-                yield subseq
-                subseq = [term]
+            yield subseq
+            subseq = [term]
         term_prev = term
-    yield subseq
+    if subseq:
+        yield subseq
 
 
 def runner(comparison):
@@ -43,28 +41,27 @@ def startswith(seq, start):
     returns a generator of subsequences such that a new subsequence begins if
     and only if cond is true for the first element in the subsequence. If cond
     is never true, returns the original sequence. """
-    if not seq:
-        return
-    subseq = []
+    seq = iter(seq)
+    el = next(seq)
+    subseq = [el]
     for el in seq:
-        if el == start and subseq:
+        if el == start:
             yield subseq
             subseq = [el]
         else:
             subseq.append(el)
-    yield subseq
+    if subseq:
+        yield subseq
 
 
 def endswith(seq, end):
     """ Return a generator returning subsequences of seq each ending with an
     element satisfying the boolean lambda function cond. """
-    if not seq:
-        return
     subseq = []
     for el in seq:
         subseq.append(el)
         if el == end:
             yield subseq
             subseq = []
-    if el != end:
+    if subseq:
         yield subseq
