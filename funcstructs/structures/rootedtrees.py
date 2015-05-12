@@ -264,12 +264,12 @@ class ForestEnumerator(bases.Enumerable):
         root. To enumerate all collections of rooted trees on n nodes, we may
         enumerate all rooted trees on n+1 nodes, chopping them at the base.
         """
-        for tree in TreeEnumerator(self.n+1):
+        for tree in TreeEnumerator(self.n+1, -1):
             yield tree.chop()
 
     @property
     def cardinality(self):
-        return TreeEnumerator(self.n+1, -1).cardinality
+        return TreeEnumerator(self.n+1).cardinality
 
 
 class PartitionForests(bases.Enumerable):
