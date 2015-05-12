@@ -195,6 +195,10 @@ class RootedTree(multiset.Multiset):
             level_sequence.extend(tree._ordered_level_sequence(level+1))
         return level_sequence
 
+    def __len__(self):
+        """Number of nodes in the tree."""
+        return len(self._ordered_level_sequence())
+
     def ordered_form(self):
         """Return the dominant representative of the rooted tree."""
         return DominantTree(self._ordered_level_sequence())
