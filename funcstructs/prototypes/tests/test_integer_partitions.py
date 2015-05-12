@@ -2,7 +2,7 @@ import unittest
 
 from PADS import IntegerPartitions
 
-from ..levypartitions import (
+from ..integer_partitions import (
     isqrt,
     minimal_partition,
     fixed_lex_partitions,

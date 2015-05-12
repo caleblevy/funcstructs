@@ -1,11 +1,7 @@
 """Caleb Levy, 2015."""
 
-from funcstructs import (
-    combinat,
-    polynomials,
-    levypartitions,
-    necklaces
-)
+from funcstructs import combinat, necklaces
+from . import polynomials, integer_partitions
 
 
 def count_by_period(beads):
@@ -16,7 +12,7 @@ def period_combos(beads, reps):
     """All possible combinations of periods from given counts by period"""
     necklace_counts = count_by_period(beads)
     periods = [i for i, val in enumerate(necklace_counts) if val]
-    for part in levypartitions.max_length_partitions(reps, len(periods)):
+    for part in integer_partitions.max_length_partitions(reps, len(periods)):
         for combo in polynomials.multisets_with_multiplicities(periods, part):
             yield combo
 
