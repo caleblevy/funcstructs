@@ -59,7 +59,7 @@ class TreeEnumerationTests(unittest.TestCase):
         n5 = multiset.Multiset(DominantTree(range(1, n+1)))
         for t in [t1, t2, t3]:
             self.assertIn(t, forests)
-        for nt in [nt1, nt2, n3, nf4]:
+        for nt in [nt1, nt2, n3, nf4, n5]:
             self.assertNotIn(nt, forests)
 
     def test_labelling_counts(self):
@@ -120,6 +120,23 @@ class RootedTreeTests(unittest.TestCase):
 
 
 class OrderedTreeTests(unittest.TestCase):
+
+    def test_constructor_checks(self):
+        """Test level sequences must be in increments by 1 above the root"""
+        error_trees = [
+            (0, 0, 1, 2, 3),
+            (0, -1, 0, 1),
+            (0, 1, 2, 3, 5),
+            (1, 2.1, 3.1),
+            ('y', 'z'),
+            (1, 2, 'y'),
+            (1, 2, 1)
+        ]
+        for et in error_trees:
+            with self.assertRaises((ValueError, TypeError)):
+                OrderedTree(et)
+            with self.assertRaises((TypeError, IndexError, KeyError)):
+                DominantTree(et)
 
     def test_dominance_ordering(self):
         """Test DominantTree produces dominant ordering"""

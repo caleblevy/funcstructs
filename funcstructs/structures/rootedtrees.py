@@ -33,6 +33,20 @@ class OrderedTree(bases.Tuple):
 
     __slots__ = ()
 
+    def __new__(cls, level_sequence):
+        self = super(OrderedTree, cls).__new__(cls, level_sequence)
+        previous_node = self[0]
+        seen = set()
+        for node in self[1:]:
+            if node in seen:
+                pass
+            elif node == previous_node + 1:
+                seen.add(node)
+            else:
+                raise ValueError("invalid level sequence: %s" % list(self))
+            previous_node = node
+        return self
+
     @classmethod
     def from_func(cls, func, root=None):
         """Return the level sequence of the rooted tree formed from the graph
@@ -118,7 +132,9 @@ class DominantTree(OrderedTree):
             f, p, g = _treefuncs.treefunc_properties(level_sequence)
             keys = _dominant_keys(g, f)
             level_sequence = _treefuncs.levels_from_preim(p, 0, keys)
-        return super(DominantTree, cls).__new__(cls, level_sequence)
+        # No need to run OrderedTree checks; it's either been preordered or
+        # treefunc_properties will serve as an effective check due to indexing.
+        return super(OrderedTree, cls).__new__(cls, level_sequence)
 
     def branches(self):
         """Return the subtrees attached to the root. Subtrees of dominant trees
