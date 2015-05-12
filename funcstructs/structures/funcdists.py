@@ -43,11 +43,9 @@ def iterdist_brute(n):
 def iterdist_funcstruct(n, cycle_type=None):
     """Every labelling of a function structure shares the same image path, thus
     we may calculate iteration distributions by enumerating all endofunction
-    structure image paths and scaling them by their multiplicities.
-
-    TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
-    investigate possibility that a<=4, and add writeup to the repository.
-    """
+    structure image paths and scaling them by their multiplicities."""
+    # TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
+    # investigate possibility that a<=4, and add writeup to the repository.
     if n == 1:
         c = 0 if(cycle_type or sum(cycle_type) != 1) else 1
         return np.array([c], dtype=object)
@@ -64,10 +62,8 @@ iterdist = iterdist_funcstruct
 
 def imagedist_composition(n):
     """Produces left column of iterdist using integer compositions in O(2^n)
-    operations. The idea of the algorithm comes from a binary tree.
-
-    TODO: place writeup in the notes.
-    """
+    operations. The idea of the algorithm comes from a binary tree."""
+    # TODO: place writeup in the notes.
     if n == 1:
         return tuple([1])
     dist = [0]*n
@@ -88,10 +84,8 @@ def imagedists_upto(n):
     """Left column of iterdist. This uses a recursion relation to run in O(n^2)
     time. It is the fastest method I know of and likely the fastest there is.
     The idea behind it is a modified special form of the monomial symmetric
-    polynomial algorithm.
-
-    # TODO: place writeup in the nodes.
-    """
+    polynomial algorithm."""
+    # TODO: place writeup in the notes.
     dist = np.zeros((n, n), dtype=object)
     for i in range(n):
         dist[0, i] = dist[i, i] = 1
@@ -157,7 +151,7 @@ def limitdist_composition(n):
 
 def limitset_count(n, k):
     """Analytic expression for the number of endofunctions on n nodes whose
-    cycle decompositions contain k elements. """
+    cycle decompositions contain k elements."""
     return k*n**(n-k)*factorial(n-1)//factorial(n-k)
 
 
@@ -169,10 +163,8 @@ def limitdist_direct(n):
 def limitdist_recurse(n):
     """Faster way to find the limitdist which reduces duplication of work. I
     discovered the above two formulas from this recursion relation, which I
-    derived empirically from the output of limitdist_composition.
-
-    TODO: derive and writeup the equivalence of these algorithms.
-    """
+    derived empirically from the output of limitdist_composition."""
+    # TODO: derive and writeup the equivalence of these algorithms.
     dist = [n**(n-1)]+[0]*(n-1)
     for k in range(1, n):
         dist[k] = (dist[k-1]*(k+1)*(n-k))//(k*n)
