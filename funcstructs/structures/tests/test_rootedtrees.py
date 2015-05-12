@@ -3,7 +3,7 @@ import math
 
 from PADS import IntegerPartitions
 
-from .. import endofunctions
+from .. import endofunctions, multiset
 
 from ..rootedtrees import (
     RootedTree,
@@ -41,6 +41,26 @@ class TreeEnumerationTests(unittest.TestCase):
             self.assertEqual(count, intforestcount)
             self.assertEqual(count, pforestcount)
             self.assertEqual(intforests, pforests)
+
+    def test_forest_elements(self):
+        """spot check enumerated forests for some elements"""
+        n = 9
+        forests = set(ForestEnumerator(9))
+        t1 = multiset.Multiset([DominantTree(range(n))])
+        t2 = multiset.Multiset([
+            DominantTree(range(n//2)),
+            DominantTree(range(n-n//2))
+        ])
+        t3 = multiset.Multiset([DominantTree(iter([0]))]*n)
+        nt1 = multiset.Multiset([DominantTree(range(n-1))])
+        nt2 = multiset.Multiset([DominantTree(range(n+1))])
+        n3 = DominantTree(range(n-1))
+        nf4 = multiset.Multiset([OrderedTree(range(n))])
+        n5 = multiset.Multiset(DominantTree(range(1, n+1)))
+        for t in [t1, t2, t3]:
+            self.assertIn(t, forests)
+        for nt in [nt1, nt2, n3, nf4]:
+            self.assertNotIn(nt, forests)
 
     def test_labelling_counts(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
