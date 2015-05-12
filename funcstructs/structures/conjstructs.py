@@ -11,18 +11,25 @@ from math import factorial
 
 import numpy as np
 
+from PADS import IntegerPartitions
+
 from . import (
     bases,
     compositions,
     endofunctions,
     factorization,
-    levypartitions,
     subsequences,
 )
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import RootedTree, DominantTree, PartitionForests
 from .utils import flatten
+
+
+def _partitions(n):
+    """Wrapper for D Eppstein's partitions returning multisets"""
+    for partition in IntegerPartitions.partitions(n):
+        yield Multiset(partition)
 
 
 def _chunks(l, n):
@@ -129,7 +136,7 @@ class Funcstruct(Multiset):
 def direct_unordered_attachments(t, l):
     """Enumerate the ways of directly attaching t unlabelled free nodes to l
     unlabelled nodes."""
-    return levypartitions.fixed_length_partitions(t+l, l)
+    return IntegerPartitions.fixed_length_partitions(t+l, l)
 
 
 def attachment_forests(t, l):
@@ -168,7 +175,7 @@ def integer_funcstructs(n):
     """Enumerate endofunction structures on n elements. Equivalent to all
     conjugacy classes in TransformationMonoid(n)."""
     for i in range(1, n+1):
-        for partition in levypartitions.partitions(i):
+        for partition in _partitions(i):
             for struct in cycle_type_funcstructs(n, partition):
                 yield struct
 
@@ -193,10 +200,11 @@ class EndofunctionStructures(bases.Enumerable):
         Combinatorial Theory, Volume 12, 1972. See the papers directory for the
         original reference."""
         tot = 0
-        for b in levypartitions.tuple_partitions(self.n):
+        for part in _partitions(self.n):
             p = 1
             for i in range(1, self.n+1):
-                s = sum(j*b[j] for j in factorization.divisors(i))
-                p *= s**b[i] * Fraction(i, 1)**(-b[i])/factorial(b[i])
+                s = sum(j*part.get(j, 0) for j in factorization.divisors(i))
+                b = part.get(i, 0)
+                p *= s**b * Fraction(i, 1)**(-b)/factorial(b)
             tot += p
         return int(tot)
