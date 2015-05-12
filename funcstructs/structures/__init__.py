@@ -14,7 +14,6 @@ from . import (
     combinat,
     factorization,
     labellings,
-    levypartitions,
     polynomials,
     productrange,
     subsequences
