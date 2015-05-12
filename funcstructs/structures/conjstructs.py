@@ -22,7 +22,7 @@ from . import (
 )
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
-from .rootedtrees import RootedTree, DominantTree, PartitionForests
+from .rootedtrees import DominantTree, PartitionForests
 from .utils import flatten
 
 
@@ -30,35 +30,6 @@ def _partitions(n):
     """Wrapper for D Eppstein's partitions returning multisets"""
     for partition in IntegerPartitions.partitions(n):
         yield Multiset(partition)
-
-
-def _chunks(l, n):
-    """ Yield successive n-sized chunks from l. """
-    for i in range(0, len(l), n):
-        yield l[i:i+n]
-
-
-def _indent_treestring(tree, second_indent, end):
-    """Format a rooted tree string with indents. """
-    treestr = str(RootedTree.from_levels(tree))
-    treestr_list = [treestr[:end]]
-    for s in _chunks(treestr[end:], end-second_indent):
-        treestr_list.append(' '*second_indent+s)
-    return treestr_list
-
-
-def _structstring(func, cycle_prefix=2, cycle_suffix=2, tree_indent=4, end=78):
-    fstrs = []
-    fstrs.append('\nFuncstruct:\n')
-    cycle_str = ' '*cycle_prefix + 'Cycle(' + ' '*cycle_suffix
-    l = len(cycle_str)
-    for cycle, count in func.items():
-        fstrs.append(cycle_str+'\n')
-        for tree in cycle:
-            for t in _indent_treestring(tree, tree_indent, end-l):
-                fstrs.append(' '*l+t+'\n')
-        fstrs.append(' '*(l-cycle_suffix-1)+')'+' * '+str(count)+'\n')
-    return ''.join(fstrs)
 
 
 class Funcstruct(Multiset):
@@ -85,9 +56,6 @@ class Funcstruct(Multiset):
                 strand.append(DominantTree.from_func(f, el))
             cycles.append(Necklace(strand))
         return cls(cycles)
-
-    def __str__(self):
-        return _structstring(self)
 
     @property
     def degeneracy(self):
