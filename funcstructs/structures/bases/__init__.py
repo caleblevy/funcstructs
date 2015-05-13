@@ -1,1 +1,3 @@
-from ._bases import Tuple, Enumerable
+"""Base classes for implementing endofunction structures."""
+from ._tuple import Tuple
+from ._enumerable import Enumerable
