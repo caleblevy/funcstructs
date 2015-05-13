@@ -123,27 +123,6 @@ class MultisetTests(unittest.TestCase):
         dic[7] = 42
         self.assertEqual(5, len(set(dic)))
 
-    def test_immutability(self):
-        """Test that all inherited mutating methods have been disabled."""
-        abra = self.abra
-        with self.assertRaises(TypeError):
-            abra['a'] += 1
-        with self.assertRaises(TypeError):
-            abra['b'] = 2
-        with self.assertRaises(TypeError):
-            del abra['b']
-        with self.assertRaises(TypeError):
-            abra.clear()
-        with self.assertRaises(TypeError):
-            abra.pop('a')
-        with self.assertRaises(TypeError):
-            abra.popitem()
-        with self.assertRaises(TypeError):
-            abra.setdefault('f', 1)
-        with self.assertRaises(TypeError):
-            abra.update(abra)
-        self.assertEqual(Multiset('abracadabra'), abra)
-
     def test_split(self):
         """Test that the indices of elements and multiplicities correspond."""
         for mset in self.msets:
