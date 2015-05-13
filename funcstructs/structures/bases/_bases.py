@@ -6,7 +6,7 @@ Caleb Levy, 2015.
 import abc
 import collections
 
-from . import multiset
+from .. import multiset
 
 
 class Tuple(tuple):
