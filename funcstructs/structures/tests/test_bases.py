@@ -24,18 +24,19 @@ class FrozendictTests(unittest.TestCase):
     def test_constructors(self):
         """Test frozendict works with usual constructors"""
         kwargs = {'c': 3, 'd': 4, 'e': 5}
-        self.assertEqual(
-            {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5},
-            dict(frozendict(a=1, b=2, **kwargs))
-        )
-        self.assertEqual(
-            {1: 1, 2: 2, 3: 3, 4: 4, 5: 5},
-            dict(frozendict(enumerate(range(1, 6), start=1)))
-        )
-        self.assertEqual(
-            frozendict.fromkeys([1, 2, 3], None),
-            frozendict({1: None, 2: None, 3: None})
-        )
+        for fdclass in [frozendict, self.F]:
+            self.assertEqual(
+                {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5},
+                dict(fdclass(a=1, b=2, **kwargs))
+            )
+            self.assertEqual(
+                {1: 1, 2: 2, 3: 3, 4: 4, 5: 5},
+                dict(fdclass(enumerate(range(1, 6), start=1)))
+            )
+            self.assertEqual(
+                fdclass.fromkeys([1, 2, 3], None),
+                fdclass({1: None, 2: None, 3: None})
+            )
 
     def test_equality(self):
         """Test different dicts compare differently"""
@@ -53,24 +54,24 @@ class FrozendictTests(unittest.TestCase):
 
     def test_immutability(self):
         """Test that all inherited mutating methods have been disabled."""
-        fd = self.b
-        with self.assertRaises(TypeError):
-            fd['a'] += 1
-        with self.assertRaises(TypeError):
-            fd['b'] = 2
-        with self.assertRaises(TypeError):
-            del fd['b']
-        with self.assertRaises(TypeError):
-            fd.clear()
-        with self.assertRaises(TypeError):
-            fd.pop('a')
-        with self.assertRaises(TypeError):
-            fd.popitem()
-        with self.assertRaises(TypeError):
-            fd.setdefault('f', 1)
-        with self.assertRaises(TypeError):
-            fd.update({'d': 4})
-        self.assertEqual(frozendict({'a': 1, 'b': 2, 'c': 3}), fd)
+        for d in [self.b, self.c]:
+            with self.assertRaises(TypeError):
+                d['a'] += 1
+            with self.assertRaises(TypeError):
+                d['b'] = 2
+            with self.assertRaises(TypeError):
+                del d['b']
+            with self.assertRaises(TypeError):
+                d.clear()
+            with self.assertRaises(TypeError):
+                d.pop('a')
+            with self.assertRaises(TypeError):
+                d.popitem()
+            with self.assertRaises(TypeError):
+                d.setdefault('f', 1)
+            with self.assertRaises(TypeError):
+                d.update({'d': 4})
+            self.assertEqual(d.__class__({'a': 1, 'b': 2, 'c': 3}), d)
 
     def test_repr(self):
         """Ensure fronzendicts evaluate to themselves"""
