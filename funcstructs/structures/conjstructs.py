@@ -39,6 +39,8 @@ class Funcstruct(Multiset):
     orderings of the trees in the multisets correspond to necklaces whose beads
     are the trees themselves."""
 
+    __slots__ = '__n'
+
     def __new__(cls, cycles, precounted=None):
         self = super(Funcstruct, cls).__new__(cls, cycles)
         if precounted is not None:
