@@ -24,7 +24,47 @@ def _raise_undeleteable(cls, *args, **kwargs):
     raise TypeError('%r does not support item deletion' % cls.__name__)
 
 
-class Multiset(dict):
+class frozendict(dict):
+    """Dictionary with no mutating methods. The values themselves, as with
+    tuples, may still be mutable. If all of frozendict's values are hashable,
+    then so is frozendict."""
+
+    __slots__ = ()
+
+    def __new__(cls, *args, **kwargs):
+        self = super(frozendict, cls).__new__(cls, *args, **kwargs)
+        super(frozendict, self).__init__(*args, **kwargs)
+        return self
+
+    def __init__(self, *args, **kwargs):
+        pass  # Override dict.__init__ to avoid call to self.update()
+
+    # Disable all inherited mutating methods. Based on brownie's ImmutableDict
+
+    __setitem__ = setdefault = update = _raise_unassignable
+
+    __delitem__ = clear = pop = popitem = _raise_undeleteable
+
+    def __hash__(self):
+        return hash(frozenset(self.items()))
+
+    def __repr__(self):
+        return self.__class__.__name__ + "(%s)" % dict(self)
+
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return dict.__eq__(self, other)
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    @classmethod
+    def fromkeys(cls, *args, **kwargs):
+        return cls(dict.fromkeys(*args, **kwargs))
+
+
+class Multiset(frozendict):
     """ Multiset is represented as a dictionary (hash table) whose keys are the
     elements of the set and values are the multiplicities. Multiset is
     immutable, and thus suitable for use as a dictionary key. """
@@ -40,15 +80,6 @@ class Multiset(dict):
                 dict.__setitem__(self, el, self.get(el, 0) + 1)
         return self
 
-    def __init__(self, *args, **kwargs):
-        pass  # Override dict.__init__ to avoid call to self.update()
-
-    # Disable all inherited mutating methods. Based on brownie's ImmutableDict
-
-    __setitem__ = setdefault = update = _raise_unassignable
-
-    __delitem__ = clear = pop = popitem = _raise_undeleteable
-
     # length of a multiset includes multiplicities
     def __len__(self):
         return sum(self.values())
@@ -56,12 +87,7 @@ class Multiset(dict):
     # Iterate through all elements; return multiple copies if present.
     __iter__ = collections.Counter.__dict__['elements']
 
-    def __hash__(self):
-        return hash(frozenset(self.items()))
-
     def __repr__(self):
-        """ The string representation is a call to the constructor given a
-        tuple containing all of the elements. """
         return "%s(%s)" % (self.__class__.__name__, list(self))
 
     def __str__(self):
