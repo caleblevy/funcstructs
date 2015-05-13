@@ -5,8 +5,8 @@ Caleb Levy, 2015.
 
 import abc
 import collections
-
-from .. import multiset
+import importlib
+multiset = importlib.import_module("funcstructs.structures.multiset")
 
 
 class Enumerable(collections.Iterable):
