@@ -94,6 +94,9 @@ class Endofunction(bases.Tuple):
         """Make an endofunction representing a tree."""
         return cls(f for _, _, f in _treefuncs.funclevels_iterator(levels))
 
+    def __iter__(self):
+        return enumerate(super(Endofunction, self).__iter__())
+
     def __str__(self):
         funcstring = self.__class__.__name__+'([\n'
         mapvals = []
@@ -106,7 +109,7 @@ class Endofunction(bases.Tuple):
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
-        return other.__class__(self[x] for x in other)
+        return other.__class__(self[y] for x, y in other)
 
     @cached_property
     def domain(self):
@@ -116,13 +119,13 @@ class Endofunction(bases.Tuple):
     @cached_property
     def image(self):
         """f.image <==> {f[x] for x in f.domain}"""
-        return frozenset(self)
+        return frozenset(y for x, y in self)
 
     @cached_property
     def preimage(self):
         """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
         preim = [set() for _ in range(len(self))]
-        for x, y in enumerate(self):
+        for x, y in self:
             preim[y].add(x)
         return tuple(map(frozenset, preim))
 
@@ -212,7 +215,7 @@ class SymmetricFunction(Endofunction):
 
     def __rmul__(self, other):
         """s.__rmul__(f) = f * s"""
-        return other.__class__(other[x] for x in self)
+        return other.__class__(other[y] for x, y in self)
 
     def __pow__(self, n):
         """Symmetric functions allow us to take inverses."""
@@ -227,7 +230,7 @@ class SymmetricFunction(Endofunction):
         # Code taken directly from: "Inverting permutations in Python" at
         # http://stackoverflow.com/a/9185908.
         inv = [0]*len(self)
-        for x, y in enumerate(self):
+        for x, y in self:
             inv[y] = x
         return self.__class__(inv)
 
@@ -245,7 +248,7 @@ class SymmetricFunction(Endofunction):
         # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
         # way to get *to* g.
         g = [0]*len(f)
-        for x, y in enumerate(self):
+        for x, y in self:
             g[y] = self[f[x]]
         return f.__class__(g)
 
