@@ -5,6 +5,7 @@ Caleb Levy, 2015.
 """
 
 import random
+from collections import defaultdict
 
 from . import bases, productrange
 from . import _treefuncs
@@ -15,6 +16,73 @@ __all__ = [
     "randfunc", "randperm", "randconj",
     "TransformationMonoid"
 ]
+
+
+class Function(bases.frozendict):
+
+    """An immutable mapping from a set to another."""
+
+    def __new__(cls, *args, **kwargs):
+        self = super(Function, cls).__new__(cls, *args, **kwargs)
+        _ = self.image  # Ensure elements of the image are hashable
+        return self
+
+    def __iter__(self):
+        """Return elements of the domain and their labels in pairs"""
+        return iter(self.items())
+
+    @cached_property
+    def domain(self):
+        """The set of objects for which f[x] is defined"""
+        return frozenset(self.keys())
+
+    @cached_property
+    def image(self):
+        """f.image <==> {f[x] for x in f.domain}"""
+        return frozenset(self.values())
+
+    @cached_property
+    def preimage(self):
+        """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
+        preim = defaultdict(set)
+        for x, y in self:
+            preim[y].add(x)
+        return self.__class__((x, preim[x]) for x in self.domain)
+
+    def __mul__(self, other):
+        """(f * g)[x] <==> f[g[x]]"""
+        # f * g becomes a function on g's domain, so it inherits class of g
+        return other.__class__((x, self[y]) for x, y in other)
+
+    def __pow__(self, n):
+        """f**n <==> the nth iterate of f"""
+        # Convert to string of binary digits, clip off 0b, then reverse.
+        component_iterates = bin(n)[2::][::-1]
+        f = self
+        f_iter = self.__class__((x, x) for x in self.domain)
+        # Iterate by self-composing, akin to exponentiation by squaring.
+        for it in component_iterates:
+            if it == '1':
+                f_iter *= f
+            f *= f
+        return f_iter
+
+    @cached_property
+    def imagepath(self):
+        """f.imagepath[n] <==> len((f**n).image)"""
+        cardinalities = [len(self.image)]
+        f = self
+        card_prev = len(self)
+        for it in range(1, len(self)-1):
+            f *= self
+            card = len(f.image)
+            cardinalities.append(card)
+            # Save some time; if we have reached the fixed set, return.
+            if card == card_prev:
+                cardinalities.extend([card]*(len(self)-2-it))
+                break
+            card_prev = card
+        return tuple(cardinalities)
 
 
 class Endofunction(bases.Tuple):
