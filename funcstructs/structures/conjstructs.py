@@ -41,7 +41,17 @@ class Funcstruct(Multiset):
 
     __slots__ = '__n'
 
-    def __new__(cls, cycles, precounted=None):
+    def __new__(cls, f):
+        cycles = []
+        for cycle in f.cycles:
+            strand = []
+            for el in cycle:
+                strand.append(DominantTree.from_func(f, el))
+            cycles.append(Necklace(strand))
+        return cls._from_cycles(cycles, len(f))
+
+    @classmethod
+    def _from_cycles(cls, cycles, precounted=None):
         self = super(Funcstruct, cls).__new__(cls, cycles)
         if precounted is not None:
             self.__n = precounted
@@ -49,19 +59,13 @@ class Funcstruct(Multiset):
             self.__n = len(list(flatten(flatten(self))))
         return self
 
+    def __repr__(self):
+        return super(Funcstruct, self).__repr__().replace(
+            self.__class__.__name__, self.__class__.__name__+"._from_cycles")
+
     def __len__(self):
         """Number of nodes in the structure."""
         return self.__n
-
-    @classmethod
-    def from_func(cls, f):
-        cycles = []
-        for cycle in f.cycles:
-            strand = []
-            for el in cycle:
-                strand.append(DominantTree.from_func(f, el))
-            cycles.append(Necklace(strand))
-        return cls(cycles)
 
     @property
     def degeneracy(self):
@@ -142,7 +146,7 @@ def cycle_type_funcstructs(n, cycle_type):
         for c, l, m in zip(composition, lengths, multiplicities):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in itertools.product(*cycle_groups):
-            yield Funcstruct(flatten(bundle), n)
+            yield Funcstruct._from_cycles(flatten(bundle), n)
 
 
 def integer_funcstructs(n):

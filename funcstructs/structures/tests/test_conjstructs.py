@@ -10,7 +10,7 @@ from ..conjstructs import Funcstruct, EndofunctionStructures
 
 class FuncstructTests(unittest.TestCase):
 
-    s = Funcstruct([
+    s = Funcstruct._from_cycles([
         necklaces.Necklace([
             rootedtrees.DominantTree([0, 1, 2]),
             rootedtrees.DominantTree([0, 1, 1])
@@ -27,7 +27,7 @@ class FuncstructTests(unittest.TestCase):
 
     def test_func_form(self):
         """Convert struct to func and back, and check we get the same thing."""
-        self.assertEqual(self.s, Funcstruct.from_func(self.s.func_form()))
+        self.assertEqual(self.s, Funcstruct(self.s.func_form()))
 
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""
@@ -56,10 +56,7 @@ class FuncstructTests(unittest.TestCase):
     def test_len(self):
         """Test Funcstruct properly overrides Multiset.__len__"""
         self.assertEqual(15, len(self.s))
-        self.assertEqual(
-            30,
-            len(Funcstruct.from_func(endofunctions.randfunc(30)))
-        )
+        self.assertEqual(30, len(Funcstruct(endofunctions.randfunc(30))))
 
     def test_repr(self):
         """Ensure an endofunction structure evaluates to itself"""
@@ -67,5 +64,5 @@ class FuncstructTests(unittest.TestCase):
             'DominantTree': rootedtrees.DominantTree,
             'Necklace': necklaces.Necklace
         }
-        struct = Funcstruct.from_func(endofunctions.randfunc(30))
+        struct = Funcstruct(endofunctions.randfunc(30))
         self.assertEqual(struct, eval(repr(struct), globals(), eval_map))
