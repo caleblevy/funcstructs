@@ -19,8 +19,7 @@ __all__ = [
 
 
 class Function(bases.frozendict):
-
-    """An immutable mapping from a set to another."""
+    """An immutable mapping between sets."""
 
     @classmethod
     def _new(cls, *args, **kwargs):
@@ -98,8 +97,7 @@ class Bijection(Function):
 
 
 class Endofunction(Function):
-    """Implementation of an endofunction as a map of range(N) into itself using
-    a list."""
+    """A Function whose domain contains its codomain."""
 
     def __init__(self, *args, **kwargs):
         super(Endofunction, self).__init__(*args, **kwargs)
