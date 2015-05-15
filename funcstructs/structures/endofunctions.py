@@ -61,6 +61,42 @@ class Function(bases.frozendict):
         return other.__class__((x, self[y]) for x, y in other)
 
 
+class Bijection(Function):
+    """An invertible Function."""
+
+    def __init__(self, *args, **kwargs):
+        super(Bijection, self).__init__(*args, **kwargs)
+        # Check cardinality of domain and codomain are identical
+        if len(self) != len(self.image):
+            raise ValueError("This function is not invertible.")
+
+    def __rmul__(self, other):
+        """s.__rmul__(f) = f * s"""
+        return other.__class__((x, other[y]) for x, y in self)
+
+    @cached_property
+    def inverse(self):
+        """s.inverse <==> s**-1"""
+        # Code taken directly from: "Inverting permutations in Python" at
+        # http://stackoverflow.com/a/9185908.
+        return self.__class__((y, x) for x, y in self)
+
+    def conj(self, f):
+        """s.conj(f) <==> s * f * s.inverse"""
+        # Order of conjugation matters. Take the trees:
+        #   1   2          a   b
+        #    \ /    <==>    \ /
+        #     3              c
+        # whose nodes may be mapped to each other by:
+        #   s(1) = a
+        #   s(2) = b
+        #   s(3) = c.
+        # If f(1) = f(2) = f(3) = 3, and g(a) = g(b) = g(c) = c, then f is
+        # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
+        # way to get *to* g.
+        return f.__class__((y, self[f[x]]) for x, y in self)
+
+
 class Endofunction(Function):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
@@ -147,52 +183,6 @@ class Endofunction(Function):
                                 self.domain)
 
 
-def rangefunc(seq):
-    """Return an Endofunction defined on range(len(seq))"""
-    return Endofunction(enumerate(seq))
-
-
-def randfunc(n):
-    """ Return a random endofunction on n elements. """
-    return rangefunc(random.randrange(n) for _ in range(n))
-
-
-class Bijection(Function):
-    """An invertible Function."""
-
-    def __init__(self, *args, **kwargs):
-        super(Bijection, self).__init__(*args, **kwargs)
-        # Check cardinality of domain and codomain are identical
-        if len(self) != len(self.image):
-            raise ValueError("This function is not invertible.")
-
-    def __rmul__(self, other):
-        """s.__rmul__(f) = f * s"""
-        return other.__class__((x, other[y]) for x, y in self)
-
-    @cached_property
-    def inverse(self):
-        """s.inverse <==> s**-1"""
-        # Code taken directly from: "Inverting permutations in Python" at
-        # http://stackoverflow.com/a/9185908.
-        return self.__class__((y, x) for x, y in self)
-
-    def conj(self, f):
-        """s.conj(f) <==> s * f * s.inverse"""
-        # Order of conjugation matters. Take the trees:
-        #   1   2          a   b
-        #    \ /    <==>    \ /
-        #     3              c
-        # whose nodes may be mapped to each other by:
-        #   s(1) = a
-        #   s(2) = b
-        #   s(3) = c.
-        # If f(1) = f(2) = f(3) = 3, and g(a) = g(b) = g(c) = c, then f is
-        # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
-        # way to get *to* g.
-        return f.__class__((y, self[f[x]]) for x, y in self)
-
-
 class SymmetricFunction(Endofunction, Bijection):
     """A Bijective Endofunction"""
 
@@ -207,9 +197,25 @@ class SymmetricFunction(Endofunction, Bijection):
             return Endofunction.__pow__(self.inverse, -n)
 
 
+# Convenience functions for defining Endofunctions from a sequence in range(n)
+
+
+def rangefunc(seq):
+    """Return an Endofunction defined on range(len(seq))"""
+    return Endofunction(enumerate(seq))
+
+
 def rangeperm(seq):
     """Return a symmetric function defined on range(len(seq))"""
     return SymmetricFunction(enumerate(seq))
+
+
+# Convenience functions for return random Functions
+
+
+def randfunc(n):
+    """ Return a random endofunction on n elements. """
+    return rangefunc(random.randrange(n) for _ in range(n))
 
 
 def randperm(n):
@@ -222,6 +228,9 @@ def randperm(n):
 def randconj(f):
     """Return a random conjugate of f."""
     return randperm(len(f)).conj(f)
+
+
+# Function enumerators
 
 
 class TransformationMonoid(bases.Enumerable):
