@@ -72,7 +72,7 @@ class EndofunctionTests(unittest.TestCase):
     def test_acyclic_ancestors_are_not_cyclic(self):
         """Make sure attached_treenodes returns nodes not in cycles."""
         for f in self.funcs:
-            for invim in f.acyclic_ancestors:
+            for _, invim in f.acyclic_ancestors.items():
                 for x in invim:
                     self.assertNotIn(x, f.limitset)
 

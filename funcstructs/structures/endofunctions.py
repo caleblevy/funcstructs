@@ -101,14 +101,6 @@ class Endofunction(Function):
         return cls((x, y) for x, _, y in
                    _treefuncs.funclevels_iterator(levels))
 
-    @cached_property
-    def preimage(self):
-        """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
-        preim = [set() for _ in range(len(self))]
-        for x, y in self:
-            preim[y].add(x)
-        return tuple(map(frozenset, preim))
-
     def enumerate_cycles(self):
         """Generate f's cycle decomposition in O(len(f)) time"""
         Tried = set()
@@ -141,12 +133,13 @@ class Endofunction(Function):
     @cached_property
     def acyclic_ancestors(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
-        descendants = [set() for _ in range(len(self))]
-        for x, inv_image in enumerate(self.preimage):
-            for f in inv_image:
-                if f not in self.limitset:
-                    descendants[x].add(f)
-        return tuple(map(frozenset, descendants))
+        descendants = defaultdict(set)
+        for y, inv_image in self.preimage.items():
+            for x in inv_image:
+                if x not in self.limitset:
+                    descendants[y].add(x)
+        return bases.frozendict((x, frozenset(descendants[x])) for x in
+                                self.domain)
 
 
 def rangefunc(seq):
