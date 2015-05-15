@@ -22,10 +22,16 @@ class Function(bases.frozendict):
 
     """An immutable mapping from a set to another."""
 
+    @classmethod
+    def _new(cls, *args, **kwargs):
+        # Bypass all verification and directly call Function constructor
+        return super(Function, cls).__new__(cls, *args, **kwargs)
+
     def __new__(cls, *args, **kwargs):
-        self = super(Function, cls).__new__(cls, *args, **kwargs)
+        return cls._new(*args, **kwargs)
+
+    def __init__(self, *args, **kwargs):
         _ = self.image  # Ensure elements of the image are hashable
-        return self
 
     def __iter__(self):
         """Return elements of the domain and their labels in pairs"""
@@ -59,11 +65,10 @@ class Endofunction(Function):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
 
-    def __new__(cls, *args, **kwargs):
-        self = super(Endofunction, cls).__new__(cls, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(Endofunction, self).__init__(*args, **kwargs)
         if not self.domain.issuperset(self.image):
             raise ValueError("image must be a subset of the domain")
-        return self
 
     @classmethod
     def from_levels(cls, levels):
@@ -152,25 +157,18 @@ def randfunc(n):
     return rangefunc(random.randrange(n) for _ in range(n))
 
 
-class SymmetricFunction(Endofunction):
-    """ An invertible endofunction. """
+class Bijection(Function):
+    """An invertible Function."""
 
-    def __new__(cls, *args, **kwargs):
-        self = super(SymmetricFunction, cls).__new__(cls, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(Bijection, self).__init__(*args, **kwargs)
+        # Check cardinality of domain and codomain are identical
         if len(self) != len(self.image):
             raise ValueError("This function is not invertible.")
-        return self
 
     def __rmul__(self, other):
         """s.__rmul__(f) = f * s"""
         return other.__class__((x, other[y]) for x, y in self)
-
-    def __pow__(self, n):
-        """Symmetric functions allow us to take inverses."""
-        if n >= 0:
-            return Endofunction.__pow__(self, n)
-        else:
-            return Endofunction.__pow__(self.inverse, -n)
 
     @cached_property
     def inverse(self):
@@ -193,6 +191,20 @@ class SymmetricFunction(Endofunction):
         # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
         # way to get *to* g.
         return f.__class__((y, self[f[x]]) for x, y in self)
+
+
+class SymmetricFunction(Endofunction, Bijection):
+    """A Bijective Endofunction"""
+
+    def __init__(self, *args, **kwargs):
+        super(SymmetricFunction, self).__init__(*args, **kwargs)
+
+    def __pow__(self, n):
+        """Symmetric functions allow us to take inverses."""
+        if n >= 0:
+            return Endofunction.__pow__(self, n)
+        else:
+            return Endofunction.__pow__(self.inverse, -n)
 
 
 def rangeperm(seq):
