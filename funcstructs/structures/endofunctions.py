@@ -192,9 +192,9 @@ class SymmetricFunction(Endofunction, Bijection):
     def __pow__(self, n):
         """Symmetric functions allow us to take inverses."""
         if n >= 0:
-            return Endofunction.__pow__(self, n)
+            return super(SymmetricFunction, self).__pow__(n)
         else:
-            return Endofunction.__pow__(self.inverse, -n)
+            return super(SymmetricFunction, self.inverse).__pow__(-n)
 
 
 # Convenience functions for defining Endofunctions from a sequence in range(n)
