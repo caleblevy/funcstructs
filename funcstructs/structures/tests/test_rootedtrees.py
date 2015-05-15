@@ -174,7 +174,7 @@ class OrderedTreeTests(unittest.TestCase):
                 self.assertEqual(tree, DominantTree.from_func(rtreefunc))
         # Make sure non-tree structures are caught
         with self.assertRaises(ValueError):
-            OrderedTree.from_func(endofunctions.Endofunction(range(10)))
+            OrderedTree.from_func(endofunctions.rangefunc(range(10)))
 
     def test_breadth_first_traversal(self):
         """Test nodes are grouped correctly by their height"""

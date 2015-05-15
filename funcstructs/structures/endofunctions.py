@@ -85,41 +85,21 @@ class Function(bases.frozendict):
         return tuple(cardinalities)
 
 
-class Endofunction(bases.Tuple):
+class Endofunction(Function):
     """Implementation of an endofunction as a map of range(N) into itself using
     a list."""
+
+    def __new__(cls, *args, **kwargs):
+        self = super(Endofunction, cls).__new__(cls, *args, **kwargs)
+        if not self.domain.issuperset(self.image):
+            raise ValueError("image must be a subset of the domain")
+        return self
 
     @classmethod
     def from_levels(cls, levels):
         """Make an endofunction representing a tree."""
-        return cls(f for _, _, f in _treefuncs.funclevels_iterator(levels))
-
-    def __iter__(self):
-        return enumerate(super(Endofunction, self).__iter__())
-
-    def __str__(self):
-        funcstring = self.__class__.__name__+'([\n'
-        mapvals = []
-        for x, y in enumerate(self[:-1]):
-            mapvals.append('\t'+str(x)+' -> '+str(y)+', \n')
-        funcstring += ''.join(mapvals)
-        funcstring += '\t'+str(len(self)-1)+" -> "+str(self[-1])+'\n])'
-        return funcstring
-
-    def __mul__(self, other):
-        """(f * g)[x] <==> f[g[x]]"""
-        # f * g becomes a function on g's domain, so it inherits class of g
-        return other.__class__(self[y] for x, y in other)
-
-    @cached_property
-    def domain(self):
-        """The set of objects for which f[x] is defined"""
-        return frozenset(range(len(self)))
-
-    @cached_property
-    def image(self):
-        """f.image <==> {f[x] for x in f.domain}"""
-        return frozenset(y for x, y in self)
+        return cls((x, y) for x, _, y in
+                   _treefuncs.funclevels_iterator(levels))
 
     @cached_property
     def preimage(self):
@@ -128,36 +108,6 @@ class Endofunction(bases.Tuple):
         for x, y in self:
             preim[y].add(x)
         return tuple(map(frozenset, preim))
-
-    @cached_property
-    def imagepath(self):
-        """f.imagepath[n] <==> len((f**n).image)"""
-        cardinalities = [len(self.image)]
-        f = self
-        card_prev = len(self)
-        for it in range(1, len(self)-1):
-            f *= self
-            card = len(f.image)
-            cardinalities.append(card)
-            # Save some time; if we have reached the fixed set, return.
-            if card == card_prev:
-                cardinalities.extend([card]*(len(self)-2-it))
-                break
-            card_prev = card
-        return tuple(cardinalities)
-
-    def __pow__(self, n):
-        """f**n <==> the nth iterate of f"""
-        # Convert to string of binary digits, clip off 0b, then reverse.
-        component_iterates = bin(n)[2::][::-1]
-        f = self
-        f_iter = self.__class__(range(len(self)))
-        # Iterate by self-composing, akin to exponentiation by squaring.
-        for it in component_iterates:
-            if it == '1':
-                f_iter *= f
-            f *= f
-        return f_iter
 
     def enumerate_cycles(self):
         """Generate f's cycle decomposition in O(len(f)) time"""
@@ -199,23 +149,28 @@ class Endofunction(bases.Tuple):
         return tuple(map(frozenset, descendants))
 
 
+def rangefunc(seq):
+    """Return an Endofunction defined on range(len(seq))"""
+    return Endofunction(enumerate(seq))
+
+
 def randfunc(n):
     """ Return a random endofunction on n elements. """
-    return Endofunction(random.randrange(n) for _ in range(n))
+    return rangefunc(random.randrange(n) for _ in range(n))
 
 
 class SymmetricFunction(Endofunction):
     """ An invertible endofunction. """
 
-    def __new__(cls, func):
-        self = super(SymmetricFunction, cls).__new__(cls, func)
+    def __new__(cls, *args, **kwargs):
+        self = super(SymmetricFunction, cls).__new__(cls, *args, **kwargs)
         if len(self) != len(self.image):
             raise ValueError("This function is not invertible.")
         return self
 
     def __rmul__(self, other):
         """s.__rmul__(f) = f * s"""
-        return other.__class__(other[y] for x, y in self)
+        return other.__class__((x, other[y]) for x, y in self)
 
     def __pow__(self, n):
         """Symmetric functions allow us to take inverses."""
@@ -229,10 +184,7 @@ class SymmetricFunction(Endofunction):
         """s.inverse <==> s**-1"""
         # Code taken directly from: "Inverting permutations in Python" at
         # http://stackoverflow.com/a/9185908.
-        inv = [0]*len(self)
-        for x, y in self:
-            inv[y] = x
-        return self.__class__(inv)
+        return self.__class__((y, x) for x, y in self)
 
     def conj(self, f):
         """s.conj(f) <==> s * f * s.inverse"""
@@ -247,17 +199,19 @@ class SymmetricFunction(Endofunction):
         # If f(1) = f(2) = f(3) = 3, and g(a) = g(b) = g(c) = c, then f is
         # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
         # way to get *to* g.
-        g = [0]*len(f)
-        for x, y in self:
-            g[y] = self[f[x]]
-        return f.__class__(g)
+        return f.__class__((y, self[f[x]]) for x, y in self)
+
+
+def rangeperm(seq):
+    """Return a symmetric function defined on range(len(seq))"""
+    return SymmetricFunction(enumerate(seq))
 
 
 def randperm(n):
     """Return a random permutation of range(n)."""
     r = list(range(n))  # Explicitly call list for python 3 compatibility.
     random.shuffle(r)
-    return SymmetricFunction(r)
+    return rangeperm(r)
 
 
 def randconj(f):
@@ -273,7 +227,7 @@ class TransformationMonoid(bases.Enumerable):
 
     def __iter__(self):
         for func in productrange.productrange([self.n] * self.n):
-            yield Endofunction(func)
+            yield rangefunc(func)
 
     def __len__(self):
         return self.n ** self.n

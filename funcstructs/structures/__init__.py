@@ -21,8 +21,8 @@ from . import (
 # Main data structures
 from .conjstructs import Funcstruct, EndofunctionStructures
 from .endofunctions import (
-    Endofunction, SymmetricFunction,
-    randfunc, randperm,
+    Endofunction, rangefunc, randfunc,
+    SymmetricFunction, rangeperm, randperm, randconj,
     TransformationMonoid
 )
 from .multiset import Multiset

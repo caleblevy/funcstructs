@@ -46,11 +46,11 @@ class FloatSetTests(unittest.TestCase):
         h = {x: x for x in self.nonfinite}
         # Order should be independent of dict
         self.assertEqual(
-            Endofunction(range(4)),
+            rangefunc(range(4)),
             self.fin.conj(f)
         )
         self.assertEqual(
-            Endofunction(range(3)),
+            rangefunc(range(3)),
             self.nfi.conj(h)
         )
         # Subdomain

@@ -7,7 +7,7 @@ from itertools import combinations, permutations, product
 from math import factorial
 
 from .combinat import multinomial_coefficient as ordered_division_count
-from .endofunctions import Endofunction, SymmetricFunction
+from .endofunctions import Endofunction, rangefunc, rangeperm
 from .multiset import Multiset
 from .necklaces import Necklace
 from .utils import flatten
@@ -197,7 +197,7 @@ def translation_keys(tree):
     to translate each combination into an endofunction."""
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
-    translation_sequence = SymmetricFunction(flatten(ind_groups)).inverse.conj(
+    translation_sequence = rangeperm(flatten(ind_groups)).inverse.conj(
         Endofunction.from_levels(tree))
     return bin_widths, translation_sequence
 
@@ -222,4 +222,4 @@ def tree_labellings(tree):
         c = list(flatten(combo))
         for i in range(n):
             func[c[i]] = c[translation_sequence[i]]
-        yield Endofunction(func)
+        yield rangefunc(func)

@@ -83,7 +83,7 @@ class FloatSet(tuple):
                     raise
         if _sentinal in fi:
             raise ValueError("Incompatible domains")
-        return Endofunction(fi)
+        return rangefunc(fi)
 
     def endofunction(self, mapping):
         """Make endofunction from mapping applied to the domain"""
