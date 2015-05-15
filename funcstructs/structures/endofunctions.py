@@ -54,6 +54,23 @@ class Function(bases.frozendict):
         # f * g becomes a function on g's domain, so it inherits class of g
         return other.__class__((x, self[y]) for x, y in other)
 
+
+class Endofunction(Function):
+    """Implementation of an endofunction as a map of range(N) into itself using
+    a list."""
+
+    def __new__(cls, *args, **kwargs):
+        self = super(Endofunction, cls).__new__(cls, *args, **kwargs)
+        if not self.domain.issuperset(self.image):
+            raise ValueError("image must be a subset of the domain")
+        return self
+
+    @classmethod
+    def from_levels(cls, levels):
+        """Make an endofunction representing a tree."""
+        return cls((x, y) for x, _, y in
+                   _treefuncs.funclevels_iterator(levels))
+
     def __pow__(self, n):
         """f**n <==> the nth iterate of f"""
         # Convert to string of binary digits, clip off 0b, then reverse.
@@ -83,23 +100,6 @@ class Function(bases.frozendict):
                 break
             card_prev = card
         return tuple(cardinalities)
-
-
-class Endofunction(Function):
-    """Implementation of an endofunction as a map of range(N) into itself using
-    a list."""
-
-    def __new__(cls, *args, **kwargs):
-        self = super(Endofunction, cls).__new__(cls, *args, **kwargs)
-        if not self.domain.issuperset(self.image):
-            raise ValueError("image must be a subset of the domain")
-        return self
-
-    @classmethod
-    def from_levels(cls, levels):
-        """Make an endofunction representing a tree."""
-        return cls((x, y) for x, _, y in
-                   _treefuncs.funclevels_iterator(levels))
 
     def enumerate_cycles(self):
         """Generate f's cycle decomposition in O(len(f)) time"""
