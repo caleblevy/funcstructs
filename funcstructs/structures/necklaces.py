@@ -9,7 +9,7 @@ import functools
 
 from PADS import Lyndon
 
-from . import bases, combinat, factorization
+from . import bases, combinat, factorization, multiset
 
 
 def periodicity(strand):
@@ -103,18 +103,19 @@ class FixedContentNecklaces(bases.Enumerable):
     """ Representation of the set of necklaces of fixed content; i.e. a fixed
     pool of beads from which to form necklaces. """
 
-    def __init__(self, content):
+    def __new__(cls, content):
         """Form a generator of all necklaces with beads of a given multiset."""
-        super(FixedContentNecklaces, self).__init__(None, content)
-        self.__elements, self.__multiplicities = self.partition.sort_split()
+        elements, multiplicities = multiset.Multiset(content).sort_split()
+        self = super(FixedContentNecklaces, cls).__new__(
+            cls, elements=tuple(elements),
+            multiplicities=tuple(multiplicities))
+        return self
 
-    @property
-    def elements(self):
-        return self.__elements
-
-    @property
-    def multiplicities(self):
-        return self.__multiplicities
+    def __repr__(self):
+        mset = []
+        for elem, mult in zip(self.elements, self.multiplicities):
+            mset.extend([elem]*mult)
+        return self.__class__.__name__ + '(%s)' % repr(multiset.Multiset(mset))
 
     @classmethod
     def from_partition(cls, partition):
@@ -171,7 +172,7 @@ class FixedContentNecklaces(bases.Enumerable):
         return simple_fixed_content(a, multiplicities, 2, 1, k)
 
     def __iter__(self):
-        if not self.partition:
+        if not self.elements:
             return
         for strand in self.sfc():
             # Explicitly make a tuple, since we must form the list of all

@@ -162,14 +162,17 @@ class EndofunctionStructures(bases.Enumerable):
     """Enumerator of endofunction structures consisting of n nodes, optionally
     restricted to a given cycle type."""
 
-    def __init__(self, node_count, cycle_type=None):
-        super(EndofunctionStructures, self).__init__(node_count, cycle_type, 0)
+    def __new__(cls, n, cycle_type=None):
+        if n < 0:
+            raise ValueError("Cannot defined funcstructs on %s nodes" % n)
+        return super(EndofunctionStructures, cls).__new__(
+            cls, n=n, cycle_type=Multiset(cycle_type))
 
     def __iter__(self):
-        if not self.partition:
+        if not self.cycle_type:
             return integer_funcstructs(self.n)
         else:
-            return cycle_type_funcstructs(self.n, self.partition)
+            return cycle_type_funcstructs(self.n, self.cycle_type)
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes. Iterates

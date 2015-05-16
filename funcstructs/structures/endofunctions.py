@@ -234,8 +234,10 @@ def randconj(f):
 class TransformationMonoid(bases.Enumerable):
     """Set of all endofunctions on n elements."""
 
-    def __init__(self, set_size):
-        super(TransformationMonoid, self).__init__(set_size, None, 0)
+    def __new__(cls, n):
+        if n < 0:
+            raise ValueError("Cannont define functions on %s nodes" % n)
+        return super(TransformationMonoid, cls).__new__(cls, n=n)
 
     def __iter__(self):
         for func in productrange.productrange([self.n] * self.n):

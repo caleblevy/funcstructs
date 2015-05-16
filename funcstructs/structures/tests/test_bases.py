@@ -6,6 +6,7 @@ from .. import(
     FixedContentNecklaces
 )
 
+from ..multiset import Multiset
 from ..bases import frozendict, Tuple, Enumerable
 
 
@@ -201,12 +202,12 @@ class EnumerableTests(unittest.TestCase):
                 return iter(range(self.n))
 
         class NoIter(Enumerable):
-            def __init__(self, n):
-                super(NoIter, self).__init__(n, None)
+            def __new__(cls, n):
+                return super(NoIter, cls).__new__(cls, n=n)
 
         class Init(NoInit):
-            def __init__(self, n):
-                super(Init, self).__init__(n, None)
+            def __new__(cls, n):
+                return super(Init, cls).__new__(cls, n=n)
 
         class Iter(NoIter):
             def __iter__(self):
@@ -254,7 +255,7 @@ class EnumerableTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             TreeEnumerator(0)
         with self.assertRaises(ValueError):
-            ForestEnumerator(0)
+            ForestEnumerator(-1)
         with self.assertRaises(ValueError):
             TransformationMonoid(-1)
         with self.assertRaises(ValueError):
