@@ -10,25 +10,32 @@ finally:
 
 # Supporting modules
 from . import (
-    compositions,
+    bases,
     combinat,
+    compositions,
+    conjstructs,
+    endofunctions,
     factorization,
+    funcdists,
     labellings,
+    multiset,
+    necklaces,
     productrange,
+    rootedtrees,
     subsequences
 )
 
 # Main data structures
 from .conjstructs import Funcstruct, EndofunctionStructures
 from .endofunctions import (
-    Endofunction, rangefunc, randfunc,
-    SymmetricFunction, rangeperm, randperm, randconj,
+    Function, Bijection, Endofunction, SymmetricFunction,
+    rangefunc, rangeperm, randfunc, randperm, randconj,
     TransformationMonoid
 )
-from .multiset import Multiset
+from .multiset import Multiset, unordered_product
 from .necklaces import periodicity, Necklace, FixedContentNecklaces
 from .rootedtrees import (
-    RootedTree,
-    OrderedTree, DominantTree,
+    OrderedTree, DominantTree, RootedTree,
     TreeEnumerator, ForestEnumerator, PartitionForests
 )
+from .utils import *
