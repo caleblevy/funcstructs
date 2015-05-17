@@ -69,6 +69,18 @@ class Enumerable(object):
         return
         yield
 
+    def __setattr__(self, name, val):
+        if name == "_params" and hasattr(self, "_params"):
+            raise AttributeError("can't set attribute")
+        else:
+            object.__setattr__(self, name, val)
+
+    def __delattr__(self, name):
+        if name == "_params" and hasattr(self, "_params"):
+            raise AttributeError("can't delete attribute")
+        else:
+            object.__delattr__(self, name)
+
 
 class Range(Enumerable):
     """Imitates range"""
@@ -97,5 +109,9 @@ class Ranger(Range):
 
 
 rger = Ranger(40)
+rger.step = 7
 print dir(rger)
 print list(rger)
+
+rger._params = {7}
+del rger.start
