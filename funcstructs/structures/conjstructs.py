@@ -16,7 +16,7 @@ from PADS import IntegerPartitions
 from . import (
     bases,
     compositions,
-    endofunctions,
+    functions,
     factorization,
     subsequences,
 )
@@ -96,7 +96,7 @@ class Funcstruct(Multiset):
                 func[root_node] = end_node
                 root_node = end_node
             func[root_node-len(tree)] = cycle_start
-        return endofunctions.rangefunc(func)
+        return functions.rangefunc(func)
 
     @property
     def imagepath(self):

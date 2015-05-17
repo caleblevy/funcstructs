@@ -2,7 +2,7 @@ import unittest
 
 from ..rootedtrees import OrderedTree
 
-from ..endofunctions import (
+from ..functions import (
     Endofunction, rangefunc,
     SymmetricFunction, rangeperm,
     TransformationMonoid,

@@ -3,7 +3,7 @@ from math import factorial
 
 import numpy as np
 
-from .. import endofunctions, necklaces, rootedtrees
+from .. import functions, necklaces, rootedtrees
 
 from ..conjstructs import Funcstruct, EndofunctionStructures
 
@@ -56,7 +56,7 @@ class FuncstructTests(unittest.TestCase):
     def test_len(self):
         """Test Funcstruct properly overrides Multiset.__len__"""
         self.assertEqual(15, len(self.s))
-        self.assertEqual(30, len(Funcstruct(endofunctions.randfunc(30))))
+        self.assertEqual(30, len(Funcstruct(functions.randfunc(30))))
 
     def test_repr(self):
         """Ensure an endofunction structure evaluates to itself"""
@@ -64,5 +64,5 @@ class FuncstructTests(unittest.TestCase):
             'DominantTree': rootedtrees.DominantTree,
             'Necklace': necklaces.Necklace
         }
-        struct = Funcstruct(endofunctions.randfunc(30))
+        struct = Funcstruct(functions.randfunc(30))
         self.assertEqual(struct, eval(repr(struct), globals(), eval_map))

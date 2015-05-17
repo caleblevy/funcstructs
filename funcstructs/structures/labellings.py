@@ -7,7 +7,7 @@ from itertools import combinations, permutations, product
 from math import factorial
 
 from .combinat import multinomial_coefficient as ordered_division_count
-from .endofunctions import Endofunction, rangefunc, rangeperm
+from .functions import Endofunction, rangefunc, rangeperm
 from .multiset import Multiset
 from .necklaces import Necklace
 from .utils import flatten

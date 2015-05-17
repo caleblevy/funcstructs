@@ -3,7 +3,7 @@ import math
 
 from PADS import IntegerPartitions
 
-from .. import endofunctions, multiset
+from .. import functions, multiset
 
 from ..rootedtrees import (
     RootedTree,
@@ -169,12 +169,12 @@ class OrderedTreeTests(unittest.TestCase):
         """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
-                treefunc = endofunctions.Endofunction.from_levels(tree)
-                rtreefunc = endofunctions.randconj(treefunc)
+                treefunc = functions.Endofunction.from_levels(tree)
+                rtreefunc = functions.randconj(treefunc)
                 self.assertEqual(tree, DominantTree.from_func(rtreefunc))
         # Make sure non-tree structures are caught
         with self.assertRaises(ValueError):
-            OrderedTree.from_func(endofunctions.rangefunc(range(10)))
+            OrderedTree.from_func(functions.rangefunc(range(10)))
 
     def test_breadth_first_traversal(self):
         """Test nodes are grouped correctly by their height"""

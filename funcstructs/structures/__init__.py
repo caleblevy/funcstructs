@@ -14,9 +14,9 @@ from . import (
     combinat,
     compositions,
     conjstructs,
-    endofunctions,
     factorization,
     funcdists,
+    functions,
     labellings,
     multiset,
     necklaces,
@@ -27,7 +27,7 @@ from . import (
 
 # Main data structures
 from .conjstructs import Funcstruct, EndofunctionStructures
-from .endofunctions import (
+from .functions import (
     Function, Bijection, Endofunction, SymmetricFunction,
     rangefunc, rangeperm, randfunc, randperm, randconj,
     TransformationMonoid

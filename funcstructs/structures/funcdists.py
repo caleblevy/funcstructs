@@ -28,13 +28,13 @@ from math import factorial
 
 import numpy as np
 
-from . import compositions, combinat, conjstructs, endofunctions
+from . import combinat, compositions, conjstructs, functions
 
 
 def iterdist_brute(n):
     """Calculate iterdist by enumerating all endofunction image paths."""
     dist = np.zeros((n, n-1), dtype=object)
-    for f in endofunctions.TransformationMonoid(n):
+    for f in functions.TransformationMonoid(n):
         for it, card in enumerate(f.imagepath):
             dist[card-1, it] += 1
     return dist
