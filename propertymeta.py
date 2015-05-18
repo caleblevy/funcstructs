@@ -20,7 +20,7 @@ def ro_parameter(name):
     return ro_parameter_decorator
 
 
-class ParameterMeta(abc.ABCMeta):
+class ParametrizedABC(abc.ABCMeta):
     """Given a list of properties in the class definition statement, define a
     list of these properties, add each with a getter and setter from params,
     and add a list of these params."""
@@ -33,14 +33,14 @@ class ParameterMeta(abc.ABCMeta):
         # only add _params to classes not inheriting from an mcls instance
         if not (bases and all(isinstance(base, mcls) for base in bases)):
             dct['__slots__'] += ('_params', )
-        cls = super(ParameterMeta, mcls).__new__(mcls, name, bases, dct)
+        cls = super(ParametrizedABC, mcls).__new__(mcls, name, bases, dct)
         # add accessor properties for elements of __parameters__
         for param in params:
             cls = ro_parameter(param)(cls)
         return cls
 
 
-class Enumerable(with_metaclass(ParameterMeta, object)):
+class Enumerable(with_metaclass(ParametrizedABC, object)):
     """Abstract base class"""
 
     @abc.abstractmethod
@@ -147,10 +147,10 @@ class ParametrizedABCTests(unittest.TestCase):
 
     def test_types(self):
         """Sanity check on type subclasses."""
-        self.assertIsInstance(StepRange, ParameterMeta)
-        self.assertFalse(issubclass(StepRange, ParameterMeta))
-        self.assertIsInstance(ParameterMeta, type)
-        self.assertTrue(issubclass(ParameterMeta, type))
+        self.assertIsInstance(StepRange, ParametrizedABC)
+        self.assertFalse(issubclass(StepRange, ParametrizedABC))
+        self.assertIsInstance(ParametrizedABC, type)
+        self.assertTrue(issubclass(ParametrizedABC, type))
 
 
 if __name__ == '__main__':
