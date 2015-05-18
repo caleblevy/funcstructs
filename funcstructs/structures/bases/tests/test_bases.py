@@ -1,13 +1,13 @@
 import unittest
 
-from .. import(
+from ... import(
     TreeEnumerator, ForestEnumerator, PartitionForests,
     EndofunctionStructures, TransformationMonoid,
     FixedContentNecklaces
 )
 
-from ..multiset import Multiset
-from ..bases import frozendict, Tuple, Enumerable
+from ...multiset import Multiset
+from .. import frozendict, Tuple, Enumerable
 
 
 class FrozendictTests(unittest.TestCase):
