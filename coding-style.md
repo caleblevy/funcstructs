@@ -15,9 +15,7 @@ Coding style for endofunction-structures
             python2 funcstructs/test_runner.py
             python3 funcstructs/test_runner.py
 
-    * The module **six** is not allowed; dependencies should be minimized
-
-- All classes are explicitly new style, or inherit from new style classes:
+- All classes are new style, either implicitly or explicitly:
 
     **Good**
 
