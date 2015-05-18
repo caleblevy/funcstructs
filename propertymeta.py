@@ -2,20 +2,6 @@ import abc
 from six import with_metaclass
 
 
-def _param_setter(self, name, val):
-    if name == "_params" and hasattr(self, "_params"):
-        raise AttributeError("can't set attribute")
-    else:
-        object.__setattr__(self, name, val)
-
-
-def _param_deleter(self, name):
-    if name == "_params" and hasattr(self, "_params"):
-        raise AttributeError("can't delete attribute")
-    else:
-        object.__delattr__(self, name)
-
-
 def ro_parameter(name):
     """Add a getter for the parameter of the given name to cls"""
     def ro_parameter_decorator(cls):
@@ -33,8 +19,6 @@ class ParameterMeta(abc.ABCMeta):
         params = tuple(dct.pop('__parameters__', ()))
         dct['__slots__'] = params
         if not (bases and all(isinstance(base, mcls) for base in bases)):
-            dct['__setattr__'] = _param_setter
-            dct['__delattr__'] = _param_deleter
             dct['__slots__'] += ('_params', )
         cls = super(ParameterMeta, mcls).__new__(mcls, name, bases, dct)
         for param in params:
@@ -55,6 +39,18 @@ class Enumerable(with_metaclass(ParameterMeta, object)):
     def __iter__(self):
         return
         yield
+
+    def __setattr__(self, name, val):
+        if name == "_params" and hasattr(self, "_params"):
+            raise AttributeError("can't set attribute")
+        else:
+            super(Enumerable, self).__setattr__(name, val)
+
+    def __delattr__(self, name):
+        if name == "_params" and hasattr(self, "_params"):
+            raise AttributeError("can't delete attribute")
+        else:
+            super(Enumerable, self).__delattr__(name)
 
 
 class Range(Enumerable):
@@ -80,8 +76,14 @@ class StepRange(Range):
 
 
 sr = StepRange(40)
-print list(sr)
-print dir(sr)
-print StepRange.__mro__
-print type(StepRange)
-print type(StepRange) is ParameterMeta
+print(list(sr))
+print(dir(sr))
+print(StepRange.__mro__)
+print(type(StepRange))
+print(type(StepRange) is ParameterMeta)
+try:
+    sr._params = 40
+except:
+    pass
+del sr._params
+del sr.abc
