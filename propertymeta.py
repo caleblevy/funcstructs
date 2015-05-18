@@ -1,3 +1,8 @@
+"""Metaclass for dynamically generating accessors to read-only attributes.
+
+Caleb Levy, 2015.
+"""
+
 import abc
 import unittest
 
@@ -13,7 +18,19 @@ def _popslots(clsdct, attr):
 
 
 def ro_parameter(name):
-    """Add a getter for the parameter of the given name to cls"""
+    """Class decorator for adding a property returning self._params[name]. Ex:
+
+    @ro_parameter("name")
+    class DecoratedClass(object):
+        pass
+
+        :: is equivalent to ::
+
+    class DecoratedClass(object):
+        @property
+        def name(self):
+            return self._params[name]
+    """
     def ro_parameter_decorator(cls):
         setattr(cls, name, property(lambda self: self._params[name]))
         return cls
