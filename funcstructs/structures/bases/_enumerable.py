@@ -6,6 +6,75 @@ import collections
 from ._frozendict import frozendict
 
 
+def _popslots(clsdct, attr):
+    """Return slots as a tuple of identifiers."""
+    slots = clsdct.pop(attr, ())
+    if isinstance(slots, str):
+        slots = (slots, )
+    return tuple(slots)
+
+
+def ro_parameter(name):
+    """Class decorator for adding a property returning self._params[name]. Ex:
+
+    @ro_parameter("name")
+    class DecoratedClass(object):
+        pass
+
+        :: is equivalent to ::
+
+    class DecoratedClass(object):
+        @property
+        def name(self):
+            return self._params[name]
+    """
+    def ro_parameter_decorator(cls):
+        setattr(cls, name, property(lambda self: self._params[name]))
+        return cls
+    return ro_parameter_decorator
+
+
+class ParametrizedABC(abc.ABCMeta):
+    """Metaclass for dynamically generating accessors to read-only attributes.
+
+    ParametrizedABC looks for a class's __parameters__ attribute, a list of
+    identifier strings defining all relevant class data, and adds data
+    descriptors for each parameter at class instantiation. ParametrizedABC's
+    are automatically slotted.
+
+    Usage:
+
+        class A(object, metaclass=ParametrizedABC):
+            __parameters__ = [n]
+
+    Becomes:
+
+        class A(object):
+            __slots__ = ('_params', )
+            @property
+            def n(self):
+                return self._params[n]
+
+    Implementing the _params attribute is left to instances of ParametrizedABC.
+
+    ParametrizedABC inherits from ABCMeta, allowing one to define abstract
+    methods and properties as expected."""
+
+    def __new__(mcls, name, bases, dct):
+        # process __slots__ and __parameters__ into tuples of identifiers
+        slots = _popslots(dct, '__slots__')
+        params = _popslots(dct, '__parameters__')
+        dct['__slots__'] = slots
+        # only add _params to classes not inheriting from an mcls instance
+        if not (bases and all(isinstance(base, mcls) for base in bases)):
+            dct['__slots__'] += ('_params', )
+        cls = super(ParametrizedABC, mcls).__new__(mcls, name, bases, dct)
+        # add accessor properties for elements of __parameters__
+        for param in params:
+            cls = ro_parameter(param)(cls)
+        return cls
+
+
 class Enumerable(collections.Iterable):
     """Convenience class for building combinatorial enumerations"""
 
