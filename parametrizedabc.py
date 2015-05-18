@@ -80,7 +80,6 @@ class ParametrizedABC(abc.ABCMeta):
 class Enumerable(with_metaclass(ParametrizedABC, object)):
     """Abstract base class for enumerable objects."""
 
-    @abc.abstractmethod
     def __new__(cls, **kwargs):
         """Return new Enumerable with parameters passed from subclasses"""
         self = super(Enumerable, cls).__new__(cls)
