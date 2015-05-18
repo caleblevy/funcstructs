@@ -1,4 +1,6 @@
 import abc
+import unittest
+
 from six import with_metaclass
 
 
@@ -75,15 +77,38 @@ class StepRange(Range):
         return iter(range(self.start, self.stop, self.step))
 
 
-sr = StepRange(40)
-print(list(sr))
-print(dir(sr))
-print(StepRange.__mro__)
-print(type(StepRange))
-print(type(StepRange) is ParameterMeta)
-try:
-    sr._params = 40
-except:
-    pass
-del sr._params
-del sr.abc
+class ParametrizedABCTests(unittest.TestCase):
+
+    def test_init(self):
+        sr = StepRange(40)
+        self.assertEqual(list(range(40, 100, 2)), list(sr))
+
+    def test_unchangeable_attributes(self):
+        sr = StepRange(40)
+        sr_old = list(sr)
+        with self.assertRaises(AttributeError):
+            del sr._params
+        with self.assertRaises(AttributeError):
+            sr._params = {'start': 1, 'step': 4, 'stop': 40}
+        with self.assertRaises(AttributeError):
+            sr.aa4 = 20
+        with self.assertRaises(AttributeError):
+            del sr.start
+        with self.assertRaises(AttributeError):
+            sr.start = 10
+        self.assertSequenceEqual(sr_old, list(sr))
+
+    def test_mro(self):
+        self.assertSequenceEqual(
+            StepRange.mro(),
+            [StepRange, Range, Enumerable, object]
+        )
+
+    def test_types(self):
+        self.assertIsInstance(StepRange, ParameterMeta)
+        self.assertIsInstance(ParameterMeta, type)
+        self.assertTrue(issubclass(ParameterMeta, type))
+
+
+if __name__ == '__main__':
+    unittest.main()
