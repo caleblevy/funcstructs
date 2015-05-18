@@ -2,19 +2,6 @@ import abc
 from six import with_metaclass
 
 
-def make_param_getter(key):
-    def fget(self):
-        return property(self.__params[key])
-    return fget
-
-
-def ro_property(name):
-    def ro_property_decorator(c):
-        setattr(c, name, property(lambda o: o._params[name]))
-        return c
-    return ro_property_decorator
-
-
 def _param_setter(self, name, val):
     if name == "_params" and hasattr(self, "_params"):
         raise AttributeError("can't set attribute")
@@ -29,6 +16,14 @@ def _param_deleter(self, name):
         object.__delattr__(self, name)
 
 
+def ro_parameter(name):
+    """Add a getter for the parameter of the given name to cls"""
+    def ro_parameter_decorator(cls):
+        setattr(cls, name, property(lambda self: self._params[name]))
+        return cls
+    return ro_parameter_decorator
+
+
 class ParameterMeta(abc.ABCMeta):
     """Given a list of properties in the class definition statement, define a
     list of these properties, add each with a getter and setter from params,
@@ -41,38 +36,10 @@ class ParameterMeta(abc.ABCMeta):
             dct['__setattr__'] = _param_setter
             dct['__delattr__'] = _param_deleter
             dct['__slots__'] += ('_params', )
-        print dct
         cls = super(ParameterMeta, mcls).__new__(mcls, name, bases, dct)
         for param in params:
-            cls = ro_property(param)(cls)
+            cls = ro_parameter(param)(cls)
         return cls
-
-
-class A(object):
-    __metaclass__ = ParameterMeta
-
-
-a = A()
-print(dir(a))
-
-
-class A2(object):
-    __metaclass__ = ParameterMeta
-
-    @abc.abstractmethod
-    def f(self):
-        return 1
-
-
-class A3(A2):
-    __parameters__ = ['n', 'm']
-
-    def f(self):
-        return 2
-
-
-a3 = A3()
-print dir(a3)
 
 
 class Enumerable(with_metaclass(ParameterMeta, object)):
@@ -101,12 +68,7 @@ class Range(Enumerable):
         return iter(range(self.start, self.stop))
 
 
-r = Range(20)
-print dir(r)
-print list(r)
-
-
-class Ranger(Range):
+class StepRange(Range):
     __parameters__ = ["step"]
 
     def __new__(cls, start, stop=100, step=2):
@@ -117,17 +79,9 @@ class Ranger(Range):
         return iter(range(self.start, self.stop, self.step))
 
 
-rger = Ranger(40)
-print rger.__slots__
-r3 = dir(rger)
-r3.append('__metaclass__')
-r3.sort()
-print r3
-help(Ranger)
-# rger.step = 7
-# print rger.__slots__
-# print dir(rger)
-# print list(rger)
-#
-rger._params = {7}
-# del rger.start
+sr = StepRange(40)
+print list(sr)
+print dir(sr)
+print StepRange.__mro__
+print type(StepRange)
+print type(StepRange) is ParameterMeta
