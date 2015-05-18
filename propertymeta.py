@@ -1,4 +1,5 @@
 import abc
+from six import with_metaclass
 
 
 def make_param_getter(key):
@@ -74,9 +75,8 @@ a3 = A3()
 print dir(a3)
 
 
-class Enumerable(object):
+class Enumerable(with_metaclass(ParameterMeta, object)):
     """Abstract base class"""
-    __metaclass__ = ParameterMeta
 
     @abc.abstractmethod
     def __new__(cls, **kwargs):
@@ -119,7 +119,10 @@ class Ranger(Range):
 
 rger = Ranger(40)
 print rger.__slots__
-print dir(rger)
+r3 = dir(rger)
+r3.append('__metaclass__')
+r3.sort()
+print r3
 help(Ranger)
 # rger.step = 7
 # print rger.__slots__
