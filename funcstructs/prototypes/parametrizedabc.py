@@ -1,7 +1,4 @@
-"""Metaclass for dynamically generating accessors to read-only attributes.
-
-Caleb Levy, 2015.
-"""
+# Caleb Levy, 2015.
 
 import abc
 
@@ -37,29 +34,30 @@ def ro_parameter(name):
 
 
 class ParametrizedABC(abc.ABCMeta):
-    """An ABC metaclass accepting a __parameters__ attribute, a listing of
-    parameters for which data descriptors will be generated at class
-    instantiation. Example usage is as follows (python3 syntax):
+    """Metaclass for dynamically generating accessors to read-only attributes.
 
-    class A(object, metaclass=ParametrizedABC):
-        __parameters__ = [n, m]
+    ParametrizedABC looks for a class's __parameters__ attribute, a list of
+    identifier strings defining all relevant class data, and adds data
+    descriptors for each parameter at class instantiation. ParametrizedABC's
+    are automatically slotted.
 
-        :: is equivalent to ::
+    Usage:
 
-    class A(object):
-        __slots__ = ()
+        class A(object, metaclass=ParametrizedABC):
+            __parameters__ = [n]
 
-        @property
-        def n(self):
-            return self._params[n]
+    Becomes:
 
-        @property
-        def m(self):
-            return self._params[m]
+        class A(object):
+            __slots__ = ('_params', )
+            @property
+            def n(self):
+                return self._params[n]
 
-    The abstractmethod and abstractproperty decorators work for instances of
-    ParametrizedABC as expected. All instances of ParametrizedABC are
-    automatically slotted."""
+    Implementing the _params attribute is left to instances of ParametrizedABC.
+
+    ParametrizedABC inherits from ABCMeta, allowing one to define abstract
+    methods and properties as expected."""
 
     def __new__(mcls, name, bases, dct):
         # process __slots__ and __parameters__ into tuples of identifiers
