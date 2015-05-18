@@ -38,3 +38,15 @@ class Enumerable(collections.Iterable):
         for param, val in self._params.items():
             params.append(param+'='+repr(val))
         return self.__class__.__name__ + '(%s)' % ', '.join(params)
+
+    def __setattr__(self, name, val):
+        if name == "_params" and hasattr(self, "_params"):
+            raise AttributeError("can't set attribute")
+        else:
+            super(Enumerable, self).__setattr__(name, val)
+
+    def __delattr__(self, name):
+        if name == "_params" and hasattr(self, "_params"):
+            raise AttributeError("can't delete attribute")
+        else:
+            super(Enumerable, self).__delattr__(name)
