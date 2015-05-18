@@ -13,28 +13,28 @@ class Enumerable(collections.Iterable):
     def __new__(cls, **kwargs):
         """Enumerator with behaviour governed by its parameters."""
         self = super(Enumerable, cls).__new__(cls)
-        self.__params = frozendict(kwargs)
+        self._params = frozendict(kwargs)
         return self
 
     def __init__(self, *args, **kwargs):
         # Autoinit for speed
-        for param, value in self.__params.items():
+        for param, value in self._params.items():
             setattr(self, param, value)
 
     def __eq__(self, other):
         """Enumerables are equal iff they have the same type and paremeters"""
         if type(self) is type(other):
-            return self.__params == other.__params
+            return self._params == other._params
         return False
 
     def __ne__(self, other):
         return not self == other
 
     def __hash__(self):
-        return hash(self.__params)
+        return hash(self._params)
 
     def __repr__(self):
         params = []
-        for param, val in self.__params.items():
+        for param, val in self._params.items():
             params.append(param+'='+repr(val))
         return self.__class__.__name__ + '(%s)' % ', '.join(params)
