@@ -14,6 +14,20 @@ def ro_property(name):
     return ro_property_decorator
 
 
+def _param_setter(self, name, val):
+    if name == "_params" and hasattr(self, "_params"):
+        raise AttributeError("can't set attribute")
+    else:
+        object.__setattr__(self, name, val)
+
+
+def _param_deleter(self, name):
+    if name == "_params" and hasattr(self, "_params"):
+        raise AttributeError("can't delete attribute")
+    else:
+        object.__delattr__(self, name)
+
+
 class ParameterMeta(abc.ABCMeta):
     """Given a list of properties in the class definition statement, define a
     list of these properties, add each with a getter and setter from params,
@@ -21,7 +35,12 @@ class ParameterMeta(abc.ABCMeta):
 
     def __new__(mcls, name, bases, dct):
         params = tuple(dct.pop('__parameters__', ()))
-        dct['__slots__'] = params + ('_params',)
+        dct['__slots__'] = params
+        if not (bases and all(isinstance(base, mcls) for base in bases)):
+            dct['__setattr__'] = _param_setter
+            dct['__delattr__'] = _param_deleter
+            dct['__slots__'] += ('_params', )
+        print dct
         cls = super(ParameterMeta, mcls).__new__(mcls, name, bases, dct)
         for param in params:
             cls = ro_property(param)(cls)
@@ -46,6 +65,7 @@ class A2(object):
 
 class A3(A2):
     __parameters__ = ['n', 'm']
+
     def f(self):
         return 2
 
@@ -69,18 +89,6 @@ class Enumerable(object):
         return
         yield
 
-    def __setattr__(self, name, val):
-        if name == "_params" and hasattr(self, "_params"):
-            raise AttributeError("can't set attribute")
-        else:
-            object.__setattr__(self, name, val)
-
-    def __delattr__(self, name):
-        if name == "_params" and hasattr(self, "_params"):
-            raise AttributeError("can't delete attribute")
-        else:
-            object.__delattr__(self, name)
-
 
 class Range(Enumerable):
     """Imitates range"""
@@ -102,16 +110,21 @@ class Ranger(Range):
     __parameters__ = ["step"]
 
     def __new__(cls, start, stop=100, step=2):
-        return super(Range, cls).__new__(cls, start=start, stop=stop, step=step)
+        return super(Range, cls).__new__(cls, start=start, stop=stop,
+                                         step=step)
 
     def __iter__(self):
         return iter(range(self.start, self.stop, self.step))
 
 
 rger = Ranger(40)
-rger.step = 7
+print rger.__slots__
 print dir(rger)
-print list(rger)
-
+help(Ranger)
+# rger.step = 7
+# print rger.__slots__
+# print dir(rger)
+# print list(rger)
+#
 rger._params = {7}
-del rger.start
+# del rger.start
