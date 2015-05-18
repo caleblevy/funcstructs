@@ -21,15 +21,35 @@ def ro_parameter(name):
 
 
 class ParametrizedABC(abc.ABCMeta):
-    """Given a list of properties in the class definition statement, define a
-    list of these properties, add each with a getter and setter from params,
-    and add a list of these params."""
+    """An ABC metaclass accepting a __parameters__ attribute, a listing of
+    parameters for which data descriptors will be generated at class
+    instantiation. Example usage is as follows (python3 syntax):
+
+    class A(object, metaclass=ParametrizedABC):
+        __parameters__ = [n, m]
+
+        :: is equivalent to ::
+
+    class A(object):
+        __slots__ = ()
+
+        @property
+        def n(self):
+            return self._params[n]
+
+        @property
+        def m(self):
+            return self._params[m]
+
+    The abstractmethod and abstractproperty decorators work for instances of
+    ParametrizedABC as expected. All instances of ParametrizedABC are
+    automatically slotted."""
 
     def __new__(mcls, name, bases, dct):
         # process __slots__ and __parameters__ into tuples of identifiers
         slots = _popslots(dct, '__slots__')
         params = _popslots(dct, '__parameters__')
-        dct['__slots__'] = slots + params
+        dct['__slots__'] = slots
         # only add _params to classes not inheriting from an mcls instance
         if not (bases and all(isinstance(base, mcls) for base in bases)):
             dct['__slots__'] += ('_params', )
@@ -41,7 +61,7 @@ class ParametrizedABC(abc.ABCMeta):
 
 
 class Enumerable(with_metaclass(ParametrizedABC, object)):
-    """Abstract base class"""
+    """Abstract base class for enumerable objects."""
 
     @abc.abstractmethod
     def __new__(cls, **kwargs):
@@ -121,18 +141,20 @@ class ParametrizedABCTests(unittest.TestCase):
 
     def test_unchangeable_attributes(self):
         """Test that the correct slots are added to the class."""
+        r = Range(40)
         sr = StepRange(40)
         sr_old = list(sr)
-        with self.assertRaises(AttributeError):
-            del sr._params
-        with self.assertRaises(AttributeError):
-            sr._params = {'start': 1, 'step': 4, 'stop': 40}
-        with self.assertRaises(AttributeError):
-            sr.aa4 = 20
-        with self.assertRaises(AttributeError):
-            del sr.start
-        with self.assertRaises(AttributeError):
-            sr.start = 10
+        for enum in [r, sr]:
+            with self.assertRaises(AttributeError):
+                del enum._params
+            with self.assertRaises(AttributeError):
+                enum._params = {'start': 1, 'step': 4, 'stop': 40}
+            with self.assertRaises(AttributeError):
+                enum.aa4 = 20
+            with self.assertRaises(AttributeError):
+                del enum.start
+            with self.assertRaises(AttributeError):
+                enum.start = 10
         self.assertEqual(sr.start, 40)
         self.assertEqual(sr.stop, 100)
         self.assertEqual(sr.step, 2)
