@@ -16,7 +16,6 @@ from .._enumerable import Enumerable, parametrize
 @parametrize("start", "stop")
 class Range(Enumerable):
     """Imitates range"""
-    __slots__ = ()
 
     def __new__(cls, start, stop=100):
         return super(Range, cls).__new__(cls, start=start, stop=stop)
@@ -27,7 +26,6 @@ class Range(Enumerable):
 
 @parametrize("step")
 class StepRange(Range):
-    __slots__ = "root_height"
 
     def __new__(cls, start, stop=100, step=2):
         return super(Range, cls).__new__(cls, start=start, stop=stop,
@@ -48,28 +46,24 @@ class ParametrizationTests(unittest.TestCase):
         self.assertIsInstance(StepRange.start, property)
         self.assertIsInstance(StepRange.step, property)
         self.assertIsInstance(StepRange.stop, property)
-        self.assertNotIsInstance(StepRange.root_height, property)
 
     def test_unchangeable_attributes(self):
-        """Test that the correct slots are added to the class."""
+        """Test that the parameters return correct values and cannot change"""
         r = Range(40)
         sr = StepRange(40)
         sr_old = list(sr)
-        for enum in [r, sr]:
+        for e in [r, sr]:
             with self.assertRaises(AttributeError):
-                del enum._params
+                del e._params
             with self.assertRaises(AttributeError):
-                enum._params = {'start': 1, 'step': 4, 'stop': 40}
+                e._params = {'start': 1, 'step': 4, 'stop': 40}
             with self.assertRaises(AttributeError):
-                enum.aa4 = 20
+                del e.start
             with self.assertRaises(AttributeError):
-                del enum.start
-            with self.assertRaises(AttributeError):
-                enum.start = 10
+                e.start = 10
         self.assertEqual(sr.start, 40)
         self.assertEqual(sr.stop, 100)
         self.assertEqual(sr.step, 2)
-        sr.root_height = 4
 
 
 class EnumerableTests(unittest.TestCase):
@@ -90,37 +84,6 @@ class EnumerableTests(unittest.TestCase):
         PartitionForests([3, 3, 2]),
         PartitionForests([1, 3, 2, 1])
     ])
-
-    def test_abstract_methods(self):
-        """Check abstract overrides require overriding to instantiate"""
-        @parametrize("n")
-        class NoInit(Enumerable):
-            def __iter__(self):
-                return iter(range(self.n))
-
-        @parametrize("n")
-        class NoIter(Enumerable):
-            def __new__(cls, n):
-                return super(NoIter, cls).__new__(cls, n=n)
-
-        class Init(NoInit):
-            def __new__(cls, n):
-                return super(Init, cls).__new__(cls, n=n)
-
-        class Iter(NoIter):
-            def __iter__(self):
-                return iter(range(self.n))
-
-        # Test that both __init__ and __iter__ are required
-        with self.assertRaises(TypeError):
-            Enumerable(4, [1, 2, 3])
-        with self.assertRaises(TypeError):
-            list(NoInit(4))
-        with self.assertRaises(TypeError):
-            list(NoIter(4))
-        # Test filling in the methods stops the erro
-        self.assertEqual(4, len(list(Init(4))))
-        self.assertEqual(4, len(list(Iter(4))))
 
     def test_repr(self):
         """Test each enumerator correctly represents itself"""
@@ -158,9 +121,3 @@ class EnumerableTests(unittest.TestCase):
             TransformationMonoid(-1)
         with self.assertRaises(ValueError):
             EndofunctionStructures(-1)
-
-    def test_slots(self):
-        """Ensure that all Enumerables have __slots__"""
-        for e in self.enums:
-            self.assertTrue(hasattr(e, "__slots__"))
-            self.assertFalse(hasattr(e, "__dict__"))

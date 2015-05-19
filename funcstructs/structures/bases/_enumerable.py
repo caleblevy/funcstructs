@@ -1,28 +1,20 @@
 # Caleb Levy, 2015.
 
-import abc
-
-from six import with_metaclass
+import collections
 
 from ._frozendict import frozendict
 
 
-class Enumerable(with_metaclass(abc.ABCMeta, object)):
+class Enumerable(collections.Iterable):
     """Convenience class for building combinatorial enumerations"""
 
     __slots__ = "_params"
 
-    @abc.abstractmethod
     def __new__(cls, **kwargs):
         """Enumerator with behaviour governed by its parameters."""
         self = super(Enumerable, cls).__new__(cls)
         self._params = frozendict(kwargs)
         return self
-
-    @abc.abstractmethod
-    def __iter__(self):
-        return
-        yield
 
     def __eq__(self, other):
         """Enumerables are equal iff they have the same type and paremeters"""
