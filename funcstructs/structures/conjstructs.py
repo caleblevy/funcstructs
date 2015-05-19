@@ -162,6 +162,8 @@ class EndofunctionStructures(bases.Enumerable):
     """Enumerator of endofunction structures consisting of n nodes, optionally
     restricted to a given cycle type."""
 
+    __parameters__ = ["n", "cycle_type"]
+
     def __new__(cls, n, cycle_type=None):
         if n < 0:
             raise ValueError("Cannot defined funcstructs on %s nodes" % n)

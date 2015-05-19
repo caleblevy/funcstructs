@@ -32,10 +32,14 @@ class EnumerableTests(unittest.TestCase):
     def test_abstract_methods(self):
         """Check abstract overrides require overriding to instantiate"""
         class NoInit(Enumerable):
+            __parameters__ = "n"
+
             def __iter__(self):
                 return iter(range(self.n))
 
         class NoIter(Enumerable):
+            __parameters__ = "n"
+
             def __new__(cls, n):
                 return super(NoIter, cls).__new__(cls, n=n)
 

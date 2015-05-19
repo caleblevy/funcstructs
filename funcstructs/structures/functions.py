@@ -234,6 +234,8 @@ def randconj(f):
 class TransformationMonoid(bases.Enumerable):
     """Set of all endofunctions on n elements."""
 
+    __parameters__ = "n"
+
     def __new__(cls, n):
         if n < 0:
             raise ValueError("Cannont define functions on %s nodes" % n)

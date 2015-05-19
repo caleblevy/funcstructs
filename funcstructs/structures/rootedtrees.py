@@ -223,6 +223,9 @@ class RootedTree(multiset.Multiset):
 class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
+    __parameters__ = 'n'
+    __slots__ = '__root_height'
+
     def __new__(cls, n, root_height=0):
         if n < 1:
             raise ValueError("Cannot define a rooted tree with %s nodes" % n)
@@ -274,6 +277,8 @@ class TreeEnumerator(bases.Enumerable):
 class ForestEnumerator(bases.Enumerable):
     """Represents the class of collections of rooted trees on n nodes."""
 
+    __parameters__ = 'n'
+
     def __new__(cls, n):
         if n < 0:
             raise ValueError("Cannot define a Forest tree with %s nodes" % n)
@@ -295,6 +300,8 @@ class ForestEnumerator(bases.Enumerable):
 
 class PartitionForests(bases.Enumerable):
     """Collections of rooted trees with sizes specified by partitions."""
+
+    __parameters__ = 'partition'
 
     def __new__(cls, partition):
         return super(PartitionForests, cls).__new__(

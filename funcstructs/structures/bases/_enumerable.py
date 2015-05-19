@@ -1,7 +1,8 @@
 # Caleb Levy, 2015.
 
 import abc
-import collections
+
+from six import with_metaclass
 
 from ._frozendict import frozendict
 
@@ -75,7 +76,7 @@ class ParametrizedABC(abc.ABCMeta):
         return cls
 
 
-class Enumerable(collections.Iterable):
+class Enumerable(with_metaclass(ParametrizedABC, object)):
     """Convenience class for building combinatorial enumerations"""
 
     @abc.abstractmethod
@@ -85,10 +86,10 @@ class Enumerable(collections.Iterable):
         self._params = frozendict(kwargs)
         return self
 
-    def __init__(self, *args, **kwargs):
-        # Autoinit for speed
-        for param, value in self._params.items():
-            setattr(self, param, value)
+    @abc.abstractmethod
+    def __iter__(self):
+        return
+        yield
 
     def __eq__(self, other):
         """Enumerables are equal iff they have the same type and paremeters"""

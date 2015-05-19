@@ -103,6 +103,8 @@ class FixedContentNecklaces(bases.Enumerable):
     """ Representation of the set of necklaces of fixed content; i.e. a fixed
     pool of beads from which to form necklaces. """
 
+    __parameters__ = ["multiplicities", "elements"]
+
     def __new__(cls, content):
         """Form a generator of all necklaces with beads of a given multiset."""
         elements, multiplicities = multiset.Multiset(content).sort_split()
