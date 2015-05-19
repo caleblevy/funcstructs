@@ -1,5 +1,6 @@
 import unittest
 
+from .. import utils
 from ..factorization import prime_factorization, divisors
 
 
@@ -7,10 +8,8 @@ class FactorizationTests(unittest.TestCase):
 
     def test_prime_factorization_counts(self):
         """Check number of prime divisors with multiplicity."""
-        A001222 = [0, 1, 1, 2, 1, 2, 1, 3, 2, 2, 1, 3, 1, 2, 2, 4, 1, 3, 1, 3,
-                   2, 2, 1, 4, 2, 2, 3, 3, 1, 3]
-        for i, count in enumerate(A001222, start=1):
-            self.assertEqual(count, len(prime_factorization(i)))
+        for n in range(1, 30):
+            self.assertEqual(n, utils.prod(prime_factorization(n).elements()))
 
     def test_divisor_count(self):
         """Check number of divisors."""

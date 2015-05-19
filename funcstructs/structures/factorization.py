@@ -3,7 +3,10 @@
 Caleb Levy, 2014 and 2015.
 """
 
-from . import multiset, productrange, utils
+# Opt to use Counter instead of Multiset to avoid circular dependencies
+from collections import Counter
+
+from . import productrange, utils
 
 __all__ = ["prime_factorization", "divisors"]
 
@@ -21,14 +24,17 @@ def prime_factorization(n):
         d += 1
     if n > 1:
         primfac.append(n)
-    return multiset.Multiset(primfac)
+    return Counter(primfac)
 
 
 def _divisor_gen(n):
     """Generate divisors of n"""
     # Refactoring of "What is the best way to get all the divisors of a number"
     # at http://stackoverflow.com/a/171784.
-    primes, multiplicities = prime_factorization(n).split()
+    if n == 1:
+        yield 1
+        return
+    primes, multiplicities = zip(*prime_factorization(n).items())
     # Since factors are prime, each partition of powers is a different divisor.
     for exponents in productrange.productrange([m+1 for m in multiplicities]):
         yield utils.prod(p**e for p, e in zip(primes, exponents))
