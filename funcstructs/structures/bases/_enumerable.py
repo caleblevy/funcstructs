@@ -15,24 +15,12 @@ def _popslots(clsdct, attr):
     return tuple(slots)
 
 
-def ro_parameter(name):
-    """Class decorator for adding a property returning self._params[name]. Ex:
-
-    @ro_parameter("name")
-    class DecoratedClass(object):
-        pass
-
-        :: is equivalent to ::
-
-    class DecoratedClass(object):
-        @property
-        def name(self):
-            return self._params[name]
-    """
-    def ro_parameter_decorator(cls):
-        setattr(cls, name, property(lambda self: self._params[name]))
-        return cls
-    return ro_parameter_decorator
+def make_param_getter(name):
+    """Creates a property returning self._params[name]"""
+    @property
+    def param_getter(self):
+        return self._params[name]
+    return param_getter
 
 
 class ParametrizedABC(abc.ABCMeta):
@@ -65,15 +53,15 @@ class ParametrizedABC(abc.ABCMeta):
         # process __slots__ and __parameters__ into tuples of identifiers
         slots = _popslots(dct, '__slots__')
         params = _popslots(dct, '__parameters__')
+        # add default empty slots
         dct['__slots__'] = slots
-        # only add _params to classes not inheriting from an mcls instance
+        # add accessor properties for elements of __parameters__
+        for param_name in params:
+            dct[param_name] = make_param_getter(param_name)
+        # add _params to classes not inheriting from an mcls instance
         if not (bases and all(isinstance(base, mcls) for base in bases)):
             dct['__slots__'] += ('_params', )
-        cls = super(ParametrizedABC, mcls).__new__(mcls, name, bases, dct)
-        # add accessor properties for elements of __parameters__
-        for param in params:
-            cls = ro_parameter(param)(cls)
-        return cls
+        return super(ParametrizedABC, mcls).__new__(mcls, name, bases, dct)
 
 
 class Enumerable(with_metaclass(ParametrizedABC, object)):
@@ -108,6 +96,8 @@ class Enumerable(with_metaclass(ParametrizedABC, object)):
         for param, val in self._params.items():
             params.append(param+'='+repr(val))
         return self.__class__.__name__ + '(%s)' % ', '.join(params)
+
+    # block access to _params attribute after creation
 
     def __setattr__(self, name, val):
         if name == "_params" and hasattr(self, "_params"):
