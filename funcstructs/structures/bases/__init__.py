@@ -5,4 +5,4 @@ Caleb Levy, 2015.
 
 from ._frozendict import frozendict
 from ._tuple import Tuple
-from ._enumerable import Enumerable
+from ._enumerable import Enumerable, parametrize

@@ -7,15 +7,16 @@ from ... import(
 )
 
 from ...multiset import Multiset
-from .._enumerable import _popslots, ParametrizedABC, Enumerable
+from .._enumerable import Enumerable, parametrize
 
 
 # Test class for ParametrizedABC
 
 
+@parametrize("start", "stop")
 class Range(Enumerable):
     """Imitates range"""
-    __parameters__ = ("start", "stop")
+    __slots__ = ()
 
     def __new__(cls, start, stop=100):
         return super(Range, cls).__new__(cls, start=start, stop=stop)
@@ -24,9 +25,9 @@ class Range(Enumerable):
         return iter(range(self.start, self.stop))
 
 
+@parametrize("step")
 class StepRange(Range):
-    __slots__ = ["root_height"]
-    __parameters__ = ["step"]
+    __slots__ = "root_height"
 
     def __new__(cls, start, stop=100, step=2):
         return super(Range, cls).__new__(cls, start=start, stop=stop,
@@ -36,19 +37,7 @@ class StepRange(Range):
         return iter(range(self.start, self.stop, self.step))
 
 
-class ParametrizedABCTests(unittest.TestCase):
-
-    def test_slots(self):
-        """Ensure slots are processed by ParametrizedABC"""
-        slot_types = [
-            ({'slots': ['a', 'b', 'c']}, ('a', 'b', 'c')),
-            ({'slots': ('a', 'b', 'c')}, ('a', 'b', 'c')),
-            ({'slots': 'abc'}, ('abc', )),
-            ({'slots': ['abc']}, ('abc', ))
-        ]
-        for slots, vals in slot_types:
-            self.assertEqual(vals, _popslots(slots, 'slots'))
-            self.assertEqual({}, slots)
+class ParametrizationTests(unittest.TestCase):
 
     def test_init(self):
         sr = StepRange(40)
@@ -82,20 +71,6 @@ class ParametrizedABCTests(unittest.TestCase):
         self.assertEqual(sr.step, 2)
         sr.root_height = 4
 
-    def test_mro(self):
-        """Sanity check on method resolution order."""
-        self.assertSequenceEqual(
-            StepRange.mro(),
-            [StepRange, Range, Enumerable, object]
-        )
-
-    def test_types(self):
-        """Sanity check on type subclasses."""
-        self.assertIsInstance(StepRange, ParametrizedABC)
-        self.assertFalse(issubclass(StepRange, ParametrizedABC))
-        self.assertIsInstance(ParametrizedABC, type)
-        self.assertTrue(issubclass(ParametrizedABC, type))
-
 
 class EnumerableTests(unittest.TestCase):
 
@@ -118,15 +93,13 @@ class EnumerableTests(unittest.TestCase):
 
     def test_abstract_methods(self):
         """Check abstract overrides require overriding to instantiate"""
+        @parametrize("n")
         class NoInit(Enumerable):
-            __parameters__ = "n"
-
             def __iter__(self):
                 return iter(range(self.n))
 
+        @parametrize("n")
         class NoIter(Enumerable):
-            __parameters__ = "n"
-
             def __new__(cls, n):
                 return super(NoIter, cls).__new__(cls, n=n)
 
@@ -185,3 +158,9 @@ class EnumerableTests(unittest.TestCase):
             TransformationMonoid(-1)
         with self.assertRaises(ValueError):
             EndofunctionStructures(-1)
+
+    def test_slots(self):
+        """Ensure that all Enumerables have __slots__"""
+        for e in self.enums:
+            self.assertTrue(hasattr(e, "__slots__"))
+            self.assertFalse(hasattr(e, "__dict__"))

@@ -158,11 +158,12 @@ def integer_funcstructs(n):
                 yield struct
 
 
+@bases.parametrize("n", "cycle_type")
 class EndofunctionStructures(bases.Enumerable):
     """Enumerator of endofunction structures consisting of n nodes, optionally
     restricted to a given cycle type."""
 
-    __parameters__ = ["n", "cycle_type"]
+    __slots__ = ()
 
     def __new__(cls, n, cycle_type=None):
         if n < 0:

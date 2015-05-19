@@ -231,10 +231,11 @@ def randconj(f):
 # Function enumerators
 
 
+@bases.parametrize("n")
 class TransformationMonoid(bases.Enumerable):
     """Set of all endofunctions on n elements."""
 
-    __parameters__ = "n"
+    __slots__ = ()
 
     def __new__(cls, n):
         if n < 0:

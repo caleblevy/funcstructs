@@ -99,11 +99,12 @@ def simple_fixed_content(a, content, t, p, k):
                 content[j] += 1
 
 
+@bases.parametrize("elements", "multiplicities")
 class FixedContentNecklaces(bases.Enumerable):
     """ Representation of the set of necklaces of fixed content; i.e. a fixed
     pool of beads from which to form necklaces. """
 
-    __parameters__ = ["multiplicities", "elements"]
+    __slots__ = ()
 
     def __new__(cls, content):
         """Form a generator of all necklaces with beads of a given multiset."""
