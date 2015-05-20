@@ -17,7 +17,6 @@ from . import (
     multiset,
     necklaces,
     rootedtrees,
-    subsequences
 )
 
 # Main data structures

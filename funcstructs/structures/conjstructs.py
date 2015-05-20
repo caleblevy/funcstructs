@@ -14,11 +14,10 @@ import numpy as np
 from PADS import IntegerPartitions
 
 from funcstructs import bases
-from funcstructs.utils import compositions, factorization
+from funcstructs.utils import compositions, factorization, subsequences
 from funcstructs.utils.misc import flatten
 
-from . import functions, subsequences
-
+from .functions import rangefunc
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import DominantTree, PartitionForests
@@ -94,7 +93,7 @@ class Funcstruct(Multiset):
                 func[root_node] = end_node
                 root_node = end_node
             func[root_node-len(tree)] = cycle_start
-        return functions.rangefunc(func)
+        return rangefunc(func)
 
     @property
     def imagepath(self):
