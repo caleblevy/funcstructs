@@ -13,12 +13,67 @@ from funcstructs.utils import combinat, factorization, subsequences
 from funcstructs.utils.misc import flatten
 
 from . import multiset
-from . import _treefuncs
 
 __all__ = [
     "OrderedTree", "DominantTree", "RootedTree",
     "TreeEnumerator", "ForestEnumerator", "PartitionForests"
 ]
+
+
+def _levels_from_preim(graph, root=0, keys=None):
+    """Return the level sequence of the ordered tree formed such that graph[x]
+    are the nodes attached to x."""
+    if keys is not None:
+        for connections in graph:
+            connections.sort(key=keys.__getitem__)
+    node_stack = [root]
+    level = 0
+    node_levels = {root: level}
+    while node_stack:
+        x = node_stack.pop()
+        level = node_levels[x]
+        yield level
+        level += 1
+        for y in graph[x]:
+            node_stack.append(y)
+            # Need to compute even for dominant tree, since levels will change
+            node_levels[y] = level
+
+
+def _funclevels_iterator(levels):
+    """Lazily generate the function of a level tree and each node's level"""
+    levels = iter(levels)
+    root = previous_level = next(levels)
+    f = node = 0
+    yield node, 0, f  # node, normalized height, and what it's mapped to
+    grafting_point = {0: 0}
+    for node, level in enumerate(levels, start=1):
+        if level > previous_level:
+            f = grafting_point[previous_level-root]
+            previous_level += 1
+        else:
+            f = grafting_point[level-root-1]
+            previous_level = level
+        yield node, level-root, f
+        grafting_point[level-root] = node
+
+
+def _treefunc_properties(levels):
+    """Given an ordered tree's level sequence, return an endofunction with the
+    tree's structure, that functions preimage, and the nodes of that tree in
+    breadth-first traversal order grouped by height."""
+    func = []
+    hg = [[]]
+    preim = []
+    for n, l, f in _funclevels_iterator(levels):
+        func.append(f)
+        preim.append([])
+        preim[f].append(n)
+        if l >= len(hg):
+            hg.append([])
+        hg[l].append(n)
+    preim[0].pop(0)  # Remove 0 to prevent infinite loop in levels_from_preim
+    return func, preim, hg
 
 
 class OrderedTree(bases.Tuple):
@@ -55,7 +110,7 @@ class OrderedTree(bases.Tuple):
             if len(func.limitset) != 1:
                 raise ValueError("Function structure is not a rooted tree")
         # Must have separate method for endofunction since default is level seq
-        return cls(_treefuncs.levels_from_preim(func.acyclic_ancestors, root))
+        return cls(_levels_from_preim(func.acyclic_ancestors, root))
 
     def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)
@@ -80,16 +135,16 @@ class OrderedTree(bases.Tuple):
         func_labelling[n] -> labels[func_labelling[n]]. """
         if labels is None:
             labels = range(len(self))
-        for _, _, f in _treefuncs.funclevels_iterator(self):
+        for _, _, f in _funclevels_iterator(self):
             yield labels[f]
 
     def breadth_first_traversal(self):
         """Return nodes in breadth-first traversal order"""
-        return flatten(_treefuncs.treefunc_properties(self)[2])
+        return flatten(_treefunc_properties(self)[2])
 
     def attachments(self):
         """Map of each node to the set of nodes attached to it in order."""
-        return _treefuncs.treefunc_properties(self)[1]
+        return _treefunc_properties(self)[1]
 
 
 def _dominant_keys(height_groups, func, sort=True):
@@ -126,9 +181,9 @@ class DominantTree(OrderedTree):
 
     def __new__(cls, level_sequence, preordered=False):
         if not preordered:
-            f, p, g = _treefuncs.treefunc_properties(level_sequence)
+            f, p, g = _treefunc_properties(level_sequence)
             keys = _dominant_keys(g, f)
-            level_sequence = _treefuncs.levels_from_preim(p, 0, keys)
+            level_sequence = _levels_from_preim(p, 0, keys)
         # No need to run OrderedTree checks; it's either been preordered or
         # treefunc_properties will serve as an effective check due to indexing.
         return super(OrderedTree, cls).__new__(cls, level_sequence)
@@ -147,7 +202,7 @@ class DominantTree(OrderedTree):
         containing the rooted trees."""
         # TODO: A writeup of this with diagrams will be in the notes.
         deg = 1
-        f, _, h = _treefuncs.treefunc_properties(self)
+        f, _, h = _treefunc_properties(self)
         k = _dominant_keys(h, f, sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
         for _, g in groupby(flatten(h), lambda x: (f[x], k[x])):
