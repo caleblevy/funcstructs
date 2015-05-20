@@ -169,7 +169,7 @@ class OrderedTreeTests(unittest.TestCase):
         """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
-                treefunc = functions.Endofunction.from_levels(tree)
+                treefunc = functions.rangefunc(tree.map_labelling())
                 rtreefunc = functions.randconj(treefunc)
                 self.assertEqual(tree, DominantTree.from_func(rtreefunc))
         # Make sure non-tree structures are caught

@@ -11,8 +11,6 @@ from funcstructs import bases
 from funcstructs.utils import productrange
 from funcstructs.utils.misc import cached_property, flatten
 
-from . import _treefuncs
-
 __all__ = [
     "Endofunction", "SymmetricFunction",
     "randfunc", "randperm", "randconj",
@@ -105,12 +103,6 @@ class Endofunction(Function):
         super(Endofunction, self).__init__(*args, **kwargs)
         if not self.domain.issuperset(self.image):
             raise ValueError("image must be a subset of the domain")
-
-    @classmethod
-    def from_levels(cls, levels):
-        """Make an endofunction representing a tree."""
-        return cls((x, y) for x, _, y in
-                   _treefuncs.funclevels_iterator(levels))
 
     def __pow__(self, n):
         """f**n <==> the nth iterate of f"""

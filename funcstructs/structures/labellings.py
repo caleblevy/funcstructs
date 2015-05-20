@@ -10,7 +10,7 @@ from funcstructs.utils.combinat import (
     multinomial_coefficient as ordered_division_count)
 from funcstructs.utils.misc import flatten
 
-from .functions import Endofunction, rangefunc, rangeperm
+from .functions import rangefunc, rangeperm
 from .multiset import Multiset
 from .necklaces import Necklace
 
@@ -201,7 +201,7 @@ def translation_keys(tree):
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
     translation_sequence = rangeperm(flatten(ind_groups)).inverse.conj(
-        Endofunction.from_levels(tree))
+        rangefunc(tree.map_labelling()))
     return bin_widths, translation_sequence
 
 
