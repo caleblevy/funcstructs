@@ -16,7 +16,6 @@ from . import (
     labellings,
     multiset,
     necklaces,
-    productrange,
     rootedtrees,
     subsequences
 )

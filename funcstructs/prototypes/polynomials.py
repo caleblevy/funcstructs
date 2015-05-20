@@ -8,7 +8,8 @@ import collections
 
 import numpy as np
 
-from funcstructs import multiset, productrange
+from funcstructs.utils import productrange
+from funcstructs.structures import multiset
 
 
 def monomial_symmetric_polynomial(x, powers):

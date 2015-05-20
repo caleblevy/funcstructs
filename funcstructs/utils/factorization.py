@@ -6,8 +6,8 @@ Caleb Levy, 2014 and 2015.
 # Opt to use Counter instead of Multiset to avoid circular dependencies
 from collections import Counter
 
+from funcstructs.utils import productrange
 from funcstructs.utils.misc import prod
-from funcstructs.structures import productrange
 
 __all__ = ["prime_factorization", "divisors"]
 
