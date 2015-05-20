@@ -14,7 +14,7 @@ import numpy as np
 from PADS import IntegerPartitions
 
 from funcstructs import bases
-from funcstructs.utils import flatten
+from funcstructs.utils.misc import flatten
 
 from . import compositions, functions, factorization, subsequences
 

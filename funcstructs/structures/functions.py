@@ -8,7 +8,8 @@ import random
 from collections import defaultdict
 
 from funcstructs import bases
-from funcstructs.utils import cached_property, flatten
+from funcstructs.utils.misc import cached_property, flatten
+
 from . import productrange
 from . import _treefuncs
 

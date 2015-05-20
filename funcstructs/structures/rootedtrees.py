@@ -9,7 +9,8 @@ from itertools import groupby
 from math import factorial
 
 from funcstructs import bases
-from funcstructs.utils import flatten
+from funcstructs.utils.misc import flatten
+
 from . import (
     combinat,
     factorization,

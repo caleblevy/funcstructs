@@ -9,7 +9,7 @@ import itertools
 import operator
 
 from funcstructs import bases
-from funcstructs.utils import flatten
+from funcstructs.utils.misc import flatten
 from .combinat import factorial_prod
 
 __all__ = ["Multiset", "unordered_product"]
