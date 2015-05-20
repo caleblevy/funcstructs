@@ -14,16 +14,13 @@ import numpy as np
 from PADS import IntegerPartitions
 
 from funcstructs import bases
-from . import (
-    compositions,
-    functions,
-    factorization,
-    subsequences,
-)
+from funcstructs.utils import flatten
+
+from . import compositions, functions, factorization, subsequences
+
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import DominantTree, PartitionForests
-from .utils import flatten
 
 
 def _partitions(n):

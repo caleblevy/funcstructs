@@ -5,7 +5,7 @@ Caleb Levy, 2015.
 
 from math import factorial
 
-from .utils import prod
+from funcstructs.utils import prod
 
 
 def factorial_prod(iterable):

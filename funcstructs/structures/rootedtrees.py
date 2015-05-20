@@ -9,6 +9,7 @@ from itertools import groupby
 from math import factorial
 
 from funcstructs import bases
+from funcstructs.utils import flatten
 from . import (
     combinat,
     factorization,
@@ -16,7 +17,6 @@ from . import (
     subsequences,
 )
 from . import _treefuncs
-from .utils import flatten
 
 __all__ = [
     "OrderedTree", "DominantTree", "RootedTree",

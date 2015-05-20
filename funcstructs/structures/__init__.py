@@ -37,4 +37,3 @@ from .rootedtrees import (
     OrderedTree, DominantTree, RootedTree,
     TreeEnumerator, ForestEnumerator, PartitionForests
 )
-from .utils import *

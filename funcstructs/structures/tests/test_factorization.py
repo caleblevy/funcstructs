@@ -1,6 +1,6 @@
 import unittest
 
-from .. import utils
+from funcstructs import utils
 from ..factorization import prime_factorization, divisors
 
 

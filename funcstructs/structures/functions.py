@@ -8,9 +8,9 @@ import random
 from collections import defaultdict
 
 from funcstructs import bases
+from funcstructs.utils import cached_property, flatten
 from . import productrange
 from . import _treefuncs
-from .utils import cached_property, flatten
 
 __all__ = [
     "Endofunction", "SymmetricFunction",
