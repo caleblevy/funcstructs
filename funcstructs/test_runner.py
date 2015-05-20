@@ -17,6 +17,4 @@ if __name__ == '__main__':
     test_runner.run(test_finder.discover("./funcstructs/utils"))
     print("\nTesting funcgraphs:")
     test_runner.run(test_finder.discover('./funcstructs/graphs'))
-    print("\nTesting prototypes:")
-    test_runner.run(test_finder.discover('./funcstructs/prototypes'))
     print("\n")
