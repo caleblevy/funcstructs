@@ -10,7 +10,6 @@ finally:
 
 # Supporting modules
 from . import (
-    compositions,
     conjstructs,
     funcdists,
     functions,

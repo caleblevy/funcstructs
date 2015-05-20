@@ -28,9 +28,9 @@ from math import factorial
 
 import numpy as np
 
-from funcstructs.utils import combinat
+from funcstructs.utils import combinat, compositions
 
-from . import compositions, conjstructs, functions
+from . import conjstructs, functions
 
 
 def iterdist_brute(n):

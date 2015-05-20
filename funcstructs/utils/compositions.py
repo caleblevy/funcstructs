@@ -22,7 +22,7 @@ compositions of N.
 Caleb Levy, 2014 and 2015.
 """
 
-from . import productrange
+from funcstructs.structures import productrange
 
 
 def binary_compositions(n):
