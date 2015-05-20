@@ -165,6 +165,12 @@ class OrderedTreeTests(unittest.TestCase):
         for tree, nest in zip(trees, nestedforms):
             self.assertSequenceEqual(nest, tree.traverse_map())
 
+    def test_map_labelling(self):
+        """Check that a functions from tree.map_labelling represent the tree"""
+        tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
+        func = functions.rangefunc([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
+        self.assertEqual(func, functions.rangefunc(tree.map_labelling()))
+
     def test_from_func(self):
         """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
