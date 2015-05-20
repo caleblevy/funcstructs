@@ -1,13 +1,3 @@
-import sys
-import os
-
-# Hack to pass pep8 rule 402
-try:
-    pass
-finally:
-    sys.path.append(os.path.join(os.getcwd(), 'PADS'))
-    del sys, os
-
 # Main data structures
 from .conjstructs import Funcstruct, EndofunctionStructures
 from .functions import (
