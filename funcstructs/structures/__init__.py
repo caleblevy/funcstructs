@@ -8,17 +8,6 @@ finally:
     sys.path.append(os.path.join(os.getcwd(), 'PADS'))
     del sys, os
 
-# Supporting modules
-from . import (
-    conjstructs,
-    funcdists,
-    functions,
-    labellings,
-    multiset,
-    necklaces,
-    rootedtrees,
-)
-
 # Main data structures
 from .conjstructs import Funcstruct, EndofunctionStructures
 from .functions import (
