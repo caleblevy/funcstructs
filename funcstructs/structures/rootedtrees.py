@@ -8,8 +8,8 @@ Caleb Levy, 2014 and 2015.
 from itertools import groupby
 from math import factorial
 
+from funcstructs import bases
 from . import (
-    bases,
     combinat,
     factorization,
     multiset,

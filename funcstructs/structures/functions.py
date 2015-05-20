@@ -7,7 +7,8 @@ Caleb Levy, 2015.
 import random
 from collections import defaultdict
 
-from . import bases, productrange
+from funcstructs import bases
+from . import productrange
 from . import _treefuncs
 from .utils import cached_property, flatten
 

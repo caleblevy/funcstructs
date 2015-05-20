@@ -13,8 +13,8 @@ import numpy as np
 
 from PADS import IntegerPartitions
 
+from funcstructs import bases
 from . import (
-    bases,
     compositions,
     functions,
     factorization,

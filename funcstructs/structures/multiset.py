@@ -8,7 +8,7 @@ import collections
 import itertools
 import operator
 
-from . import bases
+from funcstructs import bases
 from .combinat import factorial_prod
 from .utils import flatten
 

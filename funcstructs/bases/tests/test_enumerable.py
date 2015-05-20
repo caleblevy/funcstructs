@@ -1,12 +1,11 @@
 import unittest
 
-from ... import(
+from funcstructs.structures import(
     TreeEnumerator, ForestEnumerator, PartitionForests,
     EndofunctionStructures, TransformationMonoid,
     FixedContentNecklaces
 )
-
-from ...multiset import Multiset
+from funcstructs.structures.multiset import Multiset
 from .._enumerable import Enumerable, parametrize
 
 

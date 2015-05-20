@@ -9,6 +9,8 @@ test_runner = unittest.TextTestRunner()
 
 if __name__ == '__main__':
     test_finder.discover('.')
+    print("\nTesting bases:")
+    test_runner.run(test_finder.discover('./funcstructs/bases'))
     print("\nTesting funcstructs:")
     test_runner.run(test_finder.discover('./funcstructs/structures'))
     print("\nTesting funcgraphs:")
