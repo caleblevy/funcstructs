@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from .. import combinat
+from funcstructs.utils import combinat
 
 from ..funcdists import (
     iterdist_brute,

@@ -1,6 +1,7 @@
 import unittest
 
-from funcstructs import combinat, multiset
+from funcstructs.structures import multiset
+from funcstructs.utils import combinat
 
 from ..polynomials import (
     monomial_symmetric_polynomial,

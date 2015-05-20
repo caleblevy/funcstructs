@@ -9,14 +9,10 @@ from itertools import groupby
 from math import factorial
 
 from funcstructs import bases
+from funcstructs.utils import combinat
 from funcstructs.utils.misc import flatten
 
-from . import (
-    combinat,
-    factorization,
-    multiset,
-    subsequences,
-)
+from . import factorization, multiset, subsequences
 from . import _treefuncs
 
 __all__ = [

@@ -1,6 +1,6 @@
 import unittest
 
-from .. import combinat
+from funcstructs.utils import combinat
 
 from ..compositions import compositions, weak_compositions
 

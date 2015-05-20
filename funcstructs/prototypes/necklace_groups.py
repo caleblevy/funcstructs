@@ -1,6 +1,8 @@
 """Caleb Levy, 2015."""
 
-from funcstructs import combinat, necklaces
+from funcstructs.structures import necklaces
+from funcstructs.utils import combinat
+
 from . import polynomials, integer_partitions
 
 

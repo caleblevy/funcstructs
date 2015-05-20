@@ -10,7 +10,9 @@ import functools
 from PADS import Lyndon
 
 from funcstructs import bases
-from . import combinat, factorization, multiset
+from funcstructs.utils import combinat
+
+from . import factorization, multiset
 
 
 def periodicity(strand):

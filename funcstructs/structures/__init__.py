@@ -10,7 +10,6 @@ finally:
 
 # Supporting modules
 from . import (
-    combinat,
     compositions,
     conjstructs,
     factorization,

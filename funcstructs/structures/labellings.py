@@ -6,8 +6,10 @@ Caleb Levy, 2015.
 from itertools import combinations, permutations, product
 from math import factorial
 
+from funcstructs.utils.combinat import (
+    multinomial_coefficient as ordered_division_count)
 from funcstructs.utils.misc import flatten
-from .combinat import multinomial_coefficient as ordered_division_count
+
 from .functions import Endofunction, rangefunc, rangeperm
 from .multiset import Multiset
 from .necklaces import Necklace
