@@ -7,7 +7,7 @@ Caleb Levy, 2014 and 2015.
 from collections import Counter
 
 from funcstructs.utils.misc import prod
-from . import productrange
+from funcstructs.structures import productrange
 
 __all__ = ["prime_factorization", "divisors"]
 

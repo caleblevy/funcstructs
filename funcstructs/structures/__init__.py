@@ -12,7 +12,6 @@ finally:
 from . import (
     compositions,
     conjstructs,
-    factorization,
     funcdists,
     functions,
     labellings,

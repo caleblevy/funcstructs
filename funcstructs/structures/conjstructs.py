@@ -14,9 +14,10 @@ import numpy as np
 from PADS import IntegerPartitions
 
 from funcstructs import bases
+from funcstructs.utils import factorization
 from funcstructs.utils.misc import flatten
 
-from . import compositions, functions, factorization, subsequences
+from . import compositions, functions, subsequences
 
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces

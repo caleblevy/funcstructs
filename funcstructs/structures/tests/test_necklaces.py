@@ -2,7 +2,7 @@ import unittest
 
 from PADS import Lyndon
 
-from .. import factorization
+from funcstructs.utils import factorization
 
 from ..necklaces import periodicity, Necklace, FixedContentNecklaces
 
