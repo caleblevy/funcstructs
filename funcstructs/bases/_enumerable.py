@@ -49,24 +49,13 @@ class Enumerable(collections.Iterable):
             super(Enumerable, self).__delattr__(name)
 
 
-def add_parameter(name):
-    """Class decorator for adding a property returning self._params[name]. Ex:
-
-    @ro_parameter("name")
-    class DecoratedClass(object):
-        pass
-
-        :: is equivalent to ::
-
-    class DecoratedClass(object):
-        @property
-        def name(self):
-            return self._params[name]
-    """
-    def ro_parameter_decorator(cls):
-        setattr(cls, name, property(lambda self: self._params[name]))
-        return cls
-    return ro_parameter_decorator
+def add_param_getter(cls, name):
+    """Add a property with a given name to cls which returns the value assigned
+    to name by the _params attribute of cls instances."""
+    @property
+    def _param_getter(self):
+        return self._params[name]
+    setattr(cls, name, _param_getter)
 
 
 def parametrize(*params):
@@ -91,6 +80,6 @@ def parametrize(*params):
     """
     def parametrization_decorator(cls):
         for param in params:
-            cls = add_parameter(param)(cls)
+            add_param_getter(cls, param)
         return cls
     return parametrization_decorator
