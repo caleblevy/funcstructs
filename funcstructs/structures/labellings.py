@@ -175,7 +175,7 @@ def branch_groups(tree):
     instance of that branch is attached."""
     branches, mults = Multiset(tree.branches()).sort_split()
     branches = iter(branches[::-1])
-    mults.reverse()
+    mults = reversed(mults)
     indset = branch_inds(tree)[::-1]
     for m in mults:
         inds = []

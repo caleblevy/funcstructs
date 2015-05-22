@@ -6,7 +6,6 @@ Caleb Levy, 2014 and 2015.
 
 import collections
 import itertools
-import operator
 
 from funcstructs import bases
 from funcstructs.utils.combinat import factorial_prod
@@ -58,20 +57,13 @@ class Multiset(bases.frozendict):
 
     def split(self):
         """Splits the multiset into element-multiplicity pairs."""
-        y = list(self.keys())
-        d = [self[el] for el in y]
-        return y, d
-
-    most_common = collections.Counter.__dict__['most_common']
+        return zip(*self.items()) if self.items() else ((), ())
 
     def sort_split(self):
         """Same as Multiset.split with both lists sorted by elements"""
-        y = []
-        d = []
-        for elem, mult in sorted(self.items(), key=operator.itemgetter(0)):
-            y.append(elem)
-            d.append(mult)
-        return y, d
+        return zip(*sorted(self.items())) if self.items() else ((), ())
+
+    most_common = collections.Counter.__dict__['most_common']
 
     def degeneracy(self):
         """Number of different representations of the same multiset."""
