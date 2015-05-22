@@ -241,7 +241,7 @@ class TransformationMonoid(bases.Enumerable):
 
     @staticmethod
     def _new(domain):
-        return _parsed_domain(domain),
+        return _parsed_domain(domain)
 
     def __iter__(self):
         domain = sorted(self.domain)

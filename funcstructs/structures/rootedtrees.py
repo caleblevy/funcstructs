@@ -336,7 +336,7 @@ class ForestEnumerator(bases.Enumerable):
     def _new(n):
         if n < 0:
             raise ValueError("Cannot define a Forest tree with %s nodes" % n)
-        return n,
+        return n
 
     def __iter__(self):
         """Any rooted tree on n+1 nodes can be identically described as a
@@ -360,7 +360,7 @@ class PartitionForests(bases.Enumerable):
 
     @staticmethod
     def _new(partition):
-        return multiset.Multiset(partition),
+        return multiset.Multiset(partition)
 
     def __iter__(self):
         return multiset.unordered_product(self.partition, TreeEnumerator)

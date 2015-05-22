@@ -70,6 +70,9 @@ def add_new(cls, param_names):
     @staticmethod
     def __new__(subcls, *args, **kwargs):
         params = subcls._new(*args, **kwargs)
+        # convert singular outputs into tuples
+        if len(param_names) == 1:
+            params = (params, )
         param_dict = {}
         for name, param in zip(param_names, params):
             param_dict[name] = param
