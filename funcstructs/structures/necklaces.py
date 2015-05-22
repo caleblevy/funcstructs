@@ -109,13 +109,9 @@ class FixedContentNecklaces(bases.Enumerable):
 
     __slots__ = ()
 
-    def __new__(cls, content):
-        """Form a generator of all necklaces with beads of a given multiset."""
-        elements, multiplicities = multiset.Multiset(content).sort_split()
-        self = super(FixedContentNecklaces, cls).__new__(
-            cls, elements=tuple(elements),
-            multiplicities=tuple(multiplicities))
-        return self
+    @staticmethod
+    def _new(content):
+        return multiset.Multiset(content).sort_split()
 
     def __repr__(self):
         mset = []
