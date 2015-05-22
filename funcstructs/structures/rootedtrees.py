@@ -332,10 +332,11 @@ class ForestEnumerator(bases.Enumerable):
 
     __slots__ = ()
 
-    def __new__(cls, n):
+    @staticmethod
+    def _new(n):
         if n < 0:
             raise ValueError("Cannot define a Forest tree with %s nodes" % n)
-        return super(ForestEnumerator, cls).__new__(cls, n=n)
+        return n,
 
     def __iter__(self):
         """Any rooted tree on n+1 nodes can be identically described as a
@@ -357,9 +358,9 @@ class PartitionForests(bases.Enumerable):
 
     __slots__ = ()
 
-    def __new__(cls, partition):
-        return super(PartitionForests, cls).__new__(
-            cls, partition=multiset.Multiset(partition))
+    @staticmethod
+    def _new(partition):
+        return multiset.Multiset(partition),
 
     def __iter__(self):
         return multiset.unordered_product(self.partition, TreeEnumerator)
