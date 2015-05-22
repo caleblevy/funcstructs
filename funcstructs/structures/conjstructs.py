@@ -162,11 +162,11 @@ class EndofunctionStructures(bases.Enumerable):
 
     __slots__ = ()
 
-    def __new__(cls, n, cycle_type=None):
+    @staticmethod
+    def _new(n, cycle_type=None):
         if n < 0:
             raise ValueError("Cannot defined funcstructs on %s nodes" % n)
-        return super(EndofunctionStructures, cls).__new__(
-            cls, n=n, cycle_type=Multiset(cycle_type))
+        return n, Multiset(cycle_type)
 
     def __iter__(self):
         if not self.cycle_type:
