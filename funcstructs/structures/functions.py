@@ -4,11 +4,11 @@ into itself.
 Caleb Levy, 2015.
 """
 
+import itertools
 import random
 from collections import defaultdict
 
 from funcstructs import bases
-from funcstructs.utils import productrange
 from funcstructs.utils.misc import cached_property, flatten
 
 __all__ = [
@@ -224,21 +224,29 @@ def randconj(f):
 
 # Function enumerators
 
+def _parsed_domain(domain):
+    """Change domain to a frozenset. If domain is int, set to range(domain)."""
+    if isinstance(domain, int):
+        if domain < 0:
+            raise ValueError("Cannot define domain on %s elements" % domain)
+        domain = range(domain)
+    return frozenset(domain)
 
-@bases.parametrize("n")
+
+@bases.parametrize("domain")
 class TransformationMonoid(bases.Enumerable):
     """Set of all endofunctions on n elements."""
 
     __slots__ = ()
 
-    def __new__(cls, n):
-        if n < 0:
-            raise ValueError("Cannont define functions on %s nodes" % n)
-        return super(TransformationMonoid, cls).__new__(cls, n=n)
+    @staticmethod
+    def _new(domain):
+        return _parsed_domain(domain),
 
     def __iter__(self):
-        for func in productrange.productrange([self.n] * self.n):
-            yield rangefunc(func)
+        domain = sorted(self.domain)
+        for f in itertools.product(domain, repeat=len(domain)):
+            yield Endofunction(zip(domain, f))
 
     def __len__(self):
-        return self.n ** self.n
+        return len(self.domain) ** len(self.domain)
