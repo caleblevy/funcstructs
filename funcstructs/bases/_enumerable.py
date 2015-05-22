@@ -58,28 +58,63 @@ def add_param_getter(cls, name):
     setattr(cls, name, _param_getter)
 
 
+def add_new(cls, param_names):
+    """Automatically adds __new__ to cls from cls._new if none is defined"""
+    # if cls does not have _new, raise error directly at instantiation
+    if not hasattr(cls, '_new'):
+        # raise runtime error, since this will stop the module from executing
+        raise RuntimeError(
+            "Cannot parametrize %r without defining _new" % cls.__name__)
+
+    # define our new "__new__"
+    @staticmethod
+    def __new__(subcls, *args, **kwargs):
+        params = subcls._new(*args, **kwargs)
+        param_dict = {}
+        for name, param in zip(param_names, params):
+            param_dict[name] = param
+        return super(cls, subcls).__new__(subcls, **param_dict)
+    cls.__new__ = __new__    # add __new__ to cls
+
+
 def parametrize(*params):
-    """Add parameters to a class.
+    """Add parameters to a class, and set __new__ to automatically parse inputs
+    using _new = cls._new.
 
     Usage:
 
-        @parametrize('a', 'b')
-        class A(object):
-            pass
+        @parametrize("a", "b")
+        class ParametrizedClass(object):
+
+            @staticmethod
+            def _new(a, b):
+                return a, b
 
     Equates to:
 
-        class A(object):
+        class ParametrizedClass(object):
+
+            @staticmethod
+            def _new(a, b):
+                return a, b
+
+            def __new__(cls, a, b):
+                a, b = cls._new(a, b)
+                return super(ParametrizedClass, cls).__new__(cls, a=a, b=b)
+
             @property
             def a(self):
-                return self._params['a']
+                return self._params["a"]
 
             @property
             def b(self):
-                return self._params['b']
+                return self._params["b"]
     """
     def parametrization_decorator(cls):
         for param in params:
             add_param_getter(cls, param)
+        # only add default __new__ if cls does not override Enumerable.__new__
+        if cls.__new__ is Enumerable.__new__:
+            add_new(cls, params)
         return cls
     return parametrization_decorator
