@@ -55,14 +55,6 @@ class Multiset(bases.frozendict):
             contents.append(el_str)
         return '{%s}' % ', '.join(contents)
 
-    def split(self):
-        """Splits the multiset into element-multiplicity pairs."""
-        return zip(*self.items()) if self.items() else ((), ())
-
-    def sort_split(self):
-        """Same as Multiset.split with both lists sorted by elements"""
-        return zip(*sorted(self.items())) if self.items() else ((), ())
-
     most_common = collections.Counter.__dict__['most_common']
 
     def degeneracy(self):

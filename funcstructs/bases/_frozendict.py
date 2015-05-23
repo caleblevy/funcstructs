@@ -49,3 +49,11 @@ class frozendict(dict):
     @classmethod
     def fromkeys(cls, *args, **kwargs):
         return cls(dict.fromkeys(*args, **kwargs))
+
+    def split(self):
+        """Splits the dict into element-multiplicity pairs."""
+        return zip(*self.items()) if self.items() else ((), ())
+
+    def sort_split(self):
+        """Same as frozendict.split with both lists sorted by elements"""
+        return zip(*sorted(self.items())) if self.items() else ((), ())
