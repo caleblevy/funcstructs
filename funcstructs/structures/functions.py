@@ -7,6 +7,7 @@ Caleb Levy, 2015.
 import itertools
 import random
 from collections import defaultdict
+from math import factorial
 
 from funcstructs import bases
 from funcstructs.utils.misc import cached_property, flatten
@@ -224,6 +225,7 @@ def randconj(f):
 
 # Function enumerators
 
+
 def _parsed_domain(domain):
     """Change domain to a frozenset. If domain is int, set to range(domain)."""
     if isinstance(domain, int):
@@ -233,9 +235,51 @@ def _parsed_domain(domain):
     return frozenset(domain)
 
 
+@bases.parametrize("domain", "codomain")
+class Mappings(bases.Enumerable):
+    """The set of Functions between a domain and a codomain"""
+
+    __slots__ = ()
+
+    @staticmethod
+    def _new(domain, codomain):
+        return map(_parsed_domain, [domain, codomain])
+
+    def __iter__(self):
+        domain, codomain = map(sorted, [self.domain, self.codomain])
+        for f in itertools.product(codomain, repeat=len(domain)):
+            yield Function(zip(domain, f))
+
+    def __len__(self):
+        return len(self.codomain) ** len(self.domain)
+
+
+@bases.parametrize("domain", "codomain")
+class Isomorphisms(bases.Enumerable):
+    """The set of bijections between a domain and a codomain"""
+
+    __slots__ = ()
+
+    @staticmethod
+    def _new(domain, codomain):
+        domain, codomain = map(_parsed_domain, [domain, codomain])
+        if len(domain) != len(codomain):
+            raise ValueError("Sets of size %s and %s cannot be isomorphic" % (
+                len(domain), len(codomain)))
+        return domain, codomain
+
+    def __iter__(self):
+        domain, codomain = map(sorted, [self.domain, self.codomain])
+        for p in itertools.permutations(codomain):
+            yield Bijection(zip(domain, p))
+
+    def __len__(self):
+        return factorial(len(self.domain))
+
+
 @bases.parametrize("domain")
 class TransformationMonoid(bases.Enumerable):
-    """Set of all endofunctions on n elements."""
+    """Set of all Endofunctions on a domain."""
 
     __slots__ = ()
 
@@ -250,3 +294,22 @@ class TransformationMonoid(bases.Enumerable):
 
     def __len__(self):
         return len(self.domain) ** len(self.domain)
+
+
+@bases.parametrize("domain")
+class SymmetricGroup(bases.Enumerable):
+    """The set of automorphisms on a domain"""
+
+    __slots__ = ()
+
+    @staticmethod
+    def _new(domain):
+        return _parsed_domain(domain)
+
+    def __iter__(self):
+        domain = sorted(self.domain)
+        for p in itertools.permutations(domain):
+            yield Endofunction(zip(domain, p))
+
+    def __len__(self):
+        return factorial(len(self.domain))
