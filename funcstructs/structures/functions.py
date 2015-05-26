@@ -309,7 +309,7 @@ class SymmetricGroup(bases.Enumerable):
     def __iter__(self):
         domain = sorted(self.domain)
         for p in itertools.permutations(domain):
-            yield Endofunction(zip(domain, p))
+            yield SymmetricFunction(zip(domain, p))
 
     def __len__(self):
         return factorial(len(self.domain))
