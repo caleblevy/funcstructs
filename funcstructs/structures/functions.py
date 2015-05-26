@@ -46,7 +46,7 @@ class Function(bases.frozendict):
         preim = defaultdict(set)
         for x, y in self:
             preim[y].add(x)
-        return bases.frozendict((x, frozenset(preim[x])) for x in self.domain)
+        return bases.frozendict((y, frozenset(preim[y])) for y in self.image)
 
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
