@@ -1,6 +1,5 @@
 import unittest
-
-from ..rootedtrees import OrderedTree
+from math import factorial
 
 from ..functions import (
     Function, Bijection, Endofunction, SymmetricFunction,
@@ -96,3 +95,60 @@ class EndofunctionTests(unittest.TestCase):
             for _ in range(20):
                 perm = randperm(len(f))
                 self.assertEqual(f, perm.inverse.conj(perm.conj(f)))
+
+
+def _func_images(mspace):
+    funcs = set()
+    for func in mspace:
+        x, f = func.sort_split()
+        funcs.add(f)
+    return funcs
+
+
+class FunctionEnumeratorTests(unittest.TestCase):
+
+    domranges = [((i, range(4)[:i]), (j, "abcd"[:j])) for i in range(5)
+                 for j in range(5)]
+    domranges += list(map(list, map(reversed, domranges)))
+
+    def assertFuncCountsEqual(self, count, mspace):
+        """Assert that various aspects of the counts are equal"""
+        self.assertEqual(count, len(mspace))
+        self.assertEqual(count, len(set(mspace)))
+        self.assertEqual(count, len(_func_images(mspace)))
+
+    def assertDomainsCorrect(self, mspace):
+        """Assert that enumerated functions have correct domains and ranges."""
+        for f in mspace:
+            self.assertTrue(f.domain.issubset(mspace.domain))
+            if hasattr(mspace, "codomain"):
+                self.assertTrue(f.image.issubset(mspace.codomain))
+            else:
+                self.assertTrue(f.image.issubset(mspace.domain))
+
+    def test_function_counts(self):
+        """Check the number of mappings produced by function enumerators."""
+        for (i, d), (j, c) in self.domranges:
+            # test Function counts
+            self.assertFuncCountsEqual(j**i, Mappings(d, c))
+            if i == j:
+                # test Bijection counts
+                self.assertFuncCountsEqual(factorial(i), Isomorphisms(d, c))
+                # test Endofunction counts
+                self.assertFuncCountsEqual(i**i, TransformationMonoid(d))
+                # test Permutation counts
+                self.assertFuncCountsEqual(factorial(i), SymmetricGroup(d))
+            else:
+                # ensure there are no bijections between non-isomorphic sets
+                with self.assertRaises(ValueError):
+                    Isomorphisms(d, c)
+
+    def test_function_domains(self):
+        """Check that enumerated functions have correct domains and ranges."""
+        for (_, d), (_, c) in self.domranges:
+            # Check that Functions are correct
+            self.assertDomainsCorrect(Mappings(d, c))
+            if len(c) == len(d):
+                self.assertDomainsCorrect(Isomorphisms(d, c))
+                self.assertDomainsCorrect(TransformationMonoid(d))
+                self.assertDomainsCorrect(SymmetricGroup(d))
