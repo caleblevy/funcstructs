@@ -3,10 +3,9 @@ import unittest
 from ..rootedtrees import OrderedTree
 
 from ..functions import (
-    Endofunction, rangefunc,
-    SymmetricFunction, rangeperm,
-    TransformationMonoid,
-    randfunc, randperm,
+    Function, Bijection, Endofunction, SymmetricFunction,
+    rangefunc, rangeperm, randfunc, randperm, randconj,
+    Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup
 )
 
 
