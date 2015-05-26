@@ -1,5 +1,4 @@
-"""Data structures for representing endofunctions: mappings from a finite set
-into itself.
+"""Data structures for representing mappings between sets.
 
 Caleb Levy, 2015.
 """
