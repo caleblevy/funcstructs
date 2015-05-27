@@ -63,10 +63,6 @@ class Bijection(Function):
         if len(self) != len(self.image):
             raise ValueError("This function is not invertible.")
 
-    def __rmul__(self, other):
-        """s.__rmul__(f) = f * s"""
-        return other.__class__((x, other[y]) for x, y in self)
-
     @cached_property
     def inverse(self):
         """s.inverse <==> s**-1"""
