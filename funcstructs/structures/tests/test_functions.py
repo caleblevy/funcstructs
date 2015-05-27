@@ -32,6 +32,37 @@ class FunctionTests(unittest.TestCase):
         self.assertEqual({1: frozenset("abc")}, dict(self.abcfunc.preimage))
 
 
+class FunctionTypeCoercionTests(unittest.TestCase):
+
+    def test_composition_types(self):
+        """Test the four type rules for function composition"""
+        id_ = list(enumerate(range(10)))
+        f = Function(id_)
+        b = Bijection(id_)
+        e = Endofunction(id_)
+        s = SymmetricFunction(id_)
+        # test rule 1)
+        self.assertEqual(f, f*f)
+        self.assertEqual(b, b*b)
+        self.assertEqual(e, e*e)
+        self.assertEqual(s, s*s)
+        # test rule 2)
+        self.assertEqual(f, f*e)
+        self.assertEqual(f, e*f)
+        self.assertEqual(f, f*b)
+        self.assertEqual(f, b*f)
+        self.assertEqual(f, f*s)
+        self.assertEqual(f, s*f)
+        # test rule 3)
+        self.assertEqual(e, e*s)
+        self.assertEqual(e, s*e)
+        self.assertEqual(b, b*s)
+        self.assertEqual(b, s*b)
+        # test rule 4)
+        self.assertEqual(f, e*b)
+        self.assertEqual(f, b*e)
+
+
 class EndofunctionTests(unittest.TestCase):
 
     # Imagepath Tests
