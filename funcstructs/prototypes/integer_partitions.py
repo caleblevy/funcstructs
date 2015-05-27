@@ -8,7 +8,7 @@ import itertools
 
 from PADS import IntegerPartitions
 
-from funcstructs import multiset
+from funcstructs.structures import multiset
 
 
 def isqrt(n):

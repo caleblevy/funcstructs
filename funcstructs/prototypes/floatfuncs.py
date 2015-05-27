@@ -8,7 +8,7 @@ import numbers
 
 import numpy as np
 
-from funcstructs import *
+from funcstructs.structures import *
 
 __all__ = [
     "FloatSet",
