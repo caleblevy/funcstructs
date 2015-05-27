@@ -143,22 +143,22 @@ class Endofunction(Function):
 
     def enumerate_cycles(self):
         """Generate f's cycle decomposition in O(len(f)) time"""
-        Tried = set()
-        CycleEls = set()
-        Remaining = set(self.domain)
-        while Remaining:
-            x = Remaining.pop()
+        tried = set()
+        cyclic = set()
+        remaining = set(self.domain)
+        while remaining:
+            x = remaining.pop()
             path = [x]
-            while x not in Tried:
-                Remaining.discard(x)
-                Tried.add(x)
+            while x not in tried:
+                remaining.discard(x)
+                tried.add(x)
                 x = self[x]
                 path.append(x)
-            if x not in CycleEls:
+            if x not in cyclic:
                 cycle = path[path.index(x)+1:]
                 if cycle:
                     yield cycle
-                    CycleEls.update(cycle)
+                    cyclic.update(cycle)
 
     @cached_property
     def cycles(self):
