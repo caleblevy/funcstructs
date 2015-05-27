@@ -8,6 +8,30 @@ from ..functions import (
 )
 
 
+class FunctionTests(unittest.TestCase):
+
+    abcfunc = Function({'a': 1, 'b': 1, 'c': 1})
+
+    def test_function_constructor(self):
+        """Test the constructor accepts and rejects appropriate input"""
+        f = self.abcfunc
+        self.assertEqual(f, Function(f.items()))
+        self.assertEqual(f, Function.fromkeys("abc", 1))
+        self.assertEqual(f, Function(f))
+        self.assertEqual(f, Function(a=1, b=1, c=1))
+        with self.assertRaises(TypeError):
+            Function({0: 'a', 1: 'b', 2: ['c', 'd']})
+
+    def test_domain(self):
+        self.assertEqual(self.abcfunc.domain, frozenset("abc"))
+
+    def test_image(self):
+        self.assertEqual(self.abcfunc.image, frozenset({1}))
+
+    def test_preimage(self):
+        self.assertEqual({1: frozenset("abc")}, dict(self.abcfunc.preimage))
+
+
 class EndofunctionTests(unittest.TestCase):
 
     # Imagepath Tests
