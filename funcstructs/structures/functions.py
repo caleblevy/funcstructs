@@ -12,6 +12,23 @@ from funcstructs import bases
 from funcstructs.utils.misc import cached_property, flatten
 
 
+def _result_functype(f, g):
+    """Coerce func types of f and g into the proper type. Rules are:
+        1) If both types are the same, so is their result
+        2) Function has highest priority
+        3) SymmetricFunction has lowest priority
+        4) Bijection and Endofunction result in Function
+    """
+    functypes = {type(f), type(g)}
+    if len(functypes) == 1:
+        return functypes.pop()
+    elif Function in functypes:
+        return Function
+    elif SymmetricFunction in functypes:
+        return (functypes - {SymmetricFunction}).pop()
+    return Function
+
+
 class Function(bases.frozendict):
     """An immutable mapping between sets."""
 
