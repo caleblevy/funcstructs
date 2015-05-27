@@ -68,7 +68,7 @@ class Function(bases.frozendict):
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
-        return other.__class__((x, self[y]) for x, y in other)
+        return _result_functype(self, other)((x, self[y]) for x, y in other)
 
 
 class Bijection(Function):
