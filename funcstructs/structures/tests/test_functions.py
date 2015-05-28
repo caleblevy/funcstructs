@@ -1,6 +1,8 @@
 import unittest
 from math import factorial
 
+from ..conjstructs import Funcstruct
+
 from ..functions import (
     Function, Bijection, Endofunction, SymmetricFunction,
     rangefunc, rangeperm, randfunc, randperm, randconj,
@@ -32,15 +34,13 @@ class FunctionTests(unittest.TestCase):
         self.assertEqual({1: frozenset("abc")}, dict(self.abcfunc.preimage))
 
 
-class FunctionTypeCoercionTests(unittest.TestCase):
+class CompositionTests(unittest.TestCase):
+    I = list(enumerate(range(10)))
+    ids = [Function(I), Bijection(I), Endofunction(I), SymmetricFunction(I)]
 
     def test_composition_types(self):
         """Test the four type rules for function composition"""
-        id_ = list(enumerate(range(10)))
-        f = Function(id_)
-        b = Bijection(id_)
-        e = Endofunction(id_)
-        s = SymmetricFunction(id_)
+        f, b, e, s = self.ids
         # test rule 1)
         self.assertEqual(f, f*f)
         self.assertEqual(b, b*b)
@@ -61,6 +61,43 @@ class FunctionTypeCoercionTests(unittest.TestCase):
         # test rule 4)
         self.assertEqual(f, e*b)
         self.assertEqual(f, b*e)
+
+    def test_conjugation_types(self):
+        """Test that conjugate of an object is the original type"""
+        _, b, _, s = self.ids
+        for func in self.ids:
+            self.assertEqual(func, b.conj(func))
+            self.assertEqual(func, s.conj(func))
+
+    def test_conjugation(self):
+        """Test that conjugation works in the correct order"""
+        # 0   1
+        #  \ /
+        #   2
+        #  / \
+        # 3<-4
+        f = rangefunc([2, 2, 4, 2, 3])
+        s = rangeperm([0, 1, 3, 4, 2])
+        g = rangefunc([3, 3, 4, 2, 3])  # g = s*f*s**-1
+        self.assertEqual(g, s.conj(f))
+        self.assertNotEqual(g, s.inverse.conj(f))
+        # Test that if function has cycle
+        #    t=(a1, a2, ..., an)
+        # then
+        #    s.conj(t) = (s[a1], s[a2], ..., s[an])
+        sigma = rangeperm([1, 2, 0, 4, 3])  # s = (0, 1, 2)(3, 4)
+        tau = rangeperm([1, 2, 3, 4, 0])  # t = (0, 1, 2, 3, 4)
+        sr = rangeperm([4, 2, 3, 1, 0])  # t*s*t^-1 = (1, 2, 3)(4, 0)
+        sl = rangeperm([1, 4, 3, 2, 0])  # t^-1*s*t = (0, 1, 4)(2, 3)
+        self.assertEqual(sr, tau.conj(sigma))
+        self.assertEqual(sl, tau.inverse.conj(sigma))
+
+    def test_domain_changing(self):
+        """Test changing an endofunction's domain does not change structure"""
+        f = Endofunction.fromkeys("abc", "a")
+        b = Bijection(zip("abc", range(3)))
+        self.assertEqual(f, b.inverse.conj(b.conj(f)))
+        self.assertEqual(Funcstruct(f), Funcstruct(b.conj(f)))
 
 
 class EndofunctionTests(unittest.TestCase):
