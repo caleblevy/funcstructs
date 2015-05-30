@@ -3,6 +3,8 @@
 Caleb Levy, 2015.
 """
 
+import inspect
+
 
 def add_hash(cls, params):
     def __hash__(self):
@@ -35,4 +37,33 @@ def add_delattr(cls, params):
 
 
 class ParametrizedMeta(type):
-    pass
+    """Metaclass which parametrizes a class by the parameters of it's __init__
+    method. If __init__ takes no arguments, the class is assumed to have no
+    parameters.
+
+    The arguments to __init__ become write-once attributes, and the class is
+    automatically given __slots__, as any parametrized class should be
+    immutable."""
+
+    def __new__(mcls, name, bases, dct):
+        # extract parameters defined in current cls
+        init = dct.get('__init__', None)
+        if init is not None:
+            new_params = inspect.getargspec(init)[0][1:]  # exclude "self"
+        else:
+            new_params = ()
+        # add these parameters to existing slots, if any
+        slots = dct.pop('__slots__', None)
+        if slots is not None:
+            if isinstance(slots, str):
+                slots = (slots, )
+            slots += new_params
+        else:
+            slots = new_params
+        dct['__slots__'] = slots
+        # acquire parameter names in any bases and add to current parameters
+        old_params = ()
+        for base in bases:
+            old_params += getattr(base, '__parameters__', ())
+        dct['__parameters__'] = tuple(old_params) + new_params
+        return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
