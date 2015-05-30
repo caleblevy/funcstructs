@@ -4,6 +4,7 @@ Caleb Levy, 2015.
 """
 
 import inspect
+import unittest
 
 
 def add_hash(cls, params):
@@ -63,3 +64,46 @@ class ParametrizedMeta(type):
             old_params += getattr(base, '__parameters__', ())
         dct['__parameters__'] = old_params + new_params  # preserve order
         return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
+
+
+class ParametrizedMixin(object):
+    __metaclass__ = ParametrizedMeta
+
+
+class ParametrizedMetaTests(unittest.TestCase):
+
+    class A(ParametrizedMixin):
+        pass
+
+    class B(A):
+        def __init__(self, b1, b2):
+            pass
+
+    class C(B):
+        def __init__(self, c):
+            self.c = 1
+
+    def test_parameters_attribute(self):
+        """Test that ParametrizedMeta keeps track of parameters correctly"""
+        self.assertEqual((), self.A.__parameters__)
+        self.assertEqual(("b1", "b2"), self.B.__parameters__)
+        self.assertEqual(("b1", "b2", "c"), self.C.__parameters__)
+
+    def test_slotting(self):
+        """Test slots and parameters interact correctly"""
+        slotvals = [[], (), "a", ["a"], ("a")]
+        inits = [((), lambda self: None), (("b", ), lambda self, b=1: None)]
+        # test slots without parameters
+        for slots in slotvals:
+            for params, init in inits:
+                class A(ParametrizedMixin):
+                    __slots__ = slots
+                    __init__ = init
+                a = A()
+                self.assertEqual(set(a.__slots__), set(slots).union(params))
+                self.assertEqual(set(a.__parameters__), set(params))
+                self.assertFalse(hasattr(a, '__dict__'))
+
+
+if __name__ == '__main__':
+    unittest.main()
