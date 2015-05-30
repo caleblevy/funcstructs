@@ -49,21 +49,17 @@ class ParametrizedMeta(type):
         # extract parameters defined in current cls
         init = dct.get('__init__', None)
         if init is not None:
-            new_params = inspect.getargspec(init)[0][1:]  # exclude "self"
+            new_params = tuple(inspect.getargspec(init)[0][1:])
         else:
             new_params = ()
         # add these parameters to existing slots, if any
-        slots = dct.pop('__slots__', None)
-        if slots is not None:
-            if isinstance(slots, str):
-                slots = (slots, )
-            slots += new_params
-        else:
-            slots = new_params
-        dct['__slots__'] = slots
+        slots = dct.pop('__slots__', ())
+        if isinstance(slots, str):
+            slots = (slots, )
+        dct['__slots__'] = tuple(slots) + new_params
         # acquire parameter names in any bases and add to current parameters
         old_params = ()
         for base in bases:
             old_params += getattr(base, '__parameters__', ())
-        dct['__parameters__'] = tuple(old_params) + new_params
+        dct['__parameters__'] = old_params + new_params  # preserve order
         return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
