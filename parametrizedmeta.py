@@ -11,52 +11,78 @@ from operator import attrgetter
 
 class ParametrizedMeta(type):
     """Metaclass which parametrizes a class by the parameters of it's __init__
-    method. If __init__ takes no arguments, the class is assumed to have no
-    parameters.
+    method. If a class' __init__ is not present or takes no parameters, the
+    class is assumed to have no parameters.
 
     The arguments to __init__ become write-once attributes, and the class is
-    automatically given __slots__, as any parametrized class should be
-    immutable."""
+    automatically given __slots__. A parametrized class should be treated as
+    immutable.
+
+    Usage:
+
+        class ParametrizedClass(object, metaclass=ParametrizedMeta):
+            def __init__(self, a, b):
+                self.a = a
+                self.b = b
+    """
 
     def __new__(mcls, name, bases, dct):
-        # extract parameters defined in current cls __init__
-        new_params = tuple(getargspec(dct.get('__init__', lambda _: 1))[0][1:])
-        # add these parameters to existing slots, if any
-        __slots__ = dct.pop('__slots__', ())
-        if isinstance(__slots__, str):
-            __slots__ = (__slots__, )
-        else:
-            __slots__ = tuple(__slots__)
-        dct['__slots__'] = __slots__ + new_params
+        # Ensure automatically generated attributes are not overloaded
+        for attr in ['__slots__', '_get_param_values', '__parameters__',
+                     '__setattr__', '__delattr__']:
+            if attr in dct:
+                raise RuntimeError("Cannot parametrize class %s with "
+                                   "overloaded %s" % (name, attr))
+
+        # Extract parameters defined in cls __init__
+        init_args = getargspec(dct.get('__init__', lambda self: None))
+        # Classes must be parametrized with finite number of parameters
+        varmsg = "Cannot parametrize class %s with %s in __init__"
+        if init_args.varargs is not None:
+            raise RuntimeError(varmsg % (name, 'variable args'))
+        if init_args.keywords is not None:
+            raise RuntimeError(varmsg % (name, "variable keywords"))
+
+        params = tuple(init_args.args[1:])
+        # slots must be set before class creation
+        dct['__slots__'] = params
+
         cls = super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
-        # acquire parameter names in any bases and add to current parameters
-        old_params = ()
-        for base in bases:
-            old_params += getattr(base, '__parameters__', ())
-        params = old_params + new_params
+
         params_getter = attrgetter(*params) if params else lambda self: ()
-        param_names = frozenset(params)
 
         def _get_param_values(self):
             """Return ordered tuple of instance's parameter values"""
             return params_getter(self)
 
-        def __setattr__(self, attr, val):
-            if attr in param_names and hasattr(self, attr):
-                raise AttributeError("Cannot set attribute %r" % attr)
-            else:
-                dct.get('__setattr__', super(cls, self).__setattr__)(attr, val)
-
-        def __delattr__(self, attr):
-            if attr in param_names and hasattr(self, attr):
-                raise AttributeError("Cannot delete attribute %r" % attr)
-            else:
-                dct.get('__delattr__', super(cls, self).__delattr__)(attr)
-
         cls.__parameters__ = params
         cls._get_param_values = _get_param_values
-        cls.__setattr__ = __setattr__
-        cls.__delattr__ = __delattr__
+
+        if params:
+            # Design Note: Parametrized objects' behaviors are governed solely
+            # by their parameters, thus it is appropriate for ParametrizedABC
+            # to make all parameters write-once attributes at class creation.
+            #
+            # On the other hand, objects with different parameter values may
+            # compare mathematically equal, thus client classes are given
+            # freedom to implement __eq__ and __hash__.
+            param_names = frozenset(params)
+
+            def __setattr__(self, attr, val):
+                if attr in param_names and hasattr(self, attr):
+                    raise AttributeError("Cannot set attribute %r" % attr)
+                else:
+                    super(cls, self).__setattr__(attr, val)
+
+            def __delattr__(self, attr):
+                if attr in param_names and hasattr(self, attr):
+                    raise AttributeError("Cannot delete attribute %r" % attr)
+                else:
+                    super(cls, self).__delattr__(attr)
+
+            cls.__setattr__ = __setattr__
+            cls.__delattr__ = __delattr__
+
         return cls
 
 
@@ -71,76 +97,124 @@ class ParametrizedMetaTests(unittest.TestCase):
 
     class B(A):
         def __init__(self, b1, b2):
-            pass
+            self.b1 = b1
+            self.b2 = b2
 
     class C(B):
         def __init__(self, c):
-            self.c = 1
+            super(self.__class__, self).__init__(1, 2)
+            self.c = c
+
+    class C2(B):
+        def __init__(self, b1, c):
+            super(self.__class__, self).__init__(b1, 2)
+            self.c = c
+
+    class D(B):
+        def __init__(self, b1, b2, d):
+            super(self.__class__, self).__init__(b1, b2)
+            self.d = d
+
+    a = A()
+    b = B("11", "22")
+    c = C("a")
+    c2 = C2("a1", "a2")
+    d = D(4, 5, 6)
+
+    paramobjs = [a, b, c, c2, d]
 
     def test_parameters_attribute(self):
         """Test that ParametrizedMeta keeps track of parameters correctly"""
         self.assertEqual((), self.A.__parameters__)
         self.assertEqual(("b1", "b2"), self.B.__parameters__)
-        self.assertEqual(("b1", "b2", "c"), self.C.__parameters__)
+        self.assertEqual(("c", ), self.C.__parameters__)
+        self.assertEqual(("b1", "c"), self.C2.__parameters__)
+        self.assertEqual(("b1", "b2", "d"), self.D.__parameters__)
+
+    def test_init(self):
+        """Test parameter values are initialized properly"""
+        self.assertEqual(("11", "22"), (self.b.b1, self.b.b2))
+        self.assertEqual((1, 2, "a"), (self.c.b1, self.c.b2, self.c.c))
+        self.assertEqual(("a1", 2, "a2"), (self.c2.b1, self.c2.b2, self.c2.c))
+        self.assertEqual((4, 5, 6), (self.d.b1, self.d.b2, self.d.d))
 
     def test_slotting(self):
         """Test slots and parameters interact correctly"""
-        slotvals = [[], (), "a", ["a"], ("a")]
-        inits = [((), lambda self: None), (("b", ), lambda self, b=1: None)]
-        # test slots without parameters
-        for slots in slotvals:
-            for params, init in inits:
-                class A(ParametrizedMixin):
-                    __slots__ = slots
-                    __init__ = init
-                a = A()
-                self.assertEqual(set(a.__slots__), set(slots).union(params))
-                self.assertEqual(set(a.__parameters__), set(params))
-                self.assertFalse(hasattr(a, '__dict__'))
+        # Note: find way to test and eliminate duplicate slots
+        for obj in self.paramobjs:
+            self.assertEqual(obj.__parameters__, obj.__slots__)
+            self.assertFalse(hasattr(obj, '__dict__'))
+            with self.assertRaises(AttributeError):
+                setattr(obj, "e", 0)
+            self.assertFalse(hasattr(obj, "e"))
 
     def test_param_getter(self):
         """Test paramgetter works correctly"""
-        b = self.B(1, 2)
-        with self.assertRaises(AttributeError):
-            b._get_param_values()
-        b.b1 = "a"
-        b.b2 = "b"
-        self.assertEqual(("a", "b"), b._get_param_values())
+        self.assertEqual((), self.a._get_param_values())
+        self.assertEqual(("11", "22"), self.b._get_param_values())
+        self.assertEqual("a", self.c._get_param_values())
+        self.assertEqual(("a1", "a2"), self.c2._get_param_values())
+        self.assertEqual((4, 5, 6), self.d._get_param_values())
 
     def test_attr_setting(self):
         """Test weather attribute creation and deletion is blocked"""
-        c = self.C(1)
-        c.b1 = "a"
-        c.b2 = "b"
+        c2 = self.c2
         with self.assertRaises(AttributeError):
-            c.b1 = "a"
+            c2.b1 = "a"
         with self.assertRaises(AttributeError):
-            c.b2 = "b"
+            c2.b2 = "b"
         with self.assertRaises(AttributeError):
-            c.c = 1
+            c2.c = 1
         with self.assertRaises(AttributeError):
-            del c.b1
+            del c2.b1
         with self.assertRaises(AttributeError):
-            del c.b2
+            del c2.b2
         with self.assertRaises(AttributeError):
-            del c.c
-        self.assertEqual(("a", "b", 1), c._get_param_values())
+            del c2.c
+        self.assertEqual(("a1", 2, "a2"), (c2.b1, c2.b2, c2.c))
 
-        # Check that slotted attributes are not blocked along with parameters
-        class D(ParametrizedMixin):
-            __slots__ = "abc"
+    def test_autogenerated_attributes_cannot_be_customized(self):
+        """Ensure that setting autogenerated attributes raises runtime error"""
+        with self.assertRaises(RuntimeError):
+            class A1(ParametrizedMixin):
+                def __setattr__(self, name, val):
+                    object.__setattr__(self, name, val)
 
-            def __init__(self, d):
-                self.d = d
+        with self.assertRaises(RuntimeError):
+            class A2(ParametrizedMixin):
+                def __delattr__(self, attr):
+                    object.__delattr__(self, attr)
 
-        d = D(4)
-        d.abc = 5
-        with self.assertRaises(AttributeError):
-            del d.d
-        with self.assertRaises(AttributeError):
-            d.d = 1
-        d.abc = 4
-        del d.abc
+        with self.assertRaises(RuntimeError):
+            class A3(ParametrizedMixin):
+                __slots__ = ()
+
+        with self.assertRaises(RuntimeError):
+            class A4(ParametrizedMixin):
+                __parameters__ = ("a", "b", "c")
+
+        with self.assertRaises(RuntimeError):
+            class A5(ParametrizedMixin):
+                def _get_param_values(self):
+                    return ()
+
+    def test_class_cannot_have_variable_number_of_parameters(self):
+        """Ensure that presence of *args/**kwargs in __init__ raises error."""
+        with self.assertRaises(RuntimeError):
+            class B1(ParametrizedMixin):
+                def __init__(*args):
+                    self, args = args
+
+        with self.assertRaises(RuntimeError):
+            class B2(ParametrizedMixin):
+                def __init__(self, a, *ar):
+                    self.a = a
+
+        with self.assertRaises(RuntimeError):
+            class B3(ParametrizedMixin):
+                def __init__(self, a, b, **kw):
+                    self.a = a
+                    self.b = b
 
 
 if __name__ == '__main__':
