@@ -8,6 +8,8 @@ import unittest
 from inspect import getargspec
 from operator import attrgetter
 
+from itertools import chain  # for testing
+
 
 class ParametrizedMeta(type):
     """Metaclass which parametrizes a class by the parameters of it's __init__
@@ -16,7 +18,7 @@ class ParametrizedMeta(type):
     class is assumed to have no parameters.
 
     The following restrictions apply to parametrized classes:
-        1) They cannot have multiple bases
+        1) They cannot have multiple (direct) bases
         2) All classes in their inheritance chain must have __slots__
         3) Their constructor methods cannot take variable arguments.
     """
@@ -33,7 +35,6 @@ class ParametrizedMeta(type):
         if len(bases) > 1:
             raise TypeError("Parametrized classes cannot have multiple bases")
         base = bases[0] if bases else object
-
         # If any of the bases lack __slots__, so will the derived class
         if '__dict__' in base.__dict__:
             raise TypeError("parametrized class bases must have slots")
@@ -47,22 +48,27 @@ class ParametrizedMeta(type):
         if init_args.varargs is not None or init_args.keywords is not None:
             raise TypeError("variable arguments in %s.__init__" % name)
 
-        params = tuple(init_args.args[1:])
-        # slots must be set before class creation
-        dct['__slots__'] = params
-
-        cls = super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
-
-        params_getter = attrgetter(*params) if params else lambda self: ()
+        current_params = tuple(init_args.args[1:])
+        old_params = getattr(base, '__parameters__', frozenset())
+        new_params = ()
+        for param in current_params:
+            if param not in old_params:
+                new_params += param,
+        pg = attrgetter(*current_params) if current_params else lambda self: ()
 
         def _get_param_values(self):
             """Return ordered tuple of instance's parameter values"""
-            return params_getter(self)
+            return pg(self)
 
-        cls.__parameters__ = params
-        cls._get_param_values = _get_param_values
+        # slots must be set before class creation
+        dct['__slots__'] = new_params
+        dct['__parameters__'] = old_params.union(new_params)
+        dct['__'+name+'_parameters__'] = current_params
+        dct['_get_param_values'] = _get_param_values
 
-        if params:
+        cls = super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
+
+        if current_params:
             # Design Note: Parametrized objects' behaviors are governed solely
             # by their parameters, thus it is appropriate for ParametrizedABC
             # to make all parameters write-once attributes at class creation.
@@ -70,16 +76,14 @@ class ParametrizedMeta(type):
             # On the other hand, objects with different parameter values may
             # compare mathematically equal, thus client classes are given
             # freedom to implement __eq__ and __hash__.
-            param_names = frozenset(params)
-
             def __setattr__(self, attr, val):
-                if attr in param_names and hasattr(self, attr):
+                if attr in current_params and hasattr(self, attr):
                     raise AttributeError("Cannot set attribute %r" % attr)
                 else:
                     super(cls, self).__setattr__(attr, val)
 
             def __delattr__(self, attr):
-                if attr in param_names and hasattr(self, attr):
+                if attr in current_params and hasattr(self, attr):
                     raise AttributeError("Cannot delete attribute %r" % attr)
                 else:
                     super(cls, self).__delattr__(attr)
@@ -205,11 +209,11 @@ class ParametrizedMetaChecks(unittest.TestCase):
 
     def test_parameters_attribute(self):
         """Test that ParametrizedMeta keeps track of parameters correctly"""
-        self.assertEqual((), self.A.__parameters__)
-        self.assertEqual(("b1", "b2"), self.B.__parameters__)
-        self.assertEqual(("c", ), self.C.__parameters__)
-        self.assertEqual(("b1", "c"), self.C2.__parameters__)
-        self.assertEqual(("b1", "b2", "d"), self.D.__parameters__)
+        self.assertEqual(frozenset(), self.A.__parameters__)
+        self.assertEqual({"b1", "b2"}, self.B.__parameters__)
+        self.assertEqual({"b1", "b2", "c"}, self.C.__parameters__)
+        self.assertEqual({"b1", "b2", "c"}, self.C2.__parameters__)
+        self.assertEqual({"b1", "b2", "d"}, self.D.__parameters__)
 
     def test_init(self):
         """Test parameter values are initialized properly"""
@@ -218,15 +222,19 @@ class ParametrizedMetaChecks(unittest.TestCase):
         self.assertEqual(("a1", 2, "a2"), (self.c2.b1, self.c2.b2, self.c2.c))
         self.assertEqual((4, 5, 6), (self.d.b1, self.d.b2, self.d.d))
 
-    def test_parametrized_class_have_slots(self):
-        """Test slots and parameters interact correctly"""
-        # Note: find way to test and eliminate duplicate slots
+    def test_slots(self):
+        """Test parametrized classes are correctly slotted"""
         for obj in self.paramobjs:
-            self.assertEqual(obj.__parameters__, obj.__slots__)
+            self.assertTrue(hasattr(obj, '__slots__'))
             self.assertFalse(hasattr(obj, '__dict__'))
             with self.assertRaises(AttributeError):
                 setattr(obj, "e", 0)
-            self.assertFalse(hasattr(obj, "e"))
+            # If there are other slotted class in mro, this must be modified
+            slots = [getattr(c, '__slots__', ()) for c in type(obj).__mro__]
+            # Ensure there are same number of unique slots and parameters
+            self.assertEqual(len(obj.__parameters__), sum(map(len, slots)))
+            # Ensure that __parameters__ contains all unique slots in mro
+            self.assertEqual(obj.__parameters__, set(chain(*slots)))
 
     def test_param_getter(self):
         """Test paramgetter works correctly"""
