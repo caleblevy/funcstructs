@@ -40,10 +40,11 @@ class ParametrizedMeta(type):
         if '__dict__' in base.__dict__:
             raise TypeError("base class %s does not have __slots__" % base)
 
+        # Find first class in mro that override object.__init__ ...
         for b in base.__mro__:
             if '__init__' in b.__dict__:
                 break
-        # If no class in mro defines it's own __init__, assume no parameters
+        # ... and if none do, assume no parameters
         default_init = base.__init__ if b is not object else lambda self: None
         init_args = getargspec(dct.get('__init__', default_init))
         # Classes must be parametrized with finite number of parameters
@@ -121,8 +122,8 @@ class ParametrizedMetaValidationTests(unittest.TestCase):
                 class P(with_metaclass(ParametrizedMeta, unslotted)):
                     pass
 
-    def test_must_have_one_base(self):
-        """Test an error is raised when mixing nonparametrized bases"""
+    def test_cannot_have_multiple_bases(self):
+        """Test an error is raised when parametrizing from multiple bases"""
         class O1(object):
             __slots__ = ()
 
