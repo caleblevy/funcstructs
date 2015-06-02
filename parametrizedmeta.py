@@ -13,6 +13,13 @@ from itertools import chain  # for testing
 from six import with_metaclass  # to be replaced
 
 
+def hascustominit(cls):
+    """Return true if cls does not call default initializer"""
+    for c in type.mro(cls):  # works with type
+        if '__init__' in c.__dict__:
+            return c is not object
+
+
 class ParametrizedMeta(type):
     """Metaclass which parametrizes a class by the parameters of it's __init__
     method. The class is automatically given __slots__ for these parameter
@@ -20,9 +27,10 @@ class ParametrizedMeta(type):
     class is assumed to have no parameters.
 
     The following restrictions apply to parametrized classes:
-        1) They cannot have multiple (direct) bases
-        2) All classes in their inheritance chain must have __slots__
-        3) Their constructor methods cannot take variable arguments.
+        1) All classes in their inheritance chains must have __slots__
+        2) There can only be one in a class' bases
+        3) If derived from multiple bases, the bases cannot define constructors
+        4) Their constructor methods cannot take variable arguments.
     """
 
     def __new__(mcls, name, bases, dct):
@@ -32,22 +40,24 @@ class ParametrizedMeta(type):
                 raise TypeError(
                     "cannot parametrize %s: overloaded %s" % (name, attr))
 
-        # Imposed for now in the name of general sanity
-        if len(bases) > 1:
-            raise TypeError("parametrized classes cannot have multiple bases")
-        base = bases[0] if bases else object
-        # If any of the bases lack __slots__, so will the derived class
-        if '__dict__' in base.__dict__:
-            raise TypeError("base class %s does not have __slots__" % base)
+        # 1) If any of the bases lack __slots__, so will the derived class
+        for base in bases:
+            if '__dict__' in base.__dict__:
+                raise TypeError("base class %s does not have __slots__" % base)
+        # 2) For sanity, allow neither unparametrized bases with custom init...
+        if any(not isinstance(base, ParametrizedMeta) for base in bases):
+            if any(hascustominit(base) for base in bases):
+                raise TypeError("multiple bases with custom __init__")
+        # 3) ... nor inheriting multiple parametrizations of same parameters
+        elif len(bases) > 1:
+            raise TypeError("metaclass conflict: multiple parametrized bases")
 
-        # Find first class in mro that override object.__init__ ...
-        for b in base.__mro__:
-            if '__init__' in b.__dict__:
-                break
-        # ... and if none do, assume no parameters
-        default_init = base.__init__ if b is not object else lambda self: None
+        # If there are multiple bases, we have already verified none have
+        # constructors, so we may safely pick the first as representative
+        base = bases[0] if bases else object
+        default_init = base.__init__ if hascustominit(base) else lambda self: 0
         init_args = getargspec(dct.get('__init__', default_init))
-        # Classes must be parametrized with finite number of parameters
+        # 4) Classes must be parametrized with finite number of parameters
         if init_args.varargs is not None or init_args.keywords is not None:
             raise TypeError("variable arguments in %s.__init__" % name)
 
@@ -109,7 +119,10 @@ class ParametrizedMetaValidationTests(unittest.TestCase):
 
     def test_bases_must_have_slots(self):
         """Test that TypeError is raised if instances of bases have dicts"""
-        class NoSlots(object):
+        class Slotted(object):
+            __slots__ = ()
+
+        class Unslotted(object):
             pass
 
         class PhonySlots(object):
@@ -117,23 +130,46 @@ class ParametrizedMetaValidationTests(unittest.TestCase):
 
         PhonySlots.__slots__ = ("a", "b", "c", )
 
-        for unslotted in [NoSlots, PhonySlots]:
+        # Can inherit from slotted base
+        class A(with_metaclass(ParametrizedMeta, Slotted)):
+            pass
+
+        for bases in [(Unslotted, ), (PhonySlots, ), (Slotted, Unslotted)]:
             with self.assertRaises(TypeError):
-                class P(with_metaclass(ParametrizedMeta, unslotted)):
+                class P(with_metaclass(ParametrizedMeta, *bases)):
                     pass
 
-    def test_cannot_have_multiple_bases(self):
+    def test_bases_cannot_have_multiple_inits(self):
         """Test an error is raised when parametrizing from multiple bases"""
-        class O1(object):
+        class B1(object):
             __slots__ = ()
 
-        class O2(object):
+        class B2(object):
             __slots__ = ()
 
-        # test inheritance with multiple bases works as expected
-        with self.assertRaises(TypeError):
-            class P(with_metaclass(ParametrizedMeta, O1, O2)):
+        class B3(object):
+            __slots__ = ()
+
+            def __init__(self):
                 pass
+
+        class P1(with_metaclass(ParametrizedMeta)):
+            pass
+
+        class P2(with_metaclass(ParametrizedMeta)):
+            pass
+
+        class B23(B2, B3):
+            __slots__ = ()
+
+        for bases in [(B1, B2), (B1, P1)]:
+            class P(with_metaclass(ParametrizedMeta, *bases)):
+                pass
+
+        for bases in [(B3, ), (B1, B3), (B23, ), (P1, P2)]:
+            with self.assertRaises(TypeError):
+                class P(with_metaclass(ParametrizedMeta, *bases)):
+                    pass
 
     def test_constructor_cannot_have_variable_parameters(self):
         """Ensure that presence of *args/**kwargs in __init__ raises error."""
