@@ -10,6 +10,8 @@ from operator import attrgetter
 
 from itertools import chain  # for testing
 
+from six import with_metaclass  # to be replaced
+
 
 class ParametrizedMeta(type):
     """Metaclass which parametrizes a class by the parameters of it's __init__
@@ -32,17 +34,18 @@ class ParametrizedMeta(type):
 
         # Imposed for now in the name of general sanity
         if len(bases) > 1:
-            raise TypeError("Parametrized classes cannot have multiple bases")
+            raise TypeError("parametrized classes cannot have multiple bases")
         base = bases[0] if bases else object
         # If any of the bases lack __slots__, so will the derived class
         if '__dict__' in base.__dict__:
-            raise TypeError("parametrized class bases must have slots")
+            raise TypeError("base class %s does not have __slots__" % base)
 
-        # Extract parameters defined in cls __init__
-        if '__init__' not in dct and base.__init__ is object.__init__:
-            init_args = getargspec(lambda self: None)
-        else:
-            init_args = getargspec(dct.get('__init__', base.__init__))
+        for b in base.__mro__:
+            if '__init__' in b.__dict__:
+                break
+        # If no class in mro defines it's own __init__, assume no parameters
+        default_init = base.__init__ if b is not object else lambda self: None
+        init_args = getargspec(dct.get('__init__', default_init))
         # Classes must be parametrized with finite number of parameters
         if init_args.varargs is not None or init_args.keywords is not None:
             raise TypeError("variable arguments in %s.__init__" % name)
@@ -68,8 +71,7 @@ class ParametrizedMeta(type):
         return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
 
 
-class ParametrizedMixin(object):
-    __metaclass__ = ParametrizedMeta
+class ParametrizedMixin(with_metaclass(ParametrizedMeta, object)):
 
     # Make all parameters write-once attributes
 
@@ -116,8 +118,8 @@ class ParametrizedMetaValidationTests(unittest.TestCase):
 
         for unslotted in [NoSlots, PhonySlots]:
             with self.assertRaises(TypeError):
-                class P(unslotted):
-                    __metaclass__ = ParametrizedMeta
+                class P(with_metaclass(ParametrizedMeta, unslotted)):
+                    pass
 
     def test_must_have_one_base(self):
         """Test an error is raised when mixing nonparametrized bases"""
@@ -129,8 +131,8 @@ class ParametrizedMetaValidationTests(unittest.TestCase):
 
         # test inheritance with multiple bases works as expected
         with self.assertRaises(TypeError):
-            class P(O1, O2):
-                __metaclass__ = ParametrizedMeta
+            class P(with_metaclass(ParametrizedMeta, O1, O2)):
+                pass
 
     def test_constructor_cannot_have_variable_parameters(self):
         """Ensure that presence of *args/**kwargs in __init__ raises error."""
