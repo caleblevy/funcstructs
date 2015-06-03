@@ -8,9 +8,10 @@ import unittest
 from inspect import getargspec
 from operator import attrgetter
 
-from itertools import chain  # for testing
-
-from six import with_metaclass
+# imports for testing
+from abc import ABCMeta
+from collections import Iterable
+from itertools import chain, product
 
 
 def hascustominit(cls):
@@ -33,7 +34,7 @@ class ParametrizedMeta(type):
     class is assumed to have no parameters.
 
     The following restrictions apply to parametrized classes:
-    1) Their (non-parametrized) bases must have (empty) __slots__
+    1) All (non-parametrized) bases in their mro must have (empty) __slots__
     2) There can only be one in a class' bases
     3) If one has a base with a constructor, that base must be parametrized
     4) Their constructor methods cannot take variable arguments.
@@ -44,7 +45,7 @@ class ParametrizedMeta(type):
 
     def __new__(mcls, name, bases, dct):
         # Rule 0) No Reserved Names
-        for attr in ['__slots__', '_get_param_values', '__parameters__']:
+        for attr in ['__slots__', '__parameters__']:
             if attr in dct:
                 raise TypeError("cannot set reserved attribute %r" % attr)
 
@@ -62,11 +63,15 @@ class ParametrizedMeta(type):
                 raise TypeError("base %s does not have __slots__" % base)
         # Rule 1b) Unparametrized Bases Have Empty __slots__
         # --------------------------------------------------
-        # Since parametrized class cannot have initializers, it makes no sense
-        # for them to define their own __slots__.
+        # All significant attributes of a parametrized class should be declared
+        # and set in its __init__ method. If a member descripter is not set in
+        # a parametrized base, it is not useful. If it is set in two locations
+        # in the mro, the behaviour is technically undefined (see notes on
+        # slots at https://docs.python.org/3/reference/datamodel.html).
         for base, is_parametrized in zip(bases, are_parametrized):
-            if getattr(base, '__slots__', False) and not is_parametrized:
-                raise TypeError("unparametrized base with nonempty slots")
+            if not is_parametrized:
+                if any(getattr(b, '__slots__', False) for b in base.__mro__):
+                    raise TypeError("unparametrized base with nonempty slots")
 
         # Rule 2) Max of One Parametrized Base
         # ------------------------------------
@@ -131,112 +136,121 @@ class ParametrizedMeta(type):
         return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
 
 
-class ParametrizedMixin(with_metaclass(ParametrizedMeta, object)):
-
-    # Make all parameters write-once attributes
-
-    def __setattr__(self, name, val):
-        if name in self.__parameters__ and hasattr(self, name):
-            raise AttributeError("Cannot set attribute %r" % name)
-        else:
-            super(ParametrizedMixin, self).__setattr__(name, val)
-
-    def __delattr__(self, attr):
-        if attr in self.__parameters__ and hasattr(self, attr):
-            raise AttributeError("Cannot delete attribute %r" % attr)
-        else:
-            super(ParametrizedMixin, self).__delattr__(attr)
+def newclass(slots=None, init=None, bases=(), mcls=type, name="newclass", **k):
+    """Return blank class with the given metaclass, __slots__ and __init__
+    function and bases. """
+    if not isinstance(bases, Iterable):
+        bases = (bases, )
+    bases = tuple(bases)
+    dct = {}
+    if slots is not None:
+        dct['__slots__'] = slots
+    if init is not None:
+        dct['__init__'] = init
+    dct.update(k)
+    return mcls(name, bases, dct)
 
 
-class ParametrizedMetaValidationTests(unittest.TestCase):
+class ClassmakerTests(unittest.TestCase):
+
+    def test_newclass(self):
+        class A(object):
+            __slots__ = ()
+
+        class B(object):
+            __slots__ = ()
+
+        slotsets = [None, (), "abc", ("a", "b"), ["a", "b", "c"]]
+        inits = [None, (lambda self: None), (lambda self, *args: None)]
+        basesets = [(), object, [object], [A, B]]
+        metaclasses = [type, ABCMeta]
+        for s, i, b, m in product(slotsets, inits, basesets, metaclasses):
+            C = newclass(slots=s, init=i, bases=b, mcls=m)
+            # test __slots__
+            if s is not None:
+                self.assertEqual(s, C.__slots__)
+                self.assertNotIn('__dict__', C.__dict__)
+            else:
+                self.assertNotIn('__slots__', C.__dict__)
+                self.assertIn('__dict__', C.__dict__)
+            # test __init__
+            if i is None:
+                self.assertFalse(hascustominit(C))
+            else:
+                self.assertEqual(i, C.__dict__['__init__'])
+            # test bases
+            if not b or b is object:
+                b = object,
+            self.assertEqual(tuple(b), C.__bases__)
+            # test metaclass
+            self.assertEqual(m, type(C))
+
+
+ParametrizedMixin = newclass(mcls=ParametrizedMeta, name="ParametrizedMixin")
+
+
+class ParametrizedInheritanceRulesTests(unittest.TestCase):
     """Test ParametrizedMeta constructor throws errors on invalid bases"""
 
-    def test_autogenerated_attributes_cannot_be_customized(self):
-        """Ensure that setting autogenerated attributes raises runtime error"""
-        with self.assertRaises(TypeError):
-            class A3(ParametrizedMixin):
-                __slots__ = ()
-
-        with self.assertRaises(TypeError):
-            class A4(ParametrizedMixin):
-                __parameters__ = ("a", "b", "c")
-
-        with self.assertRaises(TypeError):
-            class A5(ParametrizedMixin):
-                def _get_param_values(self):
-                    return ()
-
-    def test_bases_must_have_slots(self):
-        """Test that TypeError is raised if instances of bases have dicts"""
-        class Slotted(object):
-            __slots__ = ()
-
-        class Unslotted(object):
-            pass
-
-        class PhonySlots(object):
-            pass
-
-        PhonySlots.__slots__ = ("a", "b", "c", )
-
-        # Can inherit from slotted base
-        class A(with_metaclass(ParametrizedMeta, Slotted)):
-            pass
-
-        for bases in [(Unslotted, ), (PhonySlots, ), (Slotted, Unslotted)]:
+    def test_rule_0(self):
+        """Ensure reserved attributes are unsettable"""
+        reserved = ['__slots__', '__parameters__']
+        for word in reserved:
             with self.assertRaises(TypeError):
-                class P(with_metaclass(ParametrizedMeta, *bases)):
-                    pass
+                newclass(mcls=ParametrizedMeta, **{word: ()})
 
-    def test_bases_cannot_have_multiple_inits(self):
-        """Test an error is raised when parametrizing from multiple bases"""
-        class B1(object):
-            __slots__ = ()
+    def test_rule_1(self):
+        """Ensure that bases must have slots"""
+        Slots = newclass(slots=())
+        NoSlots = newclass()
+        PhonySlots = newclass()
+        PhonySlots.__slots__ = ()
 
-        class B2(object):
-            __slots__ = ()
-
-        class B3(object):
-            __slots__ = ()
-
-            def __init__(self):
-                pass
-
-        class P1(with_metaclass(ParametrizedMeta)):
-            pass
-
-        class P2(with_metaclass(ParametrizedMeta)):
-            pass
-
-        class B23(B2, B3):
-            __slots__ = ()
-
-        for bases in [(B1, B2), (B1, P1), (B1, B2, P1)]:
-            class P(with_metaclass(ParametrizedMeta, *bases)):
-                pass
-
-        for bases in [(B3, ), (B1, B3), (B23, ), (P1, P2)]:
+        for bases in [NoSlots, PhonySlots, (Slots, NoSlots)]:
             with self.assertRaises(TypeError):
-                class P(with_metaclass(ParametrizedMeta, *bases)):
-                    pass
+                newclass(mcls=ParametrizedMeta, bases=bases)
 
-    def test_constructor_cannot_have_variable_parameters(self):
-        """Ensure that presence of *args/**kwargs in __init__ raises error."""
-        with self.assertRaises(TypeError):
-            class B1(ParametrizedMixin):
-                def __init__(*args):
-                    self, args = args
+        # test rule 1b
+        NonEmptySlots = newclass(slots=("a", "b"))
+        FromNonEmpty = newclass(slots=(), bases=NonEmptySlots)
+        for bases in [NonEmptySlots, (Slots, NonEmptySlots), FromNonEmpty]:
+            with self.assertRaises(TypeError):
+                newclass(mcls=ParametrizedMeta, bases=bases)
 
-        with self.assertRaises(TypeError):
-            class B2(ParametrizedMixin):
-                def __init__(self, a, *ar):
-                    self.a = a
+    def test_rule_2(self):
+        """Test that a class cannot derive from multiple parametrized bases"""
+        T1 = newclass(slots=())
+        T2 = newclass(slots=())
+        T3 = newclass(slots=())
+        T12 = newclass(slots=(), bases=[T1, T2])
+        # Check that we can mix and match inheritance in various ways
+        P1 = newclass(mcls=ParametrizedMeta, bases=T12, init=lambda self: 0)
+        P2 = newclass(mcls=ParametrizedMeta, bases=[P1, T2])
+        P3 = newclass(mcls=ParametrizedMeta, bases=P1)
+        for bases in [(P1, P2), (P1, P3), (P1, P3, T3)]:
+            with self.assertRaises(TypeError) as e:
+                newclass(mcls=ParametrizedMeta, bases=bases)
 
-        with self.assertRaises(TypeError):
-            class B3(ParametrizedMixin):
-                def __init__(self, a, b, **kw):
-                    self.a = a
-                    self.b = b
+    def test_rule_3(self):
+        """Test that only parametrized bases can have __init__"""
+        Init = newclass(slots=(), init=lambda self: None)
+        NoInit = newclass(slots=())
+        Parametrized = newclass(mcls=ParametrizedMeta, init=lambda self: None)
+        for bases in ([], [NoInit], [Parametrized], [NoInit, Parametrized]):
+            with self.assertRaises(TypeError):
+                newclass(mcls=ParametrizedMeta, bases=[Init] + bases)
+
+    def test_rule_4(self):
+        """Test that __init__ methods cannot have variable arguments"""
+        inits = [
+            (lambda *a: None), (lambda **k: None), (lambda *a, **k: None),
+            (lambda _, *a: None), (lambda _, **k: None),
+            (lambda _, *a, **k: None)
+        ]
+        for init in inits:
+            for bases in [newclass(slots=()), newclass(mcls=ParametrizedMeta)]:
+                with self.assertRaises(TypeError):
+                    newclass(init=init, bases=bases, mcls=ParametrizedMeta)
 
 
 class ParametrizedMetaTests(unittest.TestCase):
@@ -311,24 +325,55 @@ class ParametrizedMetaTests(unittest.TestCase):
         self.assertEqual((4, 5, 6), self.d._get_param_values())
 
 
-class ParametrizedMixinTests(unittest.TestCase):
+class WriteOnceMixin(object):
+    """Mixin class to make all parameters write-once attributes."""
+    __slots__ = ()
+
+    def __setattr__(self, name, val):
+        if hasattr(self, name):
+            raise AttributeError("Cannot set attribute %r" % name)
+        super(WriteOnceMixin, self).__setattr__(name, val)
+
+    def __delattr__(self, attr):
+        if hasattr(self, attr):
+            raise AttributeError("Cannot delete attribute %r" % attr)
+        super(WriteOnceMixin, self).__delattr__(attr)
+
+
+class ParameterStruct(ParametrizedMixin, WriteOnceMixin):
+    """Parametrized structure with equality and comparison determined by the
+    parameters"""
+    pass
+
+
+class WriteOnceMixinTests(unittest.TestCase):
+
+    class A(ParameterStruct):
+        def __init__(self, a, b):
+            self.a = a
+            self.b = b
+
+    class C(A):
+        def __init__(self, a, c):
+            super(self.__class__, self).__init__(a, 2)
+            self.c = c
 
     def test_attr_setting(self):
         """Test weather attribute creation and deletion is blocked"""
-        c2 = ParametrizedMetaTests.c2
+        c = self.C(1, 3)
         with self.assertRaises(AttributeError):
-            c2.b1 = "a"
+            c.a = "a"
         with self.assertRaises(AttributeError):
-            c2.b2 = "b"
+            c.b = "b"
         with self.assertRaises(AttributeError):
-            c2.c = 1
+            c.c = "c"
         with self.assertRaises(AttributeError):
-            del c2.b1
+            del c.a
         with self.assertRaises(AttributeError):
-            del c2.b2
+            del c.b
         with self.assertRaises(AttributeError):
-            del c2.c
-        self.assertEqual(("a1", 2, "a2"), (c2.b1, c2.b2, c2.c))
+            del c.c
+        self.assertEqual((1, 2, 3), (c.a, c.b, c.c))
 
 
 if __name__ == '__main__':
