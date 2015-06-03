@@ -186,9 +186,6 @@ class ClassmakerTests(unittest.TestCase):
 
 
 ParametrizedMixin = newclass(mcls=ParametrizedMeta, name="ParametrizedMixin")
-ParametrizedABCMeta = newclass(
-    bases=ABCMeta, name="ParametrizedABCMeta", new=ParametrizedMeta.__new__
-)
 
 
 class ParametrizedInheritanceRulesTests(unittest.TestCase):
