@@ -15,7 +15,7 @@ from itertools import chain, product
 
 
 def hascustominit(cls):
-    """Return true if cls does not call default initializer"""
+    """Return true if cls does not call default initializer."""
     # In pypy2, the following:
 
     # >>>> class A(object): pass
@@ -31,11 +31,11 @@ class ParametrizedMeta(type):
     """Metaclass which parametrizes a class by the parameters of it's __init__
     method. The class is automatically given __slots__ for these parameter
     names. If a class' __init__ is not present or takes no parameters, the
-    class is assumed to have no parameters.
+    class is assumed to have none.
 
     The following restrictions apply to parametrized classes:
     1) All (non-parametrized) bases in their mro must have (empty) __slots__
-    2) There can only be one in a class' bases
+    2) There can only be one in a class's bases
     3) If one has a base with a constructor, that base must be parametrized
     4) Their constructor methods cannot take variable arguments.
 
@@ -44,7 +44,8 @@ class ParametrizedMeta(type):
     """
 
     def __new__(mcls, name, bases, dct):
-        # Rule 0) No Reserved Names
+        # Rule 0: No Reserved Names
+        # -------------------------
         for attr in ['__slots__', '__parameters__']:
             if attr in dct:
                 raise TypeError("cannot set reserved attribute %r" % attr)
@@ -53,7 +54,7 @@ class ParametrizedMeta(type):
         are_parametrized = [isinstance(b, ParametrizedMeta) for b in bases]
         define_init = [hascustominit(b) for b in bases]
 
-        # Rule 1) All Bases Have Slots
+        # Rule 1: All Bases Have Slots
         # ----------------------------
         # If any of the bases lack __slots__, so will the derived class.
         # Parametrized classes are meant to be "simple", akin to namedtuples,
@@ -61,7 +62,7 @@ class ParametrizedMeta(type):
         for base, has_slots in zip(bases, have_slots):
             if not has_slots:
                 raise TypeError("base %s does not have __slots__" % base)
-        # Rule 1b) Unparametrized Bases Have Empty __slots__
+        # Rule 1b: Unparametrized Bases Have Empty __slots__
         # --------------------------------------------------
         # All significant attributes of a parametrized class should be declared
         # and set in its __init__ method. If a member descripter is not set in
@@ -73,7 +74,7 @@ class ParametrizedMeta(type):
                 if any(getattr(b, '__slots__', False) for b in base.__mro__):
                     raise TypeError("unparametrized base with nonempty slots")
 
-        # Rule 2) Max of One Parametrized Base
+        # Rule 2: Max of One Parametrized Base
         # ------------------------------------
         # A parametrized class defines an object "parametrized" by a fixed
         # set of "variables". In this model, __init__ declares the parameters
@@ -82,7 +83,7 @@ class ParametrizedMeta(type):
         #
         # Since all parametrized classes have __slots__, inheriting from two
         # of them requires both have identical slot structure. Conceptually
-        # these corresponds to different systems governed by the same
+        # these correspond to different systems governed by the same
         # parameters.
         #
         # Multiple inheritance makes most sense when the bases describe
@@ -96,11 +97,11 @@ class ParametrizedMeta(type):
                 raise TypeError("multiple parametrized bases")
             param_base = bases[are_parametrized.index(True)]
 
-        # Rule 3) No Unparametrized Initializers
+        # Rule 3: No Unparametrized Initializers
         # --------------------------------------
         # Parametrization is meant to begin at the first parametrized class
-        # in the inheritance chain to be parametrized; any other mix-in
-        # classes should serve only to add behavior to the system.
+        # in the inheritance chain; any other mix-in classes should serve only
+        # to add *behavior* to the system.
         def default_init(): pass  # getargspec(object.__init__) raises error
         for has_init, is_parametrized in zip(define_init, are_parametrized):
             if has_init:
@@ -108,7 +109,7 @@ class ParametrizedMeta(type):
                     raise TypeError("multiple __init__'s in bases")
                 default_init = param_base.__init__
 
-        # Rule 4) Fixed Parameter Count
+        # Rule 4: Fixed Parameter Count
         # -----------------------------
         # Parametrized classes are supposed to represent *specific* systems
         # governed by a small, very straightforward set of parameters. It
@@ -136,18 +137,16 @@ class ParametrizedMeta(type):
         return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
 
 
-def newclass(slots=None, init=None, bases=(), mcls=type, name="newclass", **k):
-    """Return blank class with the given metaclass, __slots__ and __init__
-    function and bases. """
+def newclass(mcls=type, name="newclass", bases=(), **special):
+    """Return blank class with the given metaclass, __slots__, __init__
+    function and bases. Additional keyword arguments added to class dict."""
     if not isinstance(bases, Iterable):
         bases = (bases, )
     bases = tuple(bases)
     dct = {}
-    if slots is not None:
-        dct['__slots__'] = slots
-    if init is not None:
-        dct['__init__'] = init
-    dct.update(k)
+    for attr, val in special.items():
+        if val is not None:
+            dct['__'+attr+'__'] = val
     return mcls(name, bases, dct)
 
 
@@ -187,6 +186,9 @@ class ClassmakerTests(unittest.TestCase):
 
 
 ParametrizedMixin = newclass(mcls=ParametrizedMeta, name="ParametrizedMixin")
+ParametrizedABCMeta = newclass(
+    bases=ABCMeta, name="ParametrizedABCMeta", new=ParametrizedMeta.__new__
+)
 
 
 class ParametrizedInheritanceRulesTests(unittest.TestCase):
@@ -194,7 +196,7 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
 
     def test_rule_0(self):
         """Ensure reserved attributes are unsettable"""
-        reserved = ['__slots__', '__parameters__']
+        reserved = ['slots', 'parameters']
         for word in reserved:
             with self.assertRaises(TypeError):
                 newclass(mcls=ParametrizedMeta, **{word: ()})
