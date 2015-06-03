@@ -10,11 +10,17 @@ from operator import attrgetter
 
 from itertools import chain  # for testing
 
-from six import with_metaclass  # to be replaced
+from six import with_metaclass
 
 
 def hascustominit(cls):
     """Return true if cls does not call default initializer"""
+    # In pypy2, the following:
+
+    # >>>> class A(object): pass
+    # >>>> A.__init__ is object.__init__
+
+    # returns False. Hence the need to traverse class dicts in mro
     for c in type.mro(cls):  # works with type
         if '__init__' in c.__dict__:
             return c is not object
@@ -27,57 +33,100 @@ class ParametrizedMeta(type):
     class is assumed to have no parameters.
 
     The following restrictions apply to parametrized classes:
-        1) All classes in their inheritance chains must have __slots__
-        2) There can only be one in a class' bases
-        3) If derived from multiple bases, the bases cannot define constructors
-        4) Their constructor methods cannot take variable arguments.
+    1) Their (non-parametrized) bases must have (empty) __slots__
+    2) There can only be one in a class' bases
+    3) If one has a base with a constructor, that base must be parametrized
+    4) Their constructor methods cannot take variable arguments.
+
+    Additionally, the '__parameters__' and '__slots__' attributes of
+    parametrized classes are reserved for internal use.
     """
 
     def __new__(mcls, name, bases, dct):
-        # Ensure automatically generated attributes are not overloaded
+        # Rule 0) No Reserved Names
         for attr in ['__slots__', '_get_param_values', '__parameters__']:
             if attr in dct:
-                raise TypeError(
-                    "cannot parametrize %s: overloaded %s" % (name, attr))
+                raise TypeError("cannot set reserved attribute %r" % attr)
 
-        # 1) If any of the bases lack __slots__, so will the derived class
-        for base in bases:
-            if '__dict__' in base.__dict__:
-                raise TypeError("base class %s does not have __slots__" % base)
-        # 2) For sanity, allow neither unparametrized bases with custom init...
-        if any(not isinstance(base, ParametrizedMeta) for base in bases):
-            if any(hascustominit(base) for base in bases):
-                raise TypeError("multiple bases with custom __init__")
-        # 3) ... nor inheriting multiple parametrizations of same parameters
-        elif len(bases) > 1:
-            raise TypeError("metaclass conflict: multiple parametrized bases")
+        have_slots = ['__dict__' not in b.__dict__ for b in bases]
+        are_parametrized = [isinstance(b, ParametrizedMeta) for b in bases]
+        define_init = [hascustominit(b) for b in bases]
 
-        # If there are multiple bases, we have already verified none have
-        # constructors, so we may safely pick the first as representative
-        base = bases[0] if bases else object
-        default_init = base.__init__ if hascustominit(base) else lambda self: 0
+        # Rule 1) All Bases Have Slots
+        # ----------------------------
+        # If any of the bases lack __slots__, so will the derived class.
+        # Parametrized classes are meant to be "simple", akin to namedtuples,
+        # thus the only attributes they accept are their parameters.
+        for base, has_slots in zip(bases, have_slots):
+            if not has_slots:
+                raise TypeError("base %s does not have __slots__" % base)
+        # Rule 1b) Unparametrized Bases Have Empty __slots__
+        # --------------------------------------------------
+        # Since parametrized class cannot have initializers, it makes no sense
+        # for them to define their own __slots__.
+        for base, is_parametrized in zip(bases, are_parametrized):
+            if getattr(base, '__slots__', False) and not is_parametrized:
+                raise TypeError("unparametrized base with nonempty slots")
+
+        # Rule 2) Max of One Parametrized Base
+        # ------------------------------------
+        # A parametrized class defines an object "parametrized" by a fixed
+        # set of "variables". In this model, __init__ declares the parameters
+        # and the rest of the class describes the system governed by those
+        # inputs.
+        #
+        # Since all parametrized classes have __slots__, inheriting from two
+        # of them requires both have identical slot structure. Conceptually
+        # these corresponds to different systems governed by the same
+        # parameters.
+        #
+        # Multiple inheritance makes most sense when the bases describe
+        # *independent* aspects of an object's nature. The requirement of slots
+        # only allows mixing different interpretations of the *same*
+        # parameters. It thus makes no sense to have multiple parametrized
+        # bases.
+        param_base = None
+        if any(are_parametrized):
+            if are_parametrized.count(True) > 1:
+                raise TypeError("multiple parametrized bases")
+            param_base = bases[are_parametrized.index(True)]
+
+        # Rule 3) No Unparametrized Initializers
+        # --------------------------------------
+        # Parametrization is meant to begin at the first parametrized class
+        # in the inheritance chain to be parametrized; any other mix-in
+        # classes should serve only to add behavior to the system.
+        def default_init(): pass  # getargspec(object.__init__) raises error
+        for has_init, is_parametrized in zip(define_init, are_parametrized):
+            if has_init:
+                if not is_parametrized:
+                    raise TypeError("multiple __init__'s in bases")
+                default_init = param_base.__init__
+
+        # Rule 4) Fixed Parameter Count
+        # -----------------------------
+        # Parametrized classes are supposed to represent *specific* systems
+        # governed by a small, very straightforward set of parameters. It
+        # makes no sense to allow variable arguments in this context.
         init_args = getargspec(dct.get('__init__', default_init))
-        # 4) Classes must be parametrized with finite number of parameters
         if init_args.varargs is not None or init_args.keywords is not None:
             raise TypeError("variable arguments in %s.__init__" % name)
 
         current_params = tuple(init_args.args[1:])
-        old_params = getattr(base, '__parameters__', frozenset())
+        old_params = getattr(param_base, '__parameters__', frozenset())
         new_params = ()
         for param in current_params:
             if param not in old_params:
                 new_params += param,
-        pg = attrgetter(*current_params) if current_params else lambda self: ()
-
-        def _get_param_values(self):
-            """Return ordered tuple of instance's parameter values"""
-            return pg(self)
 
         # slots must be set before class creation
         dct['__slots__'] = new_params
         dct['__parameters__'] = old_params.union(new_params)
-        dct['_get_param_values'] = _get_param_values
-        dct['__'+name+'_parameters__'] = current_params  # informational only
+
+        # convenience
+        pg = attrgetter(*current_params) if current_params else lambda self: ()
+        dct.setdefault('_get_param_values', lambda self: pg(self))
+        dct.setdefault('__'+name+'_parameters__', current_params)
 
         return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
 
@@ -162,7 +211,7 @@ class ParametrizedMetaValidationTests(unittest.TestCase):
         class B23(B2, B3):
             __slots__ = ()
 
-        for bases in [(B1, B2), (B1, P1)]:
+        for bases in [(B1, B2), (B1, P1), (B1, B2, P1)]:
             class P(with_metaclass(ParametrizedMeta, *bases)):
                 pass
 
