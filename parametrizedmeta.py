@@ -21,7 +21,7 @@ def hascustominit(cls):
             return c is not object
 
 
-class ParametrizedMeta(type):
+class ParamMeta(type):
     """Metaclass which parametrizes a class by the parameters of it's __init__
     method. The class is automatically given __slots__ for these parameter
     names. If a class' __init__ is not present or takes no parameters, the
@@ -44,9 +44,9 @@ class ParametrizedMeta(type):
             if attr in dct:
                 raise TypeError("cannot set reserved attribute %r" % attr)
 
-        have_slots = ['__dict__' not in b.__dict__ for b in bases]
-        are_parametrized = [isinstance(b, ParametrizedMeta) for b in bases]
-        define_init = [hascustominit(b) for b in bases]
+        have_slots = ['__dict__' not in base.__dict__ for base in bases]
+        are_parametrized = [isinstance(base, ParamMeta) for base in bases]
+        define_init = [hascustominit(base) for base in bases]
 
         # Rule 1: All Bases Have Slots
         # ----------------------------
@@ -128,7 +128,7 @@ class ParametrizedMeta(type):
         dct.setdefault('_get_param_values', lambda self: pg(self))
         dct.setdefault('__'+name+'_parameters__', current_params)
 
-        return super(ParametrizedMeta, mcls).__new__(mcls, name, bases, dct)
+        return super(ParamMeta, mcls).__new__(mcls, name, bases, dct)
 
 
 def newclass(mcls=type, name="newclass", bases=(), **special):
@@ -144,7 +144,7 @@ def newclass(mcls=type, name="newclass", bases=(), **special):
     return mcls(name, bases, dct)
 
 
-ParametrizedMixin = newclass(mcls=ParametrizedMeta, name="ParametrizedMixin")
+ParametrizedMixin = newclass(mcls=ParamMeta, name="ParametrizedMixin")
 
 
 class WriteOnceMixin(object):

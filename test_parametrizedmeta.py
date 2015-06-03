@@ -4,7 +4,7 @@ from abc import ABCMeta
 from itertools import chain, product
 
 from parametrizedmeta import (
-    ParametrizedMeta,
+    ParamMeta,
     ParametrizedMixin,
     WriteOnceMixin,
     ParameterStruct,
@@ -48,14 +48,14 @@ class ClassmakerTests(unittest.TestCase):
 
 
 class ParametrizedInheritanceRulesTests(unittest.TestCase):
-    """Test ParametrizedMeta constructor throws errors on invalid bases"""
+    """Test ParamMeta constructor throws errors on invalid bases"""
 
     def test_rule_0(self):
         """Ensure reserved attributes are unsettable"""
         reserved = ['slots', 'parameters']
         for word in reserved:
             with self.assertRaises(TypeError):
-                newclass(mcls=ParametrizedMeta, **{word: ()})
+                newclass(mcls=ParamMeta, **{word: ()})
 
     def test_rule_1(self):
         """Ensure that bases must have slots"""
@@ -66,14 +66,14 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
 
         for bases in [NoSlots, PhonySlots, (Slots, NoSlots)]:
             with self.assertRaises(TypeError):
-                newclass(mcls=ParametrizedMeta, bases=bases)
+                newclass(mcls=ParamMeta, bases=bases)
 
         # test rule 1b
         NonEmptySlots = newclass(slots=("a", "b"))
         FromNonEmpty = newclass(slots=(), bases=NonEmptySlots)
         for bases in [NonEmptySlots, (Slots, NonEmptySlots), FromNonEmpty]:
             with self.assertRaises(TypeError):
-                newclass(mcls=ParametrizedMeta, bases=bases)
+                newclass(mcls=ParamMeta, bases=bases)
 
     def test_rule_2(self):
         """Test that a class cannot derive from multiple parametrized bases"""
@@ -82,21 +82,21 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
         T3 = newclass(slots=())
         T12 = newclass(slots=(), bases=[T1, T2])
         # Check that we can mix and match inheritance in various ways
-        P1 = newclass(mcls=ParametrizedMeta, bases=T12, init=lambda self: 0)
-        P2 = newclass(mcls=ParametrizedMeta, bases=[P1, T2])
-        P3 = newclass(mcls=ParametrizedMeta, bases=P1)
+        P1 = newclass(mcls=ParamMeta, bases=T12, init=lambda self: 0)
+        P2 = newclass(mcls=ParamMeta, bases=[P1, T2])
+        P3 = newclass(mcls=ParamMeta, bases=P1)
         for bases in [(P1, P2), (P1, P3), (P1, P3, T3)]:
             with self.assertRaises(TypeError) as e:
-                newclass(mcls=ParametrizedMeta, bases=bases)
+                newclass(mcls=ParamMeta, bases=bases)
 
     def test_rule_3(self):
         """Test that only parametrized bases can have __init__"""
         Init = newclass(slots=(), init=lambda self: None)
         NoInit = newclass(slots=())
-        Parametrized = newclass(mcls=ParametrizedMeta, init=lambda self: None)
+        Parametrized = newclass(mcls=ParamMeta, init=lambda self: None)
         for bases in ([], [NoInit], [Parametrized], [NoInit, Parametrized]):
             with self.assertRaises(TypeError):
-                newclass(mcls=ParametrizedMeta, bases=[Init] + bases)
+                newclass(mcls=ParamMeta, bases=[Init] + bases)
 
     def test_rule_4(self):
         """Test that __init__ methods cannot have variable arguments"""
@@ -106,13 +106,13 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
             (lambda _, *a, **k: None)
         ]
         for init in inits:
-            for bases in [newclass(slots=()), newclass(mcls=ParametrizedMeta)]:
+            for bases in [newclass(slots=()), newclass(mcls=ParamMeta)]:
                 with self.assertRaises(TypeError):
-                    newclass(init=init, bases=bases, mcls=ParametrizedMeta)
+                    newclass(init=init, bases=bases, mcls=ParamMeta)
 
 
-class ParametrizedMetaTests(unittest.TestCase):
-    """Verify the properties of ParametrizedMeta instances"""
+class ParamMetaTests(unittest.TestCase):
+    """Verify the properties of ParamMeta instances"""
 
     class A(ParametrizedMixin):
         pass
@@ -146,7 +146,7 @@ class ParametrizedMetaTests(unittest.TestCase):
     paramobjs = [a, b, c, c2, d]
 
     def test_parameters_attribute(self):
-        """Test that ParametrizedMeta keeps track of parameters correctly"""
+        """Test that ParamMeta keeps track of parameters correctly"""
         self.assertEqual(frozenset(), self.A.__parameters__)
         self.assertEqual({"b1", "b2"}, self.B.__parameters__)
         self.assertEqual({"b1", "b2", "c"}, self.C.__parameters__)
