@@ -7,7 +7,7 @@ from parametrizedmeta import (
     ParamMeta,
     ParametrizedMixin,
     WriteOnceMixin,
-    ParameterStruct,
+    Struct,
     hascustominit, newclass
 )
 
@@ -176,16 +176,16 @@ class ParamMetaTests(unittest.TestCase):
 
     def test_param_getter(self):
         """Test paramgetter works correctly"""
-        self.assertEqual((), self.a._get_param_values())
-        self.assertEqual(("11", "22"), self.b._get_param_values())
-        self.assertEqual("a", self.c._get_param_values())
-        self.assertEqual(("a1", "a2"), self.c2._get_param_values())
-        self.assertEqual((4, 5, 6), self.d._get_param_values())
+        self.assertEqual((), self.a._param_values())
+        self.assertEqual(("11", "22"), self.b._param_values())
+        self.assertEqual("a", self.c._param_values())
+        self.assertEqual(("a1", "a2"), self.c2._param_values())
+        self.assertEqual((4, 5, 6), self.d._param_values())
 
 
 class WriteOnceMixinTests(unittest.TestCase):
 
-    class A(ParameterStruct):
+    class A(Struct):
         def __init__(self, a, b):
             self.a = a
             self.b = b

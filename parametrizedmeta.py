@@ -3,6 +3,7 @@
 Caleb Levy, 2015.
 """
 
+from abc import ABCMeta
 from collections import Iterable
 from inspect import getargspec
 from operator import attrgetter
@@ -125,8 +126,9 @@ class ParamMeta(type):
 
         # convenience
         pg = attrgetter(*current_params) if current_params else lambda self: ()
-        dct.setdefault('_get_param_values', lambda self: pg(self))
-        dct.setdefault('__'+name+'_parameters__', current_params)
+        dct.setdefault('_param_values', lambda self: pg(self))
+        dct.setdefault('__'+name+'_parameters__', current_params)  # for docs
+        dct.setdefault('_param_names', current_params)
 
         return super(ParamMeta, mcls).__new__(mcls, name, bases, dct)
 
@@ -144,7 +146,11 @@ def newclass(mcls=type, name="newclass", bases=(), **special):
     return mcls(name, bases, dct)
 
 
-ParametrizedMixin = newclass(mcls=ParamMeta, name="ParametrizedMixin")
+ParametrizedMixin = newclass(
+    mcls=ParamMeta,
+    name="ParametrizedMixin",
+    doc="""Mixin to parametrize a derived class"""
+)
 
 
 class WriteOnceMixin(object):
@@ -162,7 +168,38 @@ class WriteOnceMixin(object):
         super(WriteOnceMixin, self).__delattr__(attr)
 
 
-class ParameterStruct(ParametrizedMixin, WriteOnceMixin):
-    """Parametrized structure with equality and comparison determined by the
+class Struct(ParametrizedMixin, WriteOnceMixin):
+    """Parametrized structure with equality and hashing determined by the
     parameters"""
+
+    def __eq__(self, other):
+        if type(self) is type(other):
+            return self._param_values() == other._param_values()
+        return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self):
+        return hash(self._param_values())
+
+    def __repr__(self):
+        param_strings = []
+        for name, val in zip(self._param_names, self._param_values()):
+            param_strings.append('%s=%s' % (name, val))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(param_strings))
+
+
+class ParamABCMeta(ParamMeta, ABCMeta):
+    """Metaclass for creating parametrized abstract base classes"""
     pass
+
+
+Enumerable = newclass(
+    mcls=ParamABCMeta,
+    name="Enumerable",
+    bases=Struct,
+    iter=Iterable.__iter__,
+    doc=("Abstract enumerators of categories of sets parametrized by a\n"
+         "finite number of variables.")
+)
