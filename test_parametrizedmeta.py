@@ -195,19 +195,31 @@ class ParamMetaTests(unittest.TestCase):
         self.assertEqual((4, 5, 6), self.d._param_values())
 
 
-class WriteOnceMixinTests(unittest.TestCase):
+class StructTests(unittest.TestCase):
 
     class A(Struct):
         def __init__(self, a, b):
             self.a = a
             self.b = b
 
-    class C(A):
-        def __init__(self, a, c):
-            super(self.__class__, self).__init__(a, 2)
+    class B(A):
+        def __init__(self, b, c):
+            self.a = 1
+            self.b = b
             self.c = c
 
-    def test_attr_setting(self):
+    class C(A):
+        def __init__(self, a, c):
+            self.a = a
+            self.b = 2
+            self.c = c
+
+    class D(C):
+        pass
+
+    structs = [struct(1, 2) for struct in (A, B, C, D)]
+
+    def test_write_once(self):
         """Test weather attribute creation and deletion is blocked"""
         c = self.C(1, 3)
         with self.assertRaises(AttributeError):
@@ -223,6 +235,34 @@ class WriteOnceMixinTests(unittest.TestCase):
         with self.assertRaises(AttributeError):
             del c.c
         self.assertEqual((1, 2, 3), (c.a, c.b, c.c))
+
+    def test_equality(self):
+        """Ensure that structs are equal iff they have same type and params."""
+        t = [s(1, 3) for s in (self.A, self.B, self.C, self.D)]
+        for i, s1 in enumerate(self.structs):
+            for j, s2 in enumerate(self.structs):
+                if i == j:
+                    self.assertEqual(s1, s2)
+                else:
+                    self.assertNotEqual(s1, s2)
+                self.assertNotEqual(s1, t[j])
+
+    def test_repr(self):
+        """Test that that Struct strings form valid python expressions"""
+        for s in self.structs:
+            self.assertEqual(s, eval(repr(s), {s.__class__.__name__: type(s)}))
+
+    def test_keyability(self):
+        """Test that Structs can be appropriately used as dictionary keys"""
+        self.assertEqual(len(set(self.structs)), len(self.structs))
+        dic = {}
+        for i, s in enumerate(self.structs):
+            dic[s] = i
+        self.assertEqual(len(dic), len(self.structs))
+        for s in self.structs:
+            dic[type(s)(*s._param_values())] += 1
+        for i, s in enumerate(self.structs):
+            self.assertEqual(dic[s], i+1)
 
 
 if __name__ == '__main__':
