@@ -1,15 +1,28 @@
 import unittest
 
 from abc import ABCMeta
+from collections import Iterable
 from itertools import chain, product
 
 from parametrizedmeta import (
     ParamMeta,
-    ParametrizedMixin,
     WriteOnceMixin,
     Struct,
-    hascustominit, newclass
+    hascustominit
 )
+
+
+def newclass(mcls=type, name="newclass", bases=(), **special):
+    """Return blank class with the given metaclass, __slots__, __init__
+    function and bases. Additional keyword arguments added to class dict."""
+    if not isinstance(bases, Iterable):
+        bases = (bases, )
+    bases = tuple(bases)
+    dct = {}
+    for attr, val in special.items():
+        if val is not None:
+            dct['__'+attr+'__'] = val
+    return mcls(name, bases, dct)
 
 
 class ClassmakerTests(unittest.TestCase):
@@ -114,8 +127,7 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
 class ParamMetaTests(unittest.TestCase):
     """Verify the properties of ParamMeta instances"""
 
-    class A(ParametrizedMixin):
-        pass
+    A = newclass(ParamMeta)
 
     class B(A):
         def __init__(self, b1, b2):

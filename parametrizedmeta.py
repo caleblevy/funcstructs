@@ -3,10 +3,11 @@
 Caleb Levy, 2015.
 """
 
-from abc import ABCMeta
-from collections import Iterable
+from abc import abstractmethod, ABCMeta
 from inspect import getargspec
 from operator import attrgetter
+
+from six import with_metaclass
 
 
 def hascustominit(cls):
@@ -23,7 +24,7 @@ def hascustominit(cls):
 
 
 class ParamMeta(type):
-    """Metaclass which parametrizes a class by the parameters of it's __init__
+    """Metaclass which parametrizes a class by the parameters of its __init__
     method. The class is automatically given __slots__ for these parameter
     names. If a class' __init__ is not present or takes no parameters, the
     class is assumed to have none.
@@ -133,24 +134,9 @@ class ParamMeta(type):
         return super(ParamMeta, mcls).__new__(mcls, name, bases, dct)
 
 
-def newclass(mcls=type, name="newclass", bases=(), **special):
-    """Return blank class with the given metaclass, __slots__, __init__
-    function and bases. Additional keyword arguments added to class dict."""
-    if not isinstance(bases, Iterable):
-        bases = (bases, )
-    bases = tuple(bases)
-    dct = {}
-    for attr, val in special.items():
-        if val is not None:
-            dct['__'+attr+'__'] = val
-    return mcls(name, bases, dct)
-
-
-ParametrizedMixin = newclass(
-    mcls=ParamMeta,
-    name="ParametrizedMixin",
-    doc="""Mixin to parametrize a derived class"""
-)
+class ParametrizedABCMeta(ParamMeta, ABCMeta):
+    """Metaclass for creating parametrized abstract base classes"""
+    pass
 
 
 class WriteOnceMixin(object):
@@ -168,7 +154,7 @@ class WriteOnceMixin(object):
         super(WriteOnceMixin, self).__delattr__(attr)
 
 
-class Struct(ParametrizedMixin, WriteOnceMixin):
+class Struct(with_metaclass(ParamMeta, WriteOnceMixin)):
     """Parametrized structure with equality and hashing determined by the
     parameters"""
 
@@ -190,16 +176,11 @@ class Struct(ParametrizedMixin, WriteOnceMixin):
         return '%s(%s)' % (self.__class__.__name__, ', '.join(param_strings))
 
 
-class ParamABCMeta(ParamMeta, ABCMeta):
-    """Metaclass for creating parametrized abstract base classes"""
-    pass
+class Enumerable(with_metaclass(ParametrizedABCMeta, Struct)):
+    """Abstract enumerators for collections of objects parametrized by a finite
+    number of variables."""
 
-
-Enumerable = newclass(
-    mcls=ParamABCMeta,
-    name="Enumerable",
-    bases=Struct,
-    iter=Iterable.__iter__,
-    doc=("Abstract enumerators of categories of sets parametrized by a\n"
-         "finite number of variables.")
-)
+    @abstractmethod
+    def __iter__(self):
+        return
+        yield
