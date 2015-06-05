@@ -18,7 +18,7 @@ def hascustominit(cls):
     # >>>> A.__init__ is object.__init__
 
     # returns False. Hence the need to traverse class dicts in mro
-    for c in type.mro(cls):  # works with type
+    for c in type.mro(cls):
         if '__init__' in c.__dict__:
             return c is not object
 
@@ -26,8 +26,8 @@ def hascustominit(cls):
 class ParamMeta(type):
     """Metaclass which parametrizes a class by the parameters of its __init__
     method. The class is automatically given __slots__ for these parameter
-    names. If a class' __init__ is not present or takes no parameters, the
-    class is assumed to have none.
+    names. If a class's __init__ is not present or takes no parameters, the it
+    is assumed to have none.
 
     The following restrictions apply to parametrized classes:
     1) All (non-parametrized) bases in their mro must have (empty) __slots__
@@ -115,21 +115,23 @@ class ParamMeta(type):
             raise TypeError("variable arguments in %s.__init__" % name)
 
         current_params = tuple(init_args.args[1:])
-        old_params = getattr(param_base, '__parameters__', frozenset())
+        # Find all previously defined parameter names
+        old_params = set()
+        for base in bases:
+            for b in base.__mro__:
+                old_params.update(getattr(param_base, '__slots__', ()))
+        # Take care not to duplicate existing member descriptors
         new_params = ()
         for param in current_params:
             if param not in old_params:
                 new_params += param,
-
         # slots must be set before class creation
         dct['__slots__'] = new_params
-        dct['__parameters__'] = old_params.union(new_params)
 
-        # convenience
+        # for docs and convenience
+        dct['__parameters__'] = current_params
         pg = attrgetter(*current_params) if current_params else lambda self: ()
         dct.setdefault('_param_values', lambda self: pg(self))
-        dct.setdefault('__'+name+'_parameters__', current_params)  # for docs
-        dct.setdefault('_param_names', current_params)
 
         return super(ParamMeta, mcls).__new__(mcls, name, bases, dct)
 
@@ -171,7 +173,7 @@ class Struct(with_metaclass(ParamMeta, WriteOnceMixin)):
 
     def __repr__(self):
         param_strings = []
-        for name, val in zip(self._param_names, self._param_values()):
+        for name, val in zip(self.__parameters__, self._param_values()):
             param_strings.append('%s=%s' % (name, val))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(param_strings))
 

@@ -4,12 +4,7 @@ from abc import ABCMeta
 from collections import Iterable
 from itertools import chain, product
 
-from parametrizedmeta import (
-    ParamMeta,
-    WriteOnceMixin,
-    Struct,
-    hascustominit
-)
+from parametrizedmeta import ParamMeta, Struct, hascustominit
 
 
 def newclass(mcls=type, name="newclass", bases=(), **special):
@@ -158,12 +153,12 @@ class ParamMetaTests(unittest.TestCase):
     paramobjs = [a, b, c, c2, d]
 
     def test_parameters_attribute(self):
-        """Test that ParamMeta keeps track of parameters correctly"""
-        self.assertEqual(frozenset(), self.A.__parameters__)
-        self.assertEqual({"b1", "b2"}, self.B.__parameters__)
-        self.assertEqual({"b1", "b2", "c"}, self.C.__parameters__)
-        self.assertEqual({"b1", "b2", "c"}, self.C2.__parameters__)
-        self.assertEqual({"b1", "b2", "d"}, self.D.__parameters__)
+        """Test that __parameters__ attribute reflects __init__ parameters"""
+        self.assertEqual((), self.A.__parameters__)
+        self.assertEqual(("b1", "b2"), self.B.__parameters__)
+        self.assertEqual(("c", ), self.C.__parameters__)
+        self.assertEqual(("b1", "c"), self.C2.__parameters__)
+        self.assertEqual(("b1", "b2", "d"), self.D.__parameters__)
 
     def test_init(self):
         """Test parameter values are initialized properly"""
@@ -179,12 +174,10 @@ class ParamMetaTests(unittest.TestCase):
             self.assertFalse(hasattr(obj, '__dict__'))
             with self.assertRaises(AttributeError):
                 setattr(obj, "e", 0)
-            # If there are other slotted class in mro, this must be modified
-            slots = [getattr(c, '__slots__', ()) for c in type(obj).__mro__]
-            # Ensure there are same number of unique slots and parameters
-            self.assertEqual(len(obj.__parameters__), sum(map(len, slots)))
-            # Ensure that __parameters__ contains all unique slots in mro
-            self.assertEqual(obj.__parameters__, set(chain(*slots)))
+        for P in map(type, self.paramobjs):
+            slots = [getattr(c, '__slots__', ()) for c in P.__mro__]
+            # Ensure there are same number of unique slots and total
+            self.assertEqual(len(set(chain(*slots))), sum(map(len, slots)))
 
     def test_param_getter(self):
         """Test paramgetter works correctly"""
