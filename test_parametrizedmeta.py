@@ -151,13 +151,21 @@ class ParamMetaTests(unittest.TestCase):
             super(self.__class__, self).__init__(b1, b2)
             self.d = d
 
+    class E(D):
+        def __init__(self, b1, f, e):
+            self.b2 = self.d = 0
+            self.b1 = b1
+            self.e = e
+            self.f = f
+
     a = A()
     b = B("11", "22")
     c = C("a")
     c2 = C2("a1", "a2")
     d = D(4, 5, 6)
+    e = E(-3, -1, -2)
 
-    paramobjs = [a, b, c, c2, d]
+    paramobjs = [a, b, c, c2, d, e]
 
     def test_parameters_attribute(self):
         """Test that __parameters__ attribute reflects __init__ parameters"""
@@ -166,6 +174,7 @@ class ParamMetaTests(unittest.TestCase):
         self.assertEqual(("c", ), self.C.__parameters__)
         self.assertEqual(("b1", "c"), self.C2.__parameters__)
         self.assertEqual(("b1", "b2", "d"), self.D.__parameters__)
+        self.assertEqual(("b1", "f", "e"), self.E.__parameters__)
 
     def test_init(self):
         """Test parameter values are initialized properly"""
@@ -173,6 +182,10 @@ class ParamMetaTests(unittest.TestCase):
         self.assertEqual((1, 2, "a"), (self.c.b1, self.c.b2, self.c.c))
         self.assertEqual(("a1", 2, "a2"), (self.c2.b1, self.c2.b2, self.c2.c))
         self.assertEqual((4, 5, 6), (self.d.b1, self.d.b2, self.d.d))
+        self.assertEqual(
+            (-3, 0, 0, -2, -1),
+            (self.e.b1, self.e.b2, self.e.d, self.e.e, self.e.f)
+        )
 
     def test_slots(self):
         """Test parametrized classes are correctly slotted"""
@@ -180,7 +193,7 @@ class ParamMetaTests(unittest.TestCase):
             self.assertTrue(hasattr(obj, '__slots__'))
             self.assertFalse(hasattr(obj, '__dict__'))
             with self.assertRaises(AttributeError):
-                setattr(obj, "e", 0)
+                setattr(obj, "g", 0)
         for P in map(type, self.paramobjs):
             slots = [getattr(c, '__slots__', ()) for c in P.__mro__]
             # Ensure there are same number of unique slots and total
