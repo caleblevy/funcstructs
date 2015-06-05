@@ -162,9 +162,8 @@ class WriteOnceMixin(object):
         super(WriteOnceMixin, self).__delattr__(attr)
 
 
-class Struct(with_metaclass(ParamMeta, WriteOnceMixin)):
-    """Parametrized structure with equality and hashing determined by the
-    parameters"""
+class Struct(with_metaclass(ParamMeta)):
+    """Parametrized structure with equality determined by parameter values."""
 
     def __eq__(self, other):
         if type(self) is type(other):
@@ -174,9 +173,6 @@ class Struct(with_metaclass(ParamMeta, WriteOnceMixin)):
     def __ne__(self, other):
         return not self == other
 
-    def __hash__(self):
-        return hash(self._param_values())
-
     def __repr__(self):
         param_strings = []
         for name, val in zip(self.__parameters__, self._param_values()):
@@ -184,7 +180,16 @@ class Struct(with_metaclass(ParamMeta, WriteOnceMixin)):
         return '%s(%s)' % (self.__class__.__name__, ', '.join(param_strings))
 
 
-class Enumerable(with_metaclass(ParametrizedABCMeta, Struct)):
+class ImmutableStruct(Struct, WriteOnceMixin):
+    """A Struct which becomes immutable once initialized. They are hashable,
+    assuming that their parameter values are, and are thus suitable for use as
+    dictionary keys."""
+
+    def __hash__(self):
+        return hash(self._param_values())
+
+
+class Enumerable(with_metaclass(ParametrizedABCMeta, ImmutableStruct)):
     """Abstract enumerators for collections of objects parametrized by a finite
     number of variables."""
 

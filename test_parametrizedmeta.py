@@ -4,7 +4,7 @@ from abc import ABCMeta
 from collections import Iterable
 from itertools import chain, product
 
-from parametrizedmeta import ParamMeta, Struct, hascustominit
+from parametrizedmeta import hascustominit, ParamMeta, ImmutableStruct
 
 
 def newclass(mcls=type, name="newclass", bases=(), **special):
@@ -208,9 +208,9 @@ class ParamMetaTests(unittest.TestCase):
         self.assertEqual((4, 5, 6), self.d._param_values())
 
 
-class StructTests(unittest.TestCase):
+class ImmutableStructTests(unittest.TestCase):
 
-    class A(Struct):
+    class A(ImmutableStruct):
         def __init__(self, a, b):
             self.a = a
             self.b = b
