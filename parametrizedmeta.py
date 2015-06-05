@@ -23,6 +23,14 @@ def hascustominit(cls):
             return c is not object
 
 
+def base_slots(cls):
+    """Return all member descriptors in C and its bases."""
+    slots = set()
+    for c in type.mro(cls):
+        slots.update(getattr(c, '__slots__', ()))
+    return slots
+
+
 class ParamMeta(type):
     """Metaclass which parametrizes a class by the parameters of its __init__
     method. The class is automatically given __slots__ for these parameter
@@ -66,14 +74,13 @@ class ParamMeta(type):
         # in the mro, the behaviour is technically undefined (see notes on
         # slots at https://docs.python.org/3/reference/datamodel.html).
         for base, is_parametrized in zip(bases, are_parametrized):
-            if not is_parametrized:
-                if any(getattr(b, '__slots__', False) for b in base.__mro__):
-                    raise TypeError("unparametrized base with nonempty slots")
+            if not is_parametrized and base_slots(base):
+                raise TypeError("unparametrized base with nonempty slots")
 
         # Rule 2: Max of One Parametrized Base
         # ------------------------------------
         # A parametrized class defines an object "governed" by a fixed set of
-        # "variables". In this model, __init__ declares the parameters and the
+        # "variables". In this model, __init__ declares the variables and the
         # rest of the class describes the system governed by those inputs.
         #
         # Since all parametrized classes have __slots__, inheriting from two
@@ -86,30 +93,31 @@ class ParamMeta(type):
         # only allows mixing different interpretations of the *same*
         # parameters. It thus makes no sense to have multiple parametrized
         # bases.
-        param_base = None
-        if any(are_parametrized):
-            if are_parametrized.count(True) > 1:
-                raise TypeError("multiple parametrized bases")
-            param_base = bases[are_parametrized.index(True)]
+        if are_parametrized.count(True) > 1:
+            raise TypeError("multiple parametrized bases")
 
         # Rule 3: No Unparametrized Initializers
         # --------------------------------------
         # Parametrization is meant to begin at the first parametrized class
         # in the inheritance chain; any other mix-in classes should serve only
         # to add *behavior* to the system.
-        def default_init(): pass  # getargspec(object.__init__) raises error
         for has_init, is_parametrized in zip(define_init, are_parametrized):
-            if has_init:
-                if not is_parametrized:
-                    raise TypeError("multiple __init__'s in bases")
+            if has_init and not is_parametrized:
+                raise TypeError("multiple __init__'s in bases")
+
+        # Extract __init__ parameters
+        def default_init(self): pass
+        if any(are_parametrized):
+            param_base = bases[are_parametrized.index(True)]
+            if hascustominit(param_base):
                 default_init = param_base.__init__
+        init_args = getargspec(dct.get('__init__', default_init))
 
         # Rule 4: Fixed Parameter Count
         # -----------------------------
         # Parametrized classes are supposed to represent *specific* systems
         # governed by a small, very straightforward set of parameters. It
         # makes no sense to allow variable arguments in this context.
-        init_args = getargspec(dct.get('__init__', default_init))
         if init_args.varargs is not None or init_args.keywords is not None:
             raise TypeError("variable arguments in %s.__init__" % name)
 
@@ -117,8 +125,7 @@ class ParamMeta(type):
         # Find all previously defined parameter names
         old_params = set()
         for base in bases:
-            for b in base.__mro__:
-                old_params.update(getattr(param_base, '__slots__', ()))
+            old_params.update(base_slots(base))
         # Take care not to duplicate existing member descriptors
         new_params = ()
         for param in current_params:
