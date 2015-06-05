@@ -8,8 +8,15 @@ from parametrizedmeta import ParamMeta, Struct, hascustominit
 
 
 def newclass(mcls=type, name="newclass", bases=(), **special):
-    """Return blank class with the given metaclass, __slots__, __init__
-    function and bases. Additional keyword arguments added to class dict."""
+    """Return a new class with the given metaclass, name and bases. Additional
+    keyword arguments are added as class attributes wrapped in double
+    underscores.
+
+    Usage:
+        A = newclass()
+        B = newclass(name="B", init=lambda self: None)
+        C = newclass(ABCMeta, "C", [A, B], doc="A new abstract class C")
+    """
     if not isinstance(bases, Iterable):
         bases = (bases, )
     bases = tuple(bases)

@@ -26,14 +26,14 @@ def hascustominit(cls):
 class ParamMeta(type):
     """Metaclass which parametrizes a class by the parameters of its __init__
     method. The class is automatically given __slots__ for these parameter
-    names. If a class's __init__ is not present or takes no parameters, the it
-    is assumed to have none.
+    names. Classes without __init__ or whose constructors take no arguments
+    receive empty __slots__.
 
     The following restrictions apply to parametrized classes:
-    1) All (non-parametrized) bases in their mro must have (empty) __slots__
-    2) There can only be one in a class's bases
-    3) If one has a base with a constructor, that base must be parametrized
-    4) Their constructor methods cannot take variable arguments.
+    1) All of their (unparametrized) bases must have (empty) __slots__
+    2) No class may have more than one parametrized base
+    3) If one of their bases has __init__, that base must be parametrized
+    4) Their __init__ methods cannot take variable arguments.
 
     Additionally, the '__parameters__' and '__slots__' attributes of
     parametrized classes are reserved for internal use.
@@ -72,10 +72,9 @@ class ParamMeta(type):
 
         # Rule 2: Max of One Parametrized Base
         # ------------------------------------
-        # A parametrized class defines an object "parametrized" by a fixed
-        # set of "variables". In this model, __init__ declares the parameters
-        # and the rest of the class describes the system governed by those
-        # inputs.
+        # A parametrized class defines an object "governed" by a fixed set of
+        # "variables". In this model, __init__ declares the parameters and the
+        # rest of the class describes the system governed by those inputs.
         #
         # Since all parametrized classes have __slots__, inheriting from two
         # of them requires both have identical slot structure. Conceptually
