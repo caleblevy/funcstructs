@@ -121,7 +121,7 @@ class ParamMeta(type):
 
 
 class ParametrizedABCMeta(ParamMeta, ABCMeta):
-    """Metaclass for creating parametrized abstract base classes"""
+    """Metaclass for creating parametrized abstract base classes."""
     pass
 
 
