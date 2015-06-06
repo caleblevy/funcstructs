@@ -109,8 +109,8 @@ class EndofunctionTests(unittest.TestCase):
         sigma = rangefunc([1, 2, 3, 0, 5, 6, 4])  # Perm (0,1,2,3)(4,5,6)
         identity = rangefunc(range(7))
         for I in range(1, 11):  # Order of cycle is 12
-            self.assertNotEqual(identity.cycles, (sigma**I).cycles)
-        self.assertEqual(identity.cycles, (sigma**12).cycles)
+            self.assertNotEqual(identity.cycles(), (sigma**I).cycles())
+        self.assertEqual(identity.cycles(), (sigma**12).cycles())
 
     def test_imagepath(self):
         """Check various special and degenerate cases, with right index"""
@@ -145,14 +145,14 @@ class EndofunctionTests(unittest.TestCase):
     def test_cycles_are_cyclic(self):
         """Make sure funccylces actually returns cycles."""
         for f in self.funcs:
-            for cycle in f.cycles:
+            for cycle in f.cycles():
                 for ind, el in enumerate(cycle):
                     self.assertEqual(cycle[(ind+1) % len(cycle)], f[el])
 
     def test_cycles_are_unique(self):
         """Ensure funccycles returns no duplicates."""
         for f in self.funcs:
-            self.assertEqual(len(f.cycles), len(set(f.cycles)))
+            self.assertEqual(len(f.cycles()), len(set(f.cycles())))
 
     def test_cycles_are_complete(self):
         """Ensure funccycles returns every cycle."""

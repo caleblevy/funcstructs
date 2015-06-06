@@ -39,13 +39,13 @@ class Funcstruct(Multiset):
     __slots__ = '__n'
 
     def __new__(cls, f):
-        cycles = []
-        for cycle in f.cycles:
+        structcycles = []
+        for cycle in f.cycles():
             strand = []
             for el in cycle:
                 strand.append(DominantTree.from_func(f, el))
-            cycles.append(Necklace(strand))
-        return cls._from_cycles(cycles, len(f))
+            structcycles.append(Necklace(strand))
+        return cls._from_cycles(structcycles, len(f))
 
     @classmethod
     def _from_cycles(cls, cycles, precounted=None):

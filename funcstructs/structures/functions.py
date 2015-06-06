@@ -159,7 +159,6 @@ class Endofunction(Function):
                     yield cycle
                     cyclic.update(cycle)
 
-    @cached_property
     def cycles(self):
         """Return the set of f's cycles"""
         return frozenset(map(tuple, self.enumerate_cycles()))
@@ -167,7 +166,7 @@ class Endofunction(Function):
     @cached_property
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
-        return frozenset(flatten(self.cycles))
+        return frozenset(flatten(self.cycles()))
 
     @cached_property
     def acyclic_ancestors(self):
