@@ -57,7 +57,6 @@ class Function(bases.frozendict):
         """f.image <==> {f[x] for x in f.domain}"""
         return frozenset(self.values())
 
-    @cached_property
     def preimage(self):
         """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
         preim = defaultdict(set)
@@ -174,7 +173,7 @@ class Endofunction(Function):
     def acyclic_ancestors(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
         descendants = defaultdict(set)
-        for y, inv_image in self.preimage.items():
+        for y, inv_image in self.preimage().items():
             for x in inv_image:
                 if x not in self.limitset:
                     descendants[y].add(x)

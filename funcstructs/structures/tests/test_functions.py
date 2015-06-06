@@ -31,7 +31,7 @@ class FunctionTests(unittest.TestCase):
         self.assertEqual(self.abcfunc.image, frozenset({1}))
 
     def test_preimage(self):
-        self.assertEqual({1: frozenset("abc")}, dict(self.abcfunc.preimage))
+        self.assertEqual({1: frozenset("abc")}, dict(self.abcfunc.preimage()))
 
 
 class CompositionTests(unittest.TestCase):
