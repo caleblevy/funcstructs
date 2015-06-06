@@ -241,15 +241,12 @@ def _parsed_domain(domain):
     return frozenset(domain)
 
 
-@bases.parametrize("domain", "codomain")
 class Mappings(bases.Enumerable):
     """The set of Functions between a domain and a codomain"""
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(domain, codomain):
-        return map(_parsed_domain, [domain, codomain])
+    def __init__(self, domain, codomain):
+        self.domain = _parsed_domain(domain)
+        self.codomain = _parsed_domain(codomain)
 
     def __iter__(self):
         domain, codomain = map(sorted, [self.domain, self.codomain])
@@ -260,19 +257,17 @@ class Mappings(bases.Enumerable):
         return len(self.codomain) ** len(self.domain)
 
 
-@bases.parametrize("domain", "codomain")
 class Isomorphisms(bases.Enumerable):
     """The set of bijections between a domain and a codomain"""
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(domain, codomain):
-        domain, codomain = map(_parsed_domain, [domain, codomain])
+    def __init__(self, domain, codomain):
+        domain = _parsed_domain(domain)
+        codomain = _parsed_domain(codomain)
         if len(domain) != len(codomain):
             raise ValueError("Sets of size %s and %s cannot be isomorphic" % (
                 len(domain), len(codomain)))
-        return domain, codomain
+        self.domain = domain
+        self.codomain = codomain
 
     def __iter__(self):
         domain, codomain = map(sorted, [self.domain, self.codomain])
@@ -283,15 +278,11 @@ class Isomorphisms(bases.Enumerable):
         return factorial(len(self.domain))
 
 
-@bases.parametrize("domain")
 class TransformationMonoid(bases.Enumerable):
     """Set of all Endofunctions on a domain."""
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(domain):
-        return _parsed_domain(domain)
+    def __init__(self, domain):
+        self.domain = _parsed_domain(domain)
 
     def __iter__(self):
         domain = sorted(self.domain)
@@ -302,15 +293,11 @@ class TransformationMonoid(bases.Enumerable):
         return len(self.domain) ** len(self.domain)
 
 
-@bases.parametrize("domain")
 class SymmetricGroup(bases.Enumerable):
     """The set of automorphisms on a domain"""
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(domain):
-        return _parsed_domain(domain)
+    def __init__(self, domain):
+        self.domain = _parsed_domain(domain)
 
     def __iter__(self):
         domain = sorted(self.domain)

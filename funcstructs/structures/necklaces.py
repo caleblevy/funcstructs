@@ -102,22 +102,15 @@ def simple_fixed_content(a, content, t, p, k):
                 content[j] += 1
 
 
-@bases.parametrize("elements", "multiplicities")
 class FixedContentNecklaces(bases.Enumerable):
     """ Representation of the set of necklaces of fixed content; i.e. a fixed
     pool of beads from which to form necklaces. """
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(content):
-        return multiset.Multiset(content).sort_split()
-
-    def __repr__(self):
-        mset = []
-        for elem, mult in zip(self.elements, self.multiplicities):
-            mset.extend([elem]*mult)
-        return self.__class__.__name__ + '(%s)' % repr(multiset.Multiset(mset))
+    def __init__(self, elements, multiplicities=None):
+        if multiplicities is None:
+            elements, multiplicities = multiset.Multiset(elements).sort_split()
+        self.elements = elements
+        self.multiplicities = multiplicities
 
     @classmethod
     def from_partition(cls, partition):

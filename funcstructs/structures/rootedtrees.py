@@ -272,18 +272,14 @@ class RootedTree(multiset.Multiset):
         return DominantTree(self._ordered_level_sequence())
 
 
-@bases.parametrize("n")
 class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
-    __slots__ = '__root_height'
-
-    def __new__(cls, n, root_height=0):
+    def __init__(self, n, __root_height=0):
         if n < 1:
             raise ValueError("Cannot define a rooted tree with %s nodes" % n)
-        self = super(TreeEnumerator, cls).__new__(cls, n=n)
-        self.__root_height = root_height
-        return self
+        self.n = n
+        self.__root_height = __root_height
 
     def __iter__(self):
         """Generates the dominant representatives of each unordered tree in
@@ -326,17 +322,13 @@ class TreeEnumerator(bases.Enumerable):
         return T[-1]
 
 
-@bases.parametrize("n")
 class ForestEnumerator(bases.Enumerable):
     """Represents the class of collections of rooted trees on n nodes."""
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(n):
+    def __init__(self, n):
         if n < 0:
             raise ValueError("Cannot define a Forest tree with %s nodes" % n)
-        return n
+        self.n = n
 
     def __iter__(self):
         """Any rooted tree on n+1 nodes can be identically described as a
@@ -352,15 +344,11 @@ class ForestEnumerator(bases.Enumerable):
         return TreeEnumerator(self.n+1).cardinality
 
 
-@bases.parametrize("partition")
 class PartitionForests(bases.Enumerable):
     """Collections of rooted trees with sizes specified by partitions."""
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(partition):
-        return multiset.Multiset(partition)
+    def __init__(self, partition):
+        self.partition = multiset.Multiset(partition)
 
     def __iter__(self):
         return multiset.unordered_product(self.partition, TreeEnumerator)

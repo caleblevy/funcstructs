@@ -155,18 +155,15 @@ def integer_funcstructs(n):
                 yield struct
 
 
-@bases.parametrize("n", "cycle_type")
 class EndofunctionStructures(bases.Enumerable):
     """Enumerator of endofunction structures consisting of n nodes, optionally
     restricted to a given cycle type."""
 
-    __slots__ = ()
-
-    @staticmethod
-    def _new(n, cycle_type=None):
+    def __init__(self, n, cycle_type=None):
         if n < 0:
             raise ValueError("Cannot defined funcstructs on %s nodes" % n)
-        return n, Multiset(cycle_type)
+        self.n = n
+        self.cycle_type = Multiset(cycle_type)
 
     def __iter__(self):
         if not self.cycle_type:
