@@ -32,113 +32,91 @@ def base_slots(cls):
 
 
 class ParamMeta(type):
-    """Metaclass which parametrizes a class by the parameters of its __init__
-    method. The class is automatically given __slots__ for these parameter
-    names. Classes without __init__ or whose constructors take no arguments
-    receive empty __slots__.
+    """A parametrized type.
 
-    The following restrictions apply to parametrized classes:
-    1) All of their (unparametrized) bases must have (empty) __slots__
-    2) No class may have more than one parametrized base
-    3) If one of their bases has __init__, that base must be parametrized
-    4) Their __init__ methods cannot take variable arguments.
+    Parametrized classes represent objects whose behavior is determined by a
+    fixed set of independent variables. They are automatically assigned
+    __slots__ and accessors for the parameters of their __init__ methods.
+
+    Parametrized types enforce the following contract:
+    --------------------------------------------------
+    1) All of their bases define __slots__.
+    2) Their unparametrized bases do not override the default __init__. Mixin
+       classes can define behavior, but not the fundamental variables.
+    3) The __slots__ of their unparametrized bases are empty.
+    4) They cannot be multiply inherited from.
+    5) Their __init__ methods cannot take variable arguments.
 
     Additionally, the '__parameters__' and '__slots__' attributes of
     parametrized classes are reserved for internal use.
     """
 
     def __new__(mcls, name, bases, dct):
-        # Rule 0: No Reserved Names
-        # -------------------------
-        for attr in ['__slots__', '__parameters__']:
-            if attr in dct:
-                raise TypeError("cannot set reserved attribute %r" % attr)
-
-        have_slots = ['__dict__' not in base.__dict__ for base in bases]
-        are_parametrized = [isinstance(base, ParamMeta) for base in bases]
-        define_init = [hascustominit(base) for base in bases]
-
-        # Rule 1: All Bases Have Slots
-        # ----------------------------
-        # If any of the bases lack __slots__, so will the derived class.
-        # Parametrized classes are meant to be "simple", akin to namedtuples,
-        # thus the only attributes they accept are their parameters.
-        for base, has_slots in zip(bases, have_slots):
-            if not has_slots:
-                raise TypeError("base %s does not have __slots__" % base)
-        # Rule 1b: Unparametrized Bases Have Empty __slots__
-        # --------------------------------------------------
-        # All significant attributes of a parametrized class should be declared
-        # and set in its __init__ method. If a member descripter is not set in
-        # a parametrized base, it is not useful. If it is set in two locations
-        # in the mro, the behaviour is technically undefined (see notes on
-        # slots at https://docs.python.org/3/reference/datamodel.html).
-        for base, is_parametrized in zip(bases, are_parametrized):
-            if not is_parametrized and base_slots(base):
-                raise TypeError("unparametrized base with nonempty slots")
-
-        # Rule 2: Max of One Parametrized Base
-        # ------------------------------------
-        # A parametrized class defines an object "governed" by a fixed set of
-        # "variables". In this model, __init__ declares the variables and the
-        # rest of the class describes the system governed by those inputs.
-        #
-        # Since all parametrized classes have __slots__, inheriting from two
-        # of them requires both have identical slot structure. Conceptually
-        # these correspond to different systems governed by the same
-        # parameters.
-        #
-        # Multiple inheritance makes most sense when the bases describe
-        # *independent* aspects of an object's nature. The requirement of slots
-        # only allows mixing different interpretations of the *same*
-        # parameters. It thus makes no sense to have multiple parametrized
-        # bases.
-        if are_parametrized.count(True) > 1:
-            raise TypeError("multiple parametrized bases")
-
-        # Rule 3: No Unparametrized Initializers
-        # --------------------------------------
-        # Parametrization is meant to begin at the first parametrized class
-        # in the inheritance chain; any other mix-in classes should serve only
-        # to add *behavior* to the system.
-        for has_init, is_parametrized in zip(define_init, are_parametrized):
-            if has_init and not is_parametrized:
-                raise TypeError("multiple __init__'s in bases")
+        slotted = ['__dict__' not in base.__dict__ for base in bases]
+        parametrized = [isinstance(base, ParamMeta) for base in bases]
+        initialized = [hascustominit(base) for base in bases]
 
         # Extract __init__ parameters
         def default_init(self): pass
-        if any(are_parametrized):
-            param_base = bases[are_parametrized.index(True)]
+        if any(parametrized):
+            param_base = bases[parametrized.index(True)]
             if hascustominit(param_base):
                 default_init = param_base.__init__
         init_args = getargspec(dct.get('__init__', default_init))
 
-        # Rule 4: Fixed Parameter Count
-        # -----------------------------
-        # Parametrized classes are supposed to represent *specific* systems
-        # governed by a small, very straightforward set of parameters. It
-        # makes no sense to allow variable arguments in this context.
+        # Enforce the Contract
+        # --------------------
+
+        # RULE 0) No Reserved Names.
+        for attr in ['__slots__', '__parameters__']:
+            if attr in dct:
+                raise TypeError("cannot set reserved attribute %r" % attr)
+        # RULE 1) All Bases Have Slots. This requirement guarantees
+        # access to __dict__ is prevented for objects of the resulting
+        # type. See "notes on using slots" in the documentation of
+        # Python's data model.
+        for base, has_slots in zip(bases, slotted):
+            if not has_slots:
+                raise TypeError("base %s does not have __slots__" % base)
+        # RULE 2) No Unparametrized __init__.
+        for has_init, is_parametrized in zip(initialized, parametrized):
+            if has_init and not is_parametrized:
+                raise TypeError("multiple __init__'s in bases")
+        # RULE 3) Unparametrized Bases Have Slots. This is a natural
+        # consequence of maintaining consistancy between the __slots__
+        # and parameters of the type's bases, along with imposing rules
+        # one and two.
+        for base, is_parametrized in zip(bases, parametrized):
+            if not is_parametrized and base_slots(base):
+                raise TypeError("unparametrized base with nonempty slots")
+        # RULE 4) Max of One Parametrized Base. Instance layout conflicts
+        # prevent mixing of types with different parameters, and the meaning
+        # of inheriting from different bases with the same parameters is
+        # unclear, leaving little reason to allow it.
+        if parametrized.count(True) > 1:
+            raise TypeError("multiple parametrized bases")
+        # RULE 5) Fixed Parameter Count.
         if init_args.varargs is not None or init_args.keywords is not None:
             raise TypeError("variable arguments in %s.__init__" % name)
 
+        # Add __slots__ to new type. This must be done before class creation,
+        # which is why we need a metaclass. Take care not to duplicate names of
+        # existing member descriptors, which could lead to undefined behavior,
+        # as per the python docs.
         current_params = tuple(init_args.args[1:])
-        # Find all previously defined parameter names
         old_params = set()
         for base in bases:
             old_params.update(base_slots(base))
-        # Take care not to duplicate existing member descriptors
         new_params = ()
         for param in current_params:
             if param not in old_params:
                 new_params += param,
-        # slots must be set before class creation
         dct['__slots__'] = new_params
 
         # for docs and convenience
         dct['__parameters__'] = current_params
         pg = attrgetter(*current_params) if current_params else lambda self: ()
         dct.setdefault('_param_values', lambda self: pg(self))
-
         return super(ParamMeta, mcls).__new__(mcls, name, bases, dct)
 
 
