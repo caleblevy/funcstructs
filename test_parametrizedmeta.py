@@ -204,12 +204,16 @@ class ParamMetaTests(unittest.TestCase):
         """Test paramgetter works correctly"""
         self.assertEqual((), self.a._param_values())
         self.assertEqual(("11", "22"), self.b._param_values())
-        self.assertEqual("a", self.c._param_values())
+        self.assertEqual(("a", ), self.c._param_values())
         self.assertEqual(("a1", "a2"), self.c2._param_values())
         self.assertEqual((4, 5, 6), self.d._param_values())
 
 
 class ImmutableStructTests(unittest.TestCase):
+
+    class O(ImmutableStruct):
+        def __init__(self, o):
+            self.o = o
 
     class A(ImmutableStruct):
         def __init__(self, a, b):
@@ -231,7 +235,7 @@ class ImmutableStructTests(unittest.TestCase):
     class D(C):
         pass
 
-    structs = [struct(1, 2) for struct in (A, B, C, D)]
+    structs = [O(1)] + [struct(1, 2) for struct in (A, B, C, D)]
 
     def test_write_once(self):
         """Test weather attribute creation and deletion is blocked"""
@@ -252,7 +256,7 @@ class ImmutableStructTests(unittest.TestCase):
 
     def test_equality(self):
         """Ensure that structs are equal iff they have same type and params."""
-        t = [s(1, 3) for s in (self.A, self.B, self.C, self.D)]
+        t = [self.O(2)] + [s(1, 3) for s in (self.A, self.B, self.C, self.D)]
         for i, s1 in enumerate(self.structs):
             for j, s2 in enumerate(self.structs):
                 if i == j:

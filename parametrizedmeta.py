@@ -113,10 +113,18 @@ class ParamMeta(type):
                 new_params += param,
         dct['__slots__'] = new_params
 
-        # for docs and convenience
+        # For docs and convenience
         dct['__parameters__'] = current_params
-        pg = attrgetter(*current_params) if current_params else lambda self: ()
-        dct.setdefault('_param_values', lambda self: pg(self))
+        # Make sure _param_values always returns a tuple
+        if not current_params:
+            def _param_values(self): return ()
+        else:
+            pg = attrgetter(*current_params)
+            if len(current_params) == 1:
+                def _param_values(self): return pg(self),
+            else:
+                def _param_values(self): return pg(self)
+        dct.setdefault('_param_values', _param_values)
         return super(ParamMeta, mcls).__new__(mcls, name, bases, dct)
 
 
@@ -154,7 +162,7 @@ class Struct(with_metaclass(ParamMeta)):
     def __repr__(self):
         param_strings = []
         for name, val in zip(self.__parameters__, self._param_values()):
-            param_strings.append('%s=%s' % (name, val))
+            param_strings.append('%s=%s' % (name, repr(val)))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(param_strings))
 
 
