@@ -73,24 +73,34 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
                 newclass(mcls=ParamMeta, **{word: ()})
 
     def test_rule_1(self):
-        """Ensure that bases must have slots"""
+        """Ensure that bases must have __slots__"""
         Slots = newclass(slots=())
         NoSlots = newclass()
         PhonySlots = newclass()
         PhonySlots.__slots__ = ()
-
         for bases in [NoSlots, PhonySlots, (Slots, NoSlots)]:
             with self.assertRaises(TypeError):
                 newclass(mcls=ParamMeta, bases=bases)
 
-        # test rule 1b
+    def test_rule_2(self):
+        """Test that only parametrized bases can have __init__"""
+        Init = newclass(slots=(), init=lambda self: None)
+        NoInit = newclass(slots=())
+        Parametrized = newclass(mcls=ParamMeta, init=lambda self: None)
+        for bases in ([], [NoInit], [Parametrized], [NoInit, Parametrized]):
+            with self.assertRaises(TypeError):
+                newclass(mcls=ParamMeta, bases=[Init] + bases)
+
+    def test_rule_3(self):
+        """Test that unparametrized bases must have empty __slots__"""
+        Slots = newclass(slots=())
         NonEmptySlots = newclass(slots=("a", "b"))
         FromNonEmpty = newclass(slots=(), bases=NonEmptySlots)
         for bases in [NonEmptySlots, (Slots, NonEmptySlots), FromNonEmpty]:
             with self.assertRaises(TypeError):
                 newclass(mcls=ParamMeta, bases=bases)
 
-    def test_rule_2(self):
+    def test_rule_4(self):
         """Test that a class cannot derive from multiple parametrized bases"""
         T1 = newclass(slots=())
         T2 = newclass(slots=())
@@ -104,16 +114,7 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
             with self.assertRaises(TypeError) as e:
                 newclass(mcls=ParamMeta, bases=bases)
 
-    def test_rule_3(self):
-        """Test that only parametrized bases can have __init__"""
-        Init = newclass(slots=(), init=lambda self: None)
-        NoInit = newclass(slots=())
-        Parametrized = newclass(mcls=ParamMeta, init=lambda self: None)
-        for bases in ([], [NoInit], [Parametrized], [NoInit, Parametrized]):
-            with self.assertRaises(TypeError):
-                newclass(mcls=ParamMeta, bases=[Init] + bases)
-
-    def test_rule_4(self):
+    def test_rule_5(self):
         """Test that __init__ methods cannot have variable arguments"""
         inits = [
             (lambda *a: None), (lambda **k: None), (lambda *a, **k: None),
