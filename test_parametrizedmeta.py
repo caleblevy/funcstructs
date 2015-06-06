@@ -111,7 +111,7 @@ class ParametrizedInheritanceRulesTests(unittest.TestCase):
         P2 = newclass(mcls=ParamMeta, bases=[P1, T2])
         P3 = newclass(mcls=ParamMeta, bases=P1)
         for bases in [(P1, P2), (P1, P3), (P1, P3, T3)]:
-            with self.assertRaises(TypeError) as e:
+            with self.assertRaises(TypeError):
                 newclass(mcls=ParamMeta, bases=bases)
 
     def test_rule_5(self):
