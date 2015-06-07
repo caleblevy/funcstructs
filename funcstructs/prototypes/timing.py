@@ -12,7 +12,7 @@ from time import time
 from numpy import log2
 import matplotlib.pyplot as plt
 
-from funcstructs import *
+from funcstructs.structures import *
 
 
 show = plt.show
@@ -136,22 +136,22 @@ def mapping_plots(*args, **kwargs):
 
 def flattree(n):
     """Tree with all non-root nodes connected directly to root"""
-    return Endofunction([0]*n)
+    return rangefunc([0]*n)
 
 
 def identity(n):
     """Endofunction corresponding to f[x] == x for x in f.domain"""
-    return Endofunction(range(n))
+    return rangefunc(range(n))
 
 
 def talltree(n):
     """Endofunction with f[0] == 0 and f[n] == n-1 for n in f.domain"""
-    return Endofunction([0] + list(range(n)))
+    return rangefunc([0] + list(range(n)))
 
 
 def bigcycle(n):
     """Cyclic permutation of range(n)"""
-    return Endofunction(list(range(1, n)) + [0])
+    return rangefunc(list(range(1, n)) + [0])
 
 
 def balanced_binary_tree(n):
@@ -162,7 +162,7 @@ def balanced_binary_tree(n):
         h -= 1
         tree *= 2
         tree = [h] + tree
-    return Endofunction.from_levels(OrderedTree(tree))
+    return rangefunc(OrderedTree(tree).map_labelling())
 
 
 def scattered_tree(n):
@@ -171,33 +171,35 @@ def scattered_tree(n):
 
 
 if __name__ == '__main__':
-    iteration_time(levypartitions.fixed_lex_partitions(100, 40))
+    from .integer_partitions import fixed_lex_partitions
+    from funcstructs.utils.productrange import productrange
+    iteration_time(fixed_lex_partitions(100, 40))
     iteration_time(EndofunctionStructures(12))
     iteration_time(EndofunctionStructures, 12)
     iteration_time(PartitionForests, [2, 2, 3, 5])
-    iteration_time(productrange.productrange, -2, [2, 2, 2, 3, 5], step=2)
+    iteration_time(productrange, -2, [2, 2, 2, 3, 5], step=2)
 
-    mapping_time(range(1, 2000), Endofunction.cycles.fget, flattree)
+    mapping_time(range(1, 2000), Endofunction.cycles, flattree)
     mapping_time(range(1, 2000), sum, range)
     mapping_time(range(1, 2000), range)
 
     mapping_plots(2000, (sum, range), range, printing=True)
     mapping_plots(
         20, 2000,
-        (Endofunction.cycles.fget, randfunc),
-        (periodicity, randfunc),
+        (Endofunction.cycles, randfunc),
+        (periodicity, lambda f: tuple(randfunc(f).sort_split())[1]),
         printing=True
     )
 
     mapping_plots(
         20, 2500,
-        (Endofunction.cycles.fget, randfunc),
-        (Endofunction.cycles.fget, identity),
-        (Endofunction.cycles.fget, randperm),
-        (Endofunction.cycles.fget, talltree),
-        (Endofunction.cycles.fget, balanced_binary_tree),
-        (Endofunction.cycles.fget, bigcycle),
-        (Endofunction.cycles.fget, scattered_tree),
+        (Endofunction.cycles, randfunc),
+        (Endofunction.cycles, identity),
+        (Endofunction.cycles, randperm),
+        (Endofunction.cycles, talltree),
+        (Endofunction.cycles, balanced_binary_tree),
+        (Endofunction.cycles, bigcycle),
+        (Endofunction.cycles, scattered_tree),
         printing=True
     )
     plt.show()
