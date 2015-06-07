@@ -12,26 +12,40 @@ from ..functions import (
 
 class FunctionTests(unittest.TestCase):
 
-    abcfunc = Function({'a': 1, 'b': 1, 'c': 1})
+    constants = [(i, Function({'a': i, 'b': i, 'c': i})) for i in range(3)]
+    constants += [(l, Function({0: l, 1: l, 2: l})) for l in "abc"]
 
     def test_function_constructor(self):
         """Test the constructor accepts and rejects appropriate input"""
-        f = self.abcfunc
-        self.assertEqual(f, Function(f.items()))
-        self.assertEqual(f, Function.fromkeys("abc", 1))
-        self.assertEqual(f, Function(f))
-        self.assertEqual(f, Function(a=1, b=1, c=1))
+        for c, f in self.constants:
+            self.assertEqual(f, Function(f.items()))
+            self.assertEqual(f, Function(f))
+            if c in range(3):
+                self.assertEqual(f, Function.fromkeys("abc", c))
+                self.assertEqual(f, Function(a=c, b=c, c=c))
+            else:
+                self.assertEqual(f, Function.fromkeys(range(3), c))
+        # test only hashable inputs are accepted
         with self.assertRaises(TypeError):
             Function({0: 'a', 1: 'b', 2: ['c', 'd']})
 
     def test_domain(self):
-        self.assertEqual(self.abcfunc.domain, frozenset("abc"))
+        """Test that domain is set of keys."""
+        for c, f in self.constants:
+            if c in range(3):
+                self.assertEqual(f.domain, set("abc"))
+            else:
+                self.assertEqual(f.domain, {0, 1, 2})
 
     def test_image(self):
-        self.assertEqual(self.abcfunc.image, frozenset({1}))
+        """Test that the image is set of values."""
+        for c, f in self.constants:
+            self.assertEqual(f.image, {c})
 
     def test_preimage(self):
-        self.assertEqual({1: frozenset("abc")}, dict(self.abcfunc.preimage()))
+        """Test that preimage returns the nonempty fibers"""
+        for c, f in self.constants:
+            self.assertEqual(dict(f.preimage()), {c: f.domain})
 
 
 class CompositionTests(unittest.TestCase):
