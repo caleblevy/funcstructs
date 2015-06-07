@@ -79,7 +79,6 @@ class Bijection(Function):
         if len(self) != len(self.image):
             raise ValueError("This function is not invertible.")
 
-    @cached_property
     def inverse(self):
         """s.inverse <==> s**-1"""
         # Code taken directly from: "Inverting permutations in Python" at
@@ -189,7 +188,7 @@ class SymmetricFunction(Endofunction, Bijection):
         if n >= 0:
             return super(SymmetricFunction, self).__pow__(n)
         else:
-            return super(SymmetricFunction, self.inverse).__pow__(-n)
+            return super(SymmetricFunction, self.inverse()).__pow__(-n)
 
 
 # Convenience functions for defining Endofunctions from a sequence in range(n)

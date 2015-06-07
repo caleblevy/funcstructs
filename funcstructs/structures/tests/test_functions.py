@@ -80,7 +80,7 @@ class CompositionTests(unittest.TestCase):
         s = rangeperm([0, 1, 3, 4, 2])
         g = rangefunc([3, 3, 4, 2, 3])  # g = s*f*s**-1
         self.assertEqual(g, s.conj(f))
-        self.assertNotEqual(g, s.inverse.conj(f))
+        self.assertNotEqual(g, s.inverse().conj(f))
         # Test that if function has cycle
         #    t=(a1, a2, ..., an)
         # then
@@ -90,13 +90,13 @@ class CompositionTests(unittest.TestCase):
         sr = rangeperm([4, 2, 3, 1, 0])  # t*s*t^-1 = (1, 2, 3)(4, 0)
         sl = rangeperm([1, 4, 3, 2, 0])  # t^-1*s*t = (0, 1, 4)(2, 3)
         self.assertEqual(sr, tau.conj(sigma))
-        self.assertEqual(sl, tau.inverse.conj(sigma))
+        self.assertEqual(sl, tau.inverse().conj(sigma))
 
     def test_domain_changing(self):
         """Test changing an endofunction's domain does not change structure"""
         f = Endofunction.fromkeys("abc", "a")
         b = Bijection(zip("abc", range(3)))
-        self.assertEqual(f, b.inverse.conj(b.conj(f)))
+        self.assertEqual(f, b.inverse().conj(b.conj(f)))
         self.assertEqual(Funcstruct(f), Funcstruct(b.conj(f)))
 
 
@@ -179,16 +179,16 @@ class EndofunctionTests(unittest.TestCase):
 
         for perm in permlist:
             e = rangeperm(range(len(perm)))
-            self.assertSequenceEqual(e, perm * perm.inverse)
-            self.assertSequenceEqual(e, perm.inverse * perm)
-            self.assertSequenceEqual(perm, perm.inverse.inverse)
+            self.assertSequenceEqual(e, perm * perm.inverse())
+            self.assertSequenceEqual(e, perm.inverse() * perm)
+            self.assertSequenceEqual(perm, perm.inverse().inverse())
 
     def test_conjugation(self):
         """Test that conjugation is invertible, with the obvious inverse."""
         for f in self.funcs:
             for _ in range(20):
                 perm = randperm(len(f))
-                self.assertEqual(f, perm.inverse.conj(perm.conj(f)))
+                self.assertEqual(f, perm.inverse().conj(perm.conj(f)))
 
 
 def _func_images(mspace):
