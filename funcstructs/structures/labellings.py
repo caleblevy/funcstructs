@@ -3,12 +3,11 @@
 Caleb Levy, 2015.
 """
 
-from itertools import combinations, permutations, product
+from itertools import chain, combinations, permutations, product
 from math import factorial
 
 from funcstructs.utils.combinat import (
     multinomial_coefficient as ordered_division_count)
-from funcstructs.utils.misc import flatten
 
 from .functions import rangefunc, rangeperm
 from .multiset import Multiset
@@ -93,7 +92,7 @@ def _set_partitions(S, partition):
         for m, c in zip(mults, odiv):
             strand.append(_equipartitions(set(c), m))
         for bundle in product(*strand):
-            yield flatten(bundle)
+            yield chain(*bundle)
 
 
 def set_partitions(partition, S=None):
@@ -200,7 +199,7 @@ def translation_keys(tree):
     to translate each combination into an endofunction."""
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
-    translation_sequence = rangeperm(flatten(ind_groups)).inverse.conj(
+    translation_sequence = rangeperm(chain(*ind_groups)).inverse.conj(
         rangefunc(tree.map_labelling()))
     return bin_widths, translation_sequence
 
@@ -222,7 +221,7 @@ def tree_labellings(tree):
     bin_widths, translation_sequence = translation_keys(tree)
     func = [0] * n
     for combo in _ordered_divisions(set(range(n)), bin_widths):
-        c = list(flatten(combo))
+        c = list(chain(*combo))
         for i in range(n):
             func[c[i]] = c[translation_sequence[i]]
         yield rangefunc(func)

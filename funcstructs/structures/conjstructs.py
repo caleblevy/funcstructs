@@ -15,7 +15,6 @@ from PADS import IntegerPartitions
 
 from funcstructs import bases
 from funcstructs.utils import compositions, factorization, subsequences
-from funcstructs.utils.misc import flatten
 
 from .functions import rangefunc
 from .multiset import Multiset, unordered_product
@@ -53,7 +52,7 @@ class Funcstruct(Multiset):
         if precounted is not None:
             self.__n = precounted
         else:
-            self.__n = len(list(flatten(flatten(self))))
+            self.__n = len(list(itertools.chain(*itertools.chain(*cycles))))
         return self
 
     def __repr__(self):
@@ -143,7 +142,7 @@ def cycle_type_funcstructs(n, cycle_type):
         for c, l, m in zip(composition, lengths, multiplicities):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in itertools.product(*cycle_groups):
-            yield Funcstruct._from_cycles(flatten(bundle), n)
+            yield Funcstruct._from_cycles(itertools.chain(*bundle), n)
 
 
 def integer_funcstructs(n):

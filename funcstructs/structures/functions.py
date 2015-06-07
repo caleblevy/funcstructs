@@ -9,7 +9,7 @@ from collections import defaultdict
 from math import factorial
 
 from funcstructs import bases
-from funcstructs.utils.misc import cached_property, flatten
+from funcstructs.utils.misc import cached_property
 
 
 def _result_functype(f, g):
@@ -165,7 +165,7 @@ class Endofunction(Function):
 
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
-        return frozenset(flatten(self.cycles()))
+        return frozenset(itertools.chain(*self.cycles()))
 
     def acyclic_ancestors(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""

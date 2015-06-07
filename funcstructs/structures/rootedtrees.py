@@ -5,12 +5,11 @@ out-degree one. A forest is any collection of rooted trees.
 Caleb Levy, 2014 and 2015.
 """
 
-from itertools import groupby
+from itertools import chain, groupby
 from math import factorial
 
 from funcstructs import bases
 from funcstructs.utils import combinat, factorization, subsequences
-from funcstructs.utils.misc import flatten
 
 from . import multiset
 
@@ -141,7 +140,7 @@ class OrderedTree(bases.Tuple):
 
     def breadth_first_traversal(self):
         """Return nodes in breadth-first traversal order"""
-        return flatten(_treefunc_properties(self)[2])
+        return chain(*_treefunc_properties(self)[2])
 
     def attachments(self):
         """Map of each node to the set of nodes attached to it in order."""
@@ -206,7 +205,7 @@ class DominantTree(OrderedTree):
         f, _, h = _treefunc_properties(self)
         k = _dominant_keys(h, f, sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
-        for _, g in groupby(flatten(h), lambda x: (f[x], k[x])):
+        for _, g in groupby(chain(*h), lambda x: (f[x], k[x])):
             deg *= factorial(len(list(g)))
         return deg
 
