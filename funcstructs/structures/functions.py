@@ -8,8 +8,9 @@ import random
 from collections import defaultdict
 from math import factorial
 
+from parametrizedmeta import WriteOnceMixin
+
 from funcstructs import bases
-from funcstructs.utils.misc import cached_property
 
 
 def _result_functype(f, g):
@@ -29,33 +30,18 @@ def _result_functype(f, g):
     return Function
 
 
-class Function(bases.frozendict):
+class Function(bases.frozendict, WriteOnceMixin):
     """An immutable mapping between sets."""
 
-    @classmethod
-    def _new(cls, *args, **kwargs):
-        # Bypass all verification and directly call Function constructor
-        return super(Function, cls).__new__(cls, *args, **kwargs)
-
     def __new__(cls, *args, **kwargs):
-        return cls._new(*args, **kwargs)
-
-    def __init__(self, *args, **kwargs):
-        _ = self.image  # Ensure elements of the image are hashable
+        self = super(Function, cls).__new__(cls, *args, **kwargs)
+        self.domain = frozenset(self.keys())
+        self.image = frozenset(self.values())
+        return self
 
     def __iter__(self):
         """Return elements of the domain and their labels in pairs"""
         return iter(self.items())
-
-    @cached_property
-    def domain(self):
-        """The set of objects for which f[x] is defined"""
-        return frozenset(self.keys())
-
-    @cached_property
-    def image(self):
-        """f.image <==> {f[x] for x in f.domain}"""
-        return frozenset(self.values())
 
     def preimage(self):
         """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
