@@ -48,40 +48,27 @@ class FunctionTests(unittest.TestCase):
             self.assertEqual(dict(f.preimage()), {c: f.domain})
 
 
-class CompositionTests(unittest.TestCase):
-    I = list(enumerate(range(10)))
-    ids = [Function(I), Bijection(I), Endofunction(I), SymmetricFunction(I)]
+class BijectionTests(unittest.TestCase):
 
-    def test_composition_types(self):
-        """Test the four type rules for function composition"""
-        f, b, e, s = self.ids
-        # test rule 1)
-        self.assertEqual(f, f*f)
-        self.assertEqual(b, b*b)
-        self.assertEqual(e, e*e)
-        self.assertEqual(s, s*s)
-        # test rule 2)
-        self.assertEqual(f, f*e)
-        self.assertEqual(f, e*f)
-        self.assertEqual(f, f*b)
-        self.assertEqual(f, b*f)
-        self.assertEqual(f, f*s)
-        self.assertEqual(f, s*f)
-        # test rule 3)
-        self.assertEqual(e, e*s)
-        self.assertEqual(e, s*e)
-        self.assertEqual(b, b*s)
-        self.assertEqual(b, s*b)
-        # test rule 4)
-        self.assertEqual(f, e*b)
-        self.assertEqual(f, b*e)
+    def test_init(self):
+        """Test that Bijection rejects maps that are not relabellings"""
+        with self.assertRaises(ValueError):
+            Bijection({0: "a", 1: "a", 2: "b"})
+        with self.assertRaises(ValueError):
+            Bijection({"a": 0, "b": 2, "c": 2})
 
-    def test_conjugation_types(self):
-        """Test that conjugate of an object is the original type"""
-        _, b, _, s = self.ids
-        for func in self.ids:
-            self.assertEqual(func, b.conj(func))
-            self.assertEqual(func, s.conj(func))
+    def test_inverse(self):
+        """Test compose(inv(perm), perm) == perm"""
+        permlist = []
+        for n in range(1, 10):
+            for _ in range(1, 10*n):
+                permlist.append(randperm(n))
+
+        for perm in permlist:
+            e = rangeperm(range(len(perm)))
+            self.assertSequenceEqual(e, perm * perm.inverse())
+            self.assertSequenceEqual(e, perm.inverse() * perm)
+            self.assertSequenceEqual(perm, perm.inverse().inverse())
 
     def test_conjugation(self):
         """Test that conjugation works in the correct order"""
@@ -116,15 +103,28 @@ class CompositionTests(unittest.TestCase):
 
 class EndofunctionTests(unittest.TestCase):
 
-    # Imagepath Tests
+    def test_init(self):
+        """Test that Endofunction images are subsets of their domains."""
+        with self.assertRaises(ValueError):
+            Endofunction({0: 0, 1: 1, 2: "c"})
+        with self.assertRaises(ValueError):
+            Endofunction({"a": "a", "b": "a", "c": "d"})
 
-    def test_iterate(self):
+    def test_pow(self):
         """Test Endofunctions can be properly iterated"""
-        sigma = rangefunc([1, 2, 3, 0, 5, 6, 4])  # Perm (0,1,2,3)(4,5,6)
-        identity = rangefunc(range(7))
-        for I in range(1, 11):  # Order of cycle is 12
-            self.assertNotEqual(identity.cycles(), (sigma**I).cycles())
-        self.assertEqual(identity.cycles(), (sigma**12).cycles())
+        s = rangefunc([1, 2, 3, 0, 5, 6, 4])  # Perm (0,1,2,3)(4,5,6)
+        a = Bijection(zip(range(7), "abcdefg")).conj(s)
+        ii = rangefunc(range(7))
+        ia = Endofunction(zip(*(["abcdefg"]*2)))
+        for i in range(1, 12):  # Order of cycle is 12
+            self.assertNotEqual(ii.cycles(), (s**i).cycles())
+            self.assertNotEqual(ia.cycles(), (a**i).cycles())
+        self.assertEqual(ii.cycles(), (s**12).cycles())
+
+        n = 10
+        f = rangefunc([0]+list(range(10)))
+        for i in range(n):
+            self.assertEqual(rangefunc([0]*i + list(range(0, 11-i))), f**i)
 
     def test_imagepath(self):
         """Check various special and degenerate cases, with right index"""
@@ -153,8 +153,8 @@ class EndofunctionTests(unittest.TestCase):
     ]
     funcs += list([randfunc(20) for _ in range(100)])
     funcs += list(TransformationMonoid(1))
-    funcs += list(TransformationMonoid(3))
-    funcs += list(TransformationMonoid(4))
+    funcs += list(TransformationMonoid("abc"))
+    funcs += list(TransformationMonoid([("a", ), ("b", ), ("c", ), ("d", )]))
     cyclesets = [f.cycles() for f in funcs]
     limitsets = [f.limitset() for f in funcs]
 
@@ -182,27 +182,73 @@ class EndofunctionTests(unittest.TestCase):
                 for x in invim:
                     self.assertNotIn(x, lim)
 
-    # Permutation Tests
 
-    def test_inverse(self):
-        """Test compose(inv(perm), perm) == perm"""
-        permlist = []
-        for n in range(1, 10):
-            for _ in range(1, 10*n):
-                permlist.append(randperm(n))
+class PermutationTests(unittest.TestCase):
 
-        for perm in permlist:
-            e = rangeperm(range(len(perm)))
-            self.assertSequenceEqual(e, perm * perm.inverse())
-            self.assertSequenceEqual(e, perm.inverse() * perm)
-            self.assertSequenceEqual(perm, perm.inverse().inverse())
+    def test_init(self):
+        """Test permutations must be self-mapping and bijective"""
+        f = Function(zip("123", [2, 2, 3]))
+        b = Bijection(zip("123", "abc"))
+        e = Endofunction(zip([1, 2, 3], [2, 2, 3]))
+        for s in [f, b, e]:
+            with self.assertRaises(ValueError):
+                SymmetricFunction(s)
 
-    def test_conjugation(self):
-        """Test that conjugation is invertible, with the obvious inverse."""
-        for f in self.funcs:
-            for _ in range(20):
-                perm = randperm(len(f))
-                self.assertEqual(f, perm.inverse().conj(perm.conj(f)))
+    def test_negative_powers(self):
+        """Test that permutations work with negative powers."""
+        s = rangeperm([1, 2, 3, 0, 5, 6, 4])  # s.cycles() <-> (0,1,2,3)(4,5,6)
+        a = Bijection(zip(range(7), "abcdefg")).conj(s)
+        ii = rangeperm(range(7))
+        ia = SymmetricFunction(zip(*(["abcdefg"]*2)))
+        for i in range(13):
+            self.assertEqual(ii, (s**i) * (s**-i))
+            self.assertEqual(ii, (s**-i) * (s**i))
+            self.assertEqual(ia, (a**i) * (a**-i))
+            self.assertEqual(ia, (a**-i) * (a**i))
+
+
+class CompositionTests(unittest.TestCase):
+
+    def test_composition(self):
+        f = rangefunc([5, 8, 4, 5, 0, 3, 5, 2, 6, 7])
+        g = Function(enumerate("a"*6 + "b"*5))
+        self.assertEqual(g * f, Function(enumerate("abaaaaaabb")))
+        with self.assertRaises(KeyError):
+            f * g
+
+    I = list(enumerate(range(10)))
+    ids = [Function(I), Bijection(I), Endofunction(I), SymmetricFunction(I)]
+
+    def test_composition_types(self):
+        """Test the four type rules for function composition"""
+        f, b, e, s = self.ids
+        # test rule 1)
+        self.assertEqual(f, f*f)
+        self.assertEqual(b, b*b)
+        self.assertEqual(e, e*e)
+        self.assertEqual(s, s*s)
+        # test rule 2)
+        self.assertEqual(f, f*e)
+        self.assertEqual(f, e*f)
+        self.assertEqual(f, f*b)
+        self.assertEqual(f, b*f)
+        self.assertEqual(f, f*s)
+        self.assertEqual(f, s*f)
+        # test rule 3)
+        self.assertEqual(e, e*s)
+        self.assertEqual(e, s*e)
+        self.assertEqual(b, b*s)
+        self.assertEqual(b, s*b)
+        # test rule 4)
+        self.assertEqual(f, e*b)
+        self.assertEqual(f, b*e)
+
+    def test_conjugation_types(self):
+        """Test that conjugate of an object is the original type"""
+        _, b, _, s = self.ids
+        for func in self.ids:
+            self.assertEqual(func, b.conj(func))
+            self.assertEqual(func, s.conj(func))
 
 
 def _func_images(mspace):
