@@ -3,9 +3,14 @@
 Caleb Levy, 2015.
 """
 
+from functools import reduce
 from math import factorial
+from operator import mul
 
-from funcstructs.utils.misc import prod
+
+def prod(iterable):
+    """Product of all items in an iterable."""
+    return reduce(mul, iterable, 1)
 
 
 def factorial_prod(iterable):

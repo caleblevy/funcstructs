@@ -6,8 +6,9 @@ Caleb Levy, 2014 and 2015.
 # Opt to use Counter instead of Multiset to avoid circular dependencies
 from collections import Counter
 
-from funcstructs.utils import productrange
-from funcstructs.utils.misc import prod
+from funcstructs.utils.combinat import prod
+from funcstructs.utils.productrange import productrange
+
 
 __all__ = ["prime_factorization", "divisors"]
 
@@ -37,7 +38,7 @@ def _divisor_gen(n):
         return
     primes, multiplicities = zip(*prime_factorization(n).items())
     # Since factors are prime, each partition of powers is a different divisor.
-    for exponents in productrange.productrange([m+1 for m in multiplicities]):
+    for exponents in productrange([m+1 for m in multiplicities]):
         yield prod(p**e for p, e in zip(primes, exponents))
 
 

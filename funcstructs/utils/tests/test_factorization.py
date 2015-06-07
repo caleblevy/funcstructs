@@ -1,6 +1,6 @@
 import unittest
 
-from funcstructs.utils.misc import prod
+from funcstructs.utils.combinat import prod
 
 from ..factorization import prime_factorization, divisors
 

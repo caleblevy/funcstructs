@@ -3,19 +3,12 @@
 Caleb Levy, 2015.
 """
 
-import functools
 import itertools
-import operator
 
 
 def flatten(lol):
     """Flatten a list of lists."""
     return itertools.chain.from_iterable(lol)
-
-
-def prod(iterable):
-    """Product of all items in an iterable."""
-    return functools.reduce(operator.mul, iterable, 1)
 
 
 # Modification of werkzeug.cached_property. Here we have chosen not to
