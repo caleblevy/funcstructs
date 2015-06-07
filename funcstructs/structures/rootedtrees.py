@@ -111,7 +111,7 @@ class OrderedTree(bases.Tuple):
                 raise ValueError("Function structure is not a rooted tree")
             root = next(iter(lim))
         # Must have separate method for endofunction since default is level seq
-        return cls(_levels_from_preim(func.acyclic_ancestors, root))
+        return cls(_levels_from_preim(func.acyclic_ancestors(), root))
 
     def _branch_sequences(self):
         return subsequences.startswith(self[1:], self[0]+1)

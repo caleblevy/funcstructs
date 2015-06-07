@@ -167,7 +167,6 @@ class Endofunction(Function):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
         return frozenset(flatten(self.cycles()))
 
-    @cached_property
     def acyclic_ancestors(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
         descendants = defaultdict(set)
