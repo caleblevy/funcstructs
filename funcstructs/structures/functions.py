@@ -123,7 +123,6 @@ class Endofunction(Function):
             f *= f
         return f_iter
 
-    @cached_property
     def imagepath(self):
         """f.imagepath[n] <==> len((f**n).image)"""
         cardinalities = [len(self.image)]

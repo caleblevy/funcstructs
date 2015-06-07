@@ -94,7 +94,6 @@ class Funcstruct(Multiset):
             func[root_node-len(tree)] = cycle_start
         return rangefunc(func)
 
-    @property
     def imagepath(self):
         """Image path of an endofunction with the same structure."""
         cardinalities = [len(self), 0] + [0]*(len(self)-2)

@@ -37,7 +37,7 @@ def iterdist_brute(n):
     """Calculate iterdist by enumerating all endofunction image paths."""
     dist = np.zeros((n, n-1), dtype=object)
     for f in functions.TransformationMonoid(n):
-        for it, card in enumerate(f.imagepath):
+        for it, card in enumerate(f.imagepath()):
             dist[card-1, it] += 1
     return dist
 
@@ -55,7 +55,7 @@ def iterdist_funcstruct(n, cycle_type=None):
     nfac = factorial(n)
     for struct in conjstructs.EndofunctionStructures(n, cycle_type):
         mult = nfac//struct.degeneracy
-        for it, card in enumerate(struct.imagepath):
+        for it, card in enumerate(struct.imagepath()):
             dist[card-1, it] += mult
     return dist
 

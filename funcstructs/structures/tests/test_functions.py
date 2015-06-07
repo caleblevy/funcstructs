@@ -114,21 +114,21 @@ class EndofunctionTests(unittest.TestCase):
 
     def test_imagepath(self):
         """Check various special and degenerate cases, with right index"""
-        self.assertSequenceEqual([1], rangefunc([0]).imagepath)
-        self.assertSequenceEqual([1], rangefunc([0, 0]).imagepath)
-        self.assertSequenceEqual([1], rangefunc([1, 1]).imagepath)
-        self.assertSequenceEqual([2], rangefunc([0, 1]).imagepath)
-        self.assertSequenceEqual([2], rangefunc([1, 0]).imagepath)
+        self.assertSequenceEqual([1], rangefunc([0]).imagepath())
+        self.assertSequenceEqual([1], rangefunc([0, 0]).imagepath())
+        self.assertSequenceEqual([1], rangefunc([1, 1]).imagepath())
+        self.assertSequenceEqual([2], rangefunc([0, 1]).imagepath())
+        self.assertSequenceEqual([2], rangefunc([1, 0]).imagepath())
         node_count = [2, 3, 5, 15]
         for n in node_count:
             tower = rangefunc([0] + list(range(n-1)))
             cycle = rangefunc([n-1] + list(range(n-1)))
             fixed = rangefunc(list(range(n)))
             degen = rangefunc([0]*n)
-            self.assertSequenceEqual(list(range(n)[:0:-1]), tower.imagepath)
-            self.assertSequenceEqual([n]*(n-1), cycle.imagepath)
-            self.assertSequenceEqual([n]*(n-1), fixed.imagepath)
-            self.assertSequenceEqual([1]*(n-1), degen.imagepath)
+            self.assertSequenceEqual(list(range(n)[:0:-1]), tower.imagepath())
+            self.assertSequenceEqual([n]*(n-1), cycle.imagepath())
+            self.assertSequenceEqual([n]*(n-1), fixed.imagepath())
+            self.assertSequenceEqual([1]*(n-1), degen.imagepath())
 
     # Cycle tests
 
@@ -159,7 +159,7 @@ class EndofunctionTests(unittest.TestCase):
     def test_cycles_are_complete(self):
         """Ensure funccycles returns every cycle."""
         for f, lim in zip(self.funcs, self.limitsets):
-            self.assertEqual(f.imagepath[-1], len(lim))
+            self.assertEqual(f.imagepath()[-1], len(lim))
 
     def test_acyclic_ancestors_are_not_cyclic(self):
         """Make sure attached_treenodes returns nodes not in cycles."""

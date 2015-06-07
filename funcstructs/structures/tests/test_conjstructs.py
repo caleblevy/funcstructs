@@ -33,8 +33,8 @@ class FuncstructTests(unittest.TestCase):
         """Check methods for computing structure image paths are equivalent."""
         for i in range(1, 8):
             for struct in EndofunctionStructures(i):
-                sim = struct.func_form().imagepath
-                fim = struct.imagepath
+                sim = struct.func_form().imagepath()
+                fim = struct.imagepath()
                 np.testing.assert_array_equal(sim, fim)
 
     def test_struct_counts(self):
