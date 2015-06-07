@@ -19,8 +19,8 @@ class frozendict(dict):
     __slots__ = ()
 
     def __new__(cls, *args, **kwargs):
-        self = super(frozendict, cls).__new__(cls, *args, **kwargs)
-        super(frozendict, self).__init__(*args, **kwargs)
+        self = dict.__new__(cls, *args, **kwargs)
+        dict.__init__(self, *args, **kwargs)
         return self
 
     def __init__(self, *args, **kwargs):
