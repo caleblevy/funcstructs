@@ -141,30 +141,32 @@ class EndofunctionTests(unittest.TestCase):
     funcs += list(TransformationMonoid(1))
     funcs += list(TransformationMonoid(3))
     funcs += list(TransformationMonoid(4))
+    cyclesets = [f.cycles() for f in funcs]
+    limitsets = [f.limitset() for f in funcs]
 
     def test_cycles_are_cyclic(self):
         """Make sure funccylces actually returns cycles."""
-        for f in self.funcs:
-            for cycle in f.cycles():
+        for f, cycles in zip(self.funcs, self.cyclesets):
+            for cycle in cycles:
                 for ind, el in enumerate(cycle):
                     self.assertEqual(cycle[(ind+1) % len(cycle)], f[el])
 
     def test_cycles_are_unique(self):
         """Ensure funccycles returns no duplicates."""
-        for f in self.funcs:
-            self.assertEqual(len(f.cycles()), len(set(f.cycles())))
+        for cycles in self.cyclesets:
+            self.assertEqual(len(cycles), len(set(cycles)))
 
     def test_cycles_are_complete(self):
         """Ensure funccycles returns every cycle."""
-        for f in self.funcs:
-            self.assertEqual(f.imagepath[-1], len(f.limitset))
+        for f, lim in zip(self.funcs, self.limitsets):
+            self.assertEqual(f.imagepath[-1], len(lim))
 
     def test_acyclic_ancestors_are_not_cyclic(self):
         """Make sure attached_treenodes returns nodes not in cycles."""
-        for f in self.funcs:
+        for f, lim in zip(self.funcs, self.limitsets):
             for _, invim in f.acyclic_ancestors.items():
                 for x in invim:
-                    self.assertNotIn(x, f.limitset)
+                    self.assertNotIn(x, lim)
 
     # Permutation Tests
 

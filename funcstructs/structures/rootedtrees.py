@@ -106,9 +106,10 @@ class OrderedTree(bases.Tuple):
         node is specified, and the function does not have a unique cyclic
         element, a ValueError is raised."""
         if root is None:
-            root = next(iter(func.limitset))
-            if len(func.limitset) != 1:
+            lim = func.limitset()
+            if len(lim) != 1:
                 raise ValueError("Function structure is not a rooted tree")
+            root = next(iter(lim))
         # Must have separate method for endofunction since default is level seq
         return cls(_levels_from_preim(func.acyclic_ancestors, root))
 

@@ -163,7 +163,6 @@ class Endofunction(Function):
         """Return the set of f's cycles"""
         return frozenset(map(tuple, self.enumerate_cycles()))
 
-    @cached_property
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
         return frozenset(flatten(self.cycles()))
@@ -172,9 +171,10 @@ class Endofunction(Function):
     def acyclic_ancestors(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
         descendants = defaultdict(set)
+        lim = self.limitset()  # make local copy for speed
         for y, inv_image in self.preimage().items():
             for x in inv_image:
-                if x not in self.limitset:
+                if x not in lim:
                     descendants[y].add(x)
         return bases.frozendict((x, frozenset(descendants[x])) for x in
                                 self.domain)
