@@ -33,6 +33,8 @@ def _result_functype(f, g):
 class Function(bases.frozendict, WriteOnceMixin):
     """An immutable mapping between sets."""
 
+    __slots__ = "domain", "image"
+
     def __new__(cls, *args, **kwargs):
         self = super(Function, cls).__new__(cls, *args, **kwargs)
         self.domain = frozenset(self.keys())
@@ -58,6 +60,8 @@ class Function(bases.frozendict, WriteOnceMixin):
 
 class Bijection(Function):
     """An invertible Function."""
+
+    __slots__ = ()
 
     def __init__(self, *args, **kwargs):
         super(Bijection, self).__init__(*args, **kwargs)
@@ -89,6 +93,8 @@ class Bijection(Function):
 
 class Endofunction(Function):
     """A Function whose domain contains its codomain."""
+
+    __slots__ = ()
 
     def __init__(self, *args, **kwargs):
         super(Endofunction, self).__init__(*args, **kwargs)
@@ -166,8 +172,7 @@ class Endofunction(Function):
 class SymmetricFunction(Endofunction, Bijection):
     """A Bijective Endofunction"""
 
-    def __init__(self, *args, **kwargs):
-        super(SymmetricFunction, self).__init__(*args, **kwargs)
+    __slots__ = ()
 
     def __pow__(self, n):
         """Symmetric functions allow us to take inverses."""
