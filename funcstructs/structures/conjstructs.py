@@ -19,7 +19,7 @@ from funcstructs.utils import compositions, factorization, subsequences
 from .functions import rangefunc
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
-from .rootedtrees import DominantTree, PartitionForests
+from .rootedtrees import _levels_from_preim, DominantTree, PartitionForests
 
 
 def _partitions(n):
@@ -39,10 +39,11 @@ class Funcstruct(Multiset):
 
     def __new__(cls, f):
         structcycles = []
+        treenodes = f.acyclic_ancestors()
         for cycle in f.cycles():
             strand = []
             for el in cycle:
-                strand.append(DominantTree.from_func(f, el))
+                strand.append(DominantTree(_levels_from_preim(treenodes, el)))
             structcycles.append(Necklace(strand))
         return cls._from_cycles(structcycles, len(f))
 
