@@ -33,7 +33,7 @@ def _result_functype(f, g):
 class Function(bases.frozendict, WriteOnceMixin):
     """An immutable mapping between sets."""
 
-    __slots__ = "domain", "image"
+    __slots__ = ("domain", "image")
 
     def __new__(cls, *args, **kwargs):
         self = super(Function, cls).__new__(cls, *args, **kwargs)
@@ -198,26 +198,6 @@ def rangeperm(seq):
 # Convenience functions for return random Functions
 
 
-def randfunc(n):
-    """ Return a random endofunction on n elements. """
-    return rangefunc(random.randrange(n) for _ in range(n))
-
-
-def randperm(n):
-    """Return a random permutation of range(n)."""
-    r = list(range(n))  # Explicitly call list for python 3 compatibility.
-    random.shuffle(r)
-    return rangeperm(r)
-
-
-def randconj(f):
-    """Return a random conjugate of f."""
-    return randperm(len(f)).conj(f)
-
-
-# Function enumerators
-
-
 def _parsed_domain(domain):
     """Change domain to a frozenset. If domain is int, set to range(domain)."""
     if isinstance(domain, int):
@@ -225,6 +205,42 @@ def _parsed_domain(domain):
             raise ValueError("Cannot define domain on %s elements" % domain)
         domain = range(domain)
     return frozenset(domain)
+
+
+def randfunc(domain, codomain=None):
+    """Return a random endofunction on a domain."""
+    S = list(_parsed_domain(domain))
+    if codomain is not None:
+        T = list(_parsed_domain(codomain))
+        result_type = Function
+    else:
+        T = S
+        result_type = Endofunction
+    return result_type((x, random.choice(T)) for x in S)
+
+
+def randperm(domain, codomain=None):
+    """Return a random permutation of range(n)."""
+    S = list(_parsed_domain(domain))
+    if codomain is not None:
+        T = list(_parsed_domain(codomain))
+        result_type = Bijection
+    else:
+        T = S[:]
+        result_type = SymmetricFunction
+    random.shuffle(T)
+    return result_type(zip(S, T))
+
+
+def randconj(f, newdomain=None):
+    """Return a random conjugate of f."""
+    if newdomain is None:
+        return randperm(f.domain).conj(f)
+    else:
+        return randperm(f.domain, _parsed_domain(newdomain)).conj(f)
+
+
+# Function enumerators
 
 
 class Mappings(bases.Enumerable):

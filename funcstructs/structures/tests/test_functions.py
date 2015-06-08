@@ -207,6 +207,69 @@ class PermutationTests(unittest.TestCase):
             self.assertEqual(ia, (a**-i) * (a**i))
 
 
+class RandfuncTests(unittest.TestCase):
+
+    def test_randfunc(self):
+        """Verify types and domains of random functions and endofunctions."""
+        domains = [5, 6, range(5), "abc", "defgh"]
+        for dom in domains:
+            f = randfunc(dom)
+            self.assertIsInstance(f, Endofunction)
+            if isinstance(dom, int):
+                d = set(range(dom))
+            else:
+                d = set(dom)
+            self.assertEqual(f.domain, d)
+            for cod in domains:
+                g = randfunc(dom, cod)
+                self.assertIsInstance(g, Function)
+                if isinstance(cod, int):
+                    c = set(range(cod))
+                else:
+                    c = set(cod)
+                self.assertEqual(g.domain, d)
+                self.assertTrue(g.image.issubset(c))
+
+    def test_randperm(self):
+        """Verify type & invertibility of random bijections and permutatioms"""
+        domains = [5, range(5), "abcde"]
+        for dom in domains:
+            s = randperm(dom)
+            self.assertIsInstance(s, SymmetricFunction)
+            if isinstance(dom, int):
+                d = set(range(dom))
+            else:
+                d = set(dom)
+            self.assertEqual(s.domain, d)
+            self.assertEqual(s.domain, s.image)
+            for cod in domains:
+                b = randperm(dom, cod)
+                self.assertIsInstance(b, Bijection)
+                if isinstance(cod, int):
+                    c = set(range(cod))
+                else:
+                    c = set(cod)
+                self.assertEqual(b.domain, d)
+                self.assertEqual(b.image, c)
+
+    def test_randconj(self):
+        """Verify randconj returns a conjugate of f."""
+        f = randfunc(10)
+        g = randfunc("abcdefghij")
+        cf = randconj(f)
+        cg = randconj(g)
+        cdf = randconj(f, g.domain)
+        cdg = randconj(g, f.domain)
+        self.assertEqual(Funcstruct(f), Funcstruct(cf))
+        self.assertEqual(Funcstruct(f), Funcstruct(cdf))
+        self.assertEqual(f.domain, cf.domain)
+        self.assertEqual(g.domain, cdf.domain)
+        self.assertEqual(Funcstruct(g), Funcstruct(cg))
+        self.assertEqual(Funcstruct(g), Funcstruct(cdg))
+        self.assertEqual(g.domain, cg.domain)
+        self.assertEqual(f.domain, cdg.domain)
+
+
 class CompositionTests(unittest.TestCase):
 
     def test_composition(self):
