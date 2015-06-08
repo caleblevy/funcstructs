@@ -45,17 +45,17 @@ class Function(bases.frozendict, WriteOnceMixin):
         """Return elements of the domain and their labels in pairs"""
         return iter(self.items())
 
+    def __mul__(self, other):
+        """(f * g)[x] <==> f[g[x]]"""
+        # f * g becomes a function on g's domain, so it inherits class of g
+        return _result_functype(self, other)((x, self[y]) for x, y in other)
+
     def preimage(self):
         """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
         preim = defaultdict(set)
         for x, y in self:
             preim[y].add(x)
         return bases.frozendict((y, frozenset(preim[y])) for y in self.image)
-
-    def __mul__(self, other):
-        """(f * g)[x] <==> f[g[x]]"""
-        # f * g becomes a function on g's domain, so it inherits class of g
-        return _result_functype(self, other)((x, self[y]) for x, y in other)
 
 
 class Bijection(Function):
@@ -195,7 +195,7 @@ def rangeperm(seq):
     return SymmetricFunction(enumerate(seq))
 
 
-# Convenience functions for return random Functions
+# Convenience functions for returning random Functions
 
 
 def _parsed_domain(domain):
