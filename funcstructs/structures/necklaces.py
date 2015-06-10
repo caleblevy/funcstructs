@@ -105,18 +105,13 @@ class FixedContentNecklaces(bases.Enumerable):
     """ Representation of the set of necklaces of fixed content; i.e. a fixed
     pool of beads from which to form necklaces. """
 
-    def __init__(self, elements, multiplicities=None):
+    def __init__(self, elements=None, multiplicities=None):
         if multiplicities is None:
             elements, multiplicities = multiset.Multiset(elements).sort_split()
+        elif elements is None:
+            elements, multiplicities = zip(*enumerate(multiplicities))
         self.elements = elements
         self.multiplicities = multiplicities
-
-    @classmethod
-    def from_partition(cls, partition):
-        beads = []
-        for i, d in enumerate(partition):
-            beads.extend([i+1]*d)
-        return cls(beads)
 
     def count_by_period(self):
         """Returns a list whose kth element is the number of necklaces

@@ -58,14 +58,14 @@ class FixedContentNecklaceTests(unittest.TestCase):
         p2 = [4, 4, 4, 3, 3, 2, 1, 1]
         p3 = [24, 36]
         p4 = [36, 24]
-        b1 = [1]*3 + [2]*3 + [3]*2
-        b2 = [1]*4 + [2]*4 + [3]*4 + [4]*3 + [5]*3 + [6]*2 + [7] + [8]
-        b3 = [1]*24 + [2]*36
-        b4 = [1]*36 + [2]*24  # test that order matters
+        b1 = [0]*3 + [1]*3 + [2]*2
+        b2 = [0]*4 + [1]*4 + [2]*4 + [3]*3 + [4]*3 + [5]*2 + [6] + [7]
+        b3 = [0]*24 + [1]*36
+        b4 = [0]*36 + [1]*24  # test that order matters
         for b, p in zip([b1, b2, b3, b4], [p1, p2, p3, p4]):
             self.assertEqual(
                 FixedContentNecklaces(b),
-                FixedContentNecklaces.from_partition(p)
+                FixedContentNecklaces(multiplicities=p)
             )
 
     def test_total_counts(self):
@@ -73,7 +73,7 @@ class FixedContentNecklaceTests(unittest.TestCase):
         partitions = [[3, 3, 2], [4, 4, 4, 3, 3, 2, 1, 1], [24, 36]]
         cardinalities = [70, 51330759480000, 600873126148801]
         for c, p in zip(cardinalities, partitions):
-            nc = FixedContentNecklaces.from_partition(p).cardinality()
+            nc = FixedContentNecklaces(multiplicities=p).cardinality()
             self.assertEqual(c, nc)
 
     def test_enumeration_counts(self):
@@ -91,7 +91,7 @@ class FixedContentNecklaceTests(unittest.TestCase):
 
     def test_enumeration_period_counts(self):
         """Test distribution of periods of enumerated necklaces."""
-        necks = FixedContentNecklaces.from_partition([6, 12])
+        necks = FixedContentNecklaces(multiplicities=[6, 12])
         counts_by_period = necks.count_by_period()
         baseperiod = 3
         self.assertEqual(1038, sum(counts_by_period))
