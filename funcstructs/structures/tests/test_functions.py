@@ -47,6 +47,15 @@ class FunctionTests(unittest.TestCase):
         for c, f in self.constants:
             self.assertEqual(dict(f.preimage()), {c: f.domain})
 
+    def test_containment(self):
+        """Test that function containment tests for key-value pairs."""
+        for _, f in self.constants:
+            for xy in f:
+                self.assertIn(xy, f)
+                self.assertNotIn(xy[0], f)
+                self.assertNotIn(xy[1], f)
+                self.assertNotIn(xy[1:], f)
+
 
 class BijectionTests(unittest.TestCase):
 

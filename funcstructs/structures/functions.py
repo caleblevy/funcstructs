@@ -60,9 +60,21 @@ class Function(bases.frozendict):
         """f.image <==> {y for (x, y) if f}"""
         return frozenset(self.values())
 
+    # Mathematical functions describe a set of pairings of points; returning
+    # elements of the domain does not provide useful information; only the
+    # key-value pairs matter, so __iter__ is overridden to dict.__items__.
+
     def __iter__(self):
         """Return elements of the domain and their labels in pairs"""
         return iter(self.items())
+
+    def __contains__(self, keyval):
+        """Test whether f contains a key-value pair."""
+        try:
+            x, y = keyval
+        except (TypeError, ValueError):
+            return False
+        return dict.__contains__(self, x) and self[x] == y
 
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
@@ -89,7 +101,7 @@ class Bijection(Function):
             raise ValueError("This function is not invertible.")
 
     def inverse(self):
-        """s.inverse <==> s**-1"""
+        """s.inverse() * s <==> identity(s.domain)"""
         # Code taken directly from: "Inverting permutations in Python" at
         # http://stackoverflow.com/a/9185908.
         return self.__class__((y, x) for x, y in self)
