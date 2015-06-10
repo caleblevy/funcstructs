@@ -71,13 +71,12 @@ class Necklace(bases.Tuple):
             strand = Lyndon.SmallestRotation(strand)
         return super(Necklace, cls).__new__(cls, strand)
 
-    @property
     def period(self):
         return periodicity(self)
 
     def degeneracy(self):
         """Number of distinct representations of the same necklace."""
-        return len(self)//self.period
+        return len(self)//self.period()
 
 
 def simple_fixed_content(a, content, t, p, k):
