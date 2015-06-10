@@ -23,6 +23,10 @@ class frozendict(dict):
         dict.__init__(self, *args, **kwargs)
         return self
 
+    @classmethod
+    def fromkeys(cls, *args, **kwargs):
+        return cls(dict.fromkeys(*args, **kwargs))
+
     def __init__(self, *args, **kwargs):
         pass  # Override dict.__init__ to avoid call to self.update()
 
@@ -32,11 +36,8 @@ class frozendict(dict):
 
     __delitem__ = clear = pop = popitem = _raise_undeleteable
 
-    def __hash__(self):
-        return hash(frozenset(self.items()))
-
     def __repr__(self):
-        return self.__class__.__name__ + "(%s)" % dict(self)
+        return "%s(%s)" % (self.__class__.__name__, dict(self))
 
     def __eq__(self, other):
         if type(self) is type(other):
@@ -46,9 +47,17 @@ class frozendict(dict):
     def __ne__(self, other):
         return not self == other
 
-    @classmethod
-    def fromkeys(cls, *args, **kwargs):
-        return cls(dict.fromkeys(*args, **kwargs))
+    def __hash__(self):
+        # A bug in jython 2.7.0 causes it to ignore custom __eq__ methods
+        # of dict subclasses with __hash__ upon hash collision. As a
+        # temprorary fix, mix in the id of self's type. As long as this
+        # does not exceed hash width, the offsets should ensure different
+        # frozendict subclasses comparing equal have different hashes.
+        #
+        # Alternatively we could have a registry of dict subclasses to
+        # guarentee no collisions, but I don't want to use such hacks to
+        # deal with broken behavior in jython.
+        return hash(frozenset(self.items())) + id(type(self))
 
     def split(self):
         """Splits the dict into element-multiplicity pairs."""
