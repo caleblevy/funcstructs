@@ -304,7 +304,6 @@ class TreeEnumerator(bases.Enumerable):
                     tree[i] = tree[i-(p-q)]
                 yield DominantTree(tree, preordered=True)
 
-    @property
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm
         featured without derivation in Finch, S. R. "Otter's Tree Enumeration
@@ -339,9 +338,8 @@ class ForestEnumerator(bases.Enumerable):
         for tree in TreeEnumerator(self.n+1, -1):
             yield tree.chop()
 
-    @property
     def cardinality(self):
-        return TreeEnumerator(self.n+1).cardinality
+        return TreeEnumerator(self.n+1).cardinality()
 
 
 class PartitionForests(bases.Enumerable):
@@ -353,10 +351,9 @@ class PartitionForests(bases.Enumerable):
     def __iter__(self):
         return multiset.unordered_product(self.partition, TreeEnumerator)
 
-    @property
     def cardinality(self):
         l = 1
         for y, r in self.partition.items():
-            n = TreeEnumerator(y).cardinality
+            n = TreeEnumerator(y).cardinality()
             l *= combinat.nCWRk(n, r)
         return l

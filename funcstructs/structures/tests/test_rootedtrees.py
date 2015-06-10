@@ -24,18 +24,18 @@ class TreeEnumerationTests(unittest.TestCase):
         """OEIS A000081: number of unlabelled rooted trees on N nodes."""
         for n, count in enumerate(self.A000081, start=1):
             self.assertEqual(count, len(set(TreeEnumerator(n))))
-            self.assertEqual(count, TreeEnumerator(n).cardinality)
+            self.assertEqual(count, TreeEnumerator(n).cardinality())
 
     def test_forest_counts(self):
         """Check len(ForestEnumerator(N))==A000081(N+1)"""
         for n, count in enumerate(self.A000081[1:], start=1):
             intforests = set(ForestEnumerator(n))
-            intforestcount = ForestEnumerator(n).cardinality
+            intforestcount = ForestEnumerator(n).cardinality()
             pforests = set()
             pforestcount = 0
             for part in IntegerPartitions.partitions(n):
                 pforests.update(PartitionForests(part))
-                pforestcount += PartitionForests(part).cardinality
+                pforestcount += PartitionForests(part).cardinality()
             self.assertEqual(count, len(intforests))
             self.assertEqual(count, len(pforests))
             self.assertEqual(count, intforestcount)
