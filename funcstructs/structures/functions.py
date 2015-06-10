@@ -38,12 +38,26 @@ class Function(bases.frozendict):
         _ = self.image  # make sure that codomain is hashable
         return self
 
+    # "domain" and "image" used to be attributes computed in the constructor
+    # and cached for speed, with corresponding __slots__ and a WriteOnceMixin
+    # to prevent altering them. There are two reasons for using properties:
+    #
+    # 1) Multiply inheriting from classes with nonempty __slots__ leads to
+    #    instance layout conflicts in jython, *even with identical base slots*
+    #    (instance layout conflicts are *expected* when multiple bases have
+    #    *different* slots).
+    #
+    # 2) It turned out that after testing in CPython that computing on the fly
+    #    was faster anyway, presumably due to decreased memory overhead.
+
     @property
     def domain(self):
+        """f.domain <==> {x for (x, y) in f}"""
         return frozenset(self.keys())
 
     @property
     def image(self):
+        """f.image <==> {y for (x, y) if f}"""
         return frozenset(self.values())
 
     def __iter__(self):
