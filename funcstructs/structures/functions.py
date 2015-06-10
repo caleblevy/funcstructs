@@ -8,8 +8,6 @@ import random
 from collections import defaultdict
 from math import factorial
 
-from parametrizedmeta import WriteOnceMixin
-
 from funcstructs import bases
 
 
@@ -30,16 +28,23 @@ def _result_functype(f, g):
     return Function
 
 
-class Function(bases.frozendict, WriteOnceMixin):
+class Function(bases.frozendict):
     """An immutable mapping between sets."""
 
-    __slots__ = ("domain", "image")
+    __slots__ = ()
 
     def __new__(cls, *args, **kwargs):
         self = super(Function, cls).__new__(cls, *args, **kwargs)
-        self.domain = frozenset(self.keys())
-        self.image = frozenset(self.values())
+        _ = self.image  # make sure that codomain is hashable
         return self
+
+    @property
+    def domain(self):
+        return frozenset(self.keys())
+
+    @property
+    def image(self):
+        return frozenset(self.values())
 
     def __iter__(self):
         """Return elements of the domain and their labels in pairs"""
