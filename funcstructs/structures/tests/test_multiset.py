@@ -1,6 +1,7 @@
 import unittest
-import collections
 import random
+from collections import Counter
+from itertools import product
 
 from ..multiset import Multiset
 
@@ -19,7 +20,7 @@ class MultisetTests(unittest.TestCase):
 
     msets = [abra, nest, empty, nest2]
 
-    def test_init(self):
+    def test_constructor(self):
         """Test the multiset initializer"""
         mcounts = [
             {'a': 5, 'b': 2, 'r': 2, 'c': 1, 'd': 1},
@@ -35,6 +36,7 @@ class MultisetTests(unittest.TestCase):
 
     def test_repr(self):
         """Test that eval(repr(self)) == self"""
+        # Need to test outside frozendict due to overridden __repr__
         for mset in self.msets:
             self.assertEqual(mset, eval(repr(mset)))
 
@@ -60,17 +62,11 @@ class MultisetTests(unittest.TestCase):
             string_components(self.abra)
         )
 
-    def test_keying(self):
-        """Check that we record the correct number of elements."""
-        ms = Multiset('abracadabra')
-        self.assertEqual(5, ms['a'])
-        with self.assertRaises(KeyError):
-            self.assertEqual(0, ms['x'])
-
     def test_most_common(self):
         """Test inherited method most_common behaves correctly"""
-        a = collections.Counter(list(self.abra))
-        b = collections.Counter(list(self.nest))
+        # Needed to test methods are not broken from overridden __iter__
+        a = Counter(list(self.abra))
+        b = Counter(list(self.nest))
         self.assertEqual(a.most_common(1), self.abra.most_common(1))
         self.assertEqual(
             set(a.most_common()[1:3]),
@@ -94,14 +90,9 @@ class MultisetTests(unittest.TestCase):
             self.assertEqual(items_count, len(mset.values()))
             self.assertEqual(items_count, len(mset.items()))
             self.assertEqual(items_count, len(mset.keys()))
+            # Make sure methods are unaffected by overridden dict.__iter__
             self.assertEqual(items_count, len(set(mset.items())))
             self.assertEqual(items_count, len(set(mset.keys())))
-
-    def test_contains(self):
-        """Verify that we can test if an object is a member of a multiset."""
-        self.assertIn('a', Multiset('bbac'))
-        self.assertNotIn('a', Multiset())
-        self.assertNotIn('a', Multiset('missing letter'))
 
     def test_shuffling_invarience(self):
         """Test Multisets and hashes are invarient under element shuffling"""
@@ -134,3 +125,40 @@ class MultisetTests(unittest.TestCase):
         """Test multiset degeneracies reflect multiset permutations"""
         for mset, deg in zip(self.msets, [120*2*2, 2*2*2, 1, 1]):
             self.assertEqual(deg, mset.degeneracy())
+
+    def test_frommap(self):
+        """Test Multiset rejects inappropriate maps."""
+        for m in self.msets:
+            self.assertEqual(m, Multiset._frommap(dict(m)))
+        c = Counter("abracadabra")
+        c['a'] = 0
+        with self.assertRaises(TypeError):
+            m = Multiset._frommap(c)
+        c['a'] -= 1
+        with self.assertRaises(TypeError):
+            m = Multiset._frommap(c)
+        c['a'] = 1.
+        with self.assertRaises(TypeError):
+            m = Multiset._frommap(c)
+
+    def test_binary_operations(self):
+        """Test '+', '&', '|' and '-' for Multisets and Counters."""
+        i1, i2, i3 = tuple("aaabbc"), tuple("abcd"), tuple([1])
+        # We want to test our multiset operations on every ordered pair from
+        # {Multiset(a), Counter(a), Multiset(b), Counter(b)} for every
+        # combination with replacement of a and b chosen from {i1, i2, i3}.
+        for l, r in product([Multiset, Counter], repeat=2):
+            for a, b in product([i1, i2, i3], repeat=2):
+                self.assertEqual(l(a+b), l(a) + r(b))
+                if {a, b} == {i1, i2}:  # cases with overlap
+                    self.assertEqual(l("aab" if a == i1 else "d"), l(a) - r(b))
+                    self.assertEqual(l("abc"), l(a) & r(b))
+                    self.assertEqual(l("aaabbcd"), l(a) | r(b))
+                elif {a, b} in ({i1, i3}, {i2, i3}):  # disjoint cases
+                    self.assertEqual(l(a), l(a) - r(b))
+                    self.assertEqual(l(), l(a) & r(b))
+                    self.assertEqual(l(a + b), l(a) | r(b))
+                else:  # degenerate case
+                    self.assertEqual(l(), l(a) - r(b))
+                    self.assertEqual(l(a), l(a) & r(b))
+                    self.assertEqual(l(a), l(a) | r(b))
