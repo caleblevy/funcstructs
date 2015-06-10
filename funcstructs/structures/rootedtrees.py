@@ -275,11 +275,11 @@ class RootedTree(multiset.Multiset):
 class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
-    def __init__(self, n, __root_height=0):
+    def __init__(self, n, _root_height=0):
         if n < 1:
             raise ValueError("Cannot define a rooted tree with %s nodes" % n)
         self.n = n
-        self.__root_height = __root_height
+        self._root_height = _root_height
 
     def __iter__(self):
         """Generates the dominant representatives of each unordered tree in
@@ -290,7 +290,7 @@ class TreeEnumerator(bases.Enumerable):
         "Constant time generation of rooted trees." Siam Journal of
         Computation, Vol. 9, No. 4. November 1980.
         """
-        tree = list(range(self.__root_height, self.n+self.__root_height))
+        tree = list(range(self._root_height, self.n+self._root_height))
         yield DominantTree(tree, preordered=True)
         if self.n > 2:
             while tree[1] != tree[2]:
