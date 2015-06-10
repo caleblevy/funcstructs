@@ -1,8 +1,6 @@
 import unittest
 from math import factorial
 
-import numpy as np
-
 from .. import functions, necklaces, rootedtrees
 
 from ..conjstructs import Funcstruct, EndofunctionStructures
@@ -35,7 +33,7 @@ class FuncstructTests(unittest.TestCase):
             for struct in EndofunctionStructures(i):
                 sim = struct.func_form().imagepath()
                 fim = struct.imagepath()
-                np.testing.assert_array_equal(sim, fim)
+                self.assertSequenceEqual(sim, fim)
 
     def test_struct_counts(self):
         """OEIS A001372: Number of self-mapping patterns."""
