@@ -64,7 +64,6 @@ class Funcstruct(Multiset):
         """Number of nodes in the structure."""
         return self.__n
 
-    @property
     def degeneracy(self):
         """The number of ways to label a graph representing a particular
         endofunction with the given structure."""

@@ -50,7 +50,7 @@ class FuncstructTests(unittest.TestCase):
             fac = factorial(i)
             func_count = 0
             for struct in EndofunctionStructures(i):
-                func_count += fac//struct.degeneracy
+                func_count += fac//struct.degeneracy()
             self.assertEqual(i**i, func_count)
 
     def test_len(self):

@@ -54,7 +54,7 @@ def iterdist_funcstruct(n, cycle_type=None):
     dist = np.zeros((n, n-1), dtype=object)
     nfac = factorial(n)
     for struct in conjstructs.EndofunctionStructures(n, cycle_type):
-        mult = nfac//struct.degeneracy
+        mult = nfac//struct.degeneracy()
         for it, card in enumerate(struct.imagepath()):
             dist[card-1, it] += mult
     return dist
