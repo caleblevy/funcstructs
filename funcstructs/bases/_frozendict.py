@@ -60,9 +60,13 @@ class frozendict(dict):
         return hash(frozenset(self.items())) + id(type(self))
 
     def split(self):
-        """Splits the dict into element-multiplicity pairs."""
-        return zip(*self.items()) if self.items() else ((), ())
+        """Splits a mapping into corresponding key-value lists."""
+        return tuple(self.keys()), tuple(self.values())
 
     def sort_split(self):
-        """Same as frozendict.split with both lists sorted by elements"""
-        return zip(*sorted(self.items())) if self.items() else ((), ())
+        """Same as frozendict.split with both lists sorted by key values"""
+        items = self.items()
+        if items:
+            return tuple(zip(*sorted(items)))
+        else:
+            return (), ()
