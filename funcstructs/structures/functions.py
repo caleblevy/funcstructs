@@ -8,6 +8,8 @@ import random
 from collections import defaultdict
 from math import factorial
 
+import six
+
 from funcstructs import bases
 
 
@@ -70,11 +72,7 @@ class Function(bases.frozendict):
 
     def __contains__(self, keyval):
         """Test whether f contains a key-value pair."""
-        try:
-            x, y = keyval
-        except (TypeError, ValueError):
-            return False
-        return dict.__contains__(self, x) and self[x] == y
+        return keyval in six.viewitems(self)
 
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
