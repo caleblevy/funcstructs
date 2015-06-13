@@ -30,8 +30,8 @@ def _binop_template(name):
 
     def binop(self, other):
         if isinstance(other, Multiset):
-            other = Counter(dict(other))
-        return Multiset._frommap(counterop(Counter(dict(self)), other))
+            other = Counter(other)
+        return Multiset._frommap(counterop(Counter(self), other))
     binop.__name__ = name
     binop.__doc__ = counterop.__doc__
     return binop
@@ -40,7 +40,7 @@ def _binop_template(name):
 def _rop_template(name):
     """Template for reversed binary operations"""
     def binop(self, other):
-        return getattr(other, '__'+name[3:])(Counter(dict(self)))
+        return getattr(other, '__'+name[3:])(Counter(self))
     binop.__name__ = name
     binop.__doc__ = None
     return binop
