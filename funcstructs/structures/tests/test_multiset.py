@@ -28,11 +28,43 @@ class MultisetTests(unittest.TestCase):
             {},
             {self.nest: 1, self.empty: 1, 4: 1}
         ]
-        for count, mset in zip(mcounts, self.msets):
-            for el, mult in count.items():
-                self.assertEqual(mult, mset[el])
-                # Ensure multisets return themselves
-                self.assertEqual(mult, Multiset(mset)[el])
+        for c, m in zip(mcounts, self.msets):
+            self.assertEqual(c, dict(m))
+            # Multiset should accept dicts
+            self.assertEqual(c, dict(Multiset(dict(m))))
+            # Multiset should be idempotent
+            self.assertEqual(c, dict(Multiset(m)))
+        count = Counter("abracadabra")
+        # Test Multiset DOES work with keywords
+        self.assertEqual(Multiset(count), Multiset(a=5, b=2, r=2, c=1, d=1))
+        self.assertEqual(Multiset(count), Multiset(**count))
+        # Test that special keywords are not forbidden
+        self.assertEqual(
+            dict(args=1, kwargs=1, self=1, cls=1, iterable=1),
+            dict(Multiset(args=1, kwargs=1, self=1, cls=1, iterable=1))
+        )
+
+        # Test Multiset rejects inappropriate maps.
+        count['a'] = 0
+        with self.assertRaises(TypeError):
+            m = Multiset(count)
+        count['a'] -= 1
+        with self.assertRaises(TypeError):
+            m = Multiset(count)
+        count['a'] = 1.
+        with self.assertRaises(TypeError):
+            m = Multiset(count)
+        # Multiset, like dict, (and like Counter probably should), rejects None
+        with self.assertRaises(TypeError):
+            Multiset(None)
+        # Test that __new__ requires a subclass of Multiset
+        with self.assertRaises((TypeError, ValueError, IndexError)):
+            Multiset.__new__()
+        # Test that we cannot mix iterables and keywords
+        with self.assertRaises(TypeError):
+            Multiset([1, 1, 2], a=3)
+        with self.assertRaises(TypeError):
+            Multiset({1: 2}, a=3)
 
     def test_repr(self):
         """Test that eval(repr(self)) == self"""
@@ -53,14 +85,6 @@ class MultisetTests(unittest.TestCase):
                     self.assertEqual(ms1, ms2)
                 else:
                     self.assertNotEqual(ms1, ms2)
-
-    def test_str(self):
-        """Test string behaves according to specification"""
-        self.assertSequenceEqual('{}', str(self.empty))
-        self.assertEqual(
-            {"'a'^5", "'b'^2", "'r'^2", "'c'", "'d'"},
-            string_components(self.abra)
-        )
 
     def test_most_common(self):
         """Test inherited method most_common behaves correctly"""
@@ -87,9 +111,17 @@ class MultisetTests(unittest.TestCase):
         """Test that the keys, values and items methods are unaffected by
         overridden iter."""
         for mset, items_count in zip(self.msets, [5, 4, 0, 3]):
-            self.assertEqual(items_count, len(mset.values()))
-            self.assertEqual(items_count, len(mset.items()))
-            self.assertEqual(items_count, len(mset.keys()))
+            # In PyPy, dict view objects (values, items and keys) call the
+            # overridden __len__ function instead of the builtin dict length.
+            # This particular behavior is left for implementations to decide.
+            #
+            # In this context, the more proper __len__ function for the views
+            # would be that of the underlying dict, but as long as the actual
+            # items of the views have the same content it makes little
+            # difference. We thus test that the lengths are the same.
+            self.assertEqual(items_count, len(list(mset.values())))
+            self.assertEqual(items_count, len(list(mset.items())))
+            self.assertEqual(items_count, len(list(mset.keys())))
             # Make sure methods are unaffected by overridden dict.__iter__
             self.assertEqual(items_count, len(set(mset.items())))
             self.assertEqual(items_count, len(set(mset.keys())))
@@ -125,21 +157,6 @@ class MultisetTests(unittest.TestCase):
         """Test multiset degeneracies reflect multiset permutations"""
         for mset, deg in zip(self.msets, [120*2*2, 2*2*2, 1, 1]):
             self.assertEqual(deg, mset.degeneracy())
-
-    def test_frommap(self):
-        """Test Multiset rejects inappropriate maps."""
-        for m in self.msets:
-            self.assertEqual(m, Multiset._frommap(dict(m)))
-        c = Counter("abracadabra")
-        c['a'] = 0
-        with self.assertRaises(TypeError):
-            m = Multiset._frommap(c)
-        c['a'] -= 1
-        with self.assertRaises(TypeError):
-            m = Multiset._frommap(c)
-        c['a'] = 1.
-        with self.assertRaises(TypeError):
-            m = Multiset._frommap(c)
 
     def test_binary_operations(self):
         """Test '+', '&', '|' and '-' for Multisets and Counters."""

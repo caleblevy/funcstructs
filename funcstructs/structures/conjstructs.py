@@ -51,26 +51,21 @@ class Funcstruct(Multiset):
     orderings of the trees in the multisets correspond to necklaces whose beads
     are the trees themselves."""
 
-    __slots__ = '__n'
+    __slots__ = ()
 
     def __new__(cls, f):
-        structcycles = []
+        cycles = []
         treenodes = f.acyclic_ancestors()
         for cycle in f.cycles():
-            strand = []
-            for el in cycle:
-                strand.append(DominantTree(_levels_from_preim(treenodes, el)))
-            structcycles.append(Necklace(strand))
-        return cls._from_cycles(structcycles, len(f))
+            trees = []
+            for x in cycle:
+                trees.append(DominantTree(_levels_from_preim(treenodes, x)))
+            cycles.append(Necklace(trees))
+        return super(Funcstruct, cls).__new__(cls, cycles)
 
     @classmethod
-    def _from_cycles(cls, cycles, precounted=None):
-        self = super(Funcstruct, cls).__new__(cls, cycles)
-        if precounted is not None:
-            self.__n = precounted
-        else:
-            self.__n = len(list(chain(*chain(*cycles))))
-        return self
+    def _from_cycles(cls, cycles):
+        return super(Funcstruct, cls).__new__(cls, cycles)
 
     def __repr__(self):
         return super(Funcstruct, self).__repr__().replace(
@@ -78,7 +73,10 @@ class Funcstruct(Multiset):
 
     def __len__(self):
         """Number of nodes in the structure."""
-        return self.__n
+        node_count = 0
+        for cycle, mult in self.items():
+            node_count += mult * sum(map(len, cycle))
+        return node_count
 
     def degeneracy(self):
         """The number of ways to label a graph representing a particular
@@ -157,7 +155,7 @@ def cycle_type_funcstructs(n, cycle_type):
         for c, l, m in zip(composition, lengths, multiplicities):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in product(*cycle_groups):
-            yield Funcstruct._from_cycles(chain(*bundle), n)
+            yield Funcstruct._from_cycles(chain(*bundle))
 
 
 def integer_funcstructs(n):
@@ -177,10 +175,10 @@ class EndofunctionStructures(bases.Enumerable):
         if n < 0:
             raise ValueError("Cannot defined funcstructs on %s nodes" % n)
         self.n = n
-        self.cycle_type = Multiset(cycle_type)
+        self.cycle_type = None if cycle_type is None else Multiset(cycle_type)
 
     def __iter__(self):
-        if not self.cycle_type:
+        if self.cycle_type is None:
             return integer_funcstructs(self.n)
         else:
             return cycle_type_funcstructs(self.n, self.cycle_type)

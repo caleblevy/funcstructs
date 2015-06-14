@@ -10,7 +10,7 @@ from math import factorial
 
 import six
 
-from funcstructs import bases
+from funcstructs.bases import frozendict, Enumerable
 
 
 def _result_functype(f, g):
@@ -30,15 +30,13 @@ def _result_functype(f, g):
     return Function
 
 
-class Function(bases.frozendict):
+class Function(frozendict):
     """An immutable mapping between sets."""
 
     __slots__ = ()
 
-    def __new__(cls, *args, **kwargs):
-        self = super(Function, cls).__new__(cls, *args, **kwargs)
-        _ = self.image  # make sure that codomain is hashable
-        return self
+    def __init__(*args, **kwargs):
+        _ = args[0].image  # make sure that codomain is hashable
 
     # "domain" and "image" used to be attributes computed in the constructor
     # and cached for speed, with corresponding __slots__ and a WriteOnceMixin
@@ -62,6 +60,8 @@ class Function(bases.frozendict):
         """f.image <==> {y for (x, y) if f}"""
         return frozenset(self.values())
 
+    __call__ = dict.__getitem__
+
     # Mathematical functions describe a set of pairings of points; returning
     # elements of the domain does not provide useful information; only the
     # key-value pairs matter, so __iter__ is overridden to dict.__items__.
@@ -74,6 +74,8 @@ class Function(bases.frozendict):
         """Test whether f contains a key-value pair."""
         return keyval in six.viewitems(self)
 
+    # Define composition of Functions
+
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
@@ -84,7 +86,7 @@ class Function(bases.frozendict):
         preim = defaultdict(set)
         for x, y in self:
             preim[y].add(x)
-        return bases.frozendict((y, frozenset(preim[y])) for y in self.image)
+        return frozendict((y, frozenset(preim[y])) for y in self.image)
 
 
 class Bijection(Function):
@@ -92,7 +94,8 @@ class Bijection(Function):
 
     __slots__ = ()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(*args, **kwargs):
+        self = args[0]
         super(Bijection, self).__init__(*args, **kwargs)
         # Check cardinality of domain and codomain are identical
         if len(self) != len(self.image):
@@ -125,7 +128,8 @@ class Endofunction(Function):
 
     __slots__ = ()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(*args, **kwargs):
+        self = args[0]
         super(Endofunction, self).__init__(*args, **kwargs)
         if not self.domain.issuperset(self.image):
             raise ValueError("image must be a subset of the domain")
@@ -194,8 +198,7 @@ class Endofunction(Function):
             for x in inv_image:
                 if x not in lim:
                     descendants[y].add(x)
-        return bases.frozendict((x, frozenset(descendants[x])) for x in
-                                self.domain)
+        return frozendict((x, frozenset(descendants[x])) for x in self.domain)
 
 
 class SymmetricFunction(Endofunction, Bijection):
@@ -272,7 +275,7 @@ def randconj(f, newdomain=None):
 # Function enumerators
 
 
-class Mappings(bases.Enumerable):
+class Mappings(Enumerable):
     """The set of Functions between a domain and a codomain"""
 
     def __init__(self, domain, codomain):
@@ -288,7 +291,7 @@ class Mappings(bases.Enumerable):
         return len(self.codomain) ** len(self.domain)
 
 
-class Isomorphisms(bases.Enumerable):
+class Isomorphisms(Enumerable):
     """The set of bijections between a domain and a codomain"""
 
     def __init__(self, domain, codomain):
@@ -309,7 +312,7 @@ class Isomorphisms(bases.Enumerable):
         return factorial(len(self.domain))
 
 
-class TransformationMonoid(bases.Enumerable):
+class TransformationMonoid(Enumerable):
     """Set of all Endofunctions on a domain."""
 
     def __init__(self, domain):
@@ -324,7 +327,7 @@ class TransformationMonoid(bases.Enumerable):
         return len(self.domain) ** len(self.domain)
 
 
-class SymmetricGroup(bases.Enumerable):
+class SymmetricGroup(Enumerable):
     """The set of automorphisms on a domain"""
 
     def __init__(self, domain):

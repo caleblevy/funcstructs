@@ -5,7 +5,7 @@ Caleb Levy, 2014 and 2015.
 """
 
 from itertools import chain, combinations_with_replacement, product
-from collections import Counter
+from collections import Counter, Mapping
 
 from funcstructs.bases import frozendict
 from funcstructs.utils.combinat import factorial_prod
@@ -13,14 +13,18 @@ from funcstructs.utils.combinat import factorial_prod
 __all__ = ["Multiset", "unordered_product"]
 
 
+def _replace_doc(method):
+    if isinstance(method, str):
+        method = getattr(Counter, method)
+    doc = method.__doc__
+    return doc.replace("Counter", "Multiset").replace("counter", "multiset")
+
+
 def _get_method_with_docs(methodname):
     """Return a method function from Counter with 'Counter' replaced by
     'Multiset' in the docstring."""
     method = Counter.__dict__[methodname]
-    doc = method.__doc__
-    doc = doc.replace("Counter({", "Multiset._frommap({")  # dict input
-    doc = doc.replace("Counter", "Multiset").replace("counter", "multiset")
-    method.__doc__ = doc
+    method.__doc__ = _replace_doc(method)
     return method
 
 
@@ -31,7 +35,7 @@ def _binop_template(name):
     def binop(self, other):
         if isinstance(other, Multiset):
             other = Counter(other)
-        return Multiset._frommap(counterop(Counter(self), other))
+        return Multiset(counterop(Counter(self), other))
     binop.__name__ = name
     binop.__doc__ = counterop.__doc__
     return binop
@@ -46,6 +50,13 @@ def _rop_template(name):
     return binop
 
 
+def _check_multiset(mset):
+    """Return True if all elements of a mapping are positive integers."""
+    if all((isinstance(v, int) and v > 0) for v in mset.values()):
+        return True
+    raise TypeError("multiplicities must be positive integers")
+
+
 class Multiset(frozendict):
     """ Multiset is represented as a dictionary (hash table) whose keys are the
     elements of the set and values are the multiplicities. Multiset is
@@ -53,47 +64,36 @@ class Multiset(frozendict):
 
     __slots__ = ()
 
-    def __new__(cls, iterable=None):
-        self = dict.__new__(cls)
-        if iterable is not None:
-            for el in iterable:
-                dict.__setitem__(self, el, self.get(el, 0) + 1)
+    def __new__(*args, **kwargs):
+        self = dict.__new__(*args, **kwargs)
+        if len(args) == 2:
+            if kwargs:
+                raise TypeError("Multiset does not accept iterable and kwargs")
+            iterable = args[1]
+            if isinstance(iterable, Mapping):
+                dict.update(self, iterable)
+                _check_multiset(self)
+            else:
+                for el in iterable:
+                    dict.__setitem__(self, el, self.get(el, 0) + 1)
+        elif kwargs:
+            dict.update(self, kwargs)
+            _check_multiset(self)
+        elif len(args) > 2:
+            raise TypeError("expected at most 2 arguments, got %d" % len(args))
         return self
+    __new__.__doc__ = _replace_doc("__init__")
 
-    @classmethod
-    def _frommap(cls, *args, **kwargs):
-        """Multiset from any objects usable to make dictionaries."""
-        mset = cls()
-        for k, v in dict(*args, **kwargs).items():
-            if not(isinstance(v, int) and v > 0):
-                raise TypeError("%s keys must be positive integers" % cls)
-            dict.__setitem__(mset, k, v)
-        return mset
-
-    # length of a multiset includes multiplicities
     def __len__(self):
+        """Length of a multiset, including multiplicities."""
         return sum(self.values())
 
-    # Iterate through all elements; return multiple copies if present.
-    __iter__ = Counter.__dict__['elements']
+    elements = _get_method_with_docs("elements")
 
-    def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, list(self))
-
-    def __str__(self):
-        """The printable string appears just like a set, except that each
-        element is raised to the power of the multiplicity if it is greater
-        than 1. """
-        contents = []
-        for el, mult in self.items():
-            if isinstance(el, self.__class__):
-                el_str = str(el)
-            else:
-                el_str = repr(el)
-            if mult > 1:
-                el_str += '^%s' % mult
-            contents.append(el_str)
-        return '{%s}' % ', '.join(contents)
+    def __iter__(self):
+        """Iterate through the underlying set, returning multiple copies of the
+        elements if present. Equivalent to Counter.elements()."""
+        return self.elements()
 
     most_common = _get_method_with_docs("most_common")
 

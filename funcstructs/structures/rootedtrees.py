@@ -218,7 +218,7 @@ class RootedTree(multiset.Multiset):
 
     __slots__ = ()
 
-    def __new__(cls, subtrees=None):
+    def __new__(cls, subtrees=()):
         self = super(RootedTree, cls).__new__(cls, subtrees)
         if not all(isinstance(tree, cls) for tree in self.keys()):
             raise TypeError("subtrees must be rooted trees")
