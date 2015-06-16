@@ -62,6 +62,10 @@ class Function(frozendict):
 
     __call__ = dict.__getitem__
 
+    @classmethod
+    def __getitem__(cls, *args, **kwargs):
+        raise TypeError("%s should be evaluated by calling" % cls.__name__)
+
     # Mathematical functions describe a set of pairings of points; returning
     # elements of the domain does not provide useful information; only the
     # key-value pairs matter, so __iter__ is overridden to dict.__items__.
@@ -79,7 +83,7 @@ class Function(frozendict):
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
-        return _result_functype(self, other)((x, self[y]) for x, y in other)
+        return _result_functype(self, other)((x, self(y)) for x, y in other)
 
     def preimage(self):
         """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
@@ -87,6 +91,15 @@ class Function(frozendict):
         for x, y in self:
             preim[y].add(x)
         return frozendict((y, frozenset(preim[y])) for y in self.image)
+
+    # Hack for Jython: overriding dict.__getitem__ breaks custom __eq__
+    import platform
+    if platform.python_implementation() == "Jython":
+        def __eq__(self, other):
+            if type(self) is type(other):
+                return dict(self) == dict(other)
+            return False
+    del platform
 
 
 class Bijection(Function):
@@ -120,7 +133,7 @@ class Bijection(Function):
         # If f(1) = f(2) = f(3) = 3, and g(a) = g(b) = g(c) = c, then f is
         # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
         # way to get *to* g.
-        return f.__class__((y, self[f[x]]) for x, y in self)
+        return f.__class__((y, self(f(x))) for x, y in self)
 
 
 class Endofunction(Function):
@@ -174,7 +187,7 @@ class Endofunction(Function):
             while x not in tried:
                 remaining.discard(x)
                 tried.add(x)
-                x = self[x]
+                x = self(x)
                 path.append(x)
             if x not in cyclic:
                 cycle = path[path.index(x)+1:]

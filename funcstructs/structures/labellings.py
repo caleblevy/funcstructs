@@ -223,5 +223,5 @@ def tree_labellings(tree):
     for combo in _ordered_divisions(set(range(n)), bin_widths):
         c = list(chain(*combo))
         for i in range(n):
-            func[c[i]] = c[translation_sequence[i]]
+            func[c[i]] = c[translation_sequence(i)]
         yield rangefunc(func)

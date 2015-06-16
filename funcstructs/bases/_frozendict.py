@@ -19,7 +19,7 @@ class frozendict(dict):
     __slots__ = ()
 
     def __new__(*args, **kwargs):
-        self = dict.__new__(*args, **kwargs)
+        self = dict.__new__(args[0])
         dict.__init__(self, *args[1:], **kwargs)
         return self
 

@@ -6,11 +6,6 @@ from itertools import product
 from ..multiset import Multiset
 
 
-def string_components(b):
-    """Compare multiset strings."""
-    return set(str(b).lstrip('{').rstrip('}').split(', '))
-
-
 class MultisetTests(unittest.TestCase):
 
     abra = Multiset("abracadabra")
