@@ -1,41 +1,31 @@
-"""Algorithms and data structures for endofunction structures: conjugacy
-classes of the transformation monoid, represented by directed graphs with nodes
-of outdegree one.
+"""Representations and enumerations of endofunction structures.
 
-Caleb Levy, 2014 and 2015.
+Caleb Levy, 2014-2015.
 """
 
 from fractions import Fraction
 from itertools import chain, product
 from math import factorial
 
-try:
-    from itertools import accumulate  # use C speed iterator if > py3.2
-except ImportError:
-    import operator
-
-    # Taken from python.org
-    def accumulate(iterable, func=operator.add):
-        'Return running totals'
-        # accumulate([1,2,3,4,5]) --> 1 3 6 10 15
-        # accumulate([1,2,3,4,5], operator.mul) --> 1 2 6 24 120
-        it = iter(iterable)
-        total = next(it)
-        yield total
-        for element in it:
-            total = func(total, element)
-            yield total
-    del operator
-
 from PADS import IntegerPartitions
 
-from funcstructs import bases
+from funcstructs import compat
+
+from funcstructs.bases import Enumerable
 from funcstructs.utils import compositions, factorization, subsequences
 
 from .functions import rangefunc
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import _levels_from_preim, DominantTree, PartitionForests
+
+
+__all__ = ("Funcstruct", "EndofunctionStructures")
+
+
+def _ispartition(partition):
+    """Returns True if given a Multiset of positive integers."""
+    return all(isinstance(k, int) and k > 0 for k in partition.keys())
 
 
 def _partitions(n):
@@ -117,7 +107,7 @@ class Funcstruct(Multiset):
                     for it in subseq[:-1]:
                         cardinalities[subseq[-1]-it+1] -= mult
                     cardinalities[1] -= mult
-        return tuple(accumulate(cardinalities))[1:]
+        return tuple(compat.accumulate(cardinalities))[1:]
 
 
 def direct_unordered_attachments(t, l):
@@ -174,8 +164,12 @@ class EndofunctionStructures(bases.Enumerable):
     def __init__(self, n, cycle_type=None):
         if n < 0:
             raise ValueError("Cannot defined funcstructs on %s nodes" % n)
+        if cycle_type is not None:
+            cycle_type = Multiset(cycle_type)
+            if not _ispartition(cycle_type):
+                raise TypeError("A cycle type must be an integer partition")
         self.n = n
-        self.cycle_type = None if cycle_type is None else Multiset(cycle_type)
+        self.cycle_type = cycle_type
 
     def __iter__(self):
         if self.cycle_type is None:

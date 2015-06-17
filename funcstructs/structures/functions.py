@@ -8,7 +8,7 @@ import random
 from collections import defaultdict
 from math import factorial
 
-import six
+from funcstructs import compat
 
 from funcstructs.bases import frozendict, Enumerable
 
@@ -74,9 +74,9 @@ class Function(frozendict):
         """Return elements of the domain and their labels in pairs"""
         return iter(self.items())
 
-    def __contains__(self, keyval):
+    def __contains__(self, item):
         """Test whether f contains a key-value pair."""
-        return keyval in six.viewitems(self)
+        return item in compat.viewitems(self)
 
     # Define composition of Functions
 
@@ -92,14 +92,8 @@ class Function(frozendict):
             preim[y].add(x)
         return frozendict((y, frozenset(preim[y])) for y in self.image)
 
-    # Hack for Jython: overriding dict.__getitem__ breaks custom __eq__
-    import platform
-    if platform.python_implementation() == "Jython":
-        def __eq__(self, other):
-            if type(self) is type(other):
-                return dict(self) == dict(other)
-            return False
-    del platform
+    if compat.PLATFORM == "Jython":
+        __eq__ = compat.Jython_Function_eq
 
 
 class Bijection(Function):
