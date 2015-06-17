@@ -35,11 +35,36 @@ def _partitions(n):
 
 
 class Funcstruct(Multiset):
-    """ An endofunction structure may be represented as a forest of trees,
-    grouped together in multisets corresponding to cycle decompositions of the
-    final set (the subset of its domain on which it is invertible). The
-    orderings of the trees in the multisets correspond to necklaces whose beads
-    are the trees themselves."""
+    """An endofunction structure.
+
+    Intuitively, endofunction structures result from removing the
+    labels from a function's graph (where each node x connects to f(x)).
+
+    In mathematical parlance, they are conjugacy classes of
+    transformation monoids. Given any two Endofunction objects f and g,
+    it follows that Funcstruct(f) == Funcstruct(g) if and only if there
+    exists a Bijection b such that f == b.conj(g).
+
+    Funcstruct graphs are directed pseudoforests: Multisets of cycles
+    (represented by Necklace objects) whose elements are unlabelled and
+    unordered rooted trees (represented by DominantTree objects).
+
+    For example:
+
+        (b)   (c)                  O       O
+         \     /                    \     /
+          \   /           ==>        \   /
+           \ /                        \ /
+           (a)                         O
+
+    Corresponds to:
+
+        Endofunction({             Funcstruct.from_cycles([
+            "a": "a",                Necklace([
+            "b": "a",     ==>          DominantTree([0, 1, 1])
+            "c": "a"                 ])
+        })                         ])
+    """
 
     __slots__ = ()
 
@@ -49,6 +74,8 @@ class Funcstruct(Multiset):
         for cycle in f.cycles():
             trees = []
             for x in cycle:
+                # Use DominantTree instead of RootedTree to avoid hitting
+                # python's recursion limit.
                 trees.append(DominantTree(_levels_from_preim(treenodes, x)))
             cycles.append(Necklace(trees))
         return super(Funcstruct, cls).__new__(cls, cycles)
@@ -136,8 +163,7 @@ def component_groups(c, l, m):
 
 
 def cycle_type_funcstructs(n, cycle_type):
-    """ Enumerate all funcstructs on n nodes corresponding to a give cycle
-    type. """
+    """Enumerate all Funcstructs with the given node count and cycle type."""
     treenodes = n - sum(cycle_type)
     lengths, multiplicities = cycle_type.split()
     for composition in compositions.weak_compositions(treenodes, len(lengths)):
@@ -157,9 +183,15 @@ def integer_funcstructs(n):
                 yield struct
 
 
-class EndofunctionStructures(bases.Enumerable):
-    """Enumerator of endofunction structures consisting of n nodes, optionally
-    restricted to a given cycle type."""
+class EndofunctionStructures(Enumerable):
+    """Enumerator of endofunction structures consisting of n nodes,
+    optionally restricted to a given cycle type. The following invarient
+    holds for any n:
+
+    >>> mapping_types = set(map(Funcstruct, TransformationMonoid(n)))
+    >>> set(EndofunctionStructures(n)) == mapping_types
+    True
+    """
 
     def __init__(self, n, cycle_type=None):
         if n < 0:
@@ -178,11 +210,11 @@ class EndofunctionStructures(bases.Enumerable):
             return cycle_type_funcstructs(self.n, self.cycle_type)
 
     def cardinality(self):
-        """Count the number of endofunction structures on n nodes. Iterates
-        over the tuple representation of partitions using the formula featured
-        in De Bruijn, N.G., "Enumeration of Mapping Patterns", Journal of
-        Combinatorial Theory, Volume 12, 1972. See the papers directory for the
-        original reference."""
+        """Count the number of endofunction structures on n nodes.
+
+        Based on De Bruijn, N.G., "Enumeration of Mapping Patterns",
+        Journal of Combinatorial Theory, Volume 12, 1972. See the papers
+        directory for the original reference."""
         tot = 0
         for part in _partitions(self.n):
             p = 1
