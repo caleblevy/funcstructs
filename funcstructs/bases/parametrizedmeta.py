@@ -7,7 +7,7 @@ from abc import abstractmethod, ABCMeta
 from inspect import getargspec
 from operator import attrgetter
 
-from six import with_metaclass
+from funcstructs.compat import with_metaclass
 
 
 def hascustominit(cls):
