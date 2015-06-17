@@ -47,7 +47,7 @@ def Jython_Function_eq(self, other):
     # Hack to make Function work in Jython, where overriding dict.__getitem__
     # breaks the default __eq__. The explicit conversion to dict needlessly
     # and measurably slows down other implementations (unlike
-    # frozendic.__hash__, which makes no measurable differene), so we
+    # frozendict.__hash__, which makes no measurable differene), so we
     # conditionally add it for Jython's sake.
     if type(self) is type(other):
         return dict(self) == dict(other)
