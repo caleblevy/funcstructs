@@ -1,5 +1,0 @@
-python test_parametrizedmeta.py
-python3 test_parametrizedmeta.py
-pypy test_parametrizedmeta.py
-pypy3 test_parametrizedmeta.py
-jython test_parametrizedmeta.py
