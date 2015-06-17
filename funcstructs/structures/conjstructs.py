@@ -40,15 +40,6 @@ class Funcstruct(Multiset):
     Intuitively, endofunction structures result from removing the
     labels from a function's graph (where each node x connects to f(x)).
 
-    In mathematical parlance, they are conjugacy classes of
-    transformation monoids. Given any two Endofunction objects f and g,
-    it follows that Funcstruct(f) == Funcstruct(g) if and only if there
-    exists a Bijection b such that f == b.conj(g).
-
-    Funcstruct graphs are directed pseudoforests: Multisets of cycles
-    (represented by Necklace objects) whose elements are unlabelled and
-    unordered rooted trees (represented by DominantTree objects).
-
     For example:
 
         (b)   (c)                  O       O
@@ -57,13 +48,14 @@ class Funcstruct(Multiset):
            \ /                        \ /
            (a)                         O
 
-    Corresponds to:
+    In mathematical parlance, they are conjugacy classes of
+    transformation monoids. Given any two Endofunction objects f and g,
+    it follows that Funcstruct(f) == Funcstruct(g) if and only if there
+    exists a Bijection b such that f == b.conj(g).
 
-        Endofunction({             Funcstruct.from_cycles([
-            "a": "a",                Necklace([
-            "b": "a",     ==>          DominantTree([0, 1, 1])
-            "c": "a"                 ])
-        })                         ])
+    Funcstruct graphs are directed pseudoforests: Multisets of cycles
+    (represented by Necklace objects) whose elements are unlabelled and
+    unordered rooted trees (represented by DominantTree objects).
     """
 
     __slots__ = ()
