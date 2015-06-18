@@ -30,6 +30,23 @@ def _result_functype(f, g):
     return Function
 
 
+def _parsed_domain(domain):
+    """Change domain to a frozenset. If domain is int, set to range(domain)."""
+    if domain is None:
+        domain = ()
+    elif isinstance(domain, int):
+        if domain < 0:
+            raise ValueError("Cannot define domain on %s elements" % domain)
+        domain = range(domain)
+    return frozenset(domain)
+
+
+def identity(domain=None):
+    """Return the identity function on a given domain."""
+    S = _parsed_domain(domain)
+    return SymmetricFunction(zip(S, S))
+
+
 class Function(frozendict):
     """An immutable mapping between sets."""
 
@@ -97,7 +114,19 @@ class Function(frozendict):
 
 
 class Bijection(Function):
-    """An invertible Function."""
+    """An invertible Function.
+
+    Bijection objects have an inverse method. For every Bijection b:
+
+    >>> b.inverse() * b == identity(b.domain)
+    True
+    >>> b * b.inverse() == identity(b.image)
+    True
+
+    Bijections can also conjugate functions:
+
+    >>> b.conj(f) = type(f)(b * f * b.inverse())
+    """
 
     __slots__ = ()
 
@@ -146,7 +175,7 @@ class Endofunction(Function):
         # Convert to string of binary digits, clip off 0b, then reverse.
         component_iterates = bin(n)[2::][::-1]
         f = self
-        f_iter = self.__class__((x, x) for x in self.domain)
+        f_iter = identity(self.domain)
         # Iterate by self-composing, akin to exponentiation by squaring.
         for it in component_iterates:
             if it == '1':
@@ -225,25 +254,16 @@ class SymmetricFunction(Endofunction, Bijection):
 
 
 def rangefunc(seq):
-    """Return an Endofunction defined on range(len(seq))"""
+    """Return an Endofunction defined on range(len(seq))."""
     return Endofunction(enumerate(seq))
 
 
 def rangeperm(seq):
-    """Return a symmetric function defined on range(len(seq))"""
+    """Return a symmetric function defined on range(len(seq))."""
     return SymmetricFunction(enumerate(seq))
 
 
 # Convenience functions for returning random Functions
-
-
-def _parsed_domain(domain):
-    """Change domain to a frozenset. If domain is int, set to range(domain)."""
-    if isinstance(domain, int):
-        if domain < 0:
-            raise ValueError("Cannot define domain on %s elements" % domain)
-        domain = range(domain)
-    return frozenset(domain)
 
 
 def randfunc(domain, codomain=None):

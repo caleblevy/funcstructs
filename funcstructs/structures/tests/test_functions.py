@@ -5,7 +5,7 @@ from ..conjstructs import Funcstruct
 
 from ..functions import (
     Function, Bijection, Endofunction, SymmetricFunction,
-    rangefunc, rangeperm, randfunc, randperm, randconj,
+    identity, rangefunc, rangeperm, randfunc, randperm, randconj,
     Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup
 )
 
@@ -132,7 +132,8 @@ class EndofunctionTests(unittest.TestCase):
 
         n = 10
         f = rangefunc([0]+list(range(10)))
-        for i in range(n):
+        self.assertEqual(identity(11), f**0)
+        for i in range(1, n+1):
             self.assertEqual(rangefunc([0]*i + list(range(0, 11-i))), f**i)
 
     def test_imagepath(self):

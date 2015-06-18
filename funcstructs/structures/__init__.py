@@ -2,7 +2,7 @@
 from .conjstructs import Funcstruct, EndofunctionStructures
 from .functions import (
     Function, Bijection, Endofunction, SymmetricFunction,
-    rangefunc, rangeperm, randfunc, randperm, randconj,
+    identity, rangefunc, rangeperm, randfunc, randperm, randconj,
     Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup
 )
 from .multiset import Multiset, unordered_product
