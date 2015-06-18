@@ -10,6 +10,7 @@ import numpy as np
 
 from funcstructs.structures import *
 
+
 __all__ = [
     "FloatSet",
     "Inf", "Zero", "One", "NaN", "Min16", "Max16",
@@ -19,8 +20,37 @@ __all__ = [
 ]
 
 
+# works in Python 2 & 3
+class SingletonMeta(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(SingletonMeta, cls).__call__(*args,
+                                                                     **kwargs)
+        return cls._instances[cls]
+
+
+Singleton = SingletonMeta("Singleton", (), {'__slots__': ()})
+
+
+class NanType(np.float16, Singleton):
+    __slots__ = ()
+
+    def __new__(cls):
+        return np.float16.__new__(NanType, 'nan')
+
+    def __eq__(self, other):
+        return isinstance(other, np.float16) and np.isnan(other)
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self):
+        return 0
+
+NaN = NanType()
 Inf = np.float16('inf')
-NaN = np.float16('nan')
 Max16 = np.float16(65504.0)
 Min16 = -Max16
 Zero = np.float16(0)
@@ -42,7 +72,7 @@ class FloatSet(tuple):
 
         if len(self._elems) != len(self):
             raise ValueError("Elements of float domain must be unique")
-        if not all(type(f) is np.float16 for f in self):
+        if not all(isinstance(f, np.float16) for f in self):
             raise TypeError("FloatSet must contain float16")
 
         self._intmap = {}
