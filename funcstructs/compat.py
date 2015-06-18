@@ -22,9 +22,8 @@ except ImportError:
             total = func(total, element)
             yield total
 
-
-try:
-    from six import with_metaclass  # prefer maintained version when available
+try:  # prefer maintained version when available
+    from six import with_metaclass, viewitems
 except ImportError:
     def with_metaclass(meta, *bases):
         """Create a base class with a metaclass."""
@@ -36,11 +35,10 @@ except ImportError:
                 return meta(name, bases, d)
         return type.__new__(metaclass, 'temporary_class', (), {})
 
+    viewitems = getattr(dict, "viewitems", dict.items)
+
 
 PLATFORM = platform.python_implementation()  # Save an import in a few places
-
-
-viewitems = getattr(dict, "viewitems", dict.items)
 
 
 def Jython_Function_eq(self, other):
