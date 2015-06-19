@@ -59,17 +59,14 @@ class Location2DTests(unittest.TestCase):
         # Test rotation maintains object identity
         a = Point(1, 2)
         ai = a
-        a.rotate(3)
-        a.rotate(-3)
-        self.assertIs(ai, a)
-        self.assertAlmostEqual(Point(1, 2), a)
-        a.rotate(np.pi)
-        self.assertAlmostEqual(-Point(1, 2), a)
+        b = a.rotated(3).rotated(-3)
+        self.assertIs(a, ai)
+        self.assertIsNot(a, b)
+        self.assertAlmostEqual(Point(1, 2), b)
+        self.assertAlmostEqual(-Point(1, 2), a.rotated(np.pi))
         # Test dot product with perpendicular is zero
         b = Point(3, -4)
-        br = Point(b)
-        br.rotate(np.pi/2)
-        self.assertAlmostEqual(0, b * br)
+        self.assertAlmostEqual(0, b * b.rotated(np.pi/2))
         # Test rotating coordinates
         x = np.linspace(0, 1, 10)
         par = Coordinates(x, x**2)

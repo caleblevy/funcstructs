@@ -4,54 +4,56 @@ isolation and in groups.
 Caleb Levy, 2015.
 """
 
-import numbers
+import abc
+from numbers import Real
 
 import numpy as np
 import matplotlib.pyplot as plt
 
+from funcstructs.compat import with_metaclass
+
 __all__ = ["Point", "Coordinates"]
 
 
-class LocationSpecifier2D(object):
-    """Abstract coordinates. Invoked either as a point or a point cloud. """
+class Location2D(with_metaclass(abc.ABCMeta, object)):
+    """Abstract coordinates.
 
-    def __init__(self, x, y=None):
-        # Conceptually, Location2D should be an abstract base class. However,
-        # without some ugly hacks or third party libraries, there is no python
-        # 2 and 3 compatible syntax for specifying a metaclass, so we mock
-        # ABCMeta by raising an error at instantiation.
-        raise NotImplementedError("Cannot call LocationSpecifier2D directly.")
+    Like all coordinates, they require a representation. The user must
+    specify a location's representation in the complex plane, returned
+    by the abstract property 'z'. Conversions to Cartesian and Polar
+    are provided.
+    """
+
+    __slots__ = ()
+
+    @abc.abstractproperty
+    def z(self):
+        """Locations as points on the complex plane"""
+        return 0
 
     @classmethod
     def from_polar(cls, r, theta):
+        """Form points from polar coordinates."""
         return cls(r*np.exp(1j*theta))
 
     @property
-    def z(self):
-        """Return the locations as points on the complex plane"""
-        return self._coord
-
-    def __abs__(self):
-        return np.abs(self.z)
-
-    @property
     def x(self):
-        """Return x components of the cartesian representations"""
+        """Horizontal components of the Cartesian representation."""
         return self.z.real
 
     @property
     def y(self):
-        """Return the y components of cartesian representations"""
+        """Vertical components of the Cartesian representation."""
         return self.z.imag
 
-    @property
-    def r(self):
-        """Return radial components of the polar representation"""
-        return abs(self)
+    def __abs__(self):
+        return np.abs(self.z)
+
+    r = property(__abs__, doc="Radial component of the polar representation.")
 
     @property
     def theta(self):
-        """Return the angular component of the polar representation"""
+        """Angular component of the polar representation"""
         return np.arctan2(self.y, self.x)
 
     def __add__(self, other):
@@ -68,7 +70,7 @@ class LocationSpecifier2D(object):
 
     def __rmul__(self, other):
         """Scale self by real value other. """
-        if isinstance(other, numbers.Real):
+        if isinstance(other, Real):
             return self.__class__(other*self.z)
         raise TypeError("Cannot multiply coordinates by %s" % type(other))
 
@@ -78,47 +80,50 @@ class LocationSpecifier2D(object):
 
     __truediv__ = __div__
 
-    def rotate(self, angle, origin=0):
-        """Rotate the locations by angle about point p, default is origin"""
+    def rotated(self, angle, origin=0):
+        """Locations rotated by given angle about the given origin."""
         coords = self - origin
         r, theta = coords.r, coords.theta
-        self._coord = (self.from_polar(r, theta + angle) + origin).z
+        return self.from_polar(r, theta + angle) + origin
 
 
-def is_real(x): return isinstance(x, numbers.Real)
+def _check_real_type(xt, yt):
+    """Check that xt and yt are subclasses of Real."""
+    if not(issubclass(xt, Real) and issubclass(yt, Real)):
+        raise TypeError("Expected real coordinates, received %s and %s" %
+                        (xt.__name__, yt.__name__))
 
 
-def check_components_are_real(x, y):
-    """Check that both x and y are real numbers, if not raise error"""
-    if not(is_real(x) and is_real(y)):
-        raise TypeError(
-            ("Both coordinates must be real numbers, "
-             "received %s, %s") % (type(x).__name__, type(y).__name__)
-        )
+class Point(Location2D):
+    """Point(x, y=None).
 
+    A basic cartesian point. Accepts a single complex number, a single
+    (x, y) pair, or two real numbers.
 
-class Point(LocationSpecifier2D):
-    """A basic cartesian point. Internally represented as a complex number
-    (i.e. a point in the complex plane)."""
+    All of the following are equivalent:
+    >>> Point(1, 2)
+    >>> Point((1, 2))
+    >>> Point(1+2j)
+    >>> Point(Point(1, 2))
+    """
+
+    __slots__ = "_coord"
 
     def __init__(self, x, y=None):
-        """All of the following inputs to point are equivalent:
-            Point(1, 2)
-            Point((1, 2))
-            Point(1+2j)
-            Point(Point(1, 2))
-        Any other input will raise a value error."""
         if y is not None:
-            check_components_are_real(x, y)
+            _check_real_type(x.__class__, y.__class__)
             z = x + 1j*y
         elif hasattr(x, '__iter__'):
-            check_components_are_real(x[0], x[1])
-            if len(x) != 2:
-                raise ValueError("More than one coordinate specified.")
-            z = x[0] + 1j*x[1]
+            x, y = x
+            _check_real_type(x.__class__, y.__class__)
+            z = x + 1j*y
         else:
-            z = complex(x)  # Explicitly cast to complex (e.g. if ints)
+            z = complex(x)
         self._coord = z
+
+    @property
+    def z(self):
+        return self._coord
 
     def __mul__(self, other):
         """Dot product with other vector."""
@@ -140,39 +145,40 @@ class Point(LocationSpecifier2D):
         return self.z
 
 
-def array_is_real(arr): return issubclass(arr.dtype.type, numbers.Real)
+class Coordinates(Location2D):
+    """Coordinates(x, y=None)
 
+    A Coordinates object represents an ordered collection of points in
+    the Cartesian coordinate plane. Coordinates can be constructed
+    using either a list of complex numbers and/or pairs or real numbers,
+    or two equal length lists containing real numbers, thus:
 
-def check_coords_are_real(x, y):
-    """Check that x and y are real valued arrays"""
-    if not(array_is_real(x) and array_is_real(y)):
-        raise TypeError(
-            ("Both coordinates must be real valued, received"
-             " %s, %s" % (x.dtype.type.__name__, y.dtype.type.__name__))
-        )
+    >>> Coordinates([(1, 2), (3, 4), (5, 6)])
+    >>> Coordinates([1, 3, 5], [2, 4, 6])
+    >>> Coordinates([1+2j, 3+4j, 5+6j])
 
+    all compare equal, up to roundoff error.
+    """
 
-class Coordinates(LocationSpecifier2D):
-    """A set of points internally represented by a numpy array."""
+    __slots__ = "_coords"
 
     def __init__(self, x, y=None):
-        """All of the following inputs to point are equivalent:
-            Coordinates([Point(1, 2), Point(3, 4), Point(5, 6)])
-            Coordinates([1, 3, 5], [2, 4, 6])
-            Coordinates([1+2j, 3+4j, 5+6j])
-        Any other input will raise a value error."""
-        x = np.array(x)
+        x = np.array(list(x))  # call list since numpy can't take iterables
         if x.ndim != 1:
-            raise TypeError("Input must be flat iterable location collection")
+            raise TypeError("Input must be 1D array of coordinates")
         if y is not None:
-            y = np.array(y)
-            check_coords_are_real(x, y)
+            y = np.array(list(y))
+            _check_real_type(x.dtype.type, y.dtype.type)
             if x.shape != y.shape:
                 raise ValueError("Inputs must be equal length")
             z = x + 1j*y
         else:
             z = x.astype(complex)
-        self._coord = z
+        self._coords = z
+
+    @property
+    def z(self):
+        return self._coords
 
     def __repr__(self):
         return self.__class__.__name__+'(%s)' % list(self)
@@ -191,6 +197,10 @@ class Coordinates(LocationSpecifier2D):
         if isinstance(key, int):
             return Point(self.z[key])
         return Coordinates(self.z[key])
+
+    def rotate(self, angle, origin=0):
+        """In place rotation of the array."""
+        self._coords = self.rotated(angle, origin).z
 
     def plot(self, *args, **kwargs):
         """Draw connected sequence of points"""
