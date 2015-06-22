@@ -202,11 +202,8 @@ class Coordinates(Location2D):
         """In place rotation of the array."""
         self._coords = self.rotated(angle, origin).z
 
-    def plot(self, *args, **kwargs):
+    def plot(self, ax=None, *args, **kwargs):
         """Draw connected sequence of points"""
-        if kwargs.get('ax', None) is not None:
-            ax = kwargs['ax']
-        else:
+        if ax is None:
             ax = plt.gca()
-        kwargs.pop('ax', None)
         ax.plot(self.x, self.y, *args, **kwargs)

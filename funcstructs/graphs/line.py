@@ -108,7 +108,7 @@ class Line(object):
         self.p1 = self.p1 + Point.from_polar(r/2., self.vector.theta)
         self.p2 = self.p2 + Point.from_polar(r/2., self.vector.theta - np.pi)
 
-    def draw_line(self, ax=None):
+    def draw(self, ax=None):
         """Draw the line segment on the current axis."""
         self.coordinates.plot(ax=None, color='blue', zorder=1)
 
@@ -121,6 +121,7 @@ class Line(object):
         parab.rotate(theta)
         return parab + self.p1
 
-    def draw_parabola(self, d=1./3, ax=None):
+    def draw_connecting_parabola(self, d=1./3, ax=None):
         """Draw parabola of width d connecting the ends of the line segment"""
+        print(self.connecting_parabola(d))
         self.connecting_parabola(d).plot(ax)
