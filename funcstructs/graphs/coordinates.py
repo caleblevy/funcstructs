@@ -123,7 +123,7 @@ class Point(Location2D):
 
     @property
     def z(self):
-        return self._coord
+        return complex(self._coord)
 
     def __mul__(self, other):
         """Dot product with other vector."""
@@ -148,16 +148,16 @@ class Point(Location2D):
 class Coordinates(Location2D):
     """Coordinates(x, y=None)
 
-    A Coordinates object represents an ordered collection of points in
+    A Coordinates object is an ordered collection of points in
     the Cartesian coordinate plane. Coordinates can be constructed
     using either a list of complex numbers and/or pairs or real numbers,
-    or two equal length lists containing real numbers, thus:
+    or two equal length lists containing real numbers.
+
+    The following compare equal up to roundoff error:
 
     >>> Coordinates([(1, 2), (3, 4), (5, 6)])
     >>> Coordinates([1, 3, 5], [2, 4, 6])
     >>> Coordinates([1+2j, 3+4j, 5+6j])
-
-    all compare equal, up to roundoff error.
     """
 
     __slots__ = "_coords"
@@ -178,7 +178,7 @@ class Coordinates(Location2D):
 
     @property
     def z(self):
-        return self._coords
+        return self._coords.copy()
 
     def __repr__(self):
         return self.__class__.__name__+'(%s)' % list(self)
