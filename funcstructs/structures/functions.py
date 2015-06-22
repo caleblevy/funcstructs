@@ -98,15 +98,15 @@ class Function(frozendict):
     # Define composition of Functions
 
     def __mul__(self, other):
-        """(f * g)[x] <==> f[g[x]]"""
+        """(f * g)(x) <==> f(g(x))"""
         # f * g becomes a function on g's domain, so it inherits class of g
         return _result_functype(self, other)((x, self(y)) for x, y in other)
 
     def preimage(self):
-        """f.preimage[y] <==> {x for x in f.domain if f[x] == y}"""
-        preim = defaultdict(set)
+        """f.preimage[y] <==> {x for x in f.domain if f(x) == y}"""
+        preim = defaultdict(list)
         for x, y in self:
-            preim[y].add(x)
+            preim[y].append(x)
         return frozendict((y, frozenset(preim[y])) for y in self.image)
 
     if compat.PLATFORM == "Jython":
@@ -172,12 +172,11 @@ class Endofunction(Function):
 
     def __pow__(self, n):
         """f**n <==> the nth iterate of f"""
-        # Convert to string of binary digits, clip off 0b, then reverse.
-        component_iterates = bin(n)[2::][::-1]
         f = self
         f_iter = identity(self.domain)
-        # Iterate by self-composing, akin to exponentiation by squaring.
-        for it in component_iterates:
+        # Decompose f**n into the composition of power-of-2 iterates, akin to
+        # exponentiation by squaring.
+        for it in bin(n)[-1:1:-1]:
             if it == '1':
                 f_iter *= f
             f *= f
@@ -228,12 +227,12 @@ class Endofunction(Function):
 
     def acyclic_ancestors(self):
         """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
-        descendants = defaultdict(set)
+        descendants = defaultdict(list)
         lim = self.limitset()  # make local copy for speed
         for y, inv_image in self.preimage().items():
             for x in inv_image:
                 if x not in lim:
-                    descendants[y].add(x)
+                    descendants[y].append(x)
         return frozendict((x, frozenset(descendants[x])) for x in self.domain)
 
 
