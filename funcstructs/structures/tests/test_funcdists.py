@@ -14,7 +14,7 @@ from ..funcdists import (
 )
 
 
-class EndofunctionTest(unittest.TestCase):
+class FundistTests(unittest.TestCase):
 
     def test_iterdist(self):
         """Check the multiplicities of sizes of images of iterates."""
