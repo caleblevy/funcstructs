@@ -28,7 +28,7 @@ plt.show()
 #' The plot, however, is not the 'true' graph of $f(x)$; it is the floating
 #' point approximation. In particular, it is an approximation on the domain of
 #' 16-bit floating point numbers between $0.0$ and $1.0$, of which there are
-#' $15360$.
+#' <%= len(HalfOpenInterval) %>.
 
 #' Instead, we can view $f(x)$ as a discretely valued lookup table: given any
 #' 16-bit floating point value $0\le x<1$, $f(x)$ returns the closest floating
