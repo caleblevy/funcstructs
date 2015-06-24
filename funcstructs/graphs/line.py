@@ -123,5 +123,4 @@ class Line(object):
 
     def draw_connecting_parabola(self, d=1./3, ax=None):
         """Draw parabola of width d connecting the ends of the line segment"""
-        print(self.connecting_parabola(d))
         self.connecting_parabola(d).plot(ax)
