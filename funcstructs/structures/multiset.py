@@ -65,7 +65,7 @@ class Multiset(frozendict):
     __slots__ = ()
 
     def __new__(*args, **kwargs):
-        self = dict.__new__(*args, **kwargs)
+        self = frozendict.__new__(args[0])
         if len(args) == 2:
             if kwargs:
                 raise TypeError("Multiset does not accept iterable and kwargs")
