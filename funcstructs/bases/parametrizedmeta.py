@@ -41,8 +41,7 @@ class ParamMeta(type):
     Parametrized types enforce the following contract:
     --------------------------------------------------
     1) All of their bases define __slots__.
-    2) Their unparametrized bases do not override the default __init__. Mixin
-       classes can define behavior, but not the fundamental variables.
+    2) Their unparametrized bases do not override the default __init__.
     3) The __slots__ of their unparametrized bases are empty.
     4) They cannot be multiply inherited from.
     5) Their __init__ methods cannot take variable arguments.
@@ -66,7 +65,6 @@ class ParamMeta(type):
 
         # Enforce the Contract
         # --------------------
-
         # RULE 0) No Reserved Names.
         for attr in ['__slots__', '__parameters__']:
             if attr in dct:
@@ -78,7 +76,8 @@ class ParamMeta(type):
         for base, has_slots in zip(bases, slotted):
             if not has_slots:
                 raise TypeError("base %s does not have __slots__" % base)
-        # RULE 2) No Unparametrized __init__.
+        # RULE 2) No Unparametrized __init__. Mixin classes can define
+        # behavior, but not the fundamental variables.
         for has_init, is_parametrized in zip(initialized, parametrized):
             if has_init and not is_parametrized:
                 raise TypeError("unparametrized base with __init__")
