@@ -48,7 +48,7 @@ print(arr)
 
 plt.figure()
 x, y = f.split()
-plt.plot(x, y, 'ro')
+plt.plot(x, y, 'ro', rasterized=True)
 plt.title(r"Plot of $x^2$ as a discrete function of 16-bit floats.")
 plt.show()
 
@@ -86,7 +86,7 @@ g = randconj(f)
 
 plt.figure()
 x, y = g.split()
-plt.plot(x, y, 'o', markerfacecolor='orange')
+plt.plot(x, y, 'o', markerfacecolor='orange', rasterized=True)
 plt.title(r"Plot of a random conjugate of $x^2$ defined on 16-bit floats.")
 plt.show()
 
@@ -121,7 +121,7 @@ def treeiterate_plot(func, show=True, legend_loc=0, title=None):
     ax.set_color_cycle([cm(1.*i/n) for i in range(n)])
     for i, f in enumerate(iterates):
         x, y = f.split()
-        ax.plot(x, y, 'o', markerfacecolor=cm(1.*i/n), label=i)
+        ax.plot(x, y, 'o', markerfacecolor=cm(1.*i/n), label=i, rasterized=1)
     ax.legend(numpoints=1, loc=legend_loc)
     if title is not None:
         plt.title(title)
