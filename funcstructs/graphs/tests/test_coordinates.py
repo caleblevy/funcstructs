@@ -118,6 +118,7 @@ class CoordinateTests(unittest.TestCase):
 
     def test_init(self):
         coord_sets = [
+            Coordinates([(1, 2), (3, 4), (5, 6)]),  # tuple components
             Coordinates([Point(1, 2), Point(3, 4), Point(5, 6)]),  # point list
             Coordinates([1, 3, 5], [2, 4, 6]),  # from x and y components
             Coordinates([1+2j, 3+4j, 5+6j])  # from locations on complex pane
@@ -132,7 +133,6 @@ class CoordinateTests(unittest.TestCase):
             {'x': [1, 2], 'y': [1, 2, 3]},  # more y components
             {'x': [1, 2, [3]]},  # iterable points
             {'x': 1, 'y': 2},  # uniterable coordinates
-            {'x': [(1, 2), (3, 4), (5, 6)]},  # tuple components
         ]
         for components in erroneous_args:
             with self.assertRaises(Exception):

@@ -163,17 +163,17 @@ class Coordinates(Location2D):
     __slots__ = "_coords"
 
     def __init__(self, x, y=None):
-        x = np.array(list(x))  # call list since numpy can't take iterables
-        if x.ndim != 1:
-            raise TypeError("Input must be 1D array of coordinates")
         if y is not None:
+            x = np.array(list(x))  # call list since numpy can't take iterables
             y = np.array(list(y))
             _check_real_type(x.dtype.type, y.dtype.type)
             if x.shape != y.shape:
                 raise ValueError("Inputs must be equal length")
             z = x + 1j*y
         else:
-            z = x.astype(complex)
+            z = np.array(list(map(Point, x)), dtype=object).astype(complex)
+        if z.ndim != 1:
+            raise TypeError("Input must be 1D array of coordinates")
         self._coords = z
 
     @property
@@ -205,5 +205,6 @@ class Coordinates(Location2D):
     def plot(self, ax=None, *args, **kwargs):
         """Draw connected sequence of points"""
         if ax is None:
+            plt.figure()
             ax = plt.gca()
         ax.plot(self.x, self.y, *args, **kwargs)
