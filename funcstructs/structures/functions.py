@@ -385,6 +385,12 @@ class Mappings(Enumerable):
         for f in itertools.product(codomain, repeat=len(domain)):
             yield Function(zip(domain, f))
 
+    def __contains__(self, other):
+        if isinstance(other, Function):
+            return self.domain == other.domain and \
+                other.image.issubset(self.codomain)
+        return False
+
     def __len__(self):
         return len(self.codomain) ** len(self.domain)
 
@@ -416,6 +422,11 @@ class Isomorphisms(Enumerable):
         for p in itertools.permutations(codomain):
             yield Bijection(zip(domain, p))
 
+    def __contains__(self, other):
+        if isinstance(other, Bijection):
+            return self.domain == other.domain and self.codomain == other.image
+        return False
+
     def __len__(self):
         return factorial(len(self.domain))
 
@@ -439,6 +450,11 @@ class TransformationMonoid(Enumerable):
         domain = sorted(self.domain)
         for f in itertools.product(domain, repeat=len(domain)):
             yield Endofunction(zip(domain, f))
+
+    def __contains__(self, other):
+        if isinstance(other, Endofunction):
+            return self.domain == other.domain
+        return False
 
     def __len__(self):
         return len(self.domain) ** len(self.domain)
@@ -467,6 +483,11 @@ class SymmetricGroup(Enumerable):
         domain = sorted(self.domain)
         for p in itertools.permutations(domain):
             yield SymmetricFunction(zip(domain, p))
+
+    def __contains__(self, other):
+        if isinstance(other, SymmetricFunction):
+            return self.domain == other.domain
+        return False
 
     def __len__(self):
         return factorial(len(self.domain))
