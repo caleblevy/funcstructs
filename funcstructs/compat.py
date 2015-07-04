@@ -3,8 +3,6 @@
 Collected by Caleb Levy from 2014-2015, mostly from other places.
 """
 
-import platform
-
 try:
     from itertools import accumulate  # use C speed iterator if > py3.2
 except ImportError:
