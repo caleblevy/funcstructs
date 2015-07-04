@@ -51,7 +51,38 @@ def identity(domain=None):
 
 
 class Function(frozendict):
-    """An immutable mapping between sets."""
+    """An immutable mapping between sets.
+
+    Function mapping objects reflect their mathematical counterparts: a
+    mapping f: A -> B is a subset of the Cartesian product AxB such that there
+    is precisely one element in f for each x in A.
+
+    >>> f = Function(a=1, b=1, c=1)             # construct Functions in the
+    >>> g = Function({1: 'a', 2: 'a', 3: 'a'})  # same ways as dicts.
+    >>> f == Function.fromkeys("abc", 1)
+    True
+
+    >>> Function(a=[1])                         # Functions must be hashable
+    ...
+    TypeError
+
+    >>> f * g                                   # Functions can be composed
+    Function({1: 1, 2: 1, 3: 1})
+    >>> g * f
+    Function({'a': 'a', 'c': 'a', 'b': 'a'})
+
+    >>> f('a')                                  # Functions are evaluated by
+    1                                           # calling, using the same
+    >>> g(f('b'))                               # notation as in math
+    'a'
+
+    >>> list(f)                                 # iteration returns key-value
+    [('a', 1), ('c', 1), ('b', 1)]              # pairs
+    >>> 'a' in f
+    False
+    >>> ('a', 1) in f                           # (x, y) in f <==> f(x) == y
+    True
+    """
 
     __slots__ = ()
 
@@ -91,11 +122,11 @@ class Function(frozendict):
     # key-value pairs matter, so __iter__ is overridden to dict.__items__.
 
     def __iter__(self):
-        """Return elements of the domain and their labels in pairs"""
+        """list(f) <==> [(x, f(x)) for x in f.domain]"""
         return iter(self.items())
 
     def __contains__(self, item):
-        """Test whether f contains a key-value pair."""
+        """(x, y) in f <==> f(x) == y"""
         return item in compat.viewitems(self)
 
     # Define composition of Functions
