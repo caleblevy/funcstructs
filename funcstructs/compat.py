@@ -36,19 +36,3 @@ except ImportError:
         return type.__new__(metaclass, 'temporary_class', (), {})
 
     viewitems = getattr(dict, "viewitems", dict.items)
-
-
-PLATFORM = platform.python_implementation()  # Save an import in a few places
-
-
-def Jython_Function_eq(self, other):
-    # Hack to make Function work in Jython, where overriding dict.__getitem__
-    # breaks the default __eq__. The explicit conversion to dict needlessly
-    # and measurably slows down other implementations (unlike
-    # frozendict.__hash__, which makes no measurable differene), so we
-    # conditionally add it for Jython's sake.
-    if type(self) is type(other):
-        return dict(self) == dict(other)
-    return False
-# Mask custom name; this implementation detail should be transparent to users.
-Jython_Function_eq.__name__ = '__eq__'

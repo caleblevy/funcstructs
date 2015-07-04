@@ -1,4 +1,4 @@
-# Caleb Levy, 2015.
+from funcstructs.compat import viewitems
 
 
 @classmethod
@@ -41,9 +41,17 @@ class frozendict(dict):
         return "%s(%s)" % (self.__class__.__name__, dict(self))
 
     def __eq__(self, other):
-        if type(self) is type(other):
-            return dict.__eq__(self, other)
-        return False
+        # Instances of frozendict subclasses must have same items AND
+        # type to compare equal. This supports their diverse use cases as
+        # rooted trees, conjugacy classes, functions and Multisets. Even
+        # if all *could* have the same items, they are very different
+        # data structures.
+        #
+        # Calling viewitems explicitly allows Jython compatibility
+        # without ugly conditional method definitions, and doing so does
+        # not seem to induce a significant speed hit.
+        return type(self) is type(other) and \
+               viewitems(self) == viewitems(other)
 
     def __ne__(self, other):
         return not self == other

@@ -112,9 +112,6 @@ class Function(frozendict):
             preim[y].append(x)
         return frozendict((y, frozenset(preim[y])) for y in self.image)
 
-    if compat.PLATFORM == "Jython":
-        __eq__ = compat.Jython_Function_eq
-
 
 class Bijection(Function):
     """An invertible Function.
