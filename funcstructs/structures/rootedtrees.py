@@ -40,11 +40,13 @@ def _levels_from_preim(graph, root=0, keys=None):
 
 
 def _funclevels_iterator(levels):
-    """Lazily generate the function of a level tree and each node's level"""
+    """Lazily generate (node, height above root, parent node) triplets
+    from an iterator over a level sequence.
+    """
     levels = iter(levels)
     root = previous_level = next(levels)
     f = node = 0
-    yield node, 0, f  # node, normalized height, and what it's mapped to
+    yield node, 0, f
     grafting_point = {0: 0}
     for node, level in enumerate(levels, start=1):
         if level > previous_level:
@@ -61,6 +63,7 @@ def _treefunc_properties(levels):
     """Given an ordered tree's level sequence, return an endofunction with the
     tree's structure, that functions preimage, and the nodes of that tree in
     breadth-first traversal order grouped by height."""
+    # TODO: split these into three separate methods
     func = []
     hg = [[]]
     preim = []
@@ -71,7 +74,7 @@ def _treefunc_properties(levels):
         if l >= len(hg):
             hg.append([])
         hg[l].append(n)
-    preim[0].pop(0)  # Remove 0 to prevent infinite loop in levels_from_preim
+    preim[0].pop(0)  # Remove 0 to prevent infinite loop in _levels_from_preim.
     return func, preim, hg
 
 
@@ -180,6 +183,7 @@ class DominantTree(OrderedTree):
     __slots__ = ()
 
     def __new__(cls, level_sequence, preordered=False):
+        # TODO: remove preordered flag altogether, call tuple.__new__(Tree...)
         if not preordered:
             f, p, g = _treefunc_properties(level_sequence)
             keys = _dominant_keys(g, f)

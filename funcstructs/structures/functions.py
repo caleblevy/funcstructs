@@ -14,11 +14,14 @@ from funcstructs.bases import frozendict, Enumerable
 
 
 def _result_functype(f, g):
-    """Coerce func types of f and g into the proper type. Rules are:
-        1) If both types are the same, so is their result
-        2) Function has highest priority
-        3) SymmetricFunction has lowest priority
-        4) Bijection and Endofunction result in Function
+    """Coerce func types of f and g into the proper type.
+
+    Rules are:
+    ----------
+    1) If both types are the same, so is their result
+    2) Function has highest priority
+    3) SymmetricFunction has lowest priority
+    4) Bijection and Endofunction result in Function
     """
     functypes = {type(f), type(g)}
     if len(functypes) == 1:
