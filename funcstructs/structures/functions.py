@@ -136,8 +136,9 @@ class Function(frozendict):
         # f * g becomes a function on g's domain, so it inherits class of g
         return _result_functype(self, other)((x, self(y)) for x, y in other)
 
-    def preimage(self):
-        """f.preimage[y] <==> {x for x in f.domain if f(x) == y}"""
+    def fibers(self):
+        """f.fibers()[y] <==> {x for x in f.domain if f(x) == y}"""
+        # TODO: Add preimage class
         preim = defaultdict(list)
         for x, y in self:
             preim[y].append(x)
@@ -271,10 +272,10 @@ class Endofunction(Function):
         return frozenset(itertools.chain(*self.cycles()))
 
     def acyclic_ancestors(self):
-        """f.attached_treenodes[y] <==> f.preimage[y] - f.limitset"""
+        """f.attached_treenodes()[y] <==> f.fibers()[y] - f.limitset"""
         descendants = defaultdict(list)
         lim = self.limitset()  # make local copy for speed
-        for y, inv_image in self.preimage().items():
+        for y, inv_image in self.fibers().items():
             for x in inv_image:
                 if x not in lim:
                     descendants[y].append(x)

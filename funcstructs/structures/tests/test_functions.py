@@ -11,6 +11,14 @@ from ..functions import (
 
 
 class FunctionTests(unittest.TestCase):
+    # TODO: Rewrite these tests relying less on the particular format of the
+    # result, and more on behavior.
+    #
+    # I.E. instead of asking if the preimage is equal to a particular
+    # frozenset, ensure that:
+    # >>> for y in f.image:
+    # ...   for x in f.fibers()[y]:
+    # ...     self.assertEqual(y, f(x))
 
     constants = [(i, Function({'a': i, 'b': i, 'c': i})) for i in range(3)]
     constants += [(l, Function({0: l, 1: l, 2: l})) for l in "abc"]
@@ -42,10 +50,10 @@ class FunctionTests(unittest.TestCase):
         for c, f in self.constants:
             self.assertEqual(f.image, {c})
 
-    def test_preimage(self):
-        """Test that preimage returns the nonempty fibers"""
+    def test_fibers(self):
+        """Test that elements of fibers are returned correctly."""
         for c, f in self.constants:
-            self.assertEqual(dict(f.preimage()), {c: f.domain})
+            self.assertEqual(dict(f.fibers()), {c: f.domain})
 
     def test_containment(self):
         """Test that function containment tests for key-value pairs."""
