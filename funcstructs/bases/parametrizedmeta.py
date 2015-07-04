@@ -82,7 +82,7 @@ class ParamMeta(type):
             if has_init and not is_parametrized:
                 raise TypeError("unparametrized base with __init__")
         # RULE 3) Unparametrized Bases Have Slots. This is a natural
-        # consequence of maintaining consistancy between the __slots__
+        # consequence of maintaining consistency between the __slots__
         # and parameters of the type's bases, along with imposing rules
         # one and two.
         for base, is_parametrized in zip(bases, parametrized):
