@@ -14,7 +14,7 @@ from funcstructs.bases import frozendict, Enumerable
 
 
 def _result_functype(f, g):
-    """Coerce func types of f and g into the proper type.
+    """Determine the appropriate output type for f * g.
 
     Rules are:
     ----------
@@ -54,8 +54,8 @@ class Function(frozendict):
     """An immutable mapping between sets.
 
     Function mapping objects reflect their mathematical counterparts: a
-    mapping f: A -> B is a subset of the Cartesian product AxB such that there
-    is precisely one element in f for each x in A.
+    mapping f: A -> B is a subset of the Cartesian product AxB such that
+    there is precisely one element in f for each x in A.
 
     >>> f = Function(a=1, b=1, c=1)             # construct Functions in the
     >>> g = Function({1: 'a', 2: 'a', 3: 'a'})  # same ways as dicts.
@@ -72,16 +72,16 @@ class Function(frozendict):
     Function({'a': 'a', 'c': 'a', 'b': 'a'})
 
     >>> f('a')                                  # Functions are evaluated by
-    1                                           # calling, using the same
-    >>> g(f('b'))                               # notation as in math
-    'a'
+    1                                           # using the same notation as
+    >>> g(f('b'))                               # their mathematical
+    'a'                                         # counterparts
 
-    >>> list(f)                                 # iteration returns key-value
-    [('a', 1), ('c', 1), ('b', 1)]              # pairs
+    >>> list(f)                                 # iteration returns
+    [('a', 1), ('c', 1), ('b', 1)]              # key-value pairs
     >>> 'a' in f
     False
-    >>> ('a', 1) in f                           # (x, y) in f <==> f(x) == y
-    True
+    >>> ('a', 1) in f                           # containment reflects
+    True                                        # iteration
     """
 
     __slots__ = ()
@@ -122,7 +122,7 @@ class Function(frozendict):
     # key-value pairs matter, so __iter__ is overridden to dict.__items__.
 
     def __iter__(self):
-        """list(f) <==> [(x, f(x)) for x in f.domain]"""
+        """iter(f) <==> (x, f(x)) for x in f.domain"""
         return iter(self.items())
 
     def __contains__(self, item):
@@ -170,8 +170,6 @@ class Bijection(Function):
 
     def inverse(self):
         """s.inverse() * s <==> identity(s.domain)"""
-        # Code taken directly from: "Inverting permutations in Python" at
-        # http://stackoverflow.com/a/9185908.
         return self.__class__((y, x) for x, y in self)
 
     def conj(self, f):
@@ -191,7 +189,23 @@ class Bijection(Function):
 
 
 class Endofunction(Function):
-    """A Function whose domain contains its codomain."""
+    """A Function whose domain contains its codomain.
+
+    Endofunctions support iteration using exponential notation.
+
+    >>> f = Endofunction({0: 0, 1: 0, 2: 1, 3: 2})
+    >>> f**2
+    Endofunction({0: 0, 1: 0, 2: 0, 3: 1})
+    >>> f**3
+    Endofunction({0: 0, 1: 0, 2: 0, 3: 0})
+    >>> f**0
+    >>> SymmetricFunction({0: 0, 1: 1, 2: 2, 3: 3})  # identity iterate
+
+    Iteration can be used to form cycles.
+
+    >>> f.cycles()
+    frozenset([(0,)])
+    """
 
     __slots__ = ()
 
@@ -230,7 +244,7 @@ class Endofunction(Function):
         return tuple(cardinalities)
 
     def enumerate_cycles(self):
-        """Generate f's cycle decomposition in O(len(f)) time"""
+        """Generate f's cycles"""
         tried = set()
         cyclic = set()
         remaining = set(self.domain)
@@ -268,7 +282,22 @@ class Endofunction(Function):
 
 
 class SymmetricFunction(Endofunction, Bijection):
-    """A Bijective Endofunction"""
+    """A invertible Endofunction.
+
+    Permutations can be iterated like Endofunctions and inverted like
+    Bijections. Since a Permutation inverse is itself a Permutation, we
+    can define exponentiation of Permutations over all integers. Permutation
+    objects on a given domain thus form a group.
+
+    >>> s = SymmetricFunction({0: 1, 1: 2, 2: 3, 3: 0, 4: 5, 5: 6, 6: 4})
+    >>> s**-2
+    SymmetricFunction({0: 2, 1: 3, 2: 0, 3: 1, 4: 5, 5: 6, 6: 4})
+
+    >>> s**-2 == (s.inverse())**2
+    True
+    >>> s * s**-1 == s**-1 * s == identity(s.domain)
+    True
+    """
 
     __slots__ = ()
 
@@ -333,7 +362,19 @@ def randconj(f, newdomain=None):
 
 
 class Mappings(Enumerable):
-    """The set of Functions between a domain and a codomain"""
+    """Mappings(A, B) -> The set of Functions from set A to B.
+
+    >>> m = Mappings("ab", range(3))    # domains can be any iterable
+    >>> list(m)
+    [Function({'a': 0, 'b': 0}), Function({'a': 0, 'b': 1}),
+    Function({'a': 0, 'b': 2}), Function({'a': 1, 'b': 0}),
+    Function({'a': 1, 'b': 1}), Function({'a': 1, 'b': 2}),
+    Function({'a': 2, 'b': 0}), Function({'a': 2, 'b': 1}),
+    Function({'a': 2, 'b': 2})]
+
+    >>> len(m)                          # m has len(B) ** len(A) elements
+    9
+    """
 
     def __init__(self, domain, codomain):
         self.domain = _parsed_domain(domain)
@@ -349,7 +390,17 @@ class Mappings(Enumerable):
 
 
 class Isomorphisms(Enumerable):
-    """The set of bijections between a domain and a codomain"""
+    """Isomorphisms(A, B) -> The set of bijections between A and B
+
+    >>> i = Isomorphisms("abc", range(3))
+    >>> list(i)
+    [Bijection({'a': 0, 'c': 2, 'b': 1}), Bijection({'a': 0, 'c': 1, 'b': 2}),
+    Bijection({'a': 1, 'c': 2, 'b': 0}), Bijection({'a': 1, 'c': 0, 'b': 2}),
+    Bijection({'a': 2, 'c': 1, 'b': 0}), Bijection({'a': 2, 'c': 0, 'b': 1})]
+
+    >>> len(i)                          # i has factorial(len(A)) elements
+    6
+    """
 
     def __init__(self, domain, codomain):
         domain = _parsed_domain(domain)
@@ -370,7 +421,16 @@ class Isomorphisms(Enumerable):
 
 
 class TransformationMonoid(Enumerable):
-    """Set of all Endofunctions on a domain."""
+    """TransformationMonoid(A) -> The set of Endofunctions on A
+
+    >>> t = TransformationMonoid(2)
+    >>> list(t)
+    [Endofunction({0: 0, 1: 0}), Endofunction({0: 0, 1: 1}),
+    Endofunction({0: 1, 1: 0}), Endofunction({0: 1, 1: 1})]
+
+    >>> len(t)                          # t has len(A)**len(A) elements
+    4
+    """
 
     def __init__(self, domain):
         self.domain = _parsed_domain(domain)
@@ -385,7 +445,20 @@ class TransformationMonoid(Enumerable):
 
 
 class SymmetricGroup(Enumerable):
-    """The set of automorphisms on a domain"""
+    """SymmetricGroup(A) -> The set of Permutations of A
+
+    >>> s = SymmetricGroup(3)
+    >>> list(s)
+    [SymmetricFunction({0: 0, 1: 1, 2: 2}),
+    SymmetricFunction({0: 0, 1: 2, 2: 1}),
+    SymmetricFunction({0: 1, 1: 0, 2: 2}),
+    SymmetricFunction({0: 1, 1: 2, 2: 0}),
+    SymmetricFunction({0: 2, 1: 0, 2: 1}),
+    SymmetricFunction({0: 2, 1: 1, 2: 0})]
+
+    >>> len(s)                          # s has factorial(len(A)) elements
+    6
+    """
 
     def __init__(self, domain):
         self.domain = _parsed_domain(domain)
