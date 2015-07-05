@@ -1,7 +1,7 @@
 # Main data structures
 from .conjstructs import Funcstruct, EndofunctionStructures
 from .functions import (
-    Function, Bijection, Endofunction, SymmetricFunction,
+    Function, Bijection, Endofunction, Permutation,
     identity, rangefunc, rangeperm, randfunc, randperm, randconj,
     Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup
 )

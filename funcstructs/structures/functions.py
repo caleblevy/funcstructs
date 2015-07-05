@@ -20,7 +20,7 @@ def _result_functype(f, g):
     ----------
     1) If both types are the same, so is their result
     2) Function has highest priority
-    3) SymmetricFunction has lowest priority
+    3) Permutation has lowest priority
     4) Bijection and Endofunction result in Function
     """
     functypes = {type(f), type(g)}
@@ -28,8 +28,8 @@ def _result_functype(f, g):
         return functypes.pop()
     elif Function in functypes:
         return Function
-    elif SymmetricFunction in functypes:
-        return (functypes - {SymmetricFunction}).pop()
+    elif Permutation in functypes:
+        return (functypes - {Permutation}).pop()
     return Function
 
 
@@ -47,7 +47,7 @@ def _parsed_domain(domain):
 def identity(domain=None):
     """Return the identity function on a given domain."""
     S = _parsed_domain(domain)
-    return SymmetricFunction(zip(S, S))
+    return Permutation(zip(S, S))
 
 
 class Function(frozendict):
@@ -200,7 +200,7 @@ class Endofunction(Function):
     >>> f**3
     Endofunction({0: 0, 1: 0, 2: 0, 3: 0})
     >>> f**0
-    >>> SymmetricFunction({0: 0, 1: 1, 2: 2, 3: 3})  # identity iterate
+    >>> Permutation({0: 0, 1: 1, 2: 2, 3: 3})  # identity iterate
 
     Iteration can be used to form cycles.
 
@@ -217,7 +217,7 @@ class Endofunction(Function):
             raise ValueError("image must be a subset of the domain")
 
     def __pow__(self, n):
-        """f**n <==> the nth iterate of f"""
+        """f**n <==> the nth iterate of f (n > 0)"""
         f = self
         f_iter = identity(self.domain)
         # Decompose f**n into the composition of power-of-2 iterates, akin to
@@ -282,7 +282,7 @@ class Endofunction(Function):
         return frozendict((x, frozenset(descendants[x])) for x in self.domain)
 
 
-class SymmetricFunction(Endofunction, Bijection):
+class Permutation(Endofunction, Bijection):
     """A invertible Endofunction.
 
     Permutations can be iterated like Endofunctions and inverted like
@@ -290,9 +290,9 @@ class SymmetricFunction(Endofunction, Bijection):
     can define exponentiation of Permutations over all integers. Permutation
     objects on a given domain thus form a group.
 
-    >>> s = SymmetricFunction({0: 1, 1: 2, 2: 3, 3: 0, 4: 5, 5: 6, 6: 4})
+    >>> s = Permutation({0: 1, 1: 2, 2: 3, 3: 0, 4: 5, 5: 6, 6: 4})
     >>> s**-2
-    SymmetricFunction({0: 2, 1: 3, 2: 0, 3: 1, 4: 5, 5: 6, 6: 4})
+    Permutation({0: 2, 1: 3, 2: 0, 3: 1, 4: 5, 5: 6, 6: 4})
 
     >>> s**-2 == (s.inverse())**2
     True
@@ -303,11 +303,11 @@ class SymmetricFunction(Endofunction, Bijection):
     __slots__ = ()
 
     def __pow__(self, n):
-        """Symmetric functions allow us to take inverses."""
+        """f**n <==> the nth iterate of f"""
         if n >= 0:
-            return super(SymmetricFunction, self).__pow__(n)
+            return super(Permutation, self).__pow__(n)
         else:
-            return super(SymmetricFunction, self.inverse()).__pow__(-n)
+            return super(Permutation, self.inverse()).__pow__(-n)
 
 
 # Convenience functions for defining Endofunctions from a sequence in range(n)
@@ -320,7 +320,7 @@ def rangefunc(seq):
 
 def rangeperm(seq):
     """Return a symmetric function defined on range(len(seq))."""
-    return SymmetricFunction(enumerate(seq))
+    return Permutation(enumerate(seq))
 
 
 # Convenience functions for returning random Functions
@@ -346,7 +346,7 @@ def randperm(domain, codomain=None):
         result_type = Bijection
     else:
         T = S[:]
-        result_type = SymmetricFunction
+        result_type = Permutation
     random.shuffle(T)
     return result_type(zip(S, T))
 
@@ -466,12 +466,12 @@ class SymmetricGroup(Enumerable):
 
     >>> s = SymmetricGroup(3)
     >>> list(s)
-    [SymmetricFunction({0: 0, 1: 1, 2: 2}),
-    SymmetricFunction({0: 0, 1: 2, 2: 1}),
-    SymmetricFunction({0: 1, 1: 0, 2: 2}),
-    SymmetricFunction({0: 1, 1: 2, 2: 0}),
-    SymmetricFunction({0: 2, 1: 0, 2: 1}),
-    SymmetricFunction({0: 2, 1: 1, 2: 0})]
+    [Permutation({0: 0, 1: 1, 2: 2}),
+    Permutation({0: 0, 1: 2, 2: 1}),
+    Permutation({0: 1, 1: 0, 2: 2}),
+    Permutation({0: 1, 1: 2, 2: 0}),
+    Permutation({0: 2, 1: 0, 2: 1}),
+    Permutation({0: 2, 1: 1, 2: 0})]
 
     >>> len(s)                          # s has factorial(len(A)) elements
     6
@@ -483,10 +483,10 @@ class SymmetricGroup(Enumerable):
     def __iter__(self):
         domain = sorted(self.domain)
         for p in itertools.permutations(domain):
-            yield SymmetricFunction(zip(domain, p))
+            yield Permutation(zip(domain, p))
 
     def __contains__(self, other):
-        if isinstance(other, SymmetricFunction):
+        if isinstance(other, Permutation):
             return self.domain == other.domain
         return False
 

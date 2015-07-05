@@ -4,7 +4,7 @@ from math import factorial
 from ..conjstructs import Funcstruct
 
 from ..functions import (
-    Function, Bijection, Endofunction, SymmetricFunction,
+    Function, Bijection, Endofunction, Permutation,
     identity, rangefunc, rangeperm, randfunc, randperm, randconj,
     Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup
 )
@@ -210,14 +210,14 @@ class PermutationTests(unittest.TestCase):
         e = Endofunction(zip([1, 2, 3], [2, 2, 3]))
         for s in [f, b, e]:
             with self.assertRaises(ValueError):
-                SymmetricFunction(s)
+                Permutation(s)
 
     def test_negative_powers(self):
         """Test that permutations work with negative powers."""
         s = rangeperm([1, 2, 3, 0, 5, 6, 4])  # s.cycles() <-> (0,1,2,3)(4,5,6)
         a = Bijection(zip(range(7), "abcdefg")).conj(s)
         ii = rangeperm(range(7))
-        ia = SymmetricFunction(zip(*(["abcdefg"]*2)))
+        ia = Permutation(zip(*(["abcdefg"]*2)))
         for i in range(13):
             self.assertEqual(ii, (s**i) * (s**-i))
             self.assertEqual(ii, (s**-i) * (s**i))
@@ -253,7 +253,7 @@ class RandfuncTests(unittest.TestCase):
         domains = [5, range(5), "abcde"]
         for dom in domains:
             s = randperm(dom)
-            self.assertIsInstance(s, SymmetricFunction)
+            self.assertIsInstance(s, Permutation)
             if isinstance(dom, int):
                 d = set(range(dom))
             else:
@@ -298,7 +298,7 @@ class CompositionTests(unittest.TestCase):
             f * g
 
     I = list(enumerate(range(10)))
-    ids = [Function(I), Bijection(I), Endofunction(I), SymmetricFunction(I)]
+    ids = [Function(I), Bijection(I), Endofunction(I), Permutation(I)]
 
     def test_composition_types(self):
         """Test the four type rules for function composition"""
