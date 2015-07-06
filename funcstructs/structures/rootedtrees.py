@@ -152,6 +152,23 @@ class LevelSequence(bases.Tuple):
                 node_levels[y] = level
         return cls(level_sequence)
 
+    def parents(self):
+        """Generator of (node, height, parent) triplets."""
+        levels = iter(self)
+        root = previous_level = next(levels)
+        f = node = 0
+        yield f
+        grafting_point = {0: 0}
+        for node, level in enumerate(levels, start=1):
+            if level > previous_level:
+                f = grafting_point[previous_level-root]
+                previous_level += 1
+            else:
+                f = grafting_point[level-root-1]
+                previous_level = level
+            yield f
+            grafting_point[level-root] = node
+
     def branches(self):
         """Return the subtrees attached to the root."""
         for branch in subsequences.startswith(self[1:], self[0]+1):
@@ -171,19 +188,30 @@ class LevelSequence(bases.Tuple):
         """Viewing the ordered level sequence as an implicit mapping of each
         node to the most recent node of the next lowest level, return the
         sequence of elements that each node is mapped to. If labels is given,
-        func_labelling[n] -> labels[func_labelling[n]]. """
+        func_labelling[n] -> labels[func_labelling[n]]."""
         if labels is None:
             labels = range(len(self))
-        for _, _, f in _funclevels_iterator(self):
-            yield labels[f]
+        return map(labels.__getitem__, self.parents())
+
+    def height_groups(self):
+        """Nodes in breadth-first traversal order grouped by height."""
+        groups = [[] for _ in range(max(self) - self[0] + 1)]
+        for node, height in enumerate(self):
+            groups[height-self[0]].append(node)
+        return groups
 
     def breadth_first_traversal(self):
-        """Return nodes in breadth-first traversal order"""
-        return chain(*_treefunc_properties(self)[2])
+        """Generate nodes in breadth-first traversal order."""
+        return chain(*self.height_groups())
 
     def attachments(self):
         """Map of each node to the set of nodes attached to it in order."""
-        return _treefunc_properties(self)[1]
+        preim = []
+        for node, parent in enumerate(self.parents()):
+            preim.append([])
+            preim[parent].append(node)
+        preim[0].pop(0)
+        return preim
 
 
 def _dominant_keys(height_groups, func, sort=True):
