@@ -18,8 +18,11 @@ __all__ = [
 
 
 def _levels_from_preim(graph, root=0, keys=None):
-    """Return the level sequence of the ordered tree formed such that graph[x]
-    are the nodes attached to x."""
+    """Return the level sequence of the ordered tree formed such that
+    graph[x] are the nodes attached to x.
+
+    Note: If the graph has any cycles, this method will not terminate.
+    """
     if keys is not None:
         for connections in graph:
             connections.sort(key=keys.__getitem__)
@@ -90,28 +93,7 @@ class LevelSequence(bases.Tuple):
             if len(lim) != 1:
                 raise ValueError("Function structure is not a rooted tree")
             root = next(iter(lim))
-        return cls.from_graph(func.acyclic_ancestors(), root)
-
-    @classmethod
-    def from_graph(cls, graph, root=0):
-        """Return the level sequence of the ordered tree formed such
-        that graph[x] are the nodes attached to x.
-
-        Note: If the graph has any cycles, this method will not terminate.
-        """
-        node_stack = [root]
-        level = 0
-        level_sequence = []
-        node_levels = {root: level}
-        while node_stack:
-            x = node_stack.pop()
-            level = node_levels[x]
-            level_sequence.append(level)
-            level += 1
-            for y in graph[x]:
-                node_stack.append(y)
-                node_levels[y] = level
-        return cls(level_sequence)
+        return cls(_levels_from_preim(func.acyclic_ancestors(), root))
 
     def parents(self):
         """Generator of (node, height, parent) triplets."""
