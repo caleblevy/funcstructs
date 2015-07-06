@@ -135,7 +135,7 @@ class LevelSequenceTests(unittest.TestCase):
         for et in error_trees:
             with self.assertRaises((ValueError, TypeError)):
                 LevelSequence(et)
-            with self.assertRaises((TypeError, IndexError, KeyError)):
+            with self.assertRaises((TypeError, ValueError, LookupError)):
                 DominantSequence(et)
 
     def test_dominance_ordering(self):

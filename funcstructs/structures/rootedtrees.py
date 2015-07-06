@@ -37,45 +37,6 @@ def _levels_from_preim(graph, root=0, keys=None):
             node_levels[y] = level
 
 
-def _funclevels_iterator(levels):
-    """Lazily generate (node, height, parent) triplets from an iterator of a
-    level sequence.
-    """
-    levels = iter(levels)
-    root = previous_level = next(levels)
-    f = node = 0
-    yield node, 0, f
-    grafting_point = {0: 0}
-    for node, level in enumerate(levels, start=1):
-        if level > previous_level:
-            f = grafting_point[previous_level-root]
-            previous_level += 1
-        else:
-            f = grafting_point[level-root-1]
-            previous_level = level
-        yield node, level-root, f
-        grafting_point[level-root] = node
-
-
-def _treefunc_properties(levels):
-    """Given an ordered tree's level sequence, return an endofunction with the
-    tree's structure, that functions preimage, and the nodes of that tree in
-    breadth-first traversal order grouped by height."""
-    # TODO: split these into three separate methods
-    func = []
-    hg = [[]]
-    preim = []
-    for n, l, f in _funclevels_iterator(levels):
-        func.append(f)
-        preim.append([])
-        preim[f].append(n)
-        if l >= len(hg):
-            hg.append([])
-        hg[l].append(n)
-    preim[0].pop(0)  # Remove 0 to prevent infinite loop in _levels_from_preim.
-    return func, preim, hg
-
-
 class LevelSequence(bases.Tuple):
     """Representation of an unlabelled ordered tree using a level sequence.
 
@@ -247,9 +208,9 @@ class DominantSequence(LevelSequence):
     __slots__ = ()
 
     def __new__(cls, level_sequence):
-        f, p, g = _treefunc_properties(level_sequence)
-        keys = _dominant_keys(g, f)
-        level_sequence = _levels_from_preim(p, 0, keys)
+        ot = LevelSequence(level_sequence)
+        keys = _dominant_keys(ot.height_groups(), list(ot.parents()))
+        level_sequence = _levels_from_preim(ot.attachments(), 0, keys)
         # No need to run LevelSequence checks; it's either been preordered or
         # treefunc_properties will serve as an effective check due to indexing.
         return super(LevelSequence, cls).__new__(cls, level_sequence)
@@ -261,10 +222,11 @@ class DominantSequence(LevelSequence):
         containing the rooted trees."""
         # TODO: A writeup of this with diagrams will be in the notes.
         deg = 1
-        f, _, h = _treefunc_properties(self)
-        k = _dominant_keys(h, f, sort=False)
+        parents = list(self.parents())
+        groups = self.height_groups()
+        keys = _dominant_keys(groups, parents, sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
-        for _, g in groupby(chain(*h), lambda x: (f[x], k[x])):
+        for _, g in groupby(chain(*groups), lambda x: (parents[x], keys[x])):
             deg *= factorial(len(list(g)))
         return deg
 
