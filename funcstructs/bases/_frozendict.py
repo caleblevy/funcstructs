@@ -13,7 +13,7 @@ class frozendict(dict):
 
     __slots__ = ()
 
-    def __new__(*args, **kwargs):
+    def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
         self = dict.__new__(args[0])
         dict.__init__(self, *args[1:], **kwargs)
         return self
@@ -23,7 +23,7 @@ class frozendict(dict):
         cls = args[0]
         return cls(dict.fromkeys(*args[1:], **kwargs))
 
-    def __init__(*args, **kwargs):
+    def __init__(*args, **kwargs):  # signature allows using `self` keyword arg
         pass  # Override dict.__init__ to avoid calling disabled update method
 
     def __repr__(self):

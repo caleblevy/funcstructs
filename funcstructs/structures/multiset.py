@@ -64,7 +64,7 @@ class Multiset(frozendict):
 
     __slots__ = ()
 
-    def __new__(*args, **kwargs):
+    def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
         self = frozendict.__new__(args[0])
         if len(args) == 2:
             if kwargs:
