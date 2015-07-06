@@ -199,7 +199,7 @@ if __name__ == '__main__':
             h -= 1
             tree *= 2
             tree = [h] + tree
-        return rangefunc(OrderedTree(tree).map_labelling())
+        return rangefunc(LevelSequence(tree).map_labelling())
 
     def scattered_tree(n):
         """Tree with a big cycle and things attached"""

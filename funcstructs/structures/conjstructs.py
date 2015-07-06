@@ -17,7 +17,7 @@ from funcstructs.utils import compositions, factorization, subsequences
 from .functions import rangefunc
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
-from .rootedtrees import _levels_from_preim, DominantTree, PartitionForests
+from .rootedtrees import _levels_from_preim, DominantSequence, PartitionForests
 
 
 __all__ = ("Funcstruct", "EndofunctionStructures")
@@ -55,7 +55,7 @@ class Funcstruct(Multiset):
 
     Funcstruct graphs are directed pseudoforests: Multisets of cycles
     (represented by Necklace objects) whose elements are unlabelled and
-    unordered rooted trees (represented by DominantTree objects).
+    unordered rooted trees (represented by DominantSequence objects).
     """
 
     __slots__ = ()
@@ -66,9 +66,10 @@ class Funcstruct(Multiset):
         for cycle in f.cycles():
             trees = []
             for x in cycle:
-                # Use DominantTree instead of RootedTree to avoid hitting
+                # Use DominantSequence instead of RootedTree to avoid hitting
                 # python's recursion limit.
-                trees.append(DominantTree(_levels_from_preim(treenodes, x)))
+                trees.append(
+                    DominantSequence(_levels_from_preim(treenodes, x)))
             cycles.append(Necklace(trees))
         return super(Funcstruct, cls).__new__(cls, cycles)
 

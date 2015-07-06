@@ -7,8 +7,8 @@ from .. import functions, multiset
 
 from ..rootedtrees import (
     RootedTree,
-    OrderedTree,
-    DominantTree,
+    LevelSequence,
+    DominantSequence,
     TreeEnumerator,
     ForestEnumerator,
     PartitionForests
@@ -46,17 +46,17 @@ class TreeEnumerationTests(unittest.TestCase):
         """spot check enumerated forests for some elements"""
         n = 9
         forests = set(ForestEnumerator(9))
-        t1 = multiset.Multiset([DominantTree(range(n))])
+        t1 = multiset.Multiset([DominantSequence(range(n))])
         t2 = multiset.Multiset([
-            DominantTree(range(n//2)),
-            DominantTree(range(n-n//2))
+            DominantSequence(range(n//2)),
+            DominantSequence(range(n-n//2))
         ])
-        t3 = multiset.Multiset([DominantTree(iter([0]))]*n)
-        nt1 = multiset.Multiset([DominantTree(range(n-1))])
-        nt2 = multiset.Multiset([DominantTree(range(n+1))])
-        n3 = DominantTree(range(n-1))
-        nf4 = multiset.Multiset([OrderedTree(range(n))])
-        n5 = multiset.Multiset(DominantTree(range(1, n+1)))
+        t3 = multiset.Multiset([DominantSequence(iter([0]))]*n)
+        nt1 = multiset.Multiset([DominantSequence(range(n-1))])
+        nt2 = multiset.Multiset([DominantSequence(range(n+1))])
+        n3 = DominantSequence(range(n-1))
+        nf4 = multiset.Multiset([LevelSequence(range(n))])
+        n5 = multiset.Multiset(DominantSequence(range(1, n+1)))
         for t in [t1, t2, t3]:
             self.assertIn(t, forests)
         for nt in [nt1, nt2, n3, nf4, n5]:
@@ -114,12 +114,12 @@ class RootedTreeTests(unittest.TestCase):
         """Test conversion between rooted and unordered trees is seamless."""
         for l in [self.L1, self.L2, self.L3]:
             self.assertEqual(
-                DominantTree(l),
+                DominantSequence(l),
                 RootedTree.from_levels(l).ordered_form()
             )
 
 
-class OrderedTreeTests(unittest.TestCase):
+class LevelSequenceTests(unittest.TestCase):
 
     def test_constructor_checks(self):
         """Test level sequences must be in increments by 1 above the root"""
@@ -134,26 +134,26 @@ class OrderedTreeTests(unittest.TestCase):
         ]
         for et in error_trees:
             with self.assertRaises((ValueError, TypeError)):
-                OrderedTree(et)
+                LevelSequence(et)
             with self.assertRaises((TypeError, IndexError, KeyError)):
-                DominantTree(et)
+                DominantSequence(et)
 
     def test_dominance_ordering(self):
-        """Test DominantTree produces dominant ordering"""
+        """Test DominantSequence produces dominant ordering"""
         self.assertSequenceEqual(
             [0, 1, 2, 3, 4, 1, 2, 3, 1, 2, 1],
-            DominantTree([1, 2, 2, 3, 2, 3, 4, 2, 3, 4, 5])
+            DominantSequence([1, 2, 2, 3, 2, 3, 4, 2, 3, 4, 5])
         )
 
     def test_traverse_map(self):
         """Test the bracket representation of these rooted trees."""
         trees = [
-            OrderedTree([0, 1, 2, 3, 4, 5, 3, 1, 2, 3]),
-            OrderedTree([0, 1, 2, 3, 4, 5, 3, 1, 2, 2]),
-            OrderedTree([0, 1, 2, 3, 4, 4, 4, 4, 4, 1]),
+            LevelSequence([0, 1, 2, 3, 4, 5, 3, 1, 2, 3]),
+            LevelSequence([0, 1, 2, 3, 4, 5, 3, 1, 2, 2]),
+            LevelSequence([0, 1, 2, 3, 4, 4, 4, 4, 4, 1]),
             # Test different orderings
-            OrderedTree([0, 1, 1, 2, 1, 2, 3, 1, 2, 3]),
-            OrderedTree([0, 1, 2, 3, 1, 2, 3, 1, 2, 1])
+            LevelSequence([0, 1, 1, 2, 1, 2, 3, 1, 2, 3]),
+            LevelSequence([0, 1, 2, 3, 1, 2, 3, 1, 2, 1])
         ]
         nestedforms = (
             [[[[[[]]], []]], [[[]]]],
@@ -167,7 +167,7 @@ class OrderedTreeTests(unittest.TestCase):
 
     def test_map_labelling(self):
         """Check that a functions from tree.map_labelling represent the tree"""
-        tree = OrderedTree([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
+        tree = LevelSequence([1, 2, 3, 4, 4, 4, 3, 4, 4, 2, 3, 3, 2, 3])
         func = functions.rangefunc([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
         self.assertEqual(func, functions.rangefunc(tree.map_labelling()))
 
@@ -177,14 +177,14 @@ class OrderedTreeTests(unittest.TestCase):
             for tree in TreeEnumerator(n):
                 treefunc = functions.rangefunc(tree.map_labelling())
                 rtreefunc = functions.randconj(treefunc)
-                self.assertEqual(tree, DominantTree.from_func(rtreefunc))
+                self.assertEqual(tree, DominantSequence.from_func(rtreefunc))
         # Make sure non-tree structures are caught
         with self.assertRaises(ValueError):
-            OrderedTree.from_func(functions.rangefunc(range(10)))
+            LevelSequence.from_func(functions.rangefunc(range(10)))
 
     def test_breadth_first_traversal(self):
         """Test nodes are grouped correctly by their height"""
-        T = OrderedTree([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])
+        T = LevelSequence([0, 1, 2, 2, 3, 3, 3, 4, 5, 5, 4, 3, 3, 2, 1, 2])
         bft = [0, 1, 14, 2, 3, 13, 15, 4, 5, 6, 11, 12, 7, 10, 8, 9]
         lp = T[0]
         for reference, computed in zip(bft, T.breadth_first_traversal()):
@@ -194,16 +194,16 @@ class OrderedTreeTests(unittest.TestCase):
 
     def test_height_independence(self):
         """Check that tree methods are unaffected by root height"""
-        T = OrderedTree([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
+        T = LevelSequence([1, 2, 3, 3, 4, 4, 4, 5, 6, 6, 5, 4, 4, 3, 2, 3])
         bft = list(T.breadth_first_traversal())
         ml = list(T.map_labelling())
         tm = T.traverse_map()
-        d = DominantTree(T).degeneracy()
+        d = DominantSequence(T).degeneracy()
         rt = RootedTree.from_levels(T)
         for i in range(-7, 7):
-            ot = OrderedTree([t-i for t in T])
+            ot = LevelSequence([t-i for t in T])
             self.assertSequenceEqual(bft, list(ot.breadth_first_traversal()))
             self.assertSequenceEqual(ml, list(ot.map_labelling()))
             self.assertEqual(tm, ot.traverse_map())
-            self.assertEqual(d, DominantTree(ot).degeneracy())
+            self.assertEqual(d, DominantSequence(ot).degeneracy())
             self.assertEqual(rt, RootedTree.from_levels(ot))

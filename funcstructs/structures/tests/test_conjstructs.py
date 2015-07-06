@@ -10,16 +10,16 @@ class FuncstructTests(unittest.TestCase):
 
     s = Funcstruct._from_cycles([
         necklaces.Necklace([
-            rootedtrees.DominantTree([0, 1, 2]),
-            rootedtrees.DominantTree([0, 1, 1])
+            rootedtrees.DominantSequence([0, 1, 2]),
+            rootedtrees.DominantSequence([0, 1, 1])
         ]),
         necklaces.Necklace([
-            rootedtrees.DominantTree([0, 1])
+            rootedtrees.DominantSequence([0, 1])
         ]),
         necklaces.Necklace([
-            rootedtrees.DominantTree([0, 1, 1]),
-            rootedtrees.DominantTree([0]),
-            rootedtrees.DominantTree([0, 1, 1])
+            rootedtrees.DominantSequence([0, 1, 1]),
+            rootedtrees.DominantSequence([0]),
+            rootedtrees.DominantSequence([0, 1, 1])
         ])
     ])
 
@@ -59,7 +59,7 @@ class FuncstructTests(unittest.TestCase):
     def test_repr(self):
         """Ensure an endofunction structure evaluates to itself"""
         eval_map = {
-            'DominantTree': rootedtrees.DominantTree,
+            'DominantSequence': rootedtrees.DominantSequence,
             'Necklace': necklaces.Necklace
         }
         struct = Funcstruct(functions.randfunc(30))

@@ -12,7 +12,7 @@ from funcstructs.utils import combinat, factorization, subsequences
 from . import multiset
 
 __all__ = [
-    "OrderedTree", "DominantTree", "RootedTree",
+    "LevelSequence", "DominantSequence", "RootedTree",
     "TreeEnumerator", "ForestEnumerator", "PartitionForests"
 ]
 
@@ -76,7 +76,7 @@ def _treefunc_properties(levels):
     return func, preim, hg
 
 
-class OrderedTree(bases.Tuple):
+class LevelSequence(bases.Tuple):
     """Representation of an unlabelled ordered tree using a level sequence.
 
     LevelSequence objects are obtained from OrderedTrees by listing
@@ -85,11 +85,11 @@ class OrderedTree(bases.Tuple):
     tree may be reconstructed by connecting each node to previous one
     directly below its height.
 
-    Any valid level sequence may be used to make an OrderedTree.
+    Any valid level sequence may be used to make a LevelSequence object.
 
     Usage:
 
-    >>> t = OrderedTree([0, 1, 1, 2, 3, 2])
+    >>> t = LevelSequence([0, 1, 1, 2, 3, 2])
     >>> t.traverse_map()                     # representation as nested lists
     [[], [[[]], []]]
     >>> t.traverse_map(tuple)                # can use any container type
@@ -105,7 +105,7 @@ class OrderedTree(bases.Tuple):
     __slots__ = ()
 
     def __new__(cls, level_sequence):
-        self = super(OrderedTree, cls).__new__(cls, level_sequence)
+        self = super(LevelSequence, cls).__new__(cls, level_sequence)
         previous_node = self[0]
         seen = set()
         for node in self[1:]:
@@ -190,7 +190,7 @@ def _dominant_keys(height_groups, func, sort=True):
     return node_keys
 
 
-class DominantTree(OrderedTree):
+class DominantSequence(LevelSequence):
     """A dominant tree is the ordering of an unordered tree with
     lexicographically largest level sequence. It is formed by placing all
     subtrees in dominant form and then putting them in descending order.
@@ -202,9 +202,9 @@ class DominantTree(OrderedTree):
         f, p, g = _treefunc_properties(level_sequence)
         keys = _dominant_keys(g, f)
         level_sequence = _levels_from_preim(p, 0, keys)
-        # No need to run OrderedTree checks; it's either been preordered or
+        # No need to run LevelSequence checks; it's either been preordered or
         # treefunc_properties will serve as an effective check due to indexing.
-        return super(OrderedTree, cls).__new__(cls, level_sequence)
+        return super(LevelSequence, cls).__new__(cls, level_sequence)
 
     def degeneracy(self):
         """The number of representations of each labelling of the unordered
@@ -240,7 +240,7 @@ class RootedTree(multiset.Multiset):
     @classmethod
     def from_levels(cls, levels):
         """Return the unordered tree corresponding to the level sequence."""
-        return OrderedTree(levels).traverse_map(cls)
+        return LevelSequence(levels).traverse_map(cls)
 
     def __bool__(self):
         return True  # All trees have roots, thus aren't empty
@@ -282,7 +282,7 @@ class RootedTree(multiset.Multiset):
 
     def ordered_form(self):
         """Return the dominant representative of the rooted tree."""
-        return DominantTree(self._ordered_level_sequence())
+        return DominantSequence(self._ordered_level_sequence())
 
 
 class TreeEnumerator(bases.Enumerable):
@@ -304,7 +304,7 @@ class TreeEnumerator(bases.Enumerable):
         Computation, Vol. 9, No. 4. November 1980.
         """
         tree = list(range(self._root_height, self.n+self._root_height))
-        yield tuple.__new__(DominantTree, tree)
+        yield tuple.__new__(DominantSequence, tree)
         if self.n > 2:
             while tree[1] != tree[2]:
                 p = self.n-1
@@ -315,7 +315,7 @@ class TreeEnumerator(bases.Enumerable):
                     q -= 1
                 for i in range(p, self.n):
                     tree[i] = tree[i-(p-q)]
-                yield tuple.__new__(DominantTree, tree)
+                yield tuple.__new__(DominantSequence, tree)
 
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm

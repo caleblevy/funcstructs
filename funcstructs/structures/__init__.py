@@ -8,6 +8,6 @@ from .functions import (
 from .multiset import Multiset, unordered_product
 from .necklaces import periodicity, Necklace, FixedContentNecklaces
 from .rootedtrees import (
-    OrderedTree, DominantTree, RootedTree,
+    LevelSequence, DominantSequence, RootedTree,
     TreeEnumerator, ForestEnumerator, PartitionForests
 )
