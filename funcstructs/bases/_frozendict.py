@@ -1,16 +1,11 @@
 from funcstructs.compat import viewitems
+from funcstructs.utils import disable
 
 
-@classmethod
-def _raise_unassignable(cls, *args, **kwargs):
-    raise TypeError('%r does not support item assignment' % cls.__name__)
-
-
-@classmethod
-def _raise_undeleteable(cls, *args, **kwargs):
-    raise TypeError('%r does not support item deletion' % cls.__name__)
-
-
+@disable('__setitem__', 'setdefault', 'update',
+         message="{cls} does not support item assignment")
+@disable('__delitem__', 'pop', 'popitem', 'clear',
+         message="{cls} does not support item deletion")
 class frozendict(dict):
     """Dictionary with no mutating methods. The values themselves, as with
     tuples, may still be mutable. If all of frozendict's values are hashable,
@@ -29,13 +24,7 @@ class frozendict(dict):
         return cls(dict.fromkeys(*args[1:], **kwargs))
 
     def __init__(*args, **kwargs):
-        pass  # Override dict.__init__ to avoid call to self.update()
-
-    # Disable all inherited mutating methods. Based on brownie's ImmutableDict
-
-    __setitem__ = setdefault = update = _raise_unassignable
-
-    __delitem__ = clear = pop = popitem = _raise_undeleteable
+        pass  # Override dict.__init__ to avoid calling disabled update method
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, dict(self))
