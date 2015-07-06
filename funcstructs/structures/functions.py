@@ -11,6 +11,7 @@ from math import factorial
 from funcstructs import compat
 
 from funcstructs.bases import frozendict, Enumerable
+from funcstructs.utils import disable
 
 
 def _result_functype(f, g):
@@ -50,6 +51,7 @@ def identity(domain=None):
     return Permutation(zip(S, S))
 
 
+@disable('__getitem__')
 class Function(frozendict):
     """An immutable mapping between sets.
 
@@ -112,10 +114,6 @@ class Function(frozendict):
         return frozenset(self.values())
 
     __call__ = dict.__getitem__
-
-    @classmethod
-    def __getitem__(cls, *args, **kwargs):
-        raise TypeError("%s should be evaluated by calling" % cls.__name__)
 
     # Mathematical functions describe a set of pairings of points; returning
     # elements of the domain does not provide useful information; only the
