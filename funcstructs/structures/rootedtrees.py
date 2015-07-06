@@ -96,20 +96,19 @@ class LevelSequence(bases.Tuple):
         return cls(_levels_from_preim(func.acyclic_ancestors(), root))
 
     def parents(self):
-        """Generator of (node, height, parent) triplets."""
+        """Generator of the parent nodes of each node in order."""
         levels = iter(self)
         root = previous_level = next(levels)
-        f = node = 0
-        yield f
-        grafting_point = {0: 0}
+        yield 0
+        grafting_point = {0: 0}  # grafting_point[h] <-> last node at height h
         for node, level in enumerate(levels, start=1):
             if level > previous_level:
-                f = grafting_point[previous_level-root]
+                parent = grafting_point[previous_level-root]
                 previous_level += 1
             else:
-                f = grafting_point[level-root-1]
+                parent = grafting_point[level-root-1]
                 previous_level = level
-            yield f
+            yield parent
             grafting_point[level-root] = node
 
     def branches(self):
