@@ -1,8 +1,6 @@
-"""Algorithms for representing and enumerating unlabelled rooted trees:
-connected directed graphs with a single length-one cycle and nodes of
-out-degree one. A forest is any collection of rooted trees.
+"""Algorithms for representing and enumerating rooted trees.
 
-Caleb Levy, 2014 and 2015.
+Caleb Levy, 2014-2015.
 """
 
 from itertools import chain, groupby
@@ -40,8 +38,8 @@ def _levels_from_preim(graph, root=0, keys=None):
 
 
 def _funclevels_iterator(levels):
-    """Lazily generate (node, height above root, parent node) triplets
-    from an iterator over a level sequence.
+    """Lazily generate (node, height, parent) triplets from an iterator of a
+    level sequence.
     """
     levels = iter(levels)
     root = previous_level = next(levels)
@@ -79,10 +77,29 @@ def _treefunc_properties(levels):
 
 
 class OrderedTree(bases.Tuple):
-    """Data structure for representing ordered trees by a level sequence: a
-    listing of each node's height above the root produced in depth-first
-    traversal order. The tree is reconstructed by connecting each node to
-    previous one directly below its height.
+    """Representation of an unlabelled ordered tree using a level sequence.
+
+    LevelSequence objects are obtained from OrderedTrees by listing
+    each node's height above the root in post-ordered depth-first
+    traversal. Numbering each node by its position in the sequence, the
+    tree may be reconstructed by connecting each node to previous one
+    directly below its height.
+
+    Any valid level sequence may be used to make an OrderedTree.
+
+    Usage:
+
+    >>> t = OrderedTree([0, 1, 1, 2, 3, 2])
+    >>> t.traverse_map()                     # representation as nested lists
+    [[], [[[]], []]]
+    >>> t.traverse_map(tuple)                # can use any container type
+    ((), (((),), ()))
+
+    >>> list(t.breadth_first_traversal())
+    [0, 1, 2, 3, 5, 4]
+
+    >>> rangefunc(t.func_labelling())        # labelling as an Endofunction
+    Endofunction({0: 0, 1: 0, 2: 0, 3: 2, 4: 3, 5: 2})
     """
 
     __slots__ = ()
@@ -205,9 +222,11 @@ class DominantTree(OrderedTree):
 
 
 class RootedTree(multiset.Multiset):
-    """An unlabelled, unordered rooted tree; i.e. the ordering of the subtrees
-    is unimportant. Since there is nothing to distinguish the nodes, we
-    characterize a rooted tree strictly by the multiset of its subtrees.
+    """An unlabelled, unordered rooted tree
+
+    A RootedTree is a recursive data structure defined by the multiset
+    of its subtrees. As all rooted trees have roots, thus are nonempty
+    and evaluate True.
     """
 
     __slots__ = ()
