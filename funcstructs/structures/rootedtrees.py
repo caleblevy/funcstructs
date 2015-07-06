@@ -272,8 +272,8 @@ class RootedTree(multiset.Multiset):
 
     def _ordered_level_sequence(self, level=0):
         level_sequence = [level]
-        for tree in self:
-            level_sequence.extend(tree._ordered_level_sequence(level+1))
+        for tree, mult in self.items():
+            level_sequence.extend(tree._ordered_level_sequence(level+1) * mult)
         return level_sequence
 
     def __len__(self):
