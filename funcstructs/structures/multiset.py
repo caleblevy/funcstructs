@@ -8,41 +8,28 @@ from itertools import chain, combinations_with_replacement, product
 from collections import Counter, Mapping
 
 from funcstructs.bases import frozendict
+from funcstructs.utils import disable
 from funcstructs.utils.combinat import factorial_prod
 
 __all__ = ["Multiset", "unordered_product"]
 
 
-def _replace_doc(method):
-    if isinstance(method, str):
-        method = getattr(Counter, method)
-    doc = method.__doc__
-    return doc.replace("Counter", "Multiset").replace("counter", "multiset")
-
-
-def _get_method_with_docs(methodname):
-    """Return a method function from Counter with 'Counter' replaced by
-    'Multiset' in the docstring."""
-    method = Counter.__dict__[methodname]
-    method.__doc__ = _replace_doc(method)
-    return method
-
-
-def _binop_template(name):
+def _binop_maker(name):
     """Template for copying binary operations from Counter to Multiset"""
-    counterop = _get_method_with_docs(name)  # localize for speed
+    counterop = Counter.__dict__[name]
 
     def binop(self, other):
         if isinstance(other, Multiset):
             other = Counter(other)
         return Multiset(counterop(Counter(self), other))
     binop.__name__ = name
-    binop.__doc__ = counterop.__doc__
+    binop.__doc__ = counterop.__doc__.replace("Counter", "Multiset").replace(
+        "counter", "multiset")
     return binop
 
 
-def _rop_template(name):
-    """Template for reversed binary operations"""
+def _rop_maker(name):
+    """Make reversed binary ops for Multiset using Counter methods."""
     def binop(self, other):
         return getattr(other, '__'+name[3:])(Counter(self))
     binop.__name__ = name
@@ -57,14 +44,40 @@ def _check_multiset(mset):
     raise TypeError("multiplicities must be positive integers")
 
 
+@disable('fromkeys')
 class Multiset(frozendict):
-    """ Multiset is represented as a dictionary (hash table) whose keys are the
-    elements of the set and values are the multiplicities. Multiset is
-    immutable, and thus suitable for use as a dictionary key. """
+    """Dict subclass for counting hashable items.  Sometimes called a bag
+    or multiset.  Elements are stored as dictionary keys and their counts
+    are stored as dictionary values.
+
+    >>> m = Mulitset('abracadabra')      # Multiset of elements from a string
+
+    >>> m.most_common(3)                 # three most common elements
+    [('a', 5), ('r', 2), ('b', 2)]
+    >>> ''.join(sorted(m))               # list elements with repetitions
+    'aaaaabbcdrr'
+    >>> len(m)                           # total of all counts
+    11
+
+    >>> ''.join(sorted(c.elements()))    # list unique elements
+    'abcdr'
+
+    >>> m['a']                           # count of letter 'a'
+    5
+    """
 
     __slots__ = ()
 
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
+        """Create a new Multiset. If given, count elements from an
+        input iterable, otherwise initialize the count from another
+        mapping of elements to their multiplicities.
+
+        >>> m = Multiset()                      # a new, empty Multiset
+        >>> m = Multiset('gallahad')            # Multiset from an iterable
+        >>> m = Multiset({'a': 4, 'b': 2})      # Multiset from a mapping
+        >>> m = Multiset(a=4, b=2)              # Multiset from keyword args
+        """
         self = frozendict.__new__(args[0])
         if len(args) == 2:
             if kwargs:
@@ -82,30 +95,62 @@ class Multiset(frozendict):
         elif len(args) > 2:
             raise TypeError("expected at most 2 arguments, got %d" % len(args))
         return self
-    __new__.__doc__ = _replace_doc("__init__")
 
     def __len__(self):
         """Length of a multiset, including multiplicities."""
         return sum(self.values())
 
-    elements = _get_method_with_docs("elements")
+    __iter__ = Counter.__dict__['elements']
+    __iter__.__name__ = '__iter__'
+    __iter__.__doc__ = \
+        """Iterate over elements repeating each as many times as its count.
 
-    def __iter__(self):
-        """Iterate through the underlying set, returning multiple copies of the
-        elements if present. Equivalent to Counter.elements()."""
-        return self.elements()
+        >>> m = Mulitset('ABCABC')
+        >>> sorted(m))
+        ['A', 'A', 'B', 'B', 'C', 'C']
 
-    most_common = _get_method_with_docs("most_common")
+        # Knuth's example for prime factors of 1836:  2**2 * 3**3 * 17**1
+        >>> prime_factors = Multiset({2: 2, 3: 3, 17: 1})
+        >>> product = 1
+        >>> for factor in prime_factors:                # loop over factors
+        ...     product *= factor                       # and multiply them
+        >>> product
+        1836
+        """
 
-    (__add__, __sub__, __and__, __or__) = map(
-        _binop_template, ['__add__', '__sub__', '__and__', '__or__'])
+    def elements(self):
+        """Underlying set of unique elements.
 
-    (__radd__, __rsub__, __rand__, __ror__) = map(
-        _rop_template, ['__radd__', '__rsub__', '__rand__', '__ror__'])
+        >>> m = Multiset("abracadabra")
+        >>> sorted(m.elements())
+        ['a', 'b', 'c', 'd', 'r']
+        """
+        return frozenset(self.keys())
+
+    def num_unique_elements(self):
+        """Number of unique elements in the Multiset.
+
+        >>> m = Multiset("abracadabra").num_unique_elements()
+        5
+        """
+        return dict.__len__(self)  # cannot use len(dict.viewkeys()) in pypy
+
+    most_common = Counter.__dict__['most_common']
+    most_common.__doc__ = most_common.__doc__.replace("Counter", "Multiset")
 
     def degeneracy(self):
         """Number of different representations of the same multiset."""
         return factorial_prod(self.values())
+
+    __repr__ = Counter.__dict__['__repr__']
+
+
+_binops = ['__add__', '__sub__', '__and__', '__or__']
+_rops = ['__radd__', '__rsub__', '__rand__', '__ror__']
+for binop in _binops:
+    setattr(Multiset, binop, _binop_maker(binop))
+for rop in _rops:
+    setattr(Multiset, rop, _rop_maker(rop))
 
 
 def unordered_product(mset, iterfunc):

@@ -22,7 +22,7 @@ def disable(*methods, **kwargs):
         if message is None:
             message = ""
     else:
-        message = "{method} method is disabled for {cls} objects"
+        message = "{method} is disabled for {cls} objects"
     if kwargs:
         raise TypeError("disable() got unexpected keyword argument %s" %
                         kwargs.popitem()[0])
