@@ -1,11 +1,6 @@
 from funcstructs.compat import viewitems
-from funcstructs.utils import disable
 
 
-@disable('__setitem__', 'setdefault', 'update',
-         message="{cls} does not support item assignment")
-@disable('__delitem__', 'pop', 'popitem', 'clear',
-         message="{cls} does not support item deletion")
 class frozendict(dict):
     """Dictionary with no mutating methods. The values themselves, as with
     tuples, may still be mutable. If all of frozendict's values are hashable,
@@ -68,3 +63,25 @@ class frozendict(dict):
             return tuple(zip(*sorted(items)))
         else:
             return (), ()
+
+
+# Disable all mutating methods. Sadly, we must inherit from dict since in
+# python 3.4 we cannot inherit from MappingProxy to add __hash__, and pypy and
+# Jython don't even have a MappingProxy implementation
+_assignment_ops = ['__setitem__', 'setdefault', 'update']
+_deletion_ops = ['__delitem__', 'clear', 'pop', 'popitem']
+
+
+def _disabled_op(name, op):
+    """Disable a method performing a given mutating operation."""
+    def disabledfunc(cls, *args, **kwargs):
+        raise TypeError("%s does not support %s" % (cls.__name__, op))
+    disabledfunc.__name__ = name
+    disabledfunc.__doc__ = "Disabled method %s" % name
+    return classmethod(disabledfunc)
+
+
+for op in _assignment_ops:
+    setattr(frozendict, op, _disabled_op(op, "item assignment"))
+for op in _deletion_ops:
+    setattr(frozendict, op, _disabled_op(op, "item deletion"))

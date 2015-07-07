@@ -7,7 +7,6 @@ from itertools import chain, combinations_with_replacement, product
 from collections import Counter, Mapping
 
 from funcstructs.bases import frozendict
-from funcstructs.utils import disable
 from funcstructs.utils.combinat import factorial_prod
 
 __all__ = ["Multiset", "unordered_product"]
@@ -20,7 +19,6 @@ def _check_multiset(mset):
     raise TypeError("multiplicities must be positive integers")
 
 
-@disable('fromkeys')
 class Multiset(frozendict):
     """Dict subclass for counting hashable items.  Sometimes called a bag
     or multiset.  Elements are stored as dictionary keys and their counts
@@ -71,6 +69,10 @@ class Multiset(frozendict):
         elif len(args) > 2:
             raise TypeError("expected at most 2 arguments, got %d" % len(args))
         return self
+
+    @classmethod
+    def fromkeys(cls, iterable, v=None):
+        raise NotImplementedError("%s.fromkeys() is undefined." % cls.__name__)
 
     def __len__(self):
         """Length of a multiset, including multiplicities."""
