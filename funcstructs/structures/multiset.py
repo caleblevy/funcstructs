@@ -1,5 +1,4 @@
-"""Data structure for representing a multiset - also known as a bag, or
-unordered tuple.
+"""Immutable multiset data structure.
 
 Caleb Levy, 2014 and 2015.
 """
@@ -12,29 +11,6 @@ from funcstructs.utils import disable
 from funcstructs.utils.combinat import factorial_prod
 
 __all__ = ["Multiset", "unordered_product"]
-
-
-def _binop_maker(name):
-    """Template for copying binary operations from Counter to Multiset"""
-    counterop = Counter.__dict__[name]
-
-    def binop(self, other):
-        if isinstance(other, Multiset):
-            other = Counter(other)
-        return Multiset(counterop(Counter(self), other))
-    binop.__name__ = name
-    binop.__doc__ = counterop.__doc__.replace("Counter", "Multiset").replace(
-        "counter", "multiset")
-    return binop
-
-
-def _rop_maker(name):
-    """Make reversed binary ops for Multiset using Counter methods."""
-    def binop(self, other):
-        return getattr(other, '__'+name[3:])(Counter(self))
-    binop.__name__ = name
-    binop.__doc__ = None
-    return binop
 
 
 def _check_multiset(mset):
@@ -145,10 +121,42 @@ class Multiset(frozendict):
     __repr__ = Counter.__dict__['__repr__']
 
 
+# Save some effort and copy the binary operations directly from Counter
 _binops = ['__add__', '__sub__', '__and__', '__or__']
-_rops = ['__radd__', '__rsub__', '__rand__', '__ror__']
+
+
+def _binop_maker(name):
+    """Template for copying binary operations from Counter to Multiset"""
+    counterop = Counter.__dict__[name]
+
+    def binop(self, other):
+        if isinstance(other, Multiset):
+            other = Counter(other)
+        return Multiset(counterop(Counter(self), other))
+    binop.__name__ = name
+    binop.__doc__ = counterop.__doc__.replace("Counter", "Multiset").replace(
+        "counter", "multiset")
+    return binop
+
+
 for binop in _binops:
     setattr(Multiset, binop, _binop_maker(binop))
+
+
+# Make sure Counter + Multiset returns a Counter
+_rops = ['__radd__', '__rsub__', '__rand__', '__ror__']
+
+
+def _rop_maker(name):
+    """Make reversed binary ops for Multiset using Counter methods."""
+    def rop(self, other):
+        # convert self to a Counter, and retry other.__op__(self).
+        return getattr(other, '__'+name[3:])(Counter(self))
+    rop.__name__ = name
+    rop.__doc__ = None
+    return rop
+
+
 for rop in _rops:
     setattr(Multiset, rop, _rop_maker(rop))
 
