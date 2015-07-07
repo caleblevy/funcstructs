@@ -14,9 +14,9 @@ class frozendict(dict):
         return self
 
     @classmethod
-    def fromkeys(*args, **kwargs):
-        cls = args[0]
-        return cls(dict.fromkeys(*args[1:], **kwargs))
+    def fromkeys(cls, iterable, v=None):
+        """New frozendict with keys from iterable, and values set to v."""
+        return cls(dict.fromkeys(iterable, v))
 
     def __init__(*args, **kwargs):  # signature allows using `self` keyword arg
         pass  # Override dict.__init__ to avoid calling disabled update method
