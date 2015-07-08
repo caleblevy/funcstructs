@@ -1,51 +1,17 @@
 README
 ######
 
+:Author: Caleb Levy (caleb.levy@berkeley.edu)
+:Copyright: 2012-2015 Caleb Levy
+:License: MIT License
+:Project Homepage: https://github.com/caleblevy/funcstructs
+
 This is ``Funcstructs``, a collection of algorithms and data structures
 implemented in Python for exploring combinatorial problems involving
 endofunction structures.
 
 Most data structures have been tested against Python 2.7, Python 3.4, Jython
 2.7.0, PyPy 2.7 and PyPy 3.2. Some functionality requires numpy and matplotlib.
-
-
-Overview
-========
-
-Funcstructs contains five submodules.
-
-- **bases**: convenience classes used to build the core data structures. These
-  include
-
-  * ``frozendict``, an immutable dictionary
-  * ``Tuple``, a convenience wrapper for subclassing the builtin ``tuple``
-  * ``Enumerable``, a custom abstract base class for reusable generators. It is
-    an instance of ``ParamMeta``, a metaclass for adding ``__slots__`` to
-    classes using the parameters of their ``__init__`` methods.
-
-  All three account for type when testing equality, thus instances of distinct
-  subclasses will not compare equal, even with the same values.
-
-- **graphs**: objects useful for computational geometry. Currently provides a
-  ``Point`` and ``Coordinates`` type for representing isolated and ordered
-  groups of points in the 2D Cartesian coordinate plane, respectively. Also
-  contains ``Line`` class for handling line segments.
-
-  This package will hopefully become a small package to automate making pretty
-  plots of functional digraphs.
-
-  Requires ``numpy`` and ``matplotlib``.
-
-- **prototypes**: ideas under development. Prototype modules may graduate to
-  other parts of the project, or can disappear entirely. This package changes
-  regularly, thus its contents are not summarized.
-
-  Currently requires ``numpy`` and ``matplotlib``.
-
-- **structures**: the main data structures, elaborated below.
-
-- **utils**: supporting utilities. Includes basic functions for prime
-  factorization, combinatorics and iterating over subsequences.
 
 
 Available Data Structures
@@ -56,31 +22,89 @@ The key data structures are found in ``funcstructs.structures``.
 
 Multisets
 ---------
+Multiset
+    A **multiset** is a mapping from a set into the positive integers.
+    ``Multiset`` is an immutable and hashable ``frozendict`` supporting the
+    same binary operations as ``collections.Counter``.
 
-A **multiset** is a mapping from a set into the positive real integers.
-``Multiset`` is an immutable ``dict`` subclass whose objects are similar to
-``Counter`` instances. They are hashable, and used pervasively throughout
-``Funcstructs``.
+Usage
+~~~~~
+
+.. code:: python
+
+    >>> from funcstructs.structures import Multiset
+    >>> a = Multiset("abracadabra")
+    >>> b = Multiset({'a': 4, 'k': 1, 'z': 1, 'm': 1, 'l': 1})
+    >>> a
+    Multiset({'a': 5, 'r': 2, 'b': 2, 'c': 1, 'd': 1})
+
+
+    >>> a & b                           # Multiset supports the same binary
+    Multiset({'a': 4})                  # operations as Counter
+
+    >>> a - b
+    Multiset({'r': 2, 'b': 2, 'a': 1, 'c': 1, 'd': 1})
 
 
 Rooted Trees
 ------------
+RootedTree
+    Represents unlabelled, *un*ordered trees as a multiset of subtrees.
+LevelSequence
+    A **level sequence** represents an unlabelled, *ordered* tree by listing
+    the heights of its nodes in depth-first traversal order. ``LevelSequence``
+    inherits from ``tuple``.
+DominantSequence
+    A canonicalized level sequence which is lexicographically larger than the
+    level sequences of all other ordered trees with the same unordered
+    structure. Two level sequences correspond to the same unordered rooted tree
+    if and only if they have the same ``DominantSequence``.
 
-Trees play a central role in endofunction representation. **Unlabelled ordered
-trees** are represented using a ``LevelSequence``: a list of each node's height
-above the root in depth-first traversal order. Particularly important is the
-``DominantSequence`` type: a canonicalized level sequence which is the
-lexicographically largest of all orderings of an unordered tree.
+The ``rootedtrees`` module additionally provides three enumerators:
 
-The ``RootedTree`` type represents **unlabelled unordered trees** as a
-multiset of subtrees. The ``rootedtrees`` module additionally provides
-enumerators for rooted trees (``TreeEnumerator``) and **forests**
-(``ForestEnumerator``) with a fixed number of nodes based on the algorithm
-provided by T. Beyer and S. M. Hedetniemi in "Constant time generation of
-rooted trees."
+TreeEnumerator
+    Generates the dominant sequence of each unordered rooted tree on a fixed
+    number of nodes using the algorithm provided by T. Beyer and S. M.
+    Hedetniemi in "Constant time generation of rooted trees."
+ForestEnumerator
+    Generates every **forest** (a multiset of rooted trees) on a fixed number
+    of nodes.
+PartitionForests
+    Enumerates forests whose nodes are divided amongst trees with sizes of a
+    given partition.
 
-Finally, ``PartitionForests`` enumerates all forests whose nodes are divided
-amongst trees with sizes of a given partition.
+Usage
+~~~~~
+
+.. code:: python
+
+    >>> from funcstructs.structures import (
+    ...     RootedTree, LevelSequence, DominantSequence, TreeEnumerator,
+    ...     ForestEnumerator, PartitionForests
+    ... )
+
+    >>> o1 = OrderedTree([0, 1, 1, 2, 2, 3])
+    >>> o2 = OrderedTree([0, 1, 2, 2, 3, 1])
+    >>> o1 == o2
+    False
+
+    >>> d = DominantSequence(o1)
+    >>> d
+    DominantSequence([0, 1, 2, 3, 2, 1])
+    >>> d == DominantSequence(o2)
+    True
+
+    >>> RootedTree.from_levels(d)
+    RootedTree({{{{}}, {}}, {}})
+
+    >>> for d in TreeEnumerator(4):
+    ...     print(RootedTree.from_levels(d))
+    ...
+    RootedTree({{{{}}}})
+    RootedTree({{{}^2}})
+    RootedTree({{{}}, {}})
+    RootedTree({{}^3})
+
 
 
 Functions
@@ -157,7 +181,38 @@ Usage
     >>> from funcstructs.structures import *
 
 
-:Author: Caleb Levy (caleb.levy@berkeley.edu)
-:Copyright: 2012-2015 Caleb Levy
-:License: MIT License
-:Project Homepage: https://github.com/caleblevy/funcstructs
+Additional Modules
+==================
+
+Funcstructs contains 4 ancillary modules:
+
+- **bases**: convenience classes used to build the core data structures. These
+  include
+
+  * ``frozendict``, an immutable dictionary
+  * ``Tuple``, a convenience wrapper for subclassing the builtin ``tuple``
+  * ``Enumerable``, a custom abstract base class for reusable generators. It is
+    an instance of ``ParamMeta``, a metaclass for adding ``__slots__`` to
+    classes using the parameters of their ``__init__`` methods.
+
+  All three account for type when testing equality, thus instances of distinct
+  subclasses will not compare equal, even with the same values.
+
+- **graphs**: objects useful for computational geometry. Currently provides a
+  ``Point`` and ``Coordinates`` type for representing isolated and ordered
+  groups of points in the 2D Cartesian coordinate plane, respectively. Also
+  contains ``Line`` class for handling line segments.
+
+  This package will hopefully become a small package to automate making pretty
+  plots of functional digraphs.
+
+  Requires ``numpy`` and ``matplotlib``.
+
+- **prototypes**: ideas under development. Prototype modules may graduate to
+  other parts of the project, or can disappear entirely. This package changes
+  regularly, thus its contents are not summarized.
+
+  Currently requires ``numpy`` and ``matplotlib``.
+
+- **utils**: supporting utilities. Includes basic functions for prime
+  factorization, combinatorics and iterating over subsequences.
