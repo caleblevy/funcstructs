@@ -1,7 +1,7 @@
 import unittest
 from math import factorial
 
-from .. import functions, necklaces, rootedtrees, multiset
+from funcstructs.structures import functions, necklaces, rootedtrees, multiset
 
 from funcstructs.structures.functions import Endofunction
 from funcstructs.structures.conjstructs import (
