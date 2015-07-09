@@ -24,6 +24,8 @@ class frozendict(dict):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, dict(self))
 
+    __str__ = __repr__  # needed for Jython
+
     def __eq__(self, other):
         # Instances of frozendict subclasses must have same items AND
         # type to compare equal. This supports their diverse use cases as
