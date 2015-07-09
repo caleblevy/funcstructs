@@ -3,7 +3,7 @@ import unittest
 from funcstructs.structures import multiset
 from funcstructs.utils import combinat
 
-from ..polynomials import (
+from funcstructs.prototypes.polynomials import (
     monomial_symmetric_polynomial,
     FOIL,
     MultisetPolynomial,

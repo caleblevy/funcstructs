@@ -1,6 +1,6 @@
 import unittest
 
-from .. import frozendict
+from funcstructs.bases import frozendict
 
 
 class FrozendictTests(unittest.TestCase):

@@ -3,9 +3,9 @@ import math
 
 from PADS import IntegerPartitions
 
-from .. import functions, multiset
+from funcstructs.structures import functions, multiset
 
-from ..rootedtrees import (
+from funcstructs.structures.rootedtrees import (
     RootedTree,
     LevelSequence,
     DominantSequence,

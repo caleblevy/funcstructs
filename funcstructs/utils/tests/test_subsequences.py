@@ -1,6 +1,6 @@
 import unittest
 
-from ..subsequences import (
+from funcstructs.utils.subsequences import (
     increasing, decreasing, nonincreasing, nondecreasing,
     startswith,
     endswith

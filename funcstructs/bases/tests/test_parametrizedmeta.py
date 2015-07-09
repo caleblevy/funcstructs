@@ -4,7 +4,11 @@ from abc import ABCMeta
 from collections import Iterable
 from itertools import chain, product
 
-from ..parametrizedmeta import hascustominit, ParamMeta, ImmutableStruct
+from funcstructs.bases.parametrizedmeta import (
+    hascustominit,
+    ParamMeta,
+    ImmutableStruct
+)
 
 
 def newclass(mcls=type, name="newclass", bases=(), **special):

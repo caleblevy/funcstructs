@@ -1,6 +1,6 @@
 import unittest
 
-from .. import Tuple
+from funcstructs.bases import Tuple
 
 
 class TupleTests(unittest.TestCase):

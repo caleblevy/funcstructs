@@ -2,7 +2,7 @@ import unittest
 
 from funcstructs.utils.combinat import prod
 
-from ..factorization import prime_factorization, divisors
+from funcstructs.utils.factorization import prime_factorization, divisors
 
 
 class FactorizationTests(unittest.TestCase):

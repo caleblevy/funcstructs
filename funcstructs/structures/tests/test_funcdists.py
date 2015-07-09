@@ -4,7 +4,7 @@ import numpy as np
 
 from funcstructs.utils import combinat
 
-from ..funcdists import (
+from funcstructs.structures.funcdists import (
     iterdist_brute,
     iterdist_funcstruct, iterdist,
     imagedist_composition, imagedist_recurse,

@@ -2,9 +2,9 @@ import unittest
 import itertools
 import math
 
-from .. import rootedtrees
+from funcstructs.structures import rootedtrees
 
-from ..labellings import (
+from funcstructs.structures.labellings import (
     equipartitions, equipartition_count,
     ordered_divisions, ordered_division_count,
     set_partitions, set_partition_count,

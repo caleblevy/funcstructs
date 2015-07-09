@@ -1,9 +1,9 @@
 import unittest
 from math import factorial
 
-from ..conjstructs import Funcstruct
+from funcstructs.structures.conjstructs import Funcstruct
 
-from ..functions import (
+from funcstructs.structures.functions import (
     Function, Bijection, Endofunction, Permutation,
     identity, rangefunc, rangeperm, randfunc, randperm, randconj,
     Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup

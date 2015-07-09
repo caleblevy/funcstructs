@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from ..coordinates import Point
-from ..line import *
+from funcstructs.graphs.coordinates import Point
+from funcstructs.graphs.line import *
 
 
 def lsort(l): return sorted([(l.p1.x, l.p1.y), (l.p2.x, l.p2.y)])

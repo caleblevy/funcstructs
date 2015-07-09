@@ -4,7 +4,11 @@ from PADS import Lyndon
 
 from funcstructs.utils import factorization
 
-from ..necklaces import periodicity, Necklace, FixedContentNecklaces
+from funcstructs.structures.necklaces import (
+    periodicity,
+    Necklace,
+    FixedContentNecklaces
+)
 
 
 class PeriodicityTest(unittest.TestCase):

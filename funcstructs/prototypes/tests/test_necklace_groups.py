@@ -1,7 +1,10 @@
 import unittest
 
 from funcstructs.utils import combinat
-from ..necklace_groups import count_by_period, necklace_groups_by_period_combo
+from funcstructs.prototypes.necklace_groups import (
+    count_by_period,
+    necklace_groups_by_period_combo
+)
 
 
 class NecklaceGroupTests(unittest.TestCase):

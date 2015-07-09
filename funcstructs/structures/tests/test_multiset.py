@@ -3,7 +3,7 @@ import random
 from collections import Counter
 from itertools import product
 
-from ..multiset import Multiset
+from funcstructs.structures.multiset import Multiset
 
 
 class MultisetTests(unittest.TestCase):

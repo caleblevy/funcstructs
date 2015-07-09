@@ -1,6 +1,6 @@
 import unittest
 
-from ..productrange import productrange, rev_range
+from funcstructs.utils.productrange import productrange, rev_range
 
 
 class ProductrangeTest(unittest.TestCase):

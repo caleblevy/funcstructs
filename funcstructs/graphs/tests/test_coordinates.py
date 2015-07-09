@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from ..coordinates import *
+from funcstructs.graphs.coordinates import *
 
 
 class Location2DTests(unittest.TestCase):

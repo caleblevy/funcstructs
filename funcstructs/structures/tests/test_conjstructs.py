@@ -3,8 +3,11 @@ from math import factorial
 
 from .. import functions, necklaces, rootedtrees, multiset
 
-from ..functions import Endofunction
-from ..conjstructs import Funcstruct, EndofunctionStructures
+from funcstructs.structures.functions import Endofunction
+from funcstructs.structures.conjstructs import (
+    Funcstruct,
+    EndofunctionStructures
+)
 
 
 class FuncstructTests(unittest.TestCase):
