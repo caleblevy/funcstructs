@@ -243,11 +243,12 @@ class Endofunction(Function):
             card_prev = card
         return tuple(cardinalities)
 
-    def enumerate_cycles(self):
-        """Generate f's cycles"""
+    def cycles(self):
+        """Return the set of f's cycles"""
         tried = set()
         cyclic = set()
         remaining = set(self.domain)
+        cycles = []
         while remaining:
             x = remaining.pop()
             path = [x]
@@ -259,12 +260,9 @@ class Endofunction(Function):
             if x not in cyclic:
                 cycle = path[path.index(x)+1:]
                 if cycle:
-                    yield cycle
+                    cycles.append(cycle)
                     cyclic.update(cycle)
-
-    def cycles(self):
-        """Return the set of f's cycles"""
-        return frozenset(map(tuple, self.enumerate_cycles()))
+        return frozenset(map(tuple, cycles))
 
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
