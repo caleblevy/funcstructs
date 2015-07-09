@@ -4,8 +4,13 @@ FUNCSTRUCTS
 A collection of algorithms and data structures implemented in Python for
 exploring combinatorial problems involving endofunction structures.
 
-``funcstructs`` has been tested against Python 2.7 & 3.4, PyPy 2.7 & 3.2 and
-Jython 2.7.
+
+Features
+========
+- All data structures in ``funcstructs`` are immutable and hashable
+- Code is thoroughly tested: about 1/3 to 1/2 of project is tests
+- Works on many implementations: Python 2.7, 3.4, PyPy 2.7, 3.2 and Jython 2.7.
+- Contains several original algorithms you won't find anywhere else.
 
 
 Overview
@@ -131,8 +136,8 @@ Functions
 ``Function``
     Mathematical **functions** are correspondences between sets. A ``Function``
     object is an associative array which maps the set of its *keys* to the set
-    of *values*. Functions objects may be composed using the standard
-    multiplication syntax and are evaluated by calling.
+    of *values*. Function may be composed using the standard multiplication
+    syntax and are evaluated by calling.
 ``Endofunction``
     A ``Function`` whose values are a subset of its keys. They can be iterated
     to produce functional digraphs consisting of rooted trees connected in
@@ -158,6 +163,10 @@ The functions module also provides enumerators corresponding to each of the
     ... )
     
     >>> f = Function(a=1, b=2, c=2)                           # Function
+    >>> f('a')
+    1
+    >>> f('b') + f('c')
+    4
     >>> g = Function({1: 'a', 2: 'a', 3: 'a'})
     >>> f * g
     Function({0: 1, 1: 1, 2: 1})
