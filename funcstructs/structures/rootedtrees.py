@@ -111,7 +111,7 @@ class LevelSequence(bases.Tuple):
             yield parent
             grafting_point[level-root] = node
 
-    def branches(self):
+    def subtrees(self):
         """Return the subtrees attached to the root."""
         for branch in subsequences.startswith(self[1:], self[0]+1):
             # Bypass any constructor checks; since the tree is verified,
@@ -120,7 +120,7 @@ class LevelSequence(bases.Tuple):
 
     def traverse_map(self, mapping=list):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
-        return mapping(tree.traverse_map(mapping) for tree in self.branches())
+        return mapping(tree.traverse_map(mapping) for tree in self.subtrees())
 
     def map_labelling(self, labels=None):
         """Viewing the ordered level sequence as an implicit mapping of each
@@ -336,7 +336,7 @@ class ForestEnumerator(bases.Enumerable):
         enumerate all rooted trees on n+1 nodes, chopping them at the base.
         """
         for tree in TreeEnumerator(self.n+1, -1):
-            yield Multiset(tree.branches())
+            yield Multiset(tree.subtrees())
 
     def cardinality(self):
         return TreeEnumerator(self.n+1).cardinality()

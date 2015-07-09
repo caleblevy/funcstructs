@@ -172,7 +172,7 @@ def branch_inds(tree):
 def branch_groups(tree):
     """Yield, in order, tree's unique branches, and all nodes to which an
     instance of that branch is attached."""
-    branches, mults = Multiset(tree.branches()).sort_split()
+    branches, mults = Multiset(tree.subtrees()).sort_split()
     branches = iter(branches[::-1])
     mults = reversed(mults)
     indset = branch_inds(tree)[::-1]
