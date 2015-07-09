@@ -8,18 +8,21 @@ class frozendict(dict):
 
     __slots__ = ()
 
+    # One small disadvantage to Werkzeug's ImmutableDict: technically you can
+    # mutate it using __init__; not the case here.
+
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
         self = dict.__new__(args[0])
         dict.__init__(self, *args[1:], **kwargs)
         return self
 
+    def __init__(*args, **kwargs):  # signature allows using `self` keyword arg
+        pass  # Override dict.__init__ to avoid calling disabled update method
+
     @classmethod
     def fromkeys(cls, iterable, v=None):
         """New frozendict with keys from iterable, and values set to v."""
         return cls(dict.fromkeys(iterable, v))
-
-    def __init__(*args, **kwargs):  # signature allows using `self` keyword arg
-        pass  # Override dict.__init__ to avoid calling disabled update method
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, dict(self))
