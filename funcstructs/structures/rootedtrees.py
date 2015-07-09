@@ -219,15 +219,13 @@ class RootedTree(Multiset):
     __slots__ = ()
 
     def __new__(cls, subtrees=()):
+        if isinstance(subtrees, LevelSequence):
+            return subtrees.traverse_map(cls)
         self = super(RootedTree, cls).__new__(cls, subtrees)
         if not all(isinstance(tree, cls) for tree in self.keys()):
-            raise TypeError("subtrees must be rooted trees")
+            raise TypeError(
+                "input must be list of RootedTrees or a LevelSequence")
         return self
-
-    @classmethod
-    def from_levels(cls, levels):
-        """Return the unordered tree corresponding to the level sequence."""
-        return LevelSequence(levels).traverse_map(cls)
 
     def __bool__(self):
         return True  # All trees have roots, thus aren't empty

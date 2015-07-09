@@ -85,11 +85,11 @@ Additionally, there are three enumerators:
     >>> d == DominantSequence(o2)
     True
 
-    >>> RootedTree.from_levels(d)
+    >>> RootedTree(d)
     RootedTree({{{{}}, {}}, {}})
 
     >>> for d in TreeEnumerator(4):
-    ...     print(RootedTree.from_levels(d))
+    ...     print(RootedTree(d))
     ...
     RootedTree({{{{}}}})
     RootedTree({{{}^2}})

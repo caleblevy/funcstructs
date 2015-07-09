@@ -70,16 +70,16 @@ class TreeEnumerationTests(unittest.TestCase):
             nfac = math.factorial(n)
             for tree in TreeEnumerator(n):
                 ordered_count += nfac//tree.degeneracy()
-                rooted_count += nfac//RootedTree.from_levels(tree).degeneracy()
+                rooted_count += nfac//RootedTree(tree).degeneracy()
             self.assertEqual(n**(n-1), ordered_count)
             self.assertEqual(n**(n-1), rooted_count)
 
 
 class RootedTreeTests(unittest.TestCase):
 
-    L1 = [1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5]
-    L2 = range(1, 5)
-    L3 = [1, 2, 2, 3, 2, 3, 4, 2, 3, 4, 5]
+    L1 = LevelSequence([1, 2, 3, 4, 5, 5, 4, 5, 5, 2, 3, 4, 5, 5, 4, 5, 5])
+    L2 = LevelSequence(range(1, 5))
+    L3 = LevelSequence([1, 2, 2, 3, 2, 3, 4, 2, 3, 4, 5])
     R = RootedTree([
         RootedTree(),
         RootedTree(),
@@ -90,9 +90,9 @@ class RootedTreeTests(unittest.TestCase):
 
     def test_str(self):
         """Ensure Unordered trees are properly formatted."""
-        T = RootedTree.from_levels(self.L1)
-        T2 = RootedTree.from_levels(self.L2)
-        T3 = RootedTree.from_levels(self.L3)
+        T = RootedTree(self.L1)
+        T2 = RootedTree(self.L2)
+        T3 = RootedTree(self.L3)
         self.assertEqual(str(T), "RootedTree({{{{{}^2}^2}}^2})")
         self.assertEqual(str(T2), "RootedTree({{{{}}}})")
         # Test correctness of dominance ordering
@@ -101,12 +101,12 @@ class RootedTreeTests(unittest.TestCase):
     def test_len(self):
         """Test len(RootedTree) returns correct number of nodes"""
         for l in [self.L1, self.L2, self.L3]:
-            self.assertEqual(len(l), len(RootedTree.from_levels(l)))
+            self.assertEqual(len(l), len(RootedTree(l)))
         self.assertEqual(5, len(self.R))
 
     def test_repr(self):
         """Test repr(Tree) == Tree for various trees."""
-        for rt in map(RootedTree.from_levels, [self.L1, self.L2, self.L3]):
+        for rt in map(RootedTree, [self.L1, self.L2, self.L3]):
             self.assertEqual(rt, eval(repr(rt)))
         self.assertEqual(self.R, eval(repr(self.R)))
 
@@ -115,7 +115,7 @@ class RootedTreeTests(unittest.TestCase):
         for l in [self.L1, self.L2, self.L3]:
             self.assertEqual(
                 DominantSequence(l),
-                RootedTree.from_levels(l).ordered_form()
+                RootedTree(l).ordered_form()
             )
 
 
@@ -199,11 +199,11 @@ class LevelSequenceTests(unittest.TestCase):
         ml = list(T.map_labelling())
         tm = T.traverse_map()
         d = DominantSequence(T).degeneracy()
-        rt = RootedTree.from_levels(T)
+        rt = RootedTree(T)
         for i in range(-7, 7):
             ot = LevelSequence([t-i for t in T])
             self.assertSequenceEqual(bft, list(ot.breadth_first_traversal()))
             self.assertSequenceEqual(ml, list(ot.map_labelling()))
             self.assertEqual(tm, ot.traverse_map())
             self.assertEqual(d, DominantSequence(ot).degeneracy())
-            self.assertEqual(rt, RootedTree.from_levels(ot))
+            self.assertEqual(rt, RootedTree(ot))
