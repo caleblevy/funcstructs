@@ -138,7 +138,7 @@ def _cycle_permutations(cycle):
     for p in permutations(cycle):
         # The cycles are necklaces: they start with the minimal element, and
         # all elements are unique, hence they are lexicographically minimal.
-        yield Necklace((start, )+p, preordered=True)
+        yield tuple.__new__(Necklace, (start, )+p)
 
 
 def cycle_labellings(partition, S=None):

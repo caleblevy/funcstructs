@@ -7,7 +7,7 @@ Caleb Levy, 2014 and 2015.
 import fractions
 import functools
 
-from PADS import Lyndon
+from PADS.Lyndon import SmallestRotation
 
 from funcstructs import bases
 from funcstructs.utils import combinat, factorization
@@ -58,7 +58,7 @@ class Necklace(bases.Tuple):
 
     __slots__ = ()
 
-    def __new__(cls, strand, preordered=False):
+    def __new__(cls, word):
         """Initialize the necklace. Items in the necklace must be hashable
         (immutable), otherwise the equivalence class could change
         dynamically.
@@ -67,9 +67,7 @@ class Necklace(bases.Tuple):
         Input content is normalized to smallest rotation unless preordered is
         set to true. Only use this option if you can (mathematically) prove
         that your input is in lexicographically smallest form."""
-        if not(preordered or isinstance(strand, cls)):
-            strand = Lyndon.SmallestRotation(strand)
-        return super(Necklace, cls).__new__(cls, strand)
+        return super(Necklace, cls).__new__(cls, SmallestRotation(word))
 
     def period(self):
         return periodicity(self)
@@ -166,4 +164,4 @@ class FixedContentNecklaces(bases.Enumerable):
         for strand in self.sfc():
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
-            yield Necklace((self.elements[i] for i in strand), preordered=True)
+            yield tuple.__new__(Necklace, (self.elements[i] for i in strand))
