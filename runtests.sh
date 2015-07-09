@@ -1,12 +1,38 @@
 ./clearpycache.sh
-echo "python tests"
+echo "Running tests with the following implementations:"
+
+echo ""
+echo "Python"
+echo "------"
 python -m unittest discover
-echo "python3 tests"
+
+echo ""
+echo "Python3"
+echo "-------"
 python3 -m unittest discover
-echo "pypy tests"
-pypy funcstructs/test_runner.py
-echo "pypy3 tests"
-pypy3 funcstructs/test_runner.py
-echo "jython tests"
-jython funcstructs/test_runner.py
+
+echo ""
+echo "PyPy"
+echo "----"
+pypy tests/
+
+echo ""
+echo "PyPy3"
+echo "-----"
+pypy3 tests/
+
+echo ""
+echo "Jython 2.7"
+echo "----------"
+jython tests/
+
 ./clearpycache.sh
+
+echo "Runing pep8 style checker on:"
+echo "-----------------------------"
+echo ""
+echo "funcstructs/"
+pep8 funcstructs/
+echo "tests/"
+pep8 tests/
+echo ""
