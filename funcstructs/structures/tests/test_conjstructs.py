@@ -1,14 +1,15 @@
 import unittest
 from math import factorial
 
-from .. import functions, necklaces, rootedtrees
+from .. import functions, necklaces, rootedtrees, multiset
 
+from ..functions import Endofunction
 from ..conjstructs import Funcstruct, EndofunctionStructures
 
 
 class FuncstructTests(unittest.TestCase):
 
-    s = Funcstruct._from_cycles([
+    s = multiset.Multiset.__new__(Funcstruct, [
         necklaces.Necklace([
             rootedtrees.DominantSequence([0, 1, 2]),
             rootedtrees.DominantSequence([0, 1, 1])

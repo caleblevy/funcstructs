@@ -73,13 +73,8 @@ class Funcstruct(Multiset):
             cycles.append(Necklace(trees))
         return super(Funcstruct, cls).__new__(cls, cycles)
 
-    @classmethod
-    def _from_cycles(cls, cycles):
-        return super(Funcstruct, cls).__new__(cls, cycles)
-
     def __repr__(self):
-        return super(Funcstruct, self).__repr__().replace(
-            self.__class__.__name__, self.__class__.__name__+"._from_cycles")
+        return '%s(%s)' % (self.__class__.__name__, self.func_form())
 
     def __len__(self):
         """Number of nodes in the structure."""
@@ -164,7 +159,7 @@ def cycle_type_funcstructs(n, cycle_type):
         for c, l, m in zip(composition, lengths, multiplicities):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in product(*cycle_groups):
-            yield Funcstruct._from_cycles(chain(*bundle))
+            yield Multiset.__new__(Funcstruct, chain(*bundle))
 
 
 def integer_funcstructs(n):
