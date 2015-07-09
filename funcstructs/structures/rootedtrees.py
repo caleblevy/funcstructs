@@ -9,7 +9,7 @@ from math import factorial
 from funcstructs import bases
 from funcstructs.utils import combinat, factorization, subsequences
 
-from . import multiset
+from funcstructs.structures.multiset import Multiset, unordered_product
 
 __all__ = [
     "LevelSequence", "DominantSequence", "RootedTree",
@@ -118,10 +118,6 @@ class LevelSequence(bases.Tuple):
             # all of its subtrees must be as well.
             yield tuple.__new__(self.__class__, branch)
 
-    def chop(self):
-        """Return a multiset of the input tree's main subbranches."""
-        return multiset.Multiset(self.branches())
-
     def traverse_map(self, mapping=list):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
         return mapping(tree.traverse_map(mapping) for tree in self.branches())
@@ -212,7 +208,7 @@ class DominantSequence(LevelSequence):
         return deg
 
 
-class RootedTree(multiset.Multiset):
+class RootedTree(Multiset):
     """An unlabelled, unordered rooted tree
 
     A RootedTree is a recursive data structure defined by the multiset
@@ -340,7 +336,7 @@ class ForestEnumerator(bases.Enumerable):
         enumerate all rooted trees on n+1 nodes, chopping them at the base.
         """
         for tree in TreeEnumerator(self.n+1, -1):
-            yield tree.chop()
+            yield Multiset(tree.branches())
 
     def cardinality(self):
         return TreeEnumerator(self.n+1).cardinality()
@@ -350,10 +346,10 @@ class PartitionForests(bases.Enumerable):
     """Collections of rooted trees with sizes specified by partitions."""
 
     def __init__(self, partition):
-        self.partition = multiset.Multiset(partition)
+        self.partition = Multiset(partition)
 
     def __iter__(self):
-        return multiset.unordered_product(self.partition, TreeEnumerator)
+        return unordered_product(self.partition, TreeEnumerator)
 
     def cardinality(self):
         l = 1
