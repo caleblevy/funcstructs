@@ -1,15 +1,17 @@
+set -e
+
 ./clearpycache.sh
 echo "Running tests with the following implementations:"
 
 echo ""
 echo "Python"
 echo "------"
-python -m unittest discover
+python tests/
 
 echo ""
 echo "Python3"
 echo "-------"
-python3 -m unittest discover
+python3 tests/
 
 echo ""
 echo "PyPy"
@@ -26,8 +28,7 @@ echo "Jython 2.7"
 echo "----------"
 jython tests/
 
-./clearpycache.sh
-
+echo ""
 echo "Runing pep8 style checker on:"
 echo "-----------------------------"
 echo ""
@@ -35,4 +36,9 @@ echo "funcstructs/"
 pep8 funcstructs/
 echo "tests/"
 pep8 tests/
+echo ""
+
+./clearpycache.sh
+echo ""
+echo "All Good!"
 echo ""
