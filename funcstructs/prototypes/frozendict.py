@@ -5,6 +5,8 @@ Caleb Levy, 2015.
 
 from __future__ import print_function
 
+from collections import Mapping as _Mapping
+
 __all__ = ["frozendict"]
 
 
@@ -180,8 +182,10 @@ else:
     # below without the exec and quotes, so we may trust it as such.
     exec("class frozendict(object, metaclass=_FrozendictMeta): __doc__ = _fd")
 
+_Mapping.register(frozendict)
 
-del _frozendict_method, _FrozendictMeta, _fd
+
+del _Mapping, _frozendict_method, _FrozendictMeta, _fd
 
 
 # TODO: Investigate the following:
