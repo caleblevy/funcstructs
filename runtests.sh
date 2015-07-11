@@ -3,13 +3,12 @@ set -e
 ./clearpycache.sh
 
 echo ""
-echo "Runing pep8 style checker on:"
+echo "Checking PEP8 Compliance:"
 echo "-----------------------------"
 echo ""
-echo "funcstructs/"
 pep8 funcstructs/
-echo "tests/"
 pep8 tests/
+echo "OK"
 echo ""
 
 echo "Running tests with the following implementations:"
