@@ -79,33 +79,33 @@ def _FrozendictMeta(name, bases, dct):
 
     fd_cls.fromkeys = classmethod(fromkeys)
 
-    # All of dict's NON-mutating methods.
+    # All of dict's non-mutating methods, execpt:
 
-    # We exclude __del__ since (hopefully) the gc will be unaware that there is
+    # __del__: since (hopefully) the gc will be unaware that there is
     # a slot without a member descriptor; it should just see a C struct and
     # delete each field. When it sees the internal dict is one of those, it
     # then deletes the dict. (TODO: test the above on different
     # implementations, putting garbage collector benchmarks in the tests.)
 
-    # We exclude __init__ since frozendict is not a dict, and the internal dict
+    # __init__: since frozendict is not a dict, and the internal dict
     # is already initialized inside __new__.
 
-    # Exclude __repr__, since we want to wrap it to add "frozendict" around the
+    # __repr__: since we want to wrap it to add "frozendict" around the
     # dict string, so we can't just return dict.__repr__. We exclude __format__
     # and __str__ since they will depend on __repr__.
 
-    # Exclude __setattr__ and __delattr__ since (I believe) those would apply
+    # __setattr__ and __delattr__: since (I believe) those would apply
     # to the internal dict, and just raise AttributeErrors anyway. (TODO:
     # verify this).
 
-    # Exclude the comparison operations since (1) in python3 they just raise
+    # Comparison Operations: since (1) in python3 they just raise
     # TypeErrors, which is equally achievable by no giving them
     # comparison operators in the first place, (2) they should probably have
     # done this in python2 anyway, and (3) the presence of these methods
     # annoyingly prevents using functools.total_ordering in case you DO want a
     # subclass which overrides them, while adding no functionality.
 
-    # Exclude __reduce__ and __reduce_ex__ because I am not sure how dict
+    # __reduce__ and __reduce_ex__: because I am not sure how dict
     # pickling works, whether the "frozenness" of the dict should impact it,
     # and how I implement whatever I end up deciding to do.
     # (TODO: rectify this bout of laziness on my part).
@@ -143,9 +143,8 @@ def _FrozendictMeta(name, bases, dct):
     for method in dict_methods:
         setattr(fd_cls, method, _frozendict_method(method, map_get))
 
-    # Define here to make all base methods independant
-
     def __hash__(self):
+        # default hash independent of overridden items
         return hash(frozenset(map_get(self).items()))
     fd_cls.__hash__ = __hash__
 
