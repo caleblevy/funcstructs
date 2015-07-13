@@ -42,9 +42,18 @@ _map_get = _mapping.__get__
 def _frozendict_method(name, map_get):
     """Make wrapper method to access frozendict's internal dict."""
     dict_method = getattr(dict, name)
-
-    def method(self, *args, **kwargs):
-        return dict_method(map_get(self), *args, **kwargs)
+    if name in {'__getitem__', 'has_key'}:
+        def method(self, key):
+            return dict_method(map_get(self), key)
+    elif name == '__contains__':
+        def method(self, item):
+            return dict_method(map_get(self), item)
+    elif name == 'get':
+        def method(self, key, default=None):
+            return dict_method(map_get(self), key, default)
+    else:
+        def method(self):
+            return dict_method(map_get(self))
     method.__name__ = name
     method.__doc__ = dict_method.__doc__
     return method
@@ -71,9 +80,9 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     (*) Under certain circumstances, it may mutate. See comments in __eq__.
     """
 
-    # Wrap internal setter inside of __new__
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
         self = super(fd_cls, args[0]).__new__(args[0])
+        # Wrap internal setter inside of __new__
         map_set(self, dict(*args[1:], **kwargs))
         return self
     fd_cls.__new__ = staticmethod(__new__)
@@ -236,9 +245,11 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     __repr__.__doc__ = dict.__repr__.__doc__
     fd_cls.__repr__ = __repr__
 
+    dict_items = getattr(dict, 'iteritems', dict.items)
+
     def __hash__(self):
         # default hash independent of overridden items
-        return hash(frozenset(map_get(self).items()))
+        return hash(frozenset(dict_items(map_get(self))))
     fd_cls.__hash__ = __hash__
 
 
