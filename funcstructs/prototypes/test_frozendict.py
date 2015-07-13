@@ -139,6 +139,14 @@ class FrozendictTests(unittest.TestCase):
         self.assertEqual(c, ['a', 'b', 'b', 'b'])
         self.assertEqual(Counter(c), dict(mset))
 
+    def test_copy(self):
+        """Test that frozendict copies internal dict."""
+        a = frozendict({1: 'a', 2: 'b'})
+        b = a.copy()
+        self.assertEqual(a, b)
+        b[1] = 'a'
+        self.assertEqual({1: 'a', 2: 'b'}, a)  # test a independent of copy
+
 
 if __name__ == '__main__':
     unittest.main()
