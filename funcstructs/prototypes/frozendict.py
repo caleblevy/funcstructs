@@ -14,11 +14,29 @@ Caleb Levy, 2015.
 # If the above did not deter you, I welcom you to learn the twisted way I made
 # an immutable python dict.
 
-from __future__ import print_function
-
 from collections import Mapping as _Mapping
 
 __all__ = ["frozendict"]
+
+
+class frozendict(object):
+    """Dictionary with no mutating methods. The values themselves, as
+    with tuples, may still be mutable. If all of frozendict's values
+    are hashable, then so is frozendict."""
+
+    __slots__ = '_mapping'  # allocate slot for iternal dict
+
+
+_mapping = frozendict._mapping  # store reference to descriptor
+del frozendict._mapping  # destroy external access to the mapping
+del frozendict.__slots__  # make it look like a builtin type
+
+# Since the member descriptor's "__set__" and "__get__" methods are
+# themselves (method) descriptors, a new wrapper for them is generated
+# each time they are called. Store references to them locally to avoid
+# this step.
+_map_set = _mapping.__set__
+_map_get = _mapping.__get__
 
 
 def _frozendict_method(name, map_get):
@@ -32,30 +50,18 @@ def _frozendict_method(name, map_get):
     return method
 
 
-# Make a function instead of a type so that it does not show up in
-# type.__subclasses__(type). I want frozendict to appear like a builtin class,
-# which means not exposing implementation details; we don't want spurious
-# metaclasses lying around.
-#
-# (In theory, once we run "del _FrozendictMeta", there should be no further
-# references to it, whether it was a type or a function, since we explicitly
-# construct frozendict using "type" anyway. However, I have much less faith in
-# the garbage collector's ability to deal with metaclasses than with
-# functions, since the latter situation comes up far more often than the
-# former, meaning the gc should be tuned to deal with functions quite well.)
-def _FrozendictMeta(name, bases, dct):
-    """Metaclass helper to form a frozen dictionary class.
+def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
+    """Helper in setting the attributes of the frozen dictionary class.
 
-    _FrozendictMeta allocates a single slot in the template class to
-    hold the internal mapping, and then removes that slot's member
-    descriptor from the class dict, while retaining a reference to it
-    in the function body.
+    `frozendict` provides a single slot to hold a mapping internally. We have
+    removed the slot's member descriptor from the class dict, and retained a
+    private reference to it in the module body.
 
-    It creates wrappers for each of the builtin dict's non-mutating
-    methods which access the internal dict using the descriptor.
-    Upon returning, all user-accessible references to the descriptor are
-    destroyed, leaving no public mechanism to alter the internal dict. (*)
-    The resulting class is thus fully immutable.
+    _FrozendictHelper creates wrappers for the builtin `dict`'s
+    non-mutating methods; they acces `frozendict`'s internal mapping
+    using the private descriptor. Since all access is "guarded" by
+    these non-mutating methods, there is no public mechanism to alter
+    the internal dict. (*) `frozendict` is thus truly immutable.
 
     Note: The process of wrapping these methods provides (IMHO) a nice
     benefit: all methods (except __eq__ and __ne__) are guaranteed to be
@@ -64,18 +70,6 @@ def _FrozendictMeta(name, bases, dct):
 
     (*) Under certain circumstances, it may mutate. See comments in __eq__.
     """
-    dct['__slots__'] = '_mapping'  # allocate slot for iternal dict
-    fd_cls = type(name, bases, dct)  # make template class
-    _mapping = fd_cls._mapping  # store reference to descriptor
-    del fd_cls._mapping  # destroy external access to the mapping
-    del fd_cls.__slots__  # make it look like a builtin type
-
-    # Since the member descriptor's "__set__" and "__get__" methods are
-    # themselves (method) descriptors, a new wrapper for them is generated each
-    # time they are called. Store references to them locally to avoid this
-    # step.
-    map_set = _mapping.__set__
-    map_get = _mapping.__get__
 
     # Wrap internal setter inside of __new__
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
@@ -247,37 +241,17 @@ def _FrozendictMeta(name, bases, dct):
         return hash(frozenset(map_get(self).items()))
     fd_cls.__hash__ = __hash__
 
-    return fd_cls
 
-
-# Must define __doc__ at class creation time sice class docs are not writeable
-_fd = \
-    """Dictionary with no mutating methods. The values themselves, as
-    with tuples, may still be mutable. If all of frozendict's values
-    are hashable, then so is frozendict."""
-
-# Declare in a class statement for any metaclass attributes added to the class
-# (i.e. cls.__qualname__), and any other nicities added by (C)Python.
-if hasattr(dict, 'viewkeys'):
-    class frozendict(object):
-        __metaclass__ = _FrozendictMeta
-        __doc__ = _fd
-    del frozendict.__metaclass__
-else:
-    # six.with_metaclass does not work with functions. Instead we exec it, as
-    # there is no other way around a python 2 SyntaxError, which would be
-    # raised at *parse* time, before a try-except block can be executed to
-    # catch it.
-    #
-    # Note that we are exec-ing a string literal with no variables or
-    # string substitutions. It is thus equivalent to running the line
-    # below without the exec and quotes, so we may trust it as such.
-    exec("class frozendict(object, metaclass=_FrozendictMeta): __doc__ = _fd")
-
+_FrozendictHelper(frozendict)
 _Mapping.register(frozendict)
 
 
-del _Mapping, _frozendict_method, _FrozendictMeta, _fd
+del _Mapping
+del _frozendict_method
+del _FrozendictHelper
+del _mapping
+del _map_set
+del _map_get
 
 
 # TODO: Investigate the following:
