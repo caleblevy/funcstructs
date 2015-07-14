@@ -78,7 +78,7 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     """Add wrappers for `dict`'s methods to frozendict."""
 
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
-        self = super(fd_cls, args[0]).__new__(args[0])
+        self = object.__new__(args[0])
         # Wrap internal setter inside of __new__
         map_set(self, dict(*args[1:], **kwargs))
         return self
@@ -231,8 +231,10 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     __ne__.__doc__ = dict.__ne__.__doc__
     fd_cls.__ne__ = __ne__
 
+    dict_repr = dict.__repr__
+
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, map_get(self))
+        return "%s(%s)" % (self.__class__.__name__, dict_repr(map_get(self)))
     __repr__.__doc__ = dict.__repr__.__doc__
     fd_cls.__repr__ = __repr__
 
