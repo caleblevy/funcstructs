@@ -1,22 +1,37 @@
-"""Frozen dictionary.
+"""Frozen dictionary using a proxy pattern.
 
 Caleb Levy, 2015.
 """
 
-# For those about to read what follows, I give the following suggestion: you
-# should assume that this module defines an immutable dictionary called
-# "frozendict" which uses the Mapping class from the collections module,
-# overrides the appropriate methods, and call it a day.
-#
-# THIS IS DEFINITELY NOT TRUE, but you may sleep better tonight if you simply
-# close this file and pretend that's what I did.
-#
-# If the above did not deter you, I welcom you to learn the twisted way I made
-# an immutable python dict.
-
 from collections import Mapping as _Mapping
 
 __all__ = ["frozendict"]
+
+# frozendict is essentially a pure-python implementation of a
+# MappingProxyType (python3) or DictProxyType (python2).
+#
+# First we create frozendict with a single slot to hold a mapping
+# internally. We then remove the slot's member descriptor from the class
+# dict, and retain a private reference to it in the module body.
+#
+# _FrozendictHelper creates wrappers for the builtin dict's
+# non-mutating methods which acces frozendict's internal mapping using
+# the private descriptor. Since all access is "guarded" by these
+# non-mutating methods, there is no public mechanism to alter the
+# internal dict. (*) frozendict is thus truly immutable.
+#
+# Using a proxy pattern provides a nice benefit: all methods (with the
+# exception of __ne__, which is the negation of __eq__) are guaranteed to
+# be totally independent; i.e. we can override any combination of
+# methods, and the remaining ones will be unaffected. This holds true
+# regardless of any implicit relationships between the builtin dict's
+# methods, giving consistent cross-platform behavior.
+#
+# The main drawback is the convoluted code; since frozendict reflects
+# MappingProxyType in design, its code ends up looking similar to CPython:
+# define a type struct referencing another object and bolt on methods for it.
+#
+# (*) Under certain circumstances, it may mutate. See comments in __eq__.
 
 
 class frozendict(object):
@@ -60,25 +75,7 @@ def _frozendict_method(name, map_get):
 
 
 def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
-    """Helper in setting the attributes of the frozen dictionary class.
-
-    `frozendict` provides a single slot to hold a mapping internally. We have
-    removed the slot's member descriptor from the class dict, and retained a
-    private reference to it in the module body.
-
-    _FrozendictHelper creates wrappers for the builtin `dict`'s
-    non-mutating methods; they acces `frozendict`'s internal mapping
-    using the private descriptor. Since all access is "guarded" by
-    these non-mutating methods, there is no public mechanism to alter
-    the internal dict. (*) `frozendict` is thus truly immutable.
-
-    Note: The process of wrapping these methods provides (IMHO) a nice
-    benefit: all methods (except __eq__ and __ne__) are guaranteed to be
-    totally independent, regardless of any internal relationships
-    between dict methods on the python implementation.
-
-    (*) Under certain circumstances, it may mutate. See comments in __eq__.
-    """
+    """Add wrappers for `dict`'s methods to frozendict."""
 
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
         self = super(fd_cls, args[0]).__new__(args[0])
@@ -163,71 +160,65 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     for method in dict_methods:
         setattr(fd_cls, method, _frozendict_method(method, map_get))
 
-    dict_eq = dict.__eq__
-
     def __eq__(self, other):
-        # (*) Design notes: others (or my future self) may find the following
-        # rambling thoughts useful or amusing.
+        # There is technically a way to mutate a frozendict.
         #
-        # I tend to be a very persistent person, as you can likely tell by the
-        # lengths I am going to in order to prevent this dict from being
-        # mutated. Where most would likely have settled with assigning None to
-        # all the mutating methods, I am mucking around with metaclasses and
-        # member descriptors.
+        # Hiding the member accessor inside methods works because the
+        # "outside world" never directly sees the dict. However,
+        # frozendicts are supposed to complement dicts in the same way
+        # frozensets complements sets, thus we need to be able to compare a
+        # frozendict's internal dictionary against other objects.
         #
-        # My efforts do buy some measurable gain: cross-implementation
-        # consistency, documentation without redundant and/or misleading
-        # "disabled method" signatures, and error messages that automatically
-        # conform to each implementation's norms, as if frozendict objects were
-        # built-in, with absolutely no (public) attributes exposing
-        # implementation. However, it is quite obvious that none of this was
-        # really necessary to make a hashable dict.
+        # This potentially exposes the internal dictionary to another type's
+        # __eq__ method, which is free to mutate the dict. In particular, we
+        # can mutate a frozendict using the following hack:
         #
-        # So as a control freak (only when it comes to python interfaces, I
-        # hope ;), let me provide some advice. If you ever find yourself
-        # fighting with someone who would use the following hack: GIVE UP.
-        # With enough effort, you can make 1 == 2 in python. You can probably
-        # exctract the accessor from the function body if you try hard enough.
+        # >>> class A(dict):
+        # ...   def __eq__(self, other):
+        # ...     other[1] = 2
+        # ...     return dict.__eq__(self, other)
+        # ...
+        # >>> a = A()
+        # >>> b = frozendict()
+        # >>> b == a
+        # True
+        # >>> b
+        # frozendict({1: 2})
         #
-        # With that in mind...
-
-        # Hiding the accessor inside the function body works because the
-        # "outside world" never directly sees the dict, only the information we
-        # provide about it in the methods. However, frozendict is supposed to
-        # complement dict in the same way frozenset complements set, thus we
-        # need to compare the internal dictionary directly against another
-        # dict. This makes __eq__ an interesting case, because it directly
-        # exposes the internal dict to another object.
+        # Note that this hack requires:
+        # 1: "A" subclass dict. Types not inheriting from dict will not have
+        #    priority over the internal map's dict.__eq__, and thus b == a
+        #    would defer to dict.__eq__(map_get(b), a), which will not mutate.
+        # 2: the frozendict is on the left-hand side of the comparison.
+        #    If we try a == b then A's type will end up trying to mutate b
+        #    directly, which raises an error.
         #
-        # Builtin dicts don't do any funny business, but there is a potential
-        # hack here: we can subclass dict with a custom __eq__ which MUTATES
-        # the object it compares itself to. Since subclass __eq__ methods (are
-        # supposed to *cough* Jython bug *cough*) have precedence, this will
-        # allow the object to mutate the internal dict while it is exposed.
-        # There are several techniques we can use, to guard agains this,
-        # all of which have drawbacks.
+        # There are several ways to guard against this, all of which have
+        # drawbacks outweighing their (miniscule) benefits:
         #
-        # We could copy the dict at each comparison to guard agains this,
-        # and further we could do this only for (untrusted) dict
-        # subclasses. This could kill performence in cases sane people
-        # might deal with.
+        # * We could copy the dict at each comparison, and as a further
+        #   speed optimization we could do this only for (untrusted) dict
+        #   subclasses. This could kill performence in cases sane people might
+        #   deal with (i.e. every comparison becomes O(n) no matter what).
         #
-        # We can use a MappingProxyType for the internal dict in Python 3 (and
-        # 2, with ctypes hackery), but this provides another level of
-        # indirection, only works in a documented fashion in the very latest
-        # versions of python, and only on the CPython implementation.
+        # * We can use a MappingProxyType for the internal map in Python
+        #   3.4 or higher (and 2, with ctypes hackery), but this creates
+        #   another level of indirection, only works in a documented
+        #   fashion in the very latest versions of python, and only on
+        #   the CPython implementation.
         #
-        # Finally, we could force frozendict.__eq__ to always take priority,
-        # and call dict.__eq__(map_get(self), other). This will screw up
-        # legitimate behavior on subclasses that (for example) compare by type.
+        # * Finally, we could force frozendict.__eq__ to always take priority,
+        #   and call dict.__eq__(map_get(self), other). This will screw
+        #   up legitimate behavior on subclasses that (for example)
+        #   compare by type.
         #
         # It is my sincere (and naive) hope that anyone smart enough to concoct
         # such a thing would also be smart enough *not to* (again, naive). If
-        # your codebase is so screwed that it mutates objects in equality
-        # comparison *by accident*, then... well maybe its time for a rewrite.
+        # your code *accidentally* mutates objects when checking for equality,
+        # you have bigger things to worry about.
         #
-        # In short, do not define dict subclasses which mutate objects when
-        # comparing equality, and your frozendicts will not mutate.
+        # In short, DO NOT define dict subclasses which mutate objects when
+        # comparing for equality and your frozendicts will stay frozen.
         if isinstance(other, frozendict):
             return map_get(self) == map_get(other)
         else:
@@ -257,12 +248,8 @@ _FrozendictHelper(frozendict)
 _Mapping.register(frozendict)
 
 
-del _Mapping
-del _frozendict_method
-del _FrozendictHelper
-del _mapping
-del _map_set
-del _map_get
+del _Mapping, _frozendict_method, _FrozendictHelper, _mapping
+# Leave _map_set and _map_get for frozendict subclasses (Multiset).
 
 
 # TODO: Investigate the following:
