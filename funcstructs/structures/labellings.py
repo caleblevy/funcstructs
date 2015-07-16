@@ -124,7 +124,7 @@ def set_partition_count(partition, n=None):
     if n is None:
         n = sum(partition)
     count = factorial(n)
-    for l, m in zip(*partition.split()):
+    for l, m in partition.items():
         count //= factorial(l)**m * factorial(m)
     return count
 
@@ -155,7 +155,7 @@ def cycle_index(partition, n=None):
     if n is None:
         n = sum(partition)
     count = factorial(n)
-    for l, m in zip(*partition.split()):
+    for l, m in partition.items():
         count //= l**m * factorial(m)
     return count
 
