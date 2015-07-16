@@ -3,8 +3,6 @@
 Caleb Levy, 2015.
 """
 
-from __future__ import print_function
-
 import unittest
 from collections import Counter, Mapping, MutableMapping
 
@@ -20,6 +18,7 @@ class FrozendictClassTests(unittest.TestCase):
         self.assertFalse(issubclass(frozendict, MutableMapping))
         self.assertIsInstance(frozendict(), Mapping)
         self.assertNotIsInstance(frozendict(), MutableMapping)
+        self.assertNotIn(Mapping, frozendict.mro())
 
     def test_slots_are_hidden(self):
         """Make sure no trace of internal map is present."""
@@ -146,6 +145,67 @@ class FrozendictTests(unittest.TestCase):
         self.assertEqual(a, b)
         b[1] = 'a'
         self.assertEqual({1: 'a', 2: 'b'}, a)  # test a independent of copy
+
+    def test_eq_cannot_change_frozendict(self):
+        """Test that a mutating __eq__ of a dict subclass cannot mutate"""
+        class A(dict):
+            def __eq__(self, other):
+                other['a'] = 1
+                return dict.__eq__(self, other)
+
+        class B(frozendict):
+            def __eq__(self, other):
+                other['a'] = 1
+                return frozendict.__eq__(self, other)
+
+        f = frozendict(b=2)
+        a = A(b=2)
+        b = B(b=2)
+        self.assertIs(True, f == a)
+        with self.assertRaises((AttributeError, TypeError)):
+            a == f
+        with self.assertRaises((AttributeError, TypeError)):
+            a == b
+        with self.assertRaises((AttributeError, TypeError)):
+            b == f
+        with self.assertRaises((AttributeError, TypeError)):
+            f == b
+        # test both frozendicts are unchanged
+        self.assertEqual(frozendict(b=2), f)
+        self.assertIs(True, {'b': 2} == dict(b))
+
+    def test_not_implemented_results(self):
+        """Test comparison between dict and frozendict doesn't return
+        NotImplemented."""
+        class C(dict):
+            def __eq__(self, other):
+                return dict.__eq__(self, other)
+
+        class D(frozendict):
+            def __eq__(self, other):
+                return frozendict.__eq__(self, other)
+
+        dicts = [dict(a=1), frozendict(a=1), C(a=1), D(a=1)]
+        for d1 in dicts:
+            for d2 in dicts:
+                self.assertIs(True, d1 == d2)
+
+    def test_frozen_dictset_correspondence(self):
+        """Test that frozendicts and frozensets behave the same when overriding
+        each others methods in relation to dict and set."""
+        class A(dict):
+            def __eq__(self, other):
+                return "a" in other and dict.__eq__(self, other)
+
+        class B(frozendict):
+            def __eq__(self, other):
+                return "a" in other and frozendict.__eq__(self, other)
+
+        self.assertIs(True, A(a=1) == frozendict(a=1))
+        self.assertIs(True, frozendict() == A())
+        self.assertIs(False, A() == frozendict())
+        self.assertIs(False, A() == dict())
+        self.assertIs(False, dict() == A())
 
 
 if __name__ == '__main__':

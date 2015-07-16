@@ -160,69 +160,12 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     for method in dict_methods:
         setattr(fd_cls, method, _frozendict_method(method, map_get))
 
+    dict_eq = dict.__eq__
+
     def __eq__(self, other):
-        # There is technically a way to mutate a frozendict.
-        #
-        # Hiding the member accessor inside methods works because the
-        # "outside world" never directly sees the dict. However,
-        # frozendicts are supposed to complement dicts in the same way
-        # frozensets complements sets, thus we need to be able to compare a
-        # frozendict's internal dictionary against other objects.
-        #
-        # This potentially exposes the internal dictionary to another type's
-        # __eq__ method, which is free to mutate the dict. In particular, we
-        # can mutate a frozendict using the following hack:
-        #
-        # >>> class A(dict):
-        # ...   def __eq__(self, other):
-        # ...     other[1] = 2
-        # ...     return dict.__eq__(self, other)
-        # ...
-        # >>> a = A()
-        # >>> b = frozendict()
-        # >>> b == a
-        # True
-        # >>> b
-        # frozendict({1: 2})
-        #
-        # Note that this hack requires:
-        # 1: "A" subclass dict. Types not inheriting from dict will not have
-        #    priority over the internal map's dict.__eq__, and thus b == a
-        #    would defer to dict.__eq__(map_get(b), a), which will not mutate.
-        # 2: the frozendict is on the left-hand side of the comparison.
-        #    If we try a == b then A's type will end up trying to mutate b
-        #    directly, which raises an error.
-        #
-        # There are several ways to guard against this, all of which have
-        # drawbacks outweighing their (miniscule) benefits:
-        #
-        # * We could copy the dict at each comparison, and as a further
-        #   speed optimization we could do this only for (untrusted) dict
-        #   subclasses. This could kill performence in cases sane people might
-        #   deal with (i.e. every comparison becomes O(n) no matter what).
-        #
-        # * We can use a MappingProxyType for the internal map in Python
-        #   3.4 or higher (and 2, with ctypes hackery), but this creates
-        #   another level of indirection, only works in a documented
-        #   fashion in the very latest versions of python, and only on
-        #   the CPython implementation.
-        #
-        # * Finally, we could force frozendict.__eq__ to always take priority,
-        #   and call dict.__eq__(map_get(self), other). This will screw
-        #   up legitimate behavior on subclasses that (for example)
-        #   compare by type.
-        #
-        # It is my sincere (and naive) hope that anyone smart enough to concoct
-        # such a thing would also be smart enough *not to* (again, naive). If
-        # your code *accidentally* mutates objects when checking for equality,
-        # you have bigger things to worry about.
-        #
-        # In short, DO NOT define dict subclasses which mutate objects when
-        # comparing for equality and your frozendicts will stay frozen.
         if isinstance(other, frozendict):
-            return map_get(self) == map_get(other)
-        else:
-            return map_get(self) == other
+            other = map_get(other)
+        return dict_eq(map_get(self), other)
     __eq__.__doc__ = dict.__eq__.__doc__
     fd_cls.__eq__ = __eq__
 
