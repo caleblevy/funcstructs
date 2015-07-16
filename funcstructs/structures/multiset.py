@@ -12,13 +12,6 @@ from funcstructs.utils.combinat import factorial_prod
 __all__ = ["Multiset", "unordered_product", "counts", "sorted_counts"]
 
 
-def _check_multiset(mset):
-    """Return True if all elements of a mapping are positive integers."""
-    if all((isinstance(v, int) and v > 0) for v in mset.values()):
-        return True
-    raise TypeError("multiplicities must be positive integers")
-
-
 class Multiset(frozendict):
     """Dict subclass for counting hashable items.  Sometimes called a bag
     or multiset.  Elements are stored as dictionary keys and their counts
@@ -53,21 +46,25 @@ class Multiset(frozendict):
         >>> m = Multiset(a=4, b=2)              # Multiset from keyword args
         """
         self = frozendict.__new__(args[0])
+        check = False
         if len(args) == 2:
             if kwargs:
                 raise TypeError("Multiset does not accept iterable and kwargs")
             iterable = args[1]
             if isinstance(iterable, Mapping):
                 dict.update(self, iterable)
-                _check_multiset(self)
+                check = True
             else:
                 for el in iterable:
                     dict.__setitem__(self, el, self.get(el, 0) + 1)
         elif kwargs:
             dict.update(self, kwargs)
-            _check_multiset(self)
+            check = True
         elif len(args) > 2:
             raise TypeError("expected at most 2 arguments, got %d" % len(args))
+        if check:
+            if not all((isinstance(v, int) and v > 0) for v in self.values()):
+                raise TypeError("multiplicities must be positive integers")
         return self
 
     @classmethod
