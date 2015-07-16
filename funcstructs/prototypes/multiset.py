@@ -3,6 +3,7 @@
 Caleb Levy, 2015.
 """
 
+from __future__ import print_function
 
 from collections import Counter, Mapping
 
@@ -33,6 +34,54 @@ class Multiset(frozendict):
     """
 
     __slots__ = ()
+
+    @classmethod
+    def fromkeys(cls, iterable, v=None):
+        raise NotImplementedError("%s.fromkeys() is undefined." % cls.__name__)
+
+    __repr__ = Counter.__dict__['__repr__']
+
+    def __len__(self):
+        """Length of a multiset, including multiplicities."""
+        return sum(self.values())
+
+    __iter__ = Counter.__dict__['elements']
+    __iter__.__name__ = '__iter__'
+    __iter__.__doc__ = \
+        """Iterate over elements repeating each as many times as its count.
+
+        >>> m = Mulitset('ABCABC')
+        >>> sorted(m))
+        ['A', 'A', 'B', 'B', 'C', 'C']
+
+        # Knuth's example for prime factors of 1836:  2**2 * 3**3 * 17**1
+        >>> prime_factors = Multiset({2: 2, 3: 3, 17: 1})
+        >>> product = 1
+        >>> for factor in prime_factors:                # loop over factors
+        ...     product *= factor                       # and multiply them
+        >>> product
+        1836
+        """
+
+    def elements(self):
+        """Underlying set of unique elements.
+
+        >>> m = Multiset("abracadabra")
+        >>> sorted(m.elements())
+        ['a', 'b', 'c', 'd', 'r']
+        """
+        return frozenset(self.keys())
+
+    def num_unique_elements(self):
+        """Number of unique elements in the Multiset.
+
+        >>> m = Multiset("abracadabra").num_unique_elements()
+        5
+        """
+        return frozendict.__len__(self)
+
+    most_common = Counter.__dict__['most_common']
+    most_common.__doc__ = most_common.__doc__.replace("Counter", "Multiset")
 
 
 def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
@@ -86,3 +135,10 @@ print(Multiset("abracadabra"))
 # print(Multiset({'a': 'b'}))
 print(Multiset.__new__(frozendict))
 print(Counter.__new__(dict))
+print(dict(Multiset("abracadabra")) == Multiset("abracadabra"))
+print(Multiset("abracadabra") == dict(Multiset("abracadabra")))
+abra = Multiset("abracadabra")
+print(list(abra))
+print(len(abra))
+print(abra.num_unique_elements())
+print(len(abra.viewitems()))
