@@ -3,7 +3,7 @@ import random
 from collections import Counter
 from itertools import product
 
-from funcstructs.structures.multiset import Multiset
+from funcstructs.structures.multiset import Multiset, counts
 
 
 class MultisetTests(unittest.TestCase):
@@ -144,7 +144,7 @@ class MultisetTests(unittest.TestCase):
     def test_split(self):
         """Test that the indices of elements and multiplicities correspond."""
         for mset in self.msets:
-            y, d = mset.split()
+            y, d = counts(mset)
             for i, el in enumerate(y):
                 self.assertEqual(mset[el], d[i])
 

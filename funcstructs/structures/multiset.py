@@ -9,7 +9,7 @@ from collections import Counter, Mapping
 from funcstructs.bases import frozendict
 from funcstructs.utils.combinat import factorial_prod
 
-__all__ = ["Multiset", "unordered_product"]
+__all__ = ["Multiset", "unordered_product", "counts", "sorted_counts"]
 
 
 def _check_multiset(mset):
@@ -179,3 +179,18 @@ def unordered_product(mset, iterfunc):
         strands.append(combinations_with_replacement(iterfunc(y), d))
     for bundle in product(*strands):
         yield Multiset(chain(*bundle))
+
+
+def counts(elements):
+    """Split an iterable (or mapping) into corresponding key-value lists."""
+    mset = Multiset(elements)
+    return tuple(mset.keys()), tuple(mset.values())
+
+
+def sorted_counts(elements):
+    """Same as counts with both lists sorted first by key then by count."""
+    items = Multiset(elements).items()
+    if items:
+        return tuple(zip(*sorted(items)))
+    else:
+        return (), ()
