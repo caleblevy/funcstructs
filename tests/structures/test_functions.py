@@ -335,7 +335,7 @@ class CompositionTests(unittest.TestCase):
 def _func_images(mspace):
     funcs = set()
     for func in mspace:
-        x, f = func.sort_split()
+        x, f = zip(*sorted(func.items())) if func else ((), ())
         funcs.add(f)
     return funcs
 

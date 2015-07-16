@@ -57,18 +57,6 @@ class frozendict(dict):
         # deal with broken behavior in jython.
         return hash(frozenset(self.items())) + id(type(self))
 
-    def split(self):
-        """Splits a mapping into corresponding key-value lists."""
-        return tuple(self.keys()), tuple(self.values())
-
-    def sort_split(self):
-        """Same as frozendict.split with both lists sorted by key values"""
-        items = self.items()
-        if items:
-            return tuple(zip(*sorted(items)))
-        else:
-            return (), ()
-
 
 # Disable all mutating methods. Sadly, we must inherit from dict since in
 # python 3.4 we cannot inherit from MappingProxy to add __hash__, and pypy and

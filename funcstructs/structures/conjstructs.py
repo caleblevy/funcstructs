@@ -153,10 +153,10 @@ def component_groups(c, l, m):
 def cycle_type_funcstructs(n, cycle_type):
     """Enumerate all Funcstructs with the given node count and cycle type."""
     treenodes = n - sum(cycle_type)
-    lengths, multiplicities = cycle_type.split()
+    lengths, mults = zip(*cycle_type.items()) if cycle_type else ((), ())
     for composition in compositions.weak_compositions(treenodes, len(lengths)):
         cycle_groups = []
-        for c, l, m in zip(composition, lengths, multiplicities):
+        for c, l, m in zip(composition, lengths, mults):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in product(*cycle_groups):
             yield Multiset.__new__(Funcstruct, chain(*bundle))

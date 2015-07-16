@@ -10,7 +10,7 @@ from itertools import repeat
 import numpy as np
 
 from funcstructs.utils.productrange import productrange
-from funcstructs.structures.multiset import Multiset
+from funcstructs.structures.multiset import counts, Multiset
 
 
 def monomial_symmetric_polynomial(x, powers):
@@ -42,7 +42,7 @@ def monomial_symmetric_polynomial(x, powers):
     elements. """
 
     n = len(x)
-    pows, mults = Multiset(powers).split()
+    pows, mults = counts(powers)
     l = len(pows)
     shape = tuple(i+2 for i in mults)
 

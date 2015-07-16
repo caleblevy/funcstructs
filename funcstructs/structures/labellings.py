@@ -10,7 +10,7 @@ from funcstructs.utils.combinat import (
     multinomial_coefficient as ordered_division_count)
 
 from .functions import rangefunc, rangeperm
-from .multiset import Multiset
+from .multiset import Multiset, sorted_counts
 from .necklaces import Necklace
 
 
@@ -85,7 +85,7 @@ def ordered_divisions(partition, S=None):
 
 
 def _set_partitions(S, partition):
-    lengths, mults = Multiset(partition).sort_split()
+    lengths, mults = sorted_counts(partition)
     # clm[i] is the number of nodes situated in some bin of size l[i].
     for odiv in _ordered_divisions(S, [l*m for l, m in zip(lengths, mults)]):
         strand = []
@@ -172,7 +172,7 @@ def branch_inds(tree):
 def branch_groups(tree):
     """Yield, in order, tree's unique branches, and all nodes to which an
     instance of that branch is attached."""
-    branches, mults = Multiset(tree.subtrees()).sort_split()
+    branches, mults = sorted_counts(tree.subtrees())
     branches = iter(branches[::-1])
     mults = reversed(mults)
     indset = branch_inds(tree)[::-1]

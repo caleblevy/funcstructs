@@ -12,7 +12,7 @@ from PADS.Lyndon import SmallestRotation
 from funcstructs import bases
 from funcstructs.utils import combinat, factorization
 
-from . import multiset
+from .multiset import sorted_counts
 
 
 def periodicity(strand):
@@ -105,7 +105,7 @@ class FixedContentNecklaces(bases.Enumerable):
 
     def __init__(self, elements=None, multiplicities=None):
         if multiplicities is None:
-            elements, multiplicities = multiset.Multiset(elements).sort_split()
+            elements, multiplicities = sorted_counts(elements)
         elif elements is None:
             elements, multiplicities = zip(*enumerate(multiplicities))
         self.elements = elements

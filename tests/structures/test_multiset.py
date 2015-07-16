@@ -141,7 +141,7 @@ class MultisetTests(unittest.TestCase):
         dic[7] = 42
         self.assertEqual(5, len(set(dic)))
 
-    def test_split(self):
+    def test_counts(self):
         """Test that the indices of elements and multiplicities correspond."""
         for mset in self.msets:
             y, d = counts(mset)
