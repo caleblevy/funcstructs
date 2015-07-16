@@ -3,13 +3,14 @@
 Caleb Levy, 2014 and 2015.
 """
 
-import functools
 import collections
+from functools import reduce
+from itertools import repeat
 
 import numpy as np
 
-from funcstructs.utils import productrange
-from funcstructs.structures import multiset
+from funcstructs.utils.productrange import productrange
+from funcstructs.structures.multiset import Multiset
 
 
 def monomial_symmetric_polynomial(x, powers):
@@ -41,7 +42,7 @@ def monomial_symmetric_polynomial(x, powers):
     elements. """
 
     n = len(x)
-    pows, mults = multiset.Multiset(powers).split()
+    pows, mults = Multiset(powers).split()
     l = len(pows)
     shape = tuple(i+2 for i in mults)
 
@@ -52,7 +53,7 @@ def monomial_symmetric_polynomial(x, powers):
 
     # The powers use up sum(multiplcities) of the original x.
     for k in range(n-sum(mults)+1):
-        for ind in productrange.productrange(1, shape):
+        for ind in productrange(1, shape):
             fac = x[k+sum(ind)-l-1]
             for j in range(l):
                 ind_prev = list(ind)
@@ -70,19 +71,14 @@ def FOIL(roots):
         (X - roots[0]) * (X - roots[1]) * ... * (X - roots[-1])
     """
     monomials = [(1, -root) for root in roots]
-    return list(functools.reduce(np.polymul, monomials, [1]))
-
-
-def power_sum(X, k):
-    return sum(x**k for x in X)
+    return tuple(reduce(np.polymul, monomials, np.array([1], dtype=object)))
 
 
 def newton_elementary_polynomial(x, n):
-    """ Calculate the nth elementary symmetric polynomial in values x using the
-    Newton identities. """
-
+    """Calculate the nth elementary symmetric polynomial in values x
+    using the Newton identities."""
     e = [0]*(n+1)
-    p = [power_sum(x, i) for i in range(n+1)]
+    p = [sum(map(pow, x, repeat(i))) for i in range(n+1)]
     e[0] = 1
     e[1] = p[1]
     for i in range(2, n+1):
@@ -116,9 +112,9 @@ class MultisetPolynomial(object):
                 for el in iterable:
                     if not hasattr(el, '__iter__'):
                         el = [el]
-                    self.cpart.update([multiset.Multiset(el)])
+                    self.cpart.update([Multiset(el)])
             else:
-                self.cpart.update([multiset.Multiset([iterable])])
+                self.cpart.update([Multiset([iterable])])
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -132,7 +128,7 @@ class MultisetPolynomial(object):
         return self.__class__.__name__+'(%s)' % list(self.cpart.elements())
 
     def __str__(self):
-        set_str = str(multiset.Multiset(self.cpart.elements()))[1:-1]
+        set_str = str(Multiset(self.cpart.elements()))[1:-1]
         if not self.cpart:
             set_str = '{}'
         return self.__class__.__name__+'(%s)' % set_str
@@ -184,4 +180,4 @@ class MultisetPolynomial(object):
 def multisets_with_multiplicities(elems, multiplicities):
     x = [MultisetPolynomial(el) for el in elems]
     for mset in monomial_symmetric_polynomial(x, multiplicities):
-        yield multiset.Multiset(mset)
+        yield Multiset(mset)
