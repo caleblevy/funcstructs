@@ -42,16 +42,17 @@ class frozendict(object):
     __slots__ = '_mapping'  # allocate slot for iternal dict
 
 
-_mapping = frozendict._mapping  # store reference to descriptor
-del frozendict._mapping  # destroy external access to the mapping
-del frozendict.__slots__  # make it look like a builtin type
-
+# Store accessor and setter for the member descriptor.
+#
 # Since the member descriptor's "__set__" and "__get__" methods are
 # themselves (method) descriptors, a new wrapper for them is generated
 # each time they are called. Store references to them locally to avoid
 # this step.
-_map_set = _mapping.__set__
-_map_get = _mapping.__get__
+_map_set = frozendict._mapping.__set__
+_map_get = frozendict._mapping.__get__
+
+del frozendict._mapping  # destroy external access to the mapping
+del frozendict.__slots__  # make it look like a builtin type
 
 
 def _frozendict_method(name, map_get):
@@ -74,6 +75,9 @@ def _frozendict_method(name, map_get):
     return method
 
 
+# Define all methods inside _FrozendictHelper so that all references to the
+# helper functions are internal to the function body, and not module level
+# exports.
 def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     """Add wrappers for `dict`'s methods to frozendict."""
 
@@ -193,7 +197,7 @@ _FrozendictHelper(frozendict)
 _Mapping.register(frozendict)
 
 
-del _Mapping, _frozendict_method, _FrozendictHelper, _mapping
+del _Mapping, _frozendict_method, _FrozendictHelper
 # Leave _map_set and _map_get for frozendict subclasses (Multiset).
 
 
