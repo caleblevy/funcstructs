@@ -1,3 +1,5 @@
+from collections import Mapping
+
 from funcstructs.compat import viewitems
 
 
@@ -39,8 +41,9 @@ class frozendict(dict):
         # Calling viewitems explicitly allows Jython compatibility
         # without ugly conditional method definitions, and doing so does
         # not seem to induce a significant speed hit.
-        return type(self) is type(other) and \
-               viewitems(self) == viewitems(other)
+        if isinstance(other, Mapping):
+            return viewitems(self) == viewitems(other)
+        return False
 
     def __ne__(self, other):
         return not self == other
@@ -55,7 +58,7 @@ class frozendict(dict):
         # Alternatively we could have a registry of dict subclasses to
         # guarentee no collisions, but I don't want to use such hacks to
         # deal with broken behavior in jython.
-        return hash(frozenset(self.items())) + id(type(self))
+        return hash(frozenset(self.items()))
 
 
 # Disable all mutating methods. Sadly, we must inherit from dict since in

@@ -1,4 +1,6 @@
 import unittest
+from collections import Counter
+import platform
 
 from funcstructs.bases import frozendict
 
@@ -33,55 +35,153 @@ class FrozendictTests(unittest.TestCase):
             )
 
     def test_equality(self):
-        """Test different dicts compare differently"""
-        t = {'d': 1, 'e': 2, 'a': 3}
-        others = [t, frozendict(t), self.F(t)]
-        for i, d1 in enumerate(self.dicts):
-            for j, d2 in enumerate(self.dicts):
-                if i == j:
+        """Tests two mappings compare equal iff their key value pairs are."""
+        for d1 in self.dicts:
+            for d2 in self.dicts:
+                if dict(d1) == dict(d2):
                     self.assertEqual(d1, d2)
                 else:
                     self.assertNotEqual(d1, d2)
-                if i < 3 and j < 3:
-                    self.assertEqual(d2, d2.__class__(d1))
-                    self.assertNotEqual(d1, others[j])
+        t = {'d': 1, 'e': 2, 'a': 3}
+        dtypes = [t, frozendict(t), self.F(t)]
+        for d1 in dtypes:
+            for d2 in dtypes:
+                self.assertEqual(d1, d2)
 
     def test_immutability(self):
         """Test that all inherited mutating methods have been disabled."""
         for d in [self.b, self.c]:
-            with self.assertRaises(TypeError):
+            d_backup = d
+            with self.assertRaises((TypeError, AttributeError)):
                 d['a'] += 1
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, AttributeError)):
                 d['b'] = 2
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, AttributeError)):
                 del d['b']
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, AttributeError)):
                 d.clear()
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, AttributeError)):
                 d.pop('a')
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, AttributeError)):
                 d.popitem()
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, AttributeError)):
                 d.setdefault('f', 1)
-            with self.assertRaises(TypeError):
+            with self.assertRaises((TypeError, AttributeError)):
                 d.update({'d': 4})
             self.assertEqual(d.__class__({'a': 1, 'b': 2, 'c': 3}), d)
+            self.assertIs(d, d_backup)
 
     def test_repr(self):
         """Ensure fronzendicts evaluate to themselves"""
         for d in self.dicts:
-            self.assertEqual(d, eval(repr(d), {d.__class__.__name__: type(d)}))
+            d_from_repr = eval(repr(d), {d.__class__.__name__: type(d)})
+            self.assertEqual(d, d_from_repr)
+            self.assertIs(type(d), type(d_from_repr))
 
-    def test_hashing(self):
+    @unittest.skipIf(platform.python_implementation() == "Jython",
+                     "Jython dict.__eq__ is broken")
+    def test_hash(self):
         """Test that frozendicts with hashable keys are hashable"""
-        dic = dict()
-        dic[self.b] = 1
-        dic[self.c] = 2
-        self.assertEqual(2, len(dic))
-        dic2 = {self.F({'b': 2, 'c': 3, 'a': 1}): 2, self.b: 1}
-        self.assertEqual(dic, dic2)
-        with self.assertRaises(TypeError):
-            hash(self.e)
-        dic2[self.c] -= 1
-        self.assertEqual(set(dic2.values()), {1})
-        self.assertEqual(set(dic), {self.b, self.c})
+        class TypeEqFrozendict(frozendict):
+            def __eq__(self, other):
+                if type(self) is type(other):
+                    return frozendict.__eq__(self, other)
+                return False
+            __hash__ = frozendict.__hash__
+
+        a = frozendict(a=1, b=2, c=3)
+        b = TypeEqFrozendict(a=1, b=2, c=3)
+
+        dic = {}
+        dic[a] = 1
+        dic[b] = 2
+        self.assertEqual(len(dic), 2)
+        dic[a] += 3
+        self.assertEqual(dic[a], 4)
+        self.assertEqual(set(dic), {a, b})
+
+    def test_method_independence(self):
+        """Test overriding one method does not affect another."""
+        class Multiset(frozendict):
+            def __iter__(self):
+                for el, mult in self.items():
+                    for _ in range(mult):
+                        yield el
+
+        mset = Multiset({'a': 1, 'b': 3})
+        c = sorted(mset)
+        self.assertEqual(c, ['a', 'b', 'b', 'b'])
+        self.assertEqual(Counter(c), dict(mset))
+
+    def test_copy(self):
+        """Test that frozendict copies internal dict."""
+        a = frozendict({1: 'a', 2: 'b'})
+        b = a.copy()
+        self.assertEqual(a, b)
+        b[1] = 'a'
+        self.assertEqual({1: 'a', 2: 'b'}, a)  # test a independent of copy
+
+    def test_eq_cannot_change_frozendict(self):
+        """Test that a mutating __eq__ of a dict subclass cannot mutate"""
+        class A(dict):
+            def __eq__(self, other):
+                other['a'] = 1
+                return dict.__eq__(self, other)
+
+        class B(frozendict):
+            def __eq__(self, other):
+                other['a'] = 1
+                return frozendict.__eq__(self, other)
+
+        f = frozendict(b=2)
+        a = A(b=2)
+        b = B(b=2)
+        self.assertIs(True, f == a)
+        with self.assertRaises((AttributeError, TypeError)):
+            a == f
+        with self.assertRaises((AttributeError, TypeError)):
+            a == b
+        with self.assertRaises((AttributeError, TypeError)):
+            b == f
+        with self.assertRaises((AttributeError, TypeError)):
+            f == b
+        # test both frozendicts are unchanged
+        self.assertEqual(frozendict(b=2), f)
+        self.assertIs(True, {'b': 2} == dict(b))
+
+    def test_not_implemented_results(self):
+        """Test comparison between dict and frozendict doesn't return
+        NotImplemented."""
+        class C(dict):
+            def __eq__(self, other):
+                return dict.__eq__(self, other)
+
+        class D(frozendict):
+            def __eq__(self, other):
+                return frozendict.__eq__(self, other)
+
+        dicts = [dict(a=1), frozendict(a=1), C(a=1), D(a=1)]
+        for d1 in dicts:
+            for d2 in dicts:
+                self.assertIs(True, d1 == d2)
+
+    def test_frozen_dictset_correspondence(self):
+        """Test that frozendicts and frozensets behave the same when overriding
+        each others methods in relation to dict and set."""
+        class A(dict):
+            def __eq__(self, other):
+                return "a" in other and dict.__eq__(self, other)
+
+        class B(frozendict):
+            def __eq__(self, other):
+                return "a" in other and frozendict.__eq__(self, other)
+
+        self.assertIs(True, A(a=1) == frozendict(a=1))
+        self.assertIs(True, frozendict() == A())
+        self.assertIs(False, A() == frozendict())
+        self.assertIs(False, A() == dict())
+        self.assertIs(False, dict() == A())
+
+
+if __name__ == '__main__':
+    unittest.main()
