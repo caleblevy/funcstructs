@@ -11,7 +11,6 @@ from math import factorial
 from funcstructs import compat
 
 from funcstructs.bases import frozendict, Enumerable
-from funcstructs.bases._frozendict import _disabled_op
 
 
 def _result_functype(f, g):
@@ -114,7 +113,9 @@ class Function(frozendict):
 
     __call__ = dict.__getitem__
 
-    __getitem__ = _disabled_op('__getitem__', 'indexing')
+    @classmethod
+    def __getitem__(cls, *args, **kwargs):
+        raise TypeError("Function objects do not support indexing")
 
     # Mathematical functions describe a set of pairings of points; returning
     # elements of the domain does not provide useful information; only the
