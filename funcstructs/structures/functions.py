@@ -71,10 +71,10 @@ class Function(frozendict):
     >>> g * f
     Function({'a': 'a', 'c': 'a', 'b': 'a'})
 
-    >>> f('a')                                  # Functions are evaluated by
-    1                                           # using the same notation as
-    >>> g(f('b'))                               # their mathematical
-    'a'                                         # counterparts
+    >>> f['a']                                  # Functions are evaluated by
+    1                                           # using the dict interface
+    >>> g[f['b']]
+    'a'
 
     >>> list(f)                                 # iteration returns
     [('a', 1), ('c', 1), ('b', 1)]              # key-value pairs
@@ -111,33 +111,54 @@ class Function(frozendict):
         """f.image <==> {y for (x, y) if f}"""
         return frozenset(self.values())
 
-    __call__ = dict.__getitem__
-
-    @classmethod
-    def __getitem__(cls, *args, **kwargs):
-        raise TypeError("Function objects do not support indexing")
-
     # Mathematical functions describe a set of pairings of points; returning
     # elements of the domain does not provide useful information; only the
     # key-value pairs matter, so __iter__ is overridden to dict.__items__.
 
     def __iter__(self):
-        """iter(f) <==> (x, f(x)) for x in f.domain"""
+        """iter(f) <==> (x, f[x]) for x in f.domain"""
         return iter(self.items())
 
     def __contains__(self, item):
-        """(x, y) in f <==> f(x) == y"""
+        """(x, y) in f <==> f[x] == y"""
         return item in compat.viewitems(self)
 
     # Define composition of Functions
 
     def __mul__(self, other):
-        """(f * g)(x) <==> f(g(x))"""
+        """(f * g)(x) <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
-        return _result_functype(self, other)((x, self(y)) for x, y in other)
+        return _result_functype(self, other)((x, self[y]) for x, y in other)
+
+    # Design Note: Function objects used to be callable; their __call__ method
+    # was set to dict.__getitem__ and __getitem__ itself was disabled.
+    #
+    # When Function was an explicit subclass of the builtin dict, the dict
+    # constructor could handle Function objects since it would directly call
+    # the C API for copying.
+    #
+    # Once frozendict became a proxy to a dict, however, python would default
+    # to the (inadequately documented) convention for dict constructors, where
+    # calling "dict(obj)" decides if obj is a mapping by checking for the
+    # presence of a "keys" method, and if so acquires the values using
+    # __getitem__. (See "overloaded __iter__ is bypassed when deriving from
+    # dict" at http://stackoverflow.com/q/18317905/3349520). This broke the
+    # ability to copy Functions to dicts.
+    #
+    # More important, this will break any code relying on the normal dict
+    # interface, causing potentially massive inconvenience. It further obscures
+    # the difference between Function objects and python "functions" which
+    # represent very different *kinds* of function.
+    #
+    # The sole benefit was providing syntactic similarity between Functions and
+    # mathematical mappings, at the cost of semantic consistency.
+    #
+    # Leaving both methods in would clearly introduce ambiguity into the API,
+    # and getting rid of the __call__ syntax alleviates a fair number of
+    # headaches.
 
     def fibers(self):
-        """f.fibers()[y] <==> {x for x in f.domain if f(x) == y}"""
+        """f.fibers()[y] <==> {x for x in f.domain if f[x] == y}"""
         # TODO: Add preimage class
         preim = defaultdict(list)
         for x, y in self:
@@ -186,7 +207,7 @@ class Bijection(Function):
         # If f(1) = f(2) = f(3) = 3, and g(a) = g(b) = g(c) = c, then f is
         # related to g:  g(x) = s(f(s^-1(x))). We view conjugation *of* f as a
         # way to get *to* g.
-        return f.__class__((y, self(f(x))) for x, y in self)
+        return f.__class__((y, self[f[x]]) for x, y in self)
 
 
 class Endofunction(Function):
@@ -256,7 +277,7 @@ class Endofunction(Function):
             while x not in tried:
                 remaining.discard(x)
                 tried.add(x)
-                x = self(x)
+                x = self[x]
                 path.append(x)
             if x not in cyclic:
                 cycle = path[path.index(x)+1:]

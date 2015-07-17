@@ -136,8 +136,7 @@ Functions
 ``Function``
     Mathematical **functions** are correspondences between sets. A ``Function``
     object is an associative array which maps the set of its *keys* to the set
-    of *values*. Function may be composed using the standard multiplication
-    syntax and are evaluated by calling.
+    of *values*. Function may be composed using the standard multiplication.
 ``Endofunction``
     A ``Function`` whose values are a subset of its keys. They can be iterated
     to produce functional digraphs consisting of rooted trees connected in
@@ -163,9 +162,9 @@ The functions module also provides enumerators corresponding to each of the
     ... )
     
     >>> f = Function(a=1, b=2, c=2)                           # Function
-    >>> f('a')
+    >>> f['a']
     1
-    >>> f('b') + f('c')
+    >>> f['b'] + f['c']
     4
     >>> g = Function({1: 'a', 2: 'a', 3: 'a'})
     >>> f * g

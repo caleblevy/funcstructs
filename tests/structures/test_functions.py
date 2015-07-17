@@ -181,7 +181,7 @@ class EndofunctionTests(unittest.TestCase):
         for f, cycles in zip(self.funcs, self.cyclesets):
             for cycle in cycles:
                 for ind, el in enumerate(cycle):
-                    self.assertEqual(cycle[(ind+1) % len(cycle)], f(el))
+                    self.assertEqual(cycle[(ind+1) % len(cycle)], f[el])
 
     def test_cycles_are_unique(self):
         """Ensure funccycles returns no duplicates."""
