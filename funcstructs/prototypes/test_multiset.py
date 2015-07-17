@@ -3,11 +3,10 @@ import random
 from collections import Counter
 from itertools import product
 
-from funcstructs.structures.multiset import Multiset, counts
+from multiset import Multiset
 
 
 class MultisetTests(unittest.TestCase):
-
     abra = Multiset("abracadabra")
     nest = Multiset([1, 2, 2, 3, 3, abra, abra])
     empty = Multiset()
@@ -65,7 +64,10 @@ class MultisetTests(unittest.TestCase):
         """Test that eval(repr(self)) == self"""
         # Need to test outside frozendict due to overridden __repr__
         for mset in self.msets:
-            self.assertEqual(mset, eval(repr(mset)))
+            m_from_repr = eval(repr(mset))
+            self.assertEqual(mset, m_from_repr)
+            self.assertEqual(m_from_repr, mset)
+            self.assertIs(type(mset), type(m_from_repr))
 
     def test_equality(self):
         """Test Multisets are equal iff their elements are equal"""
@@ -102,25 +104,6 @@ class MultisetTests(unittest.TestCase):
             self.assertEqual(count, len(mset))
             self.assertEqual(count, len(list(mset)))
 
-    def test_dict_methods(self):
-        """Test that the keys, values and items methods are unaffected by
-        overridden iter."""
-        for mset, items_count in zip(self.msets, [5, 4, 0, 3]):
-            # In PyPy, dict view objects (values, items and keys) call the
-            # overridden __len__ function instead of the builtin dict length.
-            # This particular behavior is left for implementations to decide.
-            #
-            # In this context, the more proper __len__ function for the views
-            # would be that of the underlying dict, but as long as the actual
-            # items of the views have the same content it makes little
-            # difference. We thus test that the lengths are the same.
-            self.assertEqual(items_count, len(list(mset.values())))
-            self.assertEqual(items_count, len(list(mset.items())))
-            self.assertEqual(items_count, len(list(mset.keys())))
-            # Make sure methods are unaffected by overridden dict.__iter__
-            self.assertEqual(items_count, len(set(mset.items())))
-            self.assertEqual(items_count, len(set(mset.keys())))
-
     def test_shuffling_invarience(self):
         """Test Multisets and hashes are invarient under element shuffling"""
         for mset in self.msets:
@@ -141,17 +124,10 @@ class MultisetTests(unittest.TestCase):
         dic[7] = 42
         self.assertEqual(5, len(set(dic)))
 
-    def test_counts(self):
-        """Test that the indices of elements and multiplicities correspond."""
-        for mset in self.msets:
-            y, d = counts(mset)
-            for i, el in enumerate(y):
-                self.assertEqual(mset[el], d[i])
-
-    def test_degeneracy(self):
-        """Test multiset degeneracies reflect multiset permutations"""
-        for mset, deg in zip(self.msets, [120*2*2, 2*2*2, 1, 1]):
-            self.assertEqual(deg, mset.degeneracy())
+    def assertTypeEqual(self, first, second, msg=None):
+        """Succeed if two objects are equal and have the same type."""
+        self.assertIs(type(first), type(second), msg)
+        self.assertEqual(first, second, msg)
 
     def test_binary_operations(self):
         """Test '+', '&', '|' and '-' for Multisets and Counters."""
@@ -163,14 +139,21 @@ class MultisetTests(unittest.TestCase):
             for a, b in product([i1, i2, i3], repeat=2):
                 self.assertEqual(l(a+b), l(a) + r(b))
                 if {a, b} == {i1, i2}:  # sets with nonempty differences
-                    self.assertEqual(l("aab" if a == i1 else "d"), l(a) - r(b))
-                    self.assertEqual(l("abc"), l(a) & r(b))
-                    self.assertEqual(l("aaabbcd"), l(a) | r(b))
+                    self.assertTypeEqual(
+                        l("aab" if a == i1 else "d"),
+                        l(a) - r(b)
+                    )
+                    self.assertTypeEqual(l("abc"), l(a) & r(b))
+                    self.assertTypeEqual(l("aaabbcd"), l(a) | r(b))
                 elif {a, b} in ({i1, i3}, {i2, i3}):  # sets are disjoint
-                    self.assertEqual(l(a), l(a) - r(b))
-                    self.assertEqual(l(), l(a) & r(b))
-                    self.assertEqual(l(a + b), l(a) | r(b))
+                    self.assertTypeEqual(l(a), l(a) - r(b))
+                    self.assertTypeEqual(l(), l(a) & r(b))
+                    self.assertTypeEqual(l(a + b), l(a) | r(b))
                 else:  # one set contains the other
-                    self.assertEqual(l(), l(a) - r(b))
-                    self.assertEqual(l(a), l(a) & r(b))
-                    self.assertEqual(l(a), l(a) | r(b))
+                    self.assertTypeEqual(l(), l(a) - r(b))
+                    self.assertTypeEqual(l(a), l(a) & r(b))
+                    self.assertTypeEqual(l(a), l(a) | r(b))
+
+
+if __name__ == '__main__':
+    unittest.main()
