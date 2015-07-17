@@ -6,8 +6,14 @@ Caleb Levy, 2015.
 from __future__ import print_function
 
 from collections import Counter, Mapping
+from functools import reduce
+from itertools import chain, combinations_with_replacement, product
+from math import factorial
+from operator import mul
 
 from frozendict import frozendict, _map_get, _map_set
+
+__all__ = ["Multiset", "unordered_product", "counts", "sorted_counts"]
 
 
 def _binop_template(name, map_get, map_set):
@@ -159,6 +165,43 @@ class Multiset(frozendict):
     most_common = Counter.__dict__['most_common']
     most_common.__doc__ = most_common.__doc__.replace("Counter", "Multiset")
 
+    def degeneracy(self):
+        """Number of different representations of the same multiset."""
+        return reduce(mul, map(factorial, self.values()), 1)
+
+
+def unordered_product(mset, iterfunc):
+    """Given a multiset of inputs to an iterable, and iterfunc, returns all
+    unordered combinations of elements from iterfunc applied to each el. It is
+    equivalent to:
+
+        set(Multiset(p) for p in product([iterfunc(i) for i in mset]))
+
+    except it runs through each element once. This program makes the
+    assumptions that no two members of iterfunc(el) are the same, and that if
+    el1 != el2 then iterfunc(el1) and iterfunc(el2) are mutually disjoint."""
+    mset = Multiset(mset)
+    strands = []
+    for y, d in mset.items():
+        strands.append(combinations_with_replacement(iterfunc(y), d))
+    for bundle in product(*strands):
+        yield Multiset(chain(*bundle))
+
+
+def counts(elements):
+    """Split an iterable (or mapping) into corresponding key-value lists."""
+    mset = Multiset(elements)
+    return tuple(mset.keys()), tuple(mset.values())
+
+
+def sorted_counts(elements):
+    """Same as counts with both lists sorted first by key then by count."""
+    items = Multiset(elements).items()
+    if items:
+        return tuple(zip(*sorted(items)))
+    else:
+        return (), ()
+
 
 if __name__ == '__main__':
     print(Multiset([1, 1, 2, 2, 3]))
@@ -189,3 +232,6 @@ if __name__ == '__main__':
     print(c - a)
     print(repr(c + a))
     print(type(c + a))
+    print(a.degeneracy())
+    print(a.values())
+    print(Multiset().degeneracy())

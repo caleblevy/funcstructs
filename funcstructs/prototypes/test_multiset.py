@@ -3,7 +3,7 @@ import random
 from collections import Counter
 from itertools import product
 
-from multiset import Multiset
+from multiset import Multiset, counts
 
 
 class MultisetTests(unittest.TestCase):
@@ -123,6 +123,18 @@ class MultisetTests(unittest.TestCase):
         self.assertEqual(-7, dic[self.abra])
         dic[7] = 42
         self.assertEqual(5, len(set(dic)))
+
+    def test_counts(self):
+        """Test that the indices of elements and multiplicities correspond."""
+        for mset in self.msets:
+            y, d = counts(mset)
+            for i, el in enumerate(y):
+                self.assertEqual(mset[el], d[i])
+
+    def test_degeneracy(self):
+        """Test multiset degeneracies reflect multiset permutations"""
+        for mset, deg in zip(self.msets, [120*2*2, 2*2*2, 1, 1]):
+            self.assertEqual(deg, mset.degeneracy())
 
     def assertTypeEqual(self, first, second, msg=None):
         """Succeed if two objects are equal and have the same type."""
