@@ -1,8 +1,35 @@
+"""Tests of immutable mapping.
+
+Caleb Levy, 2015.
+"""
+
 import unittest
-from collections import Counter
-import platform
+from collections import Counter, Mapping, MutableMapping
 
 from funcstructs.bases import frozendict
+
+
+class FrozendictClassTests(unittest.TestCase):
+
+    def test_frozendict_type(self):
+        """Ensure type(frozendict) is type"""
+        self.assertIs(type(frozendict), type)
+        self.assertTrue(issubclass(frozendict, Mapping))
+        self.assertFalse(issubclass(frozendict, MutableMapping))
+        self.assertIsInstance(frozendict(), Mapping)
+        self.assertNotIsInstance(frozendict(), MutableMapping)
+        self.assertNotIn(Mapping, frozendict.mro())
+
+    def test_slots_are_hidden(self):
+        """Make sure no trace of internal map is present."""
+        self.assertFalse(hasattr(frozendict, '__slots__'))
+        self.assertFalse(hasattr(frozendict, '_mapping'))
+        self.assertNotIn('__slots__', frozendict.__dict__)
+        self.assertNotIn('_mapping', frozendict.__dict__)
+        self.assertNotIn('__slots__', dir(frozendict))
+        self.assertNotIn('_mapping', dir(frozendict))
+        self.assertNotIn('__slots__', dir(frozendict()))
+        self.assertNotIn('_mapping', dir(frozendict()))
 
 
 class FrozendictTests(unittest.TestCase):
@@ -78,8 +105,6 @@ class FrozendictTests(unittest.TestCase):
             self.assertEqual(d, d_from_repr)
             self.assertIs(type(d), type(d_from_repr))
 
-    @unittest.skipIf(platform.python_implementation() == "Jython",
-                     "Jython dict.__eq__ is broken")
     def test_hash(self):
         """Test that frozendicts with hashable keys are hashable"""
         class TypeEqFrozendict(frozendict):
@@ -181,7 +206,3 @@ class FrozendictTests(unittest.TestCase):
         self.assertIs(False, A() == frozendict())
         self.assertIs(False, A() == dict())
         self.assertIs(False, dict() == A())
-
-
-if __name__ == '__main__':
-    unittest.main()
