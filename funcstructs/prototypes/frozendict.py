@@ -77,7 +77,11 @@ def _frozendict_method(name, map_get):
 
 # Define all methods inside _FrozendictHelper so that all references to the
 # helper functions are internal to the function body, and not module level
-# exports.
+# exports. This also wraps map_get and map_set inside closure cells so that
+# altering them at the module level does not change method behavior.
+#
+# Can't make this a decorator like _MultisetHelper since we need _map_get and
+# _map_set to already be defined prior to calling.
 def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     """Add wrappers for `dict`'s methods to frozendict."""
 
