@@ -55,26 +55,6 @@ del frozendict._mapping  # destroy external access to the mapping
 del frozendict.__slots__  # make it look like a builtin type
 
 
-def _frozendict_method(name, map_get):
-    """Make wrapper method to access frozendict's internal dict."""
-    dict_method = getattr(dict, name)
-    if name in {'__getitem__', 'has_key'}:
-        def method(self, key):
-            return dict_method(map_get(self), key)
-    elif name == '__contains__':
-        def method(self, item):
-            return dict_method(map_get(self), item)
-    elif name == 'get':
-        def method(self, key, default=None):
-            return dict_method(map_get(self), key, default)
-    else:
-        def method(self):
-            return dict_method(map_get(self))
-    method.__name__ = name
-    method.__doc__ = dict_method.__doc__
-    return method
-
-
 # Define all methods inside _FrozendictHelper so that all references to the
 # helper functions are internal to the function body, and not module level
 # exports. This also wraps map_get and map_set inside closure cells so that
@@ -92,15 +72,17 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
         return self
     fd_cls.__new__ = staticmethod(__new__)
 
-    dict_fromkeys = dict.fromkeys  # cache just like for map_get(/set)
-
     def fromkeys(cls, iterable, v=None):
         """New frozendict with keys from iterable and values set to v."""
         # call cls and copy dict since subclass new might define more
         # conditions (i.e. Multiset)
-        return cls(dict_fromkeys(iterable, v))
-
+        return cls(dict.fromkeys(iterable, v))
     fd_cls.fromkeys = classmethod(fromkeys)
+
+    def add_with_docs(func):
+        name = func.__name__
+        func.__doc__ = getattr(dict, name).__doc__
+        setattr(fd_cls, name, func)
 
     # All of dict's non-mutating methods, EXCEPT:
     #
@@ -137,36 +119,77 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     # and how I implement whatever I end up deciding to do.
     # (TODO: rectify this bout of laziness on my part).
 
-    dict_methods = [
-        '__contains__',
-        '__getitem__',
-        '__iter__',
-        '__len__',
-        'copy',  # no use in returning a new immutable dict, just copy internal
-        'get',
-        'items',
-        'keys',
-        'values'
-    ]
+    @add_with_docs
+    def __contains__(self, item):
+        return item in map_get(self)
+
+    @add_with_docs
+    def __getitem__(self, key):
+        return map_get(self)[key]
+
+    @add_with_docs
+    def __iter__(self):
+        return iter(map_get(self))
+
+    @add_with_docs
+    def __len__(self):
+        return len(map_get(self))
+
+    @add_with_docs
+    def get(self, key, default=None):
+        return map_get(self).get(key, default)
+
+    @add_with_docs
+    def copy(self):
+        return map_get(self).copy()
+
+    @add_with_docs
+    def items(self):
+        return map_get(self).items()
+
+    @add_with_docs
+    def keys(self):
+        return map_get(self).keys()
+
+    @add_with_docs
+    def values(self):
+        return map_get(self).values()
 
     # Make frozendict interface resemble dict's as closely as possible.
     # TODO: This may change if it gets annoying.
     if hasattr(dict, 'iterkeys'):
-        dict_methods.extend([
-            'viewkeys',
-            'viewvalues',
-            'viewitems',
-            'iterkeys',
-            'itervalues',
-            'iteritems',
-            'has_key'
-        ])
+        @add_with_docs
+        def iteritems(self):
+            return map_get(self).iteritems()
+
+        @add_with_docs
+        def iterkeys(self):
+            return map_get(self).iterkeys()
+
+        @add_with_docs
+        def itervalues(self):
+            return map_get(self).itervalues()
+
+        @add_with_docs
+        def viewitems(self):
+            return map_get(self).viewitems()
+
+        @add_with_docs
+        def viewkeys(self):
+            return map_get(self).viewkeys()
+
+        @add_with_docs
+        def viewvalues(self):
+            return map_get(self).viewvalues()
+
+        @add_with_docs
+        def has_key(self, key):
+            return map_get(self).has_key(key)
 
     if hasattr(dict, '__sizeof__'):  # pypy's dict does not define __sizeof__
-        dict_methods.append('__sizeof__')
-
-    for method in dict_methods:
-        setattr(fd_cls, method, _frozendict_method(method, map_get))
+        @add_with_docs
+        def __sizeof__(self):
+            return map_get(self).__sizeof__()
 
     dict_eq = dict.__eq__
 
@@ -201,7 +224,7 @@ _FrozendictHelper(frozendict)
 _Mapping.register(frozendict)
 
 
-del _Mapping, _frozendict_method, _FrozendictHelper
+del _Mapping, _FrozendictHelper
 # Leave _map_set and _map_get for frozendict subclasses (Multiset).
 
 
