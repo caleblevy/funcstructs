@@ -57,7 +57,9 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
         >>> m = Multiset(a=4, b=2)              # Multiset from keyword args
         """
         self = object.__new__(args[0])
-        mset = Counter()
+        # Not calling Counter directly skips __init__, which speeds up tests by
+        # about 5 %, since we construct hundreds of thousands of Multisets.
+        mset = dict.__new__(Counter)
         check = False
         if len(args) == 2:
             if kwargs:
@@ -68,7 +70,9 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
                 check = True
             else:
                 for el in iterable:
-                    dict.__setitem__(mset, el, mset.get(el, 0) + 1)
+                    # mset is a Counter, so if item is missing then mset[el]
+                    # returns 0, to which we add 1.
+                    mset[el] += 1
         elif kwargs:
             dict.update(mset, kwargs)
             check = True
