@@ -22,9 +22,9 @@ def _binop_template(name, map_get, map_set):
 
     def binop(self, other):
         if isinstance(other, Multiset):
-            other = map_get(other)
+            other = Counter(map_get(other))
         result = object.__new__(Multiset)
-        map_set(result, counter_op(map_get(self), other))
+        map_set(result, dict(counter_op(Counter(map_get(self)), other)))
         return result
     binop.__name__ = name
     binop.__doc__ = counter_op.__doc__.replace("Counter", "Multiset").replace(
@@ -37,7 +37,7 @@ def _rop_template(name, map_get, map_set):
     binop = getattr(Counter, '__'+name[3:])
 
     def rop(self, other):
-        return binop(other, map_get(self))
+        return binop(other, Counter(map_get(self)))
     rop.__name__ = name
     rop.__doc__ = None
     return rop
@@ -57,9 +57,17 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
         >>> m = Multiset(a=4, b=2)              # Multiset from keyword args
         """
         self = object.__new__(args[0])
-        # Not calling Counter directly skips __init__, which speeds up tests by
-        # about 5 %, since we construct hundreds of thousands of Multisets.
-        mset = dict.__new__(Counter)
+        # Originally, this was "mset = Counter()", which allowd us to use
+        # the Counter binary operation methods on the internal map.
+        #
+        # Changing this to "mset = dict.__new__(Counter)" skipped calling
+        # Counter's __init__, which sped up the tests by a couple percent
+        # (we construct hundreds of thousands Multisets, so even No-Ops
+        # make a difference).
+        #
+        # Using the dict literal syntax "mset = {}" gives <5% speed
+        # boost to the original since we also avoid a globals lookup.
+        mset = {}
         check = False
         if len(args) == 2:
             if kwargs:
@@ -70,9 +78,10 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
                 check = True
             else:
                 for el in iterable:
-                    # mset is a Counter, so if item is missing then mset[el]
-                    # returns 0, to which we add 1.
-                    mset[el] += 1
+                    # Use syntactic sugar for special methods, since these
+                    # short-circuit to the type directly. Call directly on type
+                    # for regular methods.
+                    mset[el] = dict.get(mset, el, 0) + 1
         elif kwargs:
             dict.update(mset, kwargs)
             check = True
