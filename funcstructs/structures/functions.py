@@ -11,6 +11,7 @@ from math import factorial
 from funcstructs import compat
 
 from funcstructs.bases import frozendict, Enumerable
+from platform import python_implementation
 
 
 def _result_functype(f, g):
@@ -85,6 +86,13 @@ class Function(frozendict):
     """
 
     __slots__ = ()
+
+    if python_implementation() == "Jython":
+        # Jython reports instance layout conflicts if class with __slots__
+        # not inheriting from a builtin appears multiple times in the
+        # class inheritance tree. Related to http://bugs.jython.org/issue2101
+        # and http://bugs.jython.org/issue1996.
+        __slots__ += '__dict__',
 
     def __init__(*args, **kwargs):
         _ = args[0].image  # make sure that codomain is hashable
