@@ -46,6 +46,7 @@ def _rop_template(name, map_get, map_set):
 def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
     """Add Counter wrappers to Multiset."""
 
+    @staticmethod
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
         """Create a new Multiset. If given, count elements from an
         input iterable, otherwise initialize the count from another
@@ -57,16 +58,6 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
         >>> m = Multiset(a=4, b=2)              # Multiset from keyword args
         """
         self = object.__new__(args[0])
-        # Originally, this was "mset = Counter()", which allowd us to use
-        # the Counter binary operation methods on the internal map.
-        #
-        # Changing this to "mset = dict.__new__(Counter)" skipped calling
-        # Counter's __init__, which sped up the tests by a couple percent
-        # (we construct hundreds of thousands Multisets, so even No-Ops
-        # make a difference).
-        #
-        # Using the dict literal syntax "mset = {}" gives <5% speed
-        # boost to the original since we also avoid a globals lookup.
         mset = {}
         check = False
         if len(args) == 2:
@@ -74,16 +65,16 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
                 raise TypeError("Multiset does not accept iterable and kwargs")
             iterable = args[1]
             if isinstance(iterable, Mapping):
-                dict.update(mset, iterable)
+                mset.update(iterable)
                 check = True
             else:
                 for el in iterable:
                     # Use syntactic sugar for special methods, since these
                     # short-circuit to the type directly. Call directly on type
                     # for regular methods.
-                    mset[el] = dict.get(mset, el, 0) + 1
+                    mset[el] = mset.get(el, 0) + 1
         elif kwargs:
-            dict.update(mset, kwargs)
+            mset.update(kwargs)  # will need in py3.6 with **kwargs OrderedDict
             check = True
         elif len(args) > 2:
             raise TypeError("expected at most 2 arguments, got %d" % len(args))
@@ -92,8 +83,7 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
                 raise TypeError("multiplicities must be positive integers")
         map_set(self, mset)
         return self
-
-    ms_cls.__new__ = staticmethod(__new__)
+    ms_cls.__new__ = __new__
 
     for op in ['__add__', '__sub__', '__and__', '__or__']:
         setattr(ms_cls, op, _binop_template(op, map_get, map_set))
@@ -214,7 +204,7 @@ def sorted_counts(elements):
     """Same as counts with both lists sorted first by key then by count."""
     if type(elements) is not Multiset:
         elements = Multiset(elements)
-    if len(elements):  # "bool({}.viewitems()) is True" in Jython, sadly...
+    if elements:  # "bool({}.viewitems()) is True" in Jython, sadly...
         return tuple(zip(*sorted(elements.items())))
     else:
         return (), ()
