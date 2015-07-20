@@ -203,14 +203,18 @@ def unordered_product(mset, iterfunc):
 
 def counts(elements):
     """Split an iterable (or mapping) into corresponding key-value lists."""
-    mset = Multiset(elements)
-    return tuple(mset.keys()), tuple(mset.values())
+    if type(elements) is not Multiset:
+        elements = Multiset(elements)
+    # Cast to tuples, due to issues with pypy's viewitems changing order even
+    # if the dict has not been altered.
+    return tuple(elements.keys()), tuple(elements.values())
 
 
 def sorted_counts(elements):
     """Same as counts with both lists sorted first by key then by count."""
-    mset = Multiset(elements)
-    if mset:  # "bool({}.viewitems()) is True" in Jython, sadly...
-        return tuple(zip(*sorted(mset.items())))
+    if type(elements) is not Multiset:
+        elements = Multiset(elements)
+    if len(elements):  # "bool({}.viewitems()) is True" in Jython, sadly...
+        return tuple(zip(*sorted(elements.items())))
     else:
         return (), ()
