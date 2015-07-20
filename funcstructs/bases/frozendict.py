@@ -182,33 +182,24 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
         def __sizeof__(self):
             return map_get(self).__sizeof__()
 
-    dict_eq = dict.__eq__
-
+    @add_with_docs
     def __eq__(self, other):
         if isinstance(other, frozendict):
             other = map_get(other)
-        return dict_eq(map_get(self), other)
-    __eq__.__doc__ = dict.__eq__.__doc__
-    fd_cls.__eq__ = __eq__
+        return map_get(self).__eq__(other)
 
+    @add_with_docs
     def __ne__(self, other):
         return not self == other
-    __ne__.__doc__ = dict.__ne__.__doc__
-    fd_cls.__ne__ = __ne__
 
-    dict_repr = dict.__repr__
-
+    @add_with_docs
     def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, dict_repr(map_get(self)))
-    __repr__.__doc__ = dict.__repr__.__doc__
-    fd_cls.__repr__ = __repr__
+        return "%s(%s)" % (self.__class__.__name__, repr(map_get(self)))
 
-    dict_items = getattr(dict, 'iteritems', dict.items)
-
+    @add_with_docs
     def __hash__(self):
         # default hash independent of overridden items
-        return hash(frozenset(dict_items(map_get(self))))
-    fd_cls.__hash__ = __hash__
+        return hash(frozenset(map_get(self).items()))
 
 
 _FrozendictHelper(frozendict)
