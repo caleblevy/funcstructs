@@ -164,6 +164,11 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
             """D.values() -> an object providing a view on D's values"""
             return map_get(self).viewvalues()
 
+        @add_with_docs
+        def __hash__(self):
+            # default hash independent of overridden items
+            return hash(frozenset(map_get(self).viewitems()))
+
     else:
         @add_with_docs
         def items(self):
@@ -176,6 +181,10 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
         @add_with_docs
         def values(self):
             return map_get(self).values()
+
+        @add_with_docs
+        def __hash__(self):
+            return hash(frozenset(map_get(self).items()))
 
     if hasattr(dict, '__sizeof__'):  # pypy's dict does not define __sizeof__
         @add_with_docs
@@ -195,11 +204,6 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     @add_with_docs
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, repr(map_get(self)))
-
-    @add_with_docs
-    def __hash__(self):
-        # default hash independent of overridden items
-        return hash(frozenset(map_get(self).items()))
 
 
 _FrozendictHelper(frozendict)
