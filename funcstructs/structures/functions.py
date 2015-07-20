@@ -129,7 +129,7 @@ class Function(frozendict):
 
     def __contains__(self, item):
         """(x, y) in f <==> f[x] == y"""
-        return item in compat.viewitems(self)
+        return item in self.items()
 
     # Define composition of Functions
 

@@ -81,7 +81,8 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
 
     def add_with_docs(func):
         name = func.__name__
-        func.__doc__ = getattr(dict, name).__doc__
+        if func.__doc__ is None:
+            func.__doc__ = getattr(dict, name).__doc__
         setattr(fd_cls, name, func)
 
     # All of dict's non-mutating methods, EXCEPT:
@@ -95,16 +96,9 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     # __init__: since frozendict is not a dict, and the internal dict
     # is already initialized inside __new__.
     #
-    # __repr__: since we want to wrap it to add "frozendict" around the
-    # dict string, so we can't just return dict.__repr__. We exclude __format__
-    # and __str__ since they will depend on __repr__.
-    #
     # __setattr__ and __delattr__: since (I believe) those would apply
     # to the internal dict, and just raise AttributeErrors anyway. (TODO:
     # verify this).
-    #
-    # __eq__ and __ne__: since we must wrap frozendicts to compare equal
-    # to both other frozendicts and dicts.
     #
     # Ordering Operations: since (1) in python3 they just
     # raise TypeErrors, which is equally achievable by not giving them
@@ -114,14 +108,23 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     # you DO want a subclass which overrides them, while adding no
     # functionality.
     #
+    # The "iter" and "view" versions of "values", "keys" and "items"
+    # methods. The only reason to add these in would be making a python2
+    # frozendict looks like a python2 dict. Since this distinction causes
+    # numerous headaches (for myself), and I am so far the only user, I
+    # am pleasing no one by artificially maintaining them.
+    #
+    # has_key: This method is so old that even invoking it raises a pep8
+    # warning. Adding it in would be arcane.
+    #
     # __reduce__ and __reduce_ex__: because I am not sure how dict
     # pickling works, whether the "frozenness" of the dict should impact it,
     # and how I implement whatever I end up deciding to do.
     # (TODO: rectify this bout of laziness on my part).
 
     @add_with_docs
-    def __contains__(self, item):
-        return item in map_get(self)
+    def __contains__(self, key):
+        return key in map_get(self)
 
     @add_with_docs
     def __getitem__(self, key):
@@ -143,48 +146,36 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     def copy(self):
         return map_get(self).copy()
 
-    @add_with_docs
-    def items(self):
-        return map_get(self).items()
-
-    @add_with_docs
-    def keys(self):
-        return map_get(self).keys()
-
-    @add_with_docs
-    def values(self):
-        return map_get(self).values()
-
-    # Make frozendict interface resemble dict's as closely as possible.
-    # TODO: This may change if it gets annoying.
-    if hasattr(dict, 'iterkeys'):
+    # Make two distinct function definitions for speed; we want it to compile
+    # to bytecode which explicitly calls the method in question.
+    if hasattr(dict, 'itervalues'):
         @add_with_docs
-        def iteritems(self):
-            return map_get(self).iteritems()
-
-        @add_with_docs
-        def iterkeys(self):
-            return map_get(self).iterkeys()
-
-        @add_with_docs
-        def itervalues(self):
-            return map_get(self).itervalues()
-
-        @add_with_docs
-        def viewitems(self):
+        def items(self):
+            """D.items() -> a set-like object providing a view on D's items"""
             return map_get(self).viewitems()
 
         @add_with_docs
-        def viewkeys(self):
+        def keys(self):
+            """D.keys() -> a set-like object providing a view on D's keys"""
             return map_get(self).viewkeys()
 
         @add_with_docs
-        def viewvalues(self):
+        def values(self):
+            """D.values() -> an object providing a view on D's values"""
             return map_get(self).viewvalues()
 
+    else:
         @add_with_docs
-        def has_key(self, key):
-            return map_get(self).has_key(key)
+        def items(self):
+            return map_get(self).items()
+
+        @add_with_docs
+        def keys(self):
+            return map_get(self).keys()
+
+        @add_with_docs
+        def values(self):
+            return map_get(self).values()
 
     if hasattr(dict, '__sizeof__'):  # pypy's dict does not define __sizeof__
         @add_with_docs

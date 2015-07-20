@@ -209,8 +209,8 @@ def counts(elements):
 
 def sorted_counts(elements):
     """Same as counts with both lists sorted first by key then by count."""
-    items = Multiset(elements).items()
-    if items:
-        return tuple(zip(*sorted(items)))
+    mset = Multiset(elements)
+    if mset:  # "bool({}.viewitems()) is True" in Jython, sadly...
+        return tuple(zip(*sorted(mset.items())))
     else:
         return (), ()
