@@ -169,6 +169,10 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
             # default hash independent of overridden items
             return hash(frozenset(map_get(self).viewitems()))
 
+        @add_with_docs
+        def iteritems(self):
+            return map_get(self).iteritems()
+
     else:
         @add_with_docs
         def items(self):
