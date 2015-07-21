@@ -24,6 +24,11 @@ class TreeEnumerationTests(unittest.TestCase):
             self.assertEqual(count, len(set(TreeEnumerator(n))))
             self.assertEqual(count, TreeEnumerator(n).cardinality())
 
+    def test_canonical(self):
+        """Ensure the implementation correctly enumerates DominantSequences."""
+        for tree in TreeEnumerator(9):
+            self.assertEqual(list(DominantSequence(tree)), list(tree))
+
     def test_labelling_counts(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
         for n in range(1, len(self.A000081)):
@@ -37,7 +42,7 @@ class TreeEnumerationTests(unittest.TestCase):
             self.assertEqual(n**(n-1), rooted_count)
 
     def test_tree_elements(self):
-        """spot check enumerated forests for some elements"""
+        """spot check enumerated trees for some elements"""
         trees = set(TreeEnumerator(9))
         self.assertIn(DominantSequence(range(9)), trees)
         self.assertIn(DominantSequence([0, 1, 2, 3, 4, 5, 1, 2, 3]), trees)
