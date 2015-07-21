@@ -8,6 +8,7 @@ from math import factorial
 
 from funcstructs.utils.combinat import (
     multinomial_coefficient as ordered_division_count)
+from funcstructs.utils.subsequences import startswith
 
 from .functions import rangefunc, rangeperm
 from .multiset import Multiset, sorted_counts
@@ -169,10 +170,16 @@ def branch_inds(tree):
     return inds
 
 
+def _chop(tree):
+    """Chop a tree into its branches."""
+    for branch in startswith(tree[1:], tree[0]+1):
+        yield tuple(branch)
+
+
 def branch_groups(tree):
     """Yield, in order, tree's unique branches, and all nodes to which an
     instance of that branch is attached."""
-    branches, mults = sorted_counts(tree.subtrees())
+    branches, mults = sorted_counts(_chop(tree))
     branches = iter(branches[::-1])
     mults = reversed(mults)
     indset = branch_inds(tree)[::-1]

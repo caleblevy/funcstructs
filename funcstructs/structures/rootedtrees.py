@@ -116,7 +116,7 @@ class LevelSequence(bases.Tuple):
         for branch in subsequences.startswith(self[1:], self[0]+1):
             # Bypass any constructor checks; since the tree is verified,
             # all of its subtrees must be as well.
-            yield tuple.__new__(self.__class__, branch)
+            yield tuple.__new__(self.__class__, (node-1 for node in branch))
 
     def traverse_map(self, mapping=list):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
@@ -326,5 +326,5 @@ def forests(n):
     # root. To enumerate all collections of rooted trees on n nodes, we
     # may enumerate all rooted trees on n+1 nodes, chopping them at the
     # base.
-    for tree in TreeEnumerator(n+1, -1):
+    for tree in TreeEnumerator(n+1):
         yield Multiset(tree.subtrees())
