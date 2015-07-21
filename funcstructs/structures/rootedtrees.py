@@ -13,7 +13,7 @@ from funcstructs.structures.multiset import Multiset, unordered_product
 
 __all__ = [
     "LevelSequence", "DominantSequence", "RootedTree",
-    "TreeEnumerator", "ForestEnumerator", "PartitionForests"
+    "TreeEnumerator", "ForestEnumerator"
 ]
 
 
@@ -338,20 +338,3 @@ class ForestEnumerator(bases.Enumerable):
 
     def cardinality(self):
         return TreeEnumerator(self.n+1).cardinality()
-
-
-class PartitionForests(bases.Enumerable):
-    """Collections of rooted trees with sizes specified by partitions."""
-
-    def __init__(self, partition):
-        self.partition = Multiset(partition)
-
-    def __iter__(self):
-        return unordered_product(self.partition, TreeEnumerator)
-
-    def cardinality(self):
-        l = 1
-        for y, r in self.partition.items():
-            n = TreeEnumerator(y).cardinality()
-            l *= combinat.nCWRk(n, r)
-        return l

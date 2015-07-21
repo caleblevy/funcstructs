@@ -9,5 +9,5 @@ from .multiset import Multiset, unordered_product
 from .necklaces import periodicity, Necklace, FixedContentNecklaces
 from .rootedtrees import (
     LevelSequence, DominantSequence, RootedTree,
-    TreeEnumerator, ForestEnumerator, PartitionForests
+    TreeEnumerator, ForestEnumerator
 )

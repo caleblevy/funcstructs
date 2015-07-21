@@ -63,15 +63,12 @@ Additionally, there are three enumerators:
 ``ForestEnumerator``
     Generates every **forest** (a multiset of rooted trees) on a fixed number
     of nodes.
-``PartitionForests``
-    Enumerates forests whose nodes are divided amongst trees with sizes of a
-    given partition.
 
 .. code:: python
 
     >>> from funcstructs.structures import (
     ...     RootedTree, LevelSequence, DominantSequence, TreeEnumerator,
-    ...     ForestEnumerator, PartitionForests
+    ...     ForestEnumerator,
     ... )
 
     >>> o1 = OrderedTree([0, 1, 1, 2, 2, 3])

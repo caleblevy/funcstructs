@@ -17,7 +17,7 @@ from funcstructs.utils import compositions, factorization, subsequences
 from .functions import rangefunc
 from .multiset import Multiset, unordered_product
 from .necklaces import Necklace, FixedContentNecklaces
-from .rootedtrees import _levels_from_preim, DominantSequence, PartitionForests
+from .rootedtrees import _levels_from_preim, DominantSequence, TreeEnumerator
 
 
 __all__ = ("Funcstruct", "EndofunctionStructures")
@@ -308,7 +308,7 @@ def attachment_forests(t, l):
     them to a a cycle of length l."""
     for partition in direct_unordered_attachments(t, l):
         # TODO: get rid of duplicate Multiset madness here
-        for forest in PartitionForests(partition):
+        for forest in unordered_product(partition, TreeEnumerator):
             for necklace in FixedContentNecklaces(forest):
                 yield necklace
 

@@ -1,7 +1,7 @@
 import unittest
 
 from funcstructs.structures import(
-    TreeEnumerator, ForestEnumerator, PartitionForests,
+    TreeEnumerator, ForestEnumerator,
     EndofunctionStructures, TransformationMonoid,
     FixedContentNecklaces
 )
@@ -23,8 +23,6 @@ class EnumerableTests(unittest.TestCase):
     enums.extend([
         FixedContentNecklaces([3, 3, 2]),
         FixedContentNecklaces([1, 2, 1, 3]),
-        PartitionForests([3, 3, 2]),
-        PartitionForests([1, 3, 2, 1])
     ])
 
     def test_repr(self):

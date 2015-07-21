@@ -11,7 +11,6 @@ from funcstructs.structures.rootedtrees import (
     DominantSequence,
     TreeEnumerator,
     ForestEnumerator,
-    PartitionForests
 )
 
 
@@ -29,18 +28,9 @@ class TreeEnumerationTests(unittest.TestCase):
     def test_forest_counts(self):
         """Check len(ForestEnumerator(N))==A000081(N+1)"""
         for n, count in enumerate(self.A000081[1:], start=1):
-            intforests = set(ForestEnumerator(n))
-            intforestcount = ForestEnumerator(n).cardinality()
-            pforests = set()
-            pforestcount = 0
-            for part in IntegerPartitions.partitions(n):
-                pforests.update(PartitionForests(part))
-                pforestcount += PartitionForests(part).cardinality()
-            self.assertEqual(count, len(intforests))
-            self.assertEqual(count, len(pforests))
-            self.assertEqual(count, intforestcount)
-            self.assertEqual(count, pforestcount)
-            self.assertEqual(intforests, pforests)
+            forests = ForestEnumerator(n)
+            self.assertEqual(count, forests.cardinality())
+            self.assertEqual(count, len(set(forests)))
 
     def test_forest_elements(self):
         """spot check enumerated forests for some elements"""

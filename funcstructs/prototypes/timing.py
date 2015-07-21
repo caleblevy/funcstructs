@@ -208,7 +208,6 @@ if __name__ == '__main__':
     iteration_time(fixed_lex_partitions(100, 40))
     iteration_time(EndofunctionStructures(12))
     iteration_time(EndofunctionStructures, 12)
-    iteration_time(PartitionForests, [2, 2, 3, 5])
     iteration_time(productrange, -2, [2, 2, 2, 3, 5], step=2)
 
     mapbench(range(1, 2000), Endofunction.cycles, flattree)
