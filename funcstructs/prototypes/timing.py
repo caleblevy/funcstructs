@@ -193,9 +193,9 @@ if __name__ == '__main__':
 
     def balanced_binary_tree(n):
         """Produce a balanced binary tree of height n."""
-        h = int(log2(n)) + 1
+        h = int(log2(n))
         tree = [h]
-        while h-1:
+        while h:
             h -= 1
             tree *= 2
             tree = [h] + tree
@@ -212,7 +212,8 @@ if __name__ == '__main__':
 
     mapbench(range(1, 2000), Endofunction.cycles, flattree)
     mapbench(range(20, 2000), Endofunction.cycles, randfunc)
-    mapbench(range(20, 2000), periodicity, lambda f: randfunc(f).values())
+    mapbench(range(20, 2000), periodicity,
+             lambda f: list(randfunc(f).values()))
     plt.figure()
     mapbench(
         range(20, 2500), Endofunction.cycles,
