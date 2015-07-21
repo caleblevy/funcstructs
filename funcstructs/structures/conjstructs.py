@@ -125,23 +125,9 @@ def _partitions(n):
         yield Multiset(partition)
 
 
-# The following algorithm for enumerating conjugacy classes of endofunctions
-# (in particular, their representations as Funcstruct objects) was derived and
-# implemented by its author, Caleb C. Levy, from 2014 to 2015. Improvements and
-# revisions are ongoing; suggestions are welcome. To the best of his knowledge,
-# this algorithm is novel, and is the first in existence for enumerating
-# canonical representations of each endofunction structure on set of fixed
-# size without duplication.
-#
-# NOTE: This problem is HARD!! This took me MONTHS to derive, and just as
-# long to code. Combining all the supporting logic from funcstructs would
-# require ~8-10 levels of nesting, depending on how you count. Supporting
-# libraries (D. Eppstein's IntegerPartitions, python's itertools, etc.)
-# would bring that closer to ~15-20 levels of indentation for the core
-# logic alone (this excludes incidental things like the python
-# interpreter, for example). This is not for lack of simplification; in
-# fact I have placed CONSIDERABLE emphasis on economy of code.
-# Endofunction structures are suprisingly tricky beasts.
+# The following algorithm for enumerating conjugacy classes of
+# endofunctions was derived and implemented by Caleb C. Levy, from
+# 2014 to 2015. To the best of his knowledge, this algorithm is novel.
 
 
 # Enumerating Endofunction Structures with a Fixed Number of Nodes
