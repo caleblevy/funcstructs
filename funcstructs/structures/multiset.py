@@ -13,7 +13,7 @@ from operator import mul
 
 from funcstructs.bases.frozendict import frozendict, _map_get, _map_set
 
-__all__ = ["Multiset", "unordered_product", "counts", "sorted_counts"]
+__all__ = ["Multiset", "counts", "sorted_counts"]
 
 
 def _binop_template(name, map_get, map_set):
@@ -171,24 +171,6 @@ class Multiset(frozendict):
     def degeneracy(self):
         """Number of different representations of the same multiset."""
         return reduce(mul, map(factorial, self.values()), 1)
-
-
-def unordered_product(mset, iterfunc):
-    """Given a multiset of inputs to an iterable, and iterfunc, returns all
-    unordered combinations of elements from iterfunc applied to each el. It is
-    equivalent to:
-
-        set(Multiset(p) for p in product([iterfunc(i) for i in mset]))
-
-    except it runs through each element once. This program makes the
-    assumptions that no two members of iterfunc(el) are the same, and that if
-    el1 != el2 then iterfunc(el1) and iterfunc(el2) are mutually disjoint."""
-    mset = Multiset(mset)
-    strands = []
-    for y, d in mset.items():
-        strands.append(combinations_with_replacement(iterfunc(y), d))
-    for bundle in product(*strands):
-        yield Multiset(chain(*bundle))
 
 
 def counts(elements):

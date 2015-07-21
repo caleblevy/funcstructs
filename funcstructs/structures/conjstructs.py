@@ -4,7 +4,7 @@ Caleb Levy, 2014-2015.
 """
 
 from fractions import Fraction
-from itertools import chain, product
+from itertools import chain, product, combinations_with_replacement
 from math import factorial
 
 from PADS import IntegerPartitions
@@ -15,7 +15,7 @@ from funcstructs.bases import Enumerable
 from funcstructs.utils import compositions, factorization, subsequences
 
 from .functions import rangefunc
-from .multiset import Multiset, unordered_product
+from .multiset import Multiset
 from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import _levels_from_preim, DominantSequence, TreeEnumerator
 
@@ -271,6 +271,24 @@ def direct_unordered_attachments(t, m):
 #
 # All that remains is to enumerate attachments of t nodes onto a cycle
 # of length l.
+
+def unordered_product(mset, iterfunc):
+    """Given a multiset of inputs to an iterable, and iterfunc, returns all
+    unordered combinations of elements from iterfunc applied to each el. It is
+    equivalent to:
+
+        set(Multiset(p) for p in product([iterfunc(i) for i in mset]))
+
+    except it runs through each element once. This program makes the
+    assumptions that no two members of iterfunc(el) are the same, and that if
+    el1 != el2 then iterfunc(el1) and iterfunc(el2) are mutually disjoint."""
+    mset = Multiset(mset)
+    strands = []
+    for y, d in mset.items():
+        strands.append(combinations_with_replacement(iterfunc(y), d))
+    for bundle in product(*strands):
+        yield Multiset(chain(*bundle))
+
 
 def component_groups(t, l, m):
     """Enumerate ways to make rooted trees from t free nodes and attach

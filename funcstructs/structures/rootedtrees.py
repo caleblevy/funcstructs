@@ -9,7 +9,7 @@ from math import factorial
 from funcstructs import bases
 from funcstructs.utils import combinat, factorization, subsequences
 
-from funcstructs.structures.multiset import Multiset, unordered_product
+from funcstructs.structures.multiset import Multiset
 
 __all__ = [
     "LevelSequence", "DominantSequence", "RootedTree",

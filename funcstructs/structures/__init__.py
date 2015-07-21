@@ -5,7 +5,7 @@ from .functions import (
     identity, rangefunc, rangeperm, randfunc, randperm, randconj,
     Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup
 )
-from .multiset import Multiset, unordered_product
+from .multiset import Multiset
 from .necklaces import periodicity, Necklace, FixedContentNecklaces
 from .rootedtrees import (
     LevelSequence, DominantSequence, RootedTree,
