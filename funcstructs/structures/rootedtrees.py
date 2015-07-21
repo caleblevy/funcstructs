@@ -73,10 +73,13 @@ class LevelSequence(bases.Tuple):
         previous_node = self[0]
         seen = set()
         for node in self[1:]:
-            if node in seen:
-                pass
-            elif node == previous_node + 1:
+            diff = node - previous_node
+            if diff > 0:
+                if diff != 1:
+                    raise ValueError("invalid level sequence: %s" % list(self))
                 seen.add(node)
+            elif node in seen:
+                pass
             else:
                 raise ValueError("invalid level sequence: %s" % list(self))
             previous_node = node
