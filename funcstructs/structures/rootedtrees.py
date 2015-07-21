@@ -13,7 +13,7 @@ from funcstructs.structures.multiset import Multiset
 
 __all__ = [
     "LevelSequence", "DominantSequence", "RootedTree",
-    "TreeEnumerator", "ForestEnumerator"
+    "TreeEnumerator", "forests"
 ]
 
 
@@ -319,22 +319,12 @@ class TreeEnumerator(bases.Enumerable):
         return T[-1]
 
 
-class ForestEnumerator(bases.Enumerable):
-    """Represents the class of collections of rooted trees on n nodes."""
-
-    def __init__(self, n):
-        if n < 0:
-            raise ValueError("Cannot define a Forest tree with %s nodes" % n)
-        self.n = n
-
-    def __iter__(self):
-        """Any rooted tree on n+1 nodes can be identically described as a
-        collection of rooted trees on n nodes, grafted together at a single
-        root. To enumerate all collections of rooted trees on n nodes, we may
-        enumerate all rooted trees on n+1 nodes, chopping them at the base.
-        """
-        for tree in TreeEnumerator(self.n+1, -1):
-            yield Multiset(tree.subtrees())
-
-    def cardinality(self):
-        return TreeEnumerator(self.n+1).cardinality()
+def forests(n):
+    """Enumerate every forest on n nodes."""
+    # Any rooted tree on n+1 nodes can be identically described as a
+    # collection of rooted trees on n nodes, grafted together at a single
+    # root. To enumerate all collections of rooted trees on n nodes, we
+    # may enumerate all rooted trees on n+1 nodes, chopping them at the
+    # base.
+    for tree in TreeEnumerator(n+1, -1):
+        yield Multiset(tree.subtrees())

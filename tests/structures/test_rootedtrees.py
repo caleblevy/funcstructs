@@ -10,47 +10,20 @@ from funcstructs.structures.rootedtrees import (
     LevelSequence,
     DominantSequence,
     TreeEnumerator,
-    ForestEnumerator,
+    forests
 )
 
 
 class TreeEnumerationTests(unittest.TestCase):
-
-    # Counting tests
     A000081 = [1, 1, 2, 4, 9, 20, 48, 115, 286]
 
     def test_tree_counts(self):
         """OEIS A000081: number of unlabelled rooted trees on N nodes."""
+        with self.assertRaises(ValueError):
+            a = TreeEnumerator(0)  # Trees must have elements
         for n, count in enumerate(self.A000081, start=1):
             self.assertEqual(count, len(set(TreeEnumerator(n))))
             self.assertEqual(count, TreeEnumerator(n).cardinality())
-
-    def test_forest_counts(self):
-        """Check len(ForestEnumerator(N))==A000081(N+1)"""
-        for n, count in enumerate(self.A000081[1:], start=1):
-            forests = ForestEnumerator(n)
-            self.assertEqual(count, forests.cardinality())
-            self.assertEqual(count, len(set(forests)))
-
-    def test_forest_elements(self):
-        """spot check enumerated forests for some elements"""
-        n = 9
-        forests = set(ForestEnumerator(9))
-        t1 = multiset.Multiset([DominantSequence(range(n))])
-        t2 = multiset.Multiset([
-            DominantSequence(range(n//2)),
-            DominantSequence(range(n-n//2))
-        ])
-        t3 = multiset.Multiset([DominantSequence(iter([0]))]*n)
-        nt1 = multiset.Multiset([DominantSequence(range(n-1))])
-        nt2 = multiset.Multiset([DominantSequence(range(n+1))])
-        n3 = DominantSequence(range(n-1))
-        nf4 = multiset.Multiset([LevelSequence(range(n))])
-        n5 = multiset.Multiset(DominantSequence(range(1, n+1)))
-        for t in [t1, t2, t3]:
-            self.assertIn(t, forests)
-        for nt in [nt1, nt2, n3, nf4, n5]:
-            self.assertNotIn(nt, forests)
 
     def test_labelling_counts(self):
         """OEIS A000169: n**(n-1) == number of rooted trees on n nodes."""
@@ -63,6 +36,26 @@ class TreeEnumerationTests(unittest.TestCase):
                 rooted_count += nfac//RootedTree(tree).degeneracy()
             self.assertEqual(n**(n-1), ordered_count)
             self.assertEqual(n**(n-1), rooted_count)
+
+    def test_forest_elements(self):
+        """spot check enumerated forests for some elements"""
+        n = 9
+        t1 = multiset.Multiset([DominantSequence(range(n))])
+        t2 = multiset.Multiset([
+            DominantSequence(range(n//2)),
+            DominantSequence(range(n-n//2))
+        ])
+        t3 = multiset.Multiset([DominantSequence(iter([0]))]*n)
+        nt1 = multiset.Multiset([DominantSequence(range(n-1))])
+        nt2 = multiset.Multiset([DominantSequence(range(n+1))])
+        n3 = DominantSequence(range(n-1))
+        nf4 = multiset.Multiset([LevelSequence(range(n))])
+        n5 = multiset.Multiset(DominantSequence(range(1, n+1)))
+        f = set(forests(9))
+        for t in [t1, t2, t3]:
+            self.assertIn(t, f)
+        for nt in [nt1, nt2, n3, nf4, n5]:
+            self.assertNotIn(nt, f)
 
 
 class RootedTreeTests(unittest.TestCase):

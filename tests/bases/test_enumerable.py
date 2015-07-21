@@ -1,7 +1,7 @@
 import unittest
 
 from funcstructs.structures import(
-    TreeEnumerator, ForestEnumerator,
+    TreeEnumerator,
     EndofunctionStructures, TransformationMonoid,
     FixedContentNecklaces
 )
@@ -13,7 +13,6 @@ class EnumerableTests(unittest.TestCase):
     enums = []
     for n in {4, 5}:
         enums.append(TreeEnumerator(n))
-        enums.append(ForestEnumerator(n))
         enums.append(TransformationMonoid(n))
         enums.append(EndofunctionStructures(n))
     enums.extend([
@@ -55,8 +54,6 @@ class EnumerableTests(unittest.TestCase):
         """Ensure that negative enumerations raise errors"""
         with self.assertRaises(ValueError):
             TreeEnumerator(0)
-        with self.assertRaises(ValueError):
-            ForestEnumerator(-1)
         with self.assertRaises(ValueError):
             TransformationMonoid(-1)
         with self.assertRaises(ValueError):

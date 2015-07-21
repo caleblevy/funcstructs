@@ -53,22 +53,18 @@ Rooted Trees
     level sequences of all other ordered trees with the same unordered
     structure. Two level sequences correspond to the same unordered rooted tree
     if and only if they have the same dominant sequence.
-
-Additionally, there are three enumerators:
-
 ``TreeEnumerator``
     Generates the dominant sequence of each unordered rooted tree on a fixed
     number of nodes using the algorithm provided by T. Beyer and S. M.
     Hedetniemi in "Constant time generation of rooted trees."
-``ForestEnumerator``
-    Generates every **forest** (a multiset of rooted trees) on a fixed number
-    of nodes.
 
 .. code:: python
 
     >>> from funcstructs.structures import (
-    ...     RootedTree, LevelSequence, DominantSequence, TreeEnumerator,
-    ...     ForestEnumerator,
+    ...     RootedTree,
+    ...     LevelSequence,
+    ...     DominantSequence,
+    ...     TreeEnumerator
     ... )
 
     >>> o1 = OrderedTree([0, 1, 1, 2, 2, 3])
