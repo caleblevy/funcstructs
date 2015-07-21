@@ -70,7 +70,12 @@ class LevelSequence(bases.Tuple):
 
     def __new__(cls, level_sequence):
         self = super(LevelSequence, cls).__new__(cls, level_sequence)
-        previous_node = self[0]
+        # Validity checks
+        if not self:  # more helpful than seeing "IndexError"
+            raise TypeError("a tree must have a root")
+        root = previous_node = self[0]
+        if root != 0:
+            raise TypeError("root must have height 0, received %s" % root)
         seen = set()
         for node in self[1:]:
             diff = node - previous_node
