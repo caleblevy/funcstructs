@@ -53,7 +53,7 @@ class FunctionTests(unittest.TestCase):
     def test_fibers(self):
         """Test that elements of fibers are returned correctly."""
         for c, f in self.constants:
-            self.assertEqual(dict(f.fibers()), {c: f.domain})
+            self.assertEqual(dict(f.fibers), {c: f.domain})
 
     def test_containment(self):
         """Test that function containment tests for key-value pairs."""
@@ -83,9 +83,9 @@ class BijectionTests(unittest.TestCase):
 
         for perm in permlist:
             e = rangeperm(range(len(perm)))
-            self.assertSequenceEqual(e, perm * perm.inverse())
-            self.assertSequenceEqual(e, perm.inverse() * perm)
-            self.assertSequenceEqual(perm, perm.inverse().inverse())
+            self.assertSequenceEqual(e, perm * perm.inverse)
+            self.assertSequenceEqual(e, perm.inverse * perm)
+            self.assertSequenceEqual(perm, perm.inverse.inverse)
 
     def test_conjugation(self):
         """Test that conjugation works in the correct order"""
@@ -98,7 +98,7 @@ class BijectionTests(unittest.TestCase):
         s = rangeperm([0, 1, 3, 4, 2])
         g = rangefunc([3, 3, 4, 2, 3])  # g = s*f*s**-1
         self.assertEqual(g, s.conj(f))
-        self.assertNotEqual(g, s.inverse().conj(f))
+        self.assertNotEqual(g, s.inverse.conj(f))
         # Test that if function has cycle
         #    t=(a1, a2, ..., an)
         # then
@@ -108,13 +108,13 @@ class BijectionTests(unittest.TestCase):
         sr = rangeperm([4, 2, 3, 1, 0])  # t*s*t^-1 = (1, 2, 3)(4, 0)
         sl = rangeperm([1, 4, 3, 2, 0])  # t^-1*s*t = (0, 1, 4)(2, 3)
         self.assertEqual(sr, tau.conj(sigma))
-        self.assertEqual(sl, tau.inverse().conj(sigma))
+        self.assertEqual(sl, tau.inverse.conj(sigma))
 
     def test_domain_changing(self):
         """Test changing an endofunction's domain does not change structure"""
         f = Endofunction.fromkeys("abc", "a")
         b = Bijection(zip("abc", range(3)))
-        self.assertEqual(f, b.inverse().conj(b.conj(f)))
+        self.assertEqual(f, b.inverse.conj(b.conj(f)))
         self.assertEqual(Funcstruct(f), Funcstruct(b.conj(f)))
 
 
@@ -134,9 +134,9 @@ class EndofunctionTests(unittest.TestCase):
         ii = rangefunc(range(7))
         ia = Endofunction(zip(*(["abcdefg"]*2)))
         for i in range(1, 12):  # Order of cycle is 12
-            self.assertNotEqual(ii.cycles(), (s**i).cycles())
-            self.assertNotEqual(ia.cycles(), (a**i).cycles())
-        self.assertEqual(ii.cycles(), (s**12).cycles())
+            self.assertNotEqual(ii.cycles, (s**i).cycles)
+            self.assertNotEqual(ia.cycles, (a**i).cycles)
+        self.assertEqual(ii.cycles, (s**12).cycles)
 
         n = 10
         f = rangefunc([0]+list(range(10)))
@@ -173,8 +173,8 @@ class EndofunctionTests(unittest.TestCase):
     funcs += list(TransformationMonoid(1))
     funcs += list(TransformationMonoid("abc"))
     funcs += list(TransformationMonoid([("a", ), ("b", ), ("c", ), ("d", )]))
-    cyclesets = [f.cycles() for f in funcs]
-    limitsets = [f.limitset() for f in funcs]
+    cyclesets = [f.cycles for f in funcs]
+    limitsets = [f.limitset for f in funcs]
 
     def test_cycles_are_cyclic(self):
         """Make sure funccylces actually returns cycles."""
@@ -196,7 +196,7 @@ class EndofunctionTests(unittest.TestCase):
     def test_acyclic_ancestors_are_not_cyclic(self):
         """Make sure attached_treenodes returns nodes not in cycles."""
         for f, lim in zip(self.funcs, self.limitsets):
-            for _, invim in f.acyclic_ancestors().items():
+            for _, invim in f.acyclic_ancestors.items():
                 for x in invim:
                     self.assertNotIn(x, lim)
 

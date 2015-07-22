@@ -166,17 +166,17 @@ The functions module also provides enumerators corresponding to each of the
     Function({'a': 'a', 'c': 'a', 'b': 'a'})
 
     >>> h = Endofunction({0: 0, 1: 0, 2: 1, 3: 2, 4: 3})      # Endofunction
-    >>> h.cycles()
+    >>> h.cycles
     frozenset([(0, )])
     >>> h**3
     Endofunction({0: 0, 1: 0, 2: 0, 3: 0, 4: 1})
 
     >>> b = Bijection(a=1, b=2, c=3, d=4, e=5)                # Bijection
-    >>> b.inverse()
+    >>> b.inverse
     Bijection({1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e'})
     >>> b * b.inverse()
     Bijection({1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
-    >>> b.inverse() * b
+    >>> b.inverse * b
     Bijection({'a': 'a', 'c': 'c', 'b': 'b', 'e': 'e', 'd': 'd'})
 
     >>> p = Permutation({0: 3, 1: 4, 2: 1, 3: 0, 4: 2})       # Permutation

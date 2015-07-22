@@ -97,11 +97,11 @@ class LevelSequence(bases.Tuple):
         node is specified, and the function does not have a unique cyclic
         element, a ValueError is raised."""
         if root is None:
-            lim = func.limitset()
+            lim = func.limitset
             if len(lim) != 1:
                 raise ValueError("Function structure is not a rooted tree")
             root = next(iter(lim))
-        return cls(_levels_from_preim(func.acyclic_ancestors(), root))
+        return cls(_levels_from_preim(func.acyclic_ancestors, root))
 
     def parents(self):
         """Generator of the parent nodes of each node in order."""

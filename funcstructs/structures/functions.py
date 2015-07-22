@@ -165,8 +165,9 @@ class Function(frozendict):
     # and getting rid of the __call__ syntax alleviates a fair number of
     # headaches.
 
+    @property
     def fibers(self):
-        """f.fibers()[y] <==> {x for x in f.domain if f[x] == y}"""
+        """f.fibers[y] <==> {x for x in f.domain if f[x] == y}"""
         # TODO: Add preimage class
         preim = defaultdict(list)
         for x, y in self:
@@ -177,17 +178,14 @@ class Function(frozendict):
 class Bijection(Function):
     """An invertible Function.
 
-    Bijection objects have an inverse method. For every Bijection b:
+    Bijection objects have an inverse method. For every Bijection b,
+    - b.inverse * b == identity(b.domain)
+    - b * b.inverse == identity(b.image)
 
-    >>> b.inverse() * b == identity(b.domain)
-    True
-    >>> b * b.inverse() == identity(b.image)
-    True
-
-    Bijections can also conjugate functions:
-
-    >>> b.conj(f) = type(f)(b * f * b.inverse())
+    They can also conjugate functions:
+    - b.conj(f) == b * f * b.inverse()
     """
+    # TODO: add examples of the above
 
     __slots__ = ()
 
@@ -198,8 +196,9 @@ class Bijection(Function):
         if len(self) != len(self.image):
             raise ValueError("This function is not invertible.")
 
+    @property
     def inverse(self):
-        """s.inverse() * s <==> identity(s.domain)"""
+        """s.inverse * s <==> identity(s.domain)"""
         return self.__class__((y, x) for x, y in self)
 
     def conj(self, f):
@@ -233,7 +232,7 @@ class Endofunction(Function):
 
     Iteration can be used to form cycles.
 
-    >>> f.cycles()
+    >>> f.cycles
     frozenset([(0,)])
     """
 
@@ -258,7 +257,7 @@ class Endofunction(Function):
         return f_iter
 
     def imagepath(self):
-        """f.imagepath[n] <==> len((f**n).image)"""
+        """f.imagepath()[n] <==> len((f**n).image)"""
         cardinalities = [len(self.image)]
         f = self
         card_prev = len(self)
@@ -273,6 +272,7 @@ class Endofunction(Function):
             card_prev = card
         return tuple(cardinalities)
 
+    @property
     def cycles(self):
         """Return the set of f's cycles"""
         tried = set()
@@ -294,15 +294,17 @@ class Endofunction(Function):
                     cyclic.update(cycle)
         return frozenset(map(tuple, cycles))
 
+    @property
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
-        return frozenset(itertools.chain(*self.cycles()))
+        return frozenset(itertools.chain(*self.cycles))
 
+    @property
     def acyclic_ancestors(self):
-        """f.attached_treenodes()[y] <==> f.fibers()[y] - f.limitset"""
+        """f.acyclic_ancestors[y] <==> f.fibers[y] - f.limitset"""
         descendants = defaultdict(list)
-        lim = self.limitset()  # make local copy for speed
-        for y, inv_image in self.fibers().items():
+        lim = self.limitset  # make local copy for speed
+        for y, inv_image in self.fibers.items():
             for x in inv_image:
                 if x not in lim:
                     descendants[y].append(x)
@@ -334,7 +336,7 @@ class Permutation(Endofunction, Bijection):
         if n >= 0:
             return super(Permutation, self).__pow__(n)
         else:
-            return super(Permutation, self.inverse()).__pow__(-n)
+            return super(Permutation, self.inverse).__pow__(-n)
 
 
 # Convenience functions for defining Endofunctions from a sequence in range(n)

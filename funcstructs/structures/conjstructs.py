@@ -51,8 +51,8 @@ class Funcstruct(Multiset):
 
     def __new__(cls, f):
         cycles = []
-        treenodes = f.acyclic_ancestors()
-        for cycle in f.cycles():
+        treenodes = f.acyclic_ancestors
+        for cycle in f.cycles:
             trees = []
             for x in cycle:
                 # Use DominantSequence instead of RootedTree to avoid hitting

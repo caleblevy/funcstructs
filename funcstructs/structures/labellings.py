@@ -206,7 +206,7 @@ def translation_keys(tree):
     to translate each combination into an endofunction."""
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
-    translation_sequence = rangeperm(chain(*ind_groups)).inverse().conj(
+    translation_sequence = rangeperm(chain(*ind_groups)).inverse.conj(
         rangefunc(tree.map_labelling()))
     return bin_widths, translation_sequence
 
