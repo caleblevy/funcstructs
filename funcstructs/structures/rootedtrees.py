@@ -309,6 +309,44 @@ class TreeEnumerator(bases.Enumerable):
                     tree[i] = tree[i-(p-q)]
                 yield tuple.__new__(DominantSequence, tree)
 
+    def __len__(self):
+        """Number of trees on n nodes. May break for N >= 25."""
+        # Memoize standard sequence for number of rooted trees
+        # for every term less than 2**32 (Jython's max index size).
+        # We could go to 64-bit (Python and PyPy cutoff), but honestly
+        # if someone is going to make a list of > 2 billion trees,
+        # the time to do that will dwarf the time to calculate length.
+        #
+        # Adding a __len__ method will cause PyPy and Python to spit an
+        # overflow error when *explicitly* constructing a list of trees
+        # on > 50 nodes, as these break the 64 - bit index size limit.
+        # This will not break the "for i in TreeEnumerator(n):" syntax,
+        # however, which is the only kind I can imagine being used for N
+        # > 20 or so (i.e. getting the first few terms or something).
+        #
+        # As for memoizing magic numbers (instead of the formula):
+        # The unit tests (my de facto benchmark) take about 1/2 sec
+        # longer just from computing, or about 5%. The problem is
+        # that even though the iterator syntax does not *use* the
+        # the result of __len__, it still calls it, and
+        # there are a lot of (duplicate) rooted trees called when
+        # enumerating endofunctions.
+        #
+        # We keep __len__ here for consistency of interface. As for
+        # making the OEIS sequence local to the function: we
+        # avoid a global lookup (and this tuple gets translated into
+        # LOAD_CONST in bytecode). Making it a tuple further
+        # means it is not reconstructed at each call (see
+        # "Why is hardcoding this list slower than calculating it?"
+        # at http://stackoverflow.com/a/27763902/3349520).
+        OEIS_A000081 = (
+            1, 1, 2, 4, 9, 20, 48, 115, 286, 719, 1842, 4766,
+            12486, 32973, 87811, 235381, 634847, 1721159, 4688676,
+            12826228, 35221832, 97055181, 268282855, 743724984,
+            2067174645
+        )
+        return OEIS_A000081[self.n-1] if self.n <= 25 else self.cardinality()
+
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm
         featured without derivation in Finch, S. R. "Otter's Tree Enumeration
