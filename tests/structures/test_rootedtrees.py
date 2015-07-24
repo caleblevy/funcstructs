@@ -162,13 +162,13 @@ class LevelSequenceTests(unittest.TestCase):
         """Check that a functions from tree.map_labelling represent the tree"""
         tree = LevelSequence([0, 1, 2, 3, 3, 3, 2, 3, 3, 1, 2, 2, 1, 2])
         func = functions.rangefunc([0, 0, 1, 2, 2, 2, 1, 6, 6, 0, 9, 9, 0, 12])
-        self.assertEqual(func, functions.rangefunc(tree.map_labelling()))
+        self.assertEqual(func, functions.rangefunc(tree.parents()))
 
     def test_from_func(self):
         """Tests attached tree nodes and canonical_treeorder in one go."""
         for n in range(1, 10):
             for tree in TreeEnumerator(n):
-                treefunc = functions.rangefunc(tree.map_labelling())
+                treefunc = functions.rangefunc(tree.parents())
                 rtreefunc = functions.randconj(treefunc)
                 self.assertEqual(tree, DominantSequence.from_func(rtreefunc))
         # Make sure non-tree structures are caught

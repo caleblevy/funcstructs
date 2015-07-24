@@ -156,15 +156,6 @@ class LevelSequence(bases.Tuple):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
         return mapping(tree.traverse_map(mapping) for tree in self.subtrees())
 
-    def map_labelling(self, labels=None):
-        """Viewing the ordered level sequence as an implicit mapping of each
-        node to the most recent node of the next lowest level, return the
-        sequence of elements that each node is mapped to. If labels is given,
-        func_labelling[n] -> labels[func_labelling[n]]."""
-        if labels is None:
-            labels = range(len(self))
-        return map(labels.__getitem__, self.parents())
-
     def height_groups(self):
         """Nodes in breadth-first traversal order grouped by height."""
         groups = [[] for _ in range(max(self) - self[0] + 1)]

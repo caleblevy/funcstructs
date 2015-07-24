@@ -207,7 +207,7 @@ def translation_keys(tree):
     ind_groups = list(label_groups(tree))
     bin_widths = list(map(len, ind_groups))
     translation_sequence = rangeperm(chain(*ind_groups)).inverse.conj(
-        rangefunc(tree.map_labelling()))
+        rangefunc(tree.parents()))
     return bin_widths, translation_sequence
 
 

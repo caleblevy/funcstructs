@@ -95,7 +95,7 @@ class Funcstruct(Multiset):
             for tree in cycle:
                 end_node += len(tree)
                 # Form tree function labelled with the acyclic nodes
-                func.extend(tree.map_labelling(range(root_node, end_node)))
+                func.extend(node+root_node for node in tree.parents())
                 # Permute the cyclic nodes to form the cycle decomposition
                 func[root_node] = end_node
                 root_node = end_node
