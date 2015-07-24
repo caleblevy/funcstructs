@@ -152,7 +152,7 @@ class LevelSequence(bases.Tuple):
         """Generate nodes in breadth-first traversal order."""
         return chain(*self.height_groups())
 
-    def attachments(self):
+    def children(self):
         """Map of each node to the set of nodes attached to it in order."""
         preim = []
         for node, parent in enumerate(self.parents()):
@@ -197,7 +197,7 @@ class DominantSequence(LevelSequence):
     def __new__(cls, level_sequence):
         ot = LevelSequence(level_sequence)
         keys = _dominant_keys(ot.height_groups(), list(ot.parents()))
-        level_sequence = _levels_from_preim(ot.attachments(), 0, keys)
+        level_sequence = _levels_from_preim(ot.children(), 0, keys)
         # No need to run LevelSequence checks; it's either been preordered or
         # treefunc_properties will serve as an effective check due to indexing.
         return super(LevelSequence, cls).__new__(cls, level_sequence)
