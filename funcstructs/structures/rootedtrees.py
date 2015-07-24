@@ -21,8 +21,25 @@ def _levels_from_preim(graph, root=0, keys=None):
     """Return the level sequence of the ordered tree formed such that
     graph[x] are the nodes attached to x.
 
-    Note: If the graph has any cycles, this method will not terminate.
+    Note: The graph must be acyclic, or the function may not terminate.
     """
+    # Algorithm for turning an Endofunction into a Funcstruct, taking
+    # inspiration from the idea that the preimage of an endofunction
+    # is literally the standard representation of a graph as a mapping
+    # of its vertices to the set of its edges.
+    #
+    # The original implementation of this algorithm was recursive,
+    # however for functions with trees more than 2000 nodes deep
+    # (i.e. sin(x) approximated on 16-bit floats) this would cause
+    # a stack overflow, so I moved it to a managed stack.
+    #
+    # Recursive (and more readable) version was as follows:
+    #
+    #   def levels(graph, root, level=0):
+    #       seq = [level]
+    #       for x in graph[root]:
+    #           seq.extend(levels(graph, x, level+1))
+    #       return seq
     if keys is not None:
         for connections in graph:
             connections.sort(key=keys.__getitem__)
