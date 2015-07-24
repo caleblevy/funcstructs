@@ -126,6 +126,11 @@ class LevelSequence(bases.Tuple):
 
     def parents(self):
         """Generator of the parent nodes of each node in order."""
+        # Algorithm inspired by viewing the ordered level sequence as an
+        # implicit function from each node to the most recent node of the next
+        # lowest level. By keeping a running record of the most recently
+        # visited nodes for each level, we generate the sequence of elements
+        # that each node is mapped to.
         levels = iter(self)
         root = previous_level = next(levels)
         yield 0
