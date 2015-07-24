@@ -128,19 +128,14 @@ class LevelSequence(bases.Tuple):
             yield grafting_point[level-1]
             grafting_point[level] = node
 
-    def subtrees(self):
-        """Return the subtrees attached to the root."""
-        for branch in subsequences.startswith(self[1:], self[0]+1):
-            # Bypass any constructor checks; since the tree is verified,
-            # all of its subtrees must be as well.
-            yield tuple.__new__(self.__class__, (node-1 for node in branch))
-
-    def traverse_map(self, mapping=list):
-        """Apply mapping to the sequence of mapping applied to the subtrees."""
-        # The breaking condition here is implicit; if the tree has no subtrees,
-        # tree.traverse_map(mapping) is simply not called, returning
-        # the equivalent mapping(iter(())).
-        return mapping(tree.traverse_map(mapping) for tree in self.subtrees())
+    def children(self):
+        """Map of each node to the set of nodes attached to it in order."""
+        preim = []
+        for node, parent in enumerate(self.parents()):
+            preim.append([])
+            preim[parent].append(node)
+        preim[0].pop(0)
+        return preim
 
     def height_groups(self):
         """Nodes in breadth-first traversal order grouped by height."""
@@ -155,14 +150,19 @@ class LevelSequence(bases.Tuple):
         """Generate nodes in breadth-first traversal order."""
         return chain(*self.height_groups())
 
-    def children(self):
-        """Map of each node to the set of nodes attached to it in order."""
-        preim = []
-        for node, parent in enumerate(self.parents()):
-            preim.append([])
-            preim[parent].append(node)
-        preim[0].pop(0)
-        return preim
+    def subtrees(self):
+        """Return the subtrees attached to the root."""
+        for branch in subsequences.startswith(self[1:], self[0]+1):
+            # Bypass any constructor checks; since the tree is verified,
+            # all of its subtrees must be as well.
+            yield tuple.__new__(self.__class__, (node-1 for node in branch))
+
+    def traverse_map(self, mapping=list):
+        """Apply mapping to the sequence of mapping applied to the subtrees."""
+        # The breaking condition here is implicit; if the tree has no subtrees,
+        # tree.traverse_map(mapping) is simply not called, returning
+        # the equivalent mapping(iter(())).
+        return mapping(tree.traverse_map(mapping) for tree in self.subtrees())
 
 
 def _dominant_keys(height_groups, func, sort=True):
