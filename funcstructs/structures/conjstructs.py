@@ -132,15 +132,17 @@ def _partitions(n):
 
 # Enumerating Endofunction Structures with a Fixed Number of Nodes
 # ================================================================
-# We use the following tools as black boxes: (TODO: link to their modules)
-# - Enumerator of every forest with a fixed (multi)set of tree sizes
-# - Enumerator of every necklace with a fixed (multi)set of beads
-# - Enumerator of weak compositions n into k parts
-# - Enumerator of partitions of n (into k parts)
-# - Enumerator of a(n unordered) cartesian product of arbitrary sets
+# We use enumerators of the following sets of objects without derivation:
+# - Unordered rooted trees on a fixed number of nodes
+# - Necklaces with a fixed (multi)set of beads
+# - Weak compositions n into k parts
+# - Partitions of n (into k parts)
+# - Cartesian products of given sets
+# - Combinations with replacement from a given set
 #
-# Please note that NONE of the above are trivial to implement, but we do
-# not discuss them further here.
+# (TODO: link to their modules) Please note that NONE of the above are
+# trivial to implement, but we do not discuss them further here.
+
 #
 #
 # "Groups of Forests" vs "Cycles with Trees"
@@ -160,17 +162,20 @@ def _partitions(n):
 # This might have been more straightforward if enumerating multiset
 # partitions were not so difficult. Sympy is the the only library I am
 # aware of with such a function (in python, anyway), and at over 1000
-# lines, it exceeds the combined complexity of every other part the
+# lines, it exceeds the combined complexity of every other part of the
 # algorithm!
 #
-# So using (1) actually adds substantial complexity to the total process.
-# Adding a sympy dependency also greatly increased import time,
-# restricted compatibility with other python implementations, and the
-# implementation slower (by ~4x) at the set sizes we are interested in.
+# So using (1) actually added substantial complexity to the total
+# process, and turned out to be slower (by ~4x) at the set sizes we were
+# interested in. Adding a sympy dependency also greatly increased import
+# time and restricted compatibility with other python implementations.
+# Finally, method (2) had the added benefit of answering the more general
+# question of enumerating endofunction structures of a given cycle type.
 #
-# * They need not be directed if we distinguish between psudoforest components
-#   which are mirrors, but NOT rotations, of each other. This distinction
-#   is important but subtle. (TODO: Add example with brute force conjugating)
+# * They need not be directed if we distinguish between psudoforest
+#   components which are mirrors, but NOT rotations, of each other. This
+#   distinction is important but subtle. (TODO: Add example with brute
+#   force conjugating)
 #
 # Cycle Types
 # -----------
@@ -180,7 +185,7 @@ def _partitions(n):
 # The remaining nodes are called "tree" nodes.
 #
 # The "cycle type" of an endofunction is the cycle type of the permutation
-# obtained by removing all of its tree nodes. This may be any partition
+# obtained by removing all of the tree nodes. This may be any partition
 # of an integer between 1 and the number of nodes.
 #
 # The next step is to enumerate the endofunction structures of a fixed
@@ -199,25 +204,27 @@ def integer_funcstructs(n):
 
 # Endofunction Structures with a Given Cycle Type
 # -----------------------------------------------
-# Our next task is two-fold: (a) forming trees with the remaining tree nodes
-# and (b) enumerating ways of attaching them to the partition of cycles.
-# Problem (a) is solved via our black box, so we focus mainly on (b).
+# Our next task is two-fold: (a) forming trees with the remaining tree
+# nodes and (b) enumerating ways of attaching them to the partition of
+# cycles. Problem (a) is solved via our black box, so we focus mainly on
+# (b).
 #
 # The underlying permutation may be divided into "components": groups of
 # cycles with the same length. No matter how the tree nodes are connected
 # to each other or to the cyclic nodes, any endofunctions with distinct
-# allocations of tree nodes will have different structure.
-# (TODO: find which step in the twelve-fold path this is).
+# allocations of tree nodes will have different structure. (TODO: find
+# which step in the twelve-fold path this is).
 #
 # Let n be the total number of nodes and k be the number of cyclic nodes.
-# If we impose an (arbitrary) ordering on the components, these allocations
-# will correspond to weak compositions of n into k parts (components).
+# If we impose an (arbitrary) ordering on the components, these
+# allocations will correspond to weak compositions of n into k parts
+# (components).
 #
 # A "component group" is a component with rooted trees attached to it.
-# Once we have a mechanism to enumerate component groups formable from
-# a component and a set of tree nodes, we take the cartesian product
-# of each set of component groups to get the endofunction structures
-# corresponding to an weak composition of tree nodes.
+# Once we have a mechanism to enumerate component groups formable from a
+# component and a set of tree nodes, we take the cartesian product of
+# each set of component groups to get the endofunction structures
+# corresponding to a weak composition of tree nodes.
 #
 # The next section describes such a mechanism.
 
@@ -233,11 +240,11 @@ def cycle_type_funcstructs(n, cycle_type):
             yield Multiset.__new__(Funcstruct, chain(*bundle))
 
 
-# 12-Fold Path: Item #10
-# ----------------------
-# Consider a component with m cycles of length l. We wish enumerate
-# every component group we can form by connecting t tree nodes to themselves
-# or the cycles.
+# Twelve-Fold Path: Item #10
+# --------------------------
+# Consider a component with m cycles of length l. We wish enumerate every
+# component group we can form by connecting t tree nodes to themselves or
+# the cycles.
 #
 # Our first step for enumerating component groups is allocating the tree
 # nodes amongst the cycles of the component. Prior to attaching the
@@ -245,10 +252,10 @@ def cycle_type_funcstructs(n, cycle_type):
 # distinguishable (labelled) from each other, thus the problem reduces
 # directly to distributing t unlabelled balls into m unlabelled boxes.
 #
-# This is problem #10 in the "Twelve-Fold Path" (see the references), and
-# it is solved enumerating partitions of t into at most m parts, or
-# equivalently, partitions of t+m into exactly m parts. The latter
-# proves more convenient for our purposes.
+# This is problem ten in the "Twelve-Fold Path" (see the references), and
+# it is solved by enumerating partitions of t into at most m parts, or
+# equivalently, partitions of t+m into exactly m parts. The latter proves
+# more convenient for our purposes.
 
 
 def direct_unordered_attachments(t, m):
@@ -257,27 +264,40 @@ def direct_unordered_attachments(t, m):
     return IntegerPartitions.fixed_length_partitions(t+m, m)
 
 
-# Component Groups
-# ----------------
-# We refer to any way of attaching tree nodes to themselves or a
-# cycle as an attachment. Suppose we have a way to enumerate
-# attachments of t nodes to a cycle of length l.
+# Unordered Product
+# -----------------
+# We define the unordered product of sets (A_1, A_2, ..., A_m) as the set
+# of all distinct multisets of length m containing precisely one element
+# from each A_i, where i goes between 1 and m.
 #
-# We then take the unordered cartesian product of these sets of
-# attachments to generate the component groups for a given allocation of
-# nodes. The "unordered"-ness of the product is an important and subtle
-# detail which only shows up when dealing with three or more cycles.
-# (TODO: fille this detail in, establish min node bound).
+# We refer to any way of attaching tree nodes to themselves or a cycle as
+# an "attachment". Supposing we can enumerate attachments of p nodes to a
+# cycle of length l, we can then take an "unordered" cartesian product of
+# the sets of attachments to each cycle to generate the component groups
+# for a given allocation of nodes. For general sets, unordered products
+# are fairly complicated, however we can exploit certain aspects of our
+# situation.
 #
-# All that remains is to enumerate attachments of t nodes onto a cycle
-# of length l.
+# First note that the unordered product of pair-wise disjoint sets is
+# isomorphic to the ordered product of any fixed ordering of those sets.
+# Second, we notice that the elements of an unordered product of a set
+# with itself are simply combinations with replacement from elements of
+# that set.
+#
+# Our attachment groups are "pseudo-orthogonal": if they have the same
+# number of free tree nodes, they are equal; otherwise they are disjoint.
+# For a given partition of tree nodes amongst the cycles of the
+# component, we first group by number of attached tree nodes and form
+# combinations of them with replacement, and then take cartesian products
+# of those sets of combinations.
+
 
 def unordered_product(mset, iterfunc):
     """Given a multiset of inputs to an iterable, and iterfunc, returns all
     unordered combinations of elements from iterfunc applied to each el. It is
     equivalent to:
 
-        set(Multiset(p) for p in product([iterfunc(i) for i in mset]))
+        set(Multiset(p) for p in product(*[iterfunc(i) for i in mset]))
 
     except it runs through each element once. This program makes the
     assumptions that no two members of iterfunc(el) are the same, and that if
@@ -290,22 +310,51 @@ def unordered_product(mset, iterfunc):
         yield Multiset(chain(*bundle))
 
 
+# The "unorderedness" of the product is an important and subtle detail.
+# It is a degeneracy that only shows up for larger node counts. It also
+# prevents our algorithm from being "resumable"; given an endofunction
+# structure, one cannot deduce the next one from it alone. (TODO: fill
+# this detail in, establish min node bound).
+#
+# All that remains is to enumerate attachments of p nodes onto a cycle of
+# length l.
+
+
 def component_groups(t, l, m):
     """Enumerate ways to make rooted trees from t free nodes and attach
     them to a group of m cycles of length l.
     """
     for partition in direct_unordered_attachments(t, m):
         for cycle_group in unordered_product(
-                partition,  # TODO: remember how that "y-1" works
+                partition,
+                # Each element of the partition corresponds to a cycle.
+                # Due to the way they are enumerated, each bin of the
+                # partition has an extra node, which must be taken
+                # out, hence the "y-1" term
                 lambda y: attachment_forests(y-1, l)):
             yield cycle_group
 
 
 # Attachments
 # -----------
-# To find the attachments, we enumerate every forest with precisely as
-# many trees as there are elements in the cycle, then enumerate the
+# At this point we have a cycle of length l, and p tree nodes to attach
+# to it. A "forest" is any multiset of rooted trees. Without ordering,
+# each attachment is simply a forest with l trees and l+p nodes.
+#
+# We can reuse our allocater of unlabelled balls into unlabelled boxes to
+# enumerate all partitions of p nodes into l bins. We can write the set
+# of forests on each partition of tree sizes as the unordered product of
+# the sets of trees formable from each component of the partition.
+#
+# For any one such forest, the cycles are simply all of the orderings of
+# those trees which are distinct up to rotation. These are given by our
+# enumerator of necklaces with fixed content, where the forests comprise
+# the content.
+#
+# Thus, to find the attachments, we enumerate every forest with precisely
+# as many trees as there are elements in the cycle, then enumerate the
 # necklaces whose elements are the trees of the forest.
+
 
 def attachment_forests(t, l):
     """Enumerate all ways to make rooted trees from t free nodes and attach
@@ -319,7 +368,7 @@ def attachment_forests(t, l):
 
 class EndofunctionStructures(Enumerable):
     """Enumerator of endofunction structures consisting of n nodes,
-    optionally restricted to a given cycle type. The following invarient
+    optionally restricted to a given cycle type. The following invariant
     holds for any n:
 
     >>> mapping_types = set(map(Funcstruct, TransformationMonoid(n)))
