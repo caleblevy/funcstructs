@@ -90,23 +90,15 @@ class LevelSequence(bases.Tuple):
         # Validity checks:
         # 0) len(self) > 0
         # 1) self[0] == 0
-        # 2) self[n+1] - self[n] <= 1
-        # 3) self[n] in range(2, max(self[:n]+2))
+        # 2) all(self[n+1] in range(1, self[n]+2) for n in range(len(self)-1))
         if not self:  # Rule 0
             raise TypeError("a tree must have a root")
         root = previous_node = self[0]
         if root != 0:  # Rule 1
             raise TypeError("root must have height 0, received %s" % root)
         seen = set()
-        for node in self[1:]:
-            diff = node - previous_node
-            if diff > 0:
-                if diff != 1:  # Rule 2
-                    raise ValueError("invalid level sequence: %s" % list(self))
-                seen.add(node)
-            elif node in seen:  # Rule 3
-                pass
-            else:
+        for node in self[1:]:  # Rule 2
+            if not ((1 <= node <= previous_node+1) and isinstance(node, int)):
                 raise ValueError("invalid level sequence: %s" % list(self))
             previous_node = node
         return self
