@@ -137,6 +137,9 @@ class LevelSequence(bases.Tuple):
 
     def traverse_map(self, mapping=list):
         """Apply mapping to the sequence of mapping applied to the subtrees."""
+        # The breaking condition here is implicit; if the tree has no subtrees,
+        # tree.traverse_map(mapping) is simply not called, returning
+        # the equivalent mapping(iter(())).
         return mapping(tree.traverse_map(mapping) for tree in self.subtrees())
 
     def height_groups(self):
