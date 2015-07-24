@@ -131,19 +131,17 @@ class LevelSequence(bases.Tuple):
         # lowest level. By keeping a running record of the most recently
         # visited nodes for each level, we generate the sequence of elements
         # that each node is mapped to.
-        levels = iter(self)
-        root = previous_level = next(levels)
-        yield 0
-        grafting_point = {0: 0}  # grafting_point[h] <-> last node at height h
-        for node, level in enumerate(levels, start=1):
+        previous_level = 0
+        grafting_point = {-1: 0}  # grafting_point[h] <-> last node at height h
+        for node, level in enumerate(self):
             if level > previous_level:
-                parent = grafting_point[previous_level-root]
+                parent = grafting_point[previous_level]
                 previous_level += 1
             else:
-                parent = grafting_point[level-root-1]
+                parent = grafting_point[level-1]
                 previous_level = level
             yield parent
-            grafting_point[level-root] = node
+            grafting_point[level] = node
 
     def subtrees(self):
         """Return the subtrees attached to the root."""
