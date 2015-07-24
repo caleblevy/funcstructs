@@ -156,9 +156,11 @@ class LevelSequence(bases.Tuple):
 
     def height_groups(self):
         """Nodes in breadth-first traversal order grouped by height."""
-        groups = [[] for _ in range(max(self) - self[0] + 1)]
+        groups = []
         for node, height in enumerate(self):
-            groups[height-self[0]].append(node)
+            if height+1 > len(groups):
+                groups.append([])
+            groups[height].append(node)
         return groups
 
     def breadth_first_traversal(self):
