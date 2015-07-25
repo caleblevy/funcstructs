@@ -91,12 +91,12 @@ class LevelSequence(bases.Tuple):
         # 0) len(self) > 0
         # 1) self[0] == 0
         # 2) all(self[n+1] in range(1, self[n]+2) for n in range(len(self)-1))
+        # Note that all nodes must be integers to use them as indices.
         if not self:  # Rule 0
             raise TypeError("a tree must have a root")
         root = previous_node = self[0]
-        if root != 0:  # Rule 1
+        if not (root == 0 and isinstance(root, int)):  # Rule 1
             raise TypeError("root must have height 0, received %s" % root)
-        seen = set()
         for node in self[1:]:  # Rule 2
             if not ((1 <= node <= previous_node+1) and isinstance(node, int)):
                 raise ValueError("invalid level sequence: %s" % list(self))
