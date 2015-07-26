@@ -165,6 +165,21 @@ class LevelSequence(bases.Tuple):
         return mapping(tree.traverse_map(mapping) for tree in self.subtrees())
 
 
+# The following method for converting a rooted tree into canonical form
+# was independently rediscovered by Caleb Levy in Spring 2015. It is
+# featured in
+#
+#   "Canonical forms for labelled trees and their applications in
+#   frequent subtree mining" by UCLA researchers Yun Chi, Yirong Yang and
+#   Richard R. Muntz, published in Knowledge and Infromation Systems in 2005.
+#   DOI 10.1007/s10115-004-0180-7.
+#
+# The method runs in O(k*log(k)), with k being the number of nodes in the tree.
+# Essentially, starting at the top, we sort the nodes at each level by
+# using the list of their children as keys (the lists are sorted
+# lexicographically).
+
+
 def _dominant_keys(height_groups, func, sort=True):
     """Assign to each node a key for sorting"""
     node_keys = [0]*len(func)  # node_keys[node] <-> sort key for node
