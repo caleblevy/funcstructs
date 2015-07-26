@@ -24,21 +24,6 @@ Multisets
     ``Multiset`` is an immutable and hashable ``frozendict`` supporting the
     same binary operations as ``collections.Counter``.
 
-.. code:: python
-
-    >>> from funcstructs.structures import Multiset
-    >>> a = Multiset("abracadabra")
-    >>> b = Multiset({'a': 4, 'k': 1, 'z': 1, 'm': 1, 'l': 1})
-    >>> a
-    Multiset({'a': 5, 'r': 2, 'b': 2, 'c': 1, 'd': 1})
-
-
-    >>> a & b                           # Multiset supports the same binary
-    Multiset({'a': 4})                  # operations as Counter
-
-    >>> a - b
-    Multiset({'r': 2, 'b': 2, 'a': 1, 'c': 1, 'd': 1})
-
 
 Rooted Trees
 ------------
@@ -58,37 +43,6 @@ Rooted Trees
     number of nodes using the algorithm provided by T. Beyer and S. M.
     Hedetniemi in "Constant time generation of rooted trees."
 
-.. code:: python
-
-    >>> from funcstructs.structures import (
-    ...     RootedTree,
-    ...     LevelSequence,
-    ...     DominantSequence,
-    ...     TreeEnumerator
-    ... )
-
-    >>> o1 = OrderedTree([0, 1, 1, 2, 2, 3])
-    >>> o2 = OrderedTree([0, 1, 2, 2, 3, 1])
-    >>> o1 == o2
-    False
-
-    >>> d = DominantSequence(o1)
-    >>> d
-    DominantSequence([0, 1, 2, 3, 2, 1])
-    >>> d == DominantSequence(o2)
-    True
-
-    >>> RootedTree(d)
-    RootedTree({{{{}}, {}}, {}})
-
-    >>> for d in TreeEnumerator(4):
-    ...     print(RootedTree(d))
-    ...
-    RootedTree({{{{}}}})
-    RootedTree({{{}^2}})
-    RootedTree({{{}}, {}})
-    RootedTree({{}^3})
-
 
 Necklaces
 ---------
@@ -103,24 +57,6 @@ Necklaces
     Enumerator of necklaces with a fixed multiset of elements using the 
     `simple fixed content` algorithm described by Joe Sawada in "A fast
     algorithm to generate necklaces with fixed content."
-
-.. code:: python
-
-    >>> from funcstructs.structures import Necklace, FixedContentNecklaces
-    >>> n = Necklace("cabcab")
-    >>> n
-    Necklace(['a', 'b', 'c', 'a', 'b', 'c'])
-    >>> n.period()
-    3
-
-    >>> fc = FixedContentNecklace([1, 1, 1, 2, 2, 2])
-    >>> fc
-    FixedContentNecklaces(elements=(1, 2), multiplicities=(3, 3))
-    >>> list(fc)
-    [Necklace([1, 1, 1, 2, 2, 2]), Necklace([1, 1, 2, 1, 2, 2]),
-    Necklace([1, 1, 2, 2, 1, 2]), Necklace([1, 2, 1, 2, 1, 2])]
-    >>> fc.count_by_period()
-    [0, 1, 0, 3]
 
 
 Functions
@@ -147,60 +83,6 @@ The functions module also provides enumerators corresponding to each of the
 - ``TransformationMonoid``
 - ``SymmetricGroup``
 
-.. code:: python
-
-    >>> from funcstructs.structures import (
-    ...     Function, Endofunction, Bijection, Permutation,
-    ...     Mappings, SymmetricGroup
-    ... )
-    
-    >>> f = Function(a=1, b=2, c=2)                           # Function
-    >>> f['a']
-    1
-    >>> f['b'] + f['c']
-    4
-    >>> g = Function({1: 'a', 2: 'a', 3: 'a'})
-    >>> f * g
-    Function({0: 1, 1: 1, 2: 1})
-    >>> g * f
-    Function({'a': 'a', 'c': 'a', 'b': 'a'})
-
-    >>> h = Endofunction({0: 0, 1: 0, 2: 1, 3: 2, 4: 3})      # Endofunction
-    >>> h.cycles
-    frozenset([(0, )])
-    >>> h**3
-    Endofunction({0: 0, 1: 0, 2: 0, 3: 0, 4: 1})
-
-    >>> b = Bijection(a=1, b=2, c=3, d=4, e=5)                # Bijection
-    >>> b.inverse
-    Bijection({1: 'a', 2: 'b', 3: 'c', 4: 'd', 5: 'e'})
-    >>> b * b.inverse()
-    Bijection({1: 1, 2: 2, 3: 3, 4: 4, 5: 5})
-    >>> b.inverse * b
-    Bijection({'a': 'a', 'c': 'c', 'b': 'b', 'e': 'e', 'd': 'd'})
-
-    >>> p = Permutation({0: 3, 1: 4, 2: 1, 3: 0, 4: 2})       # Permutation
-    >>> p ** -4
-    Permutation({0: 0, 1: 2, 2: 4, 3: 3, 4: 1})
-    >>> set([p, p**-1, p**-2])
-    set([Permutation({0: 0, 1: 4, 2: 1, 3: 3, 4: 2}),
-    Permutation({0: 3, 1: 4, 2: 1, 3: 0, 4: 2}), 
-    Permutation({0: 3, 1: 2, 2: 4, 3: 0, 4: 1})])
-
-    >>> list(Mappings(2, 3))                                  # Enumerators
-    [Function({0: 0, 1: 0}), Function({0: 0, 1: 1}), Function({0: 0, 1: 2}),
-    Function({0: 1, 1: 0}), Function({0: 1, 1: 1}), Function({0: 1, 1: 2}),
-    Function({0: 2, 1: 0}), Function({0: 2, 1: 1}), Function({0: 2, 1: 2})]
-
-    >>> list(SymmetricGroup("abc"))
-    >>> list(SymmetricGroup("abc"))
-    [Permutation({'a': 'a', 'c': 'c', 'b': 'b'}),
-    Permutation({'a': 'a', 'c': 'b', 'b': 'c'}),
-    Permutation({'a': 'b', 'c': 'c', 'b': 'a'}),
-    Permutation({'a': 'b', 'c': 'a', 'b': 'c'}),
-    Permutation({'a': 'c', 'c': 'b', 'b': 'a'}),
-    Permutation({'a': 'c', 'c': 'a', 'b': 'b'})]
-
 
 Endofunction Structures
 -----------------------
@@ -218,34 +100,6 @@ Endofunction Structures
     optionally specify a cycle type. As far as I am aware, this algorithm is
     original to the ``funcstructs`` library.
 
-.. code:: python
-
-    >>> from funcstructs.structures import (
-    ...     Endofunction, Bijection, Funcstruct, EndofunctionStructures)
-
-    >>> f = Endofunction({0: 4, 1: 4, 2: 0, 3: 1, 4: 2, 5: 5, 6: 2, 7: 7})
-    >>> Funcstruct(f)
-    Funcstruct._from_cycles({
-        Necklace([DominantSequence([0])]): 2,
-        Necklace([
-            DominantSequence([0]),
-            DominantSequence([0, 1, 2]),
-            DominantSequence([0, 1])
-            ]): 1
-        })
-
-    >>> b = Bijection(zip(range(8), "abcdefgh"))
-    >>> g = b.conj(f)
-    Endofunction({'a': 'e', 'c': 'a', 'b': 'e', 'e': 'c', 'd': 'b', 'g': 'c',
-    'f': 'f', 'h': 'h'})
-    >>> Funcstruct(r) == Funcstruct(h)
-    True
-
-    >>> es = EndofunctionStructures(4)
-    >>> len(list(es))
-    >>> t = EndofunctionStructures(10, cycle_type=(2, 2, 3))
-    >>> len(list(t))
-    25
 
 Labellings
 ----------
