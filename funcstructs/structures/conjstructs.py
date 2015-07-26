@@ -3,6 +3,7 @@
 Caleb Levy, 2014-2015.
 """
 
+from collections import defaultdict
 from fractions import Fraction
 from itertools import chain, product, combinations_with_replacement
 from math import factorial
@@ -71,6 +72,15 @@ class Funcstruct(Multiset):
         for cycle, mult in self.items():
             node_count += mult * sum(map(len, cycle))
         return node_count
+
+    def cycle_type(self):
+        """Return the type of a structure's cycle decomposition."""
+        # Equivalent to Multiset(map(len, self)), but more efficient
+        # in the case of highly degeneracy cycles.
+        m = defaultdict(int)
+        for cycle, mult in self.items():
+            m[len(cycle)] += mult
+        return Multiset(m)
 
     def degeneracy(self):
         """The number of ways to label a graph representing a particular
