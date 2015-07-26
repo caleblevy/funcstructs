@@ -1,9 +1,13 @@
 import unittest
 from math import factorial
 
-from funcstructs.structures import functions, necklaces, rootedtrees, multiset
+from funcstructs.structures import (
+    randfunc,
+    Endofunction,
+    DominantSequence,
+    Necklace
+)
 
-from funcstructs.structures.functions import Endofunction
 from funcstructs.structures.conjstructs import (
     Funcstruct,
     EndofunctionStructures
@@ -12,20 +16,20 @@ from funcstructs.structures.conjstructs import (
 
 class FuncstructTests(unittest.TestCase):
 
-    s = multiset.Multiset.__new__(Funcstruct, [
-        necklaces.Necklace([
-            rootedtrees.DominantSequence([0, 1, 2]),
-            rootedtrees.DominantSequence([0, 1, 1])
-        ]),
-        necklaces.Necklace([
-            rootedtrees.DominantSequence([0, 1])
-        ]),
-        necklaces.Necklace([
-            rootedtrees.DominantSequence([0, 1, 1]),
-            rootedtrees.DominantSequence([0]),
-            rootedtrees.DominantSequence([0, 1, 1])
+    s = super(Funcstruct, Funcstruct).__new__(Funcstruct, [
+            Necklace([
+                DominantSequence([0, 1, 2]),
+                DominantSequence([0, 1, 1])
+            ]),
+            Necklace([
+                DominantSequence([0, 1])
+            ]),
+            Necklace([
+                DominantSequence([0, 1, 1]),
+                DominantSequence([0]),
+                DominantSequence([0, 1, 1])
+            ])
         ])
-    ])
 
     def test_func_form(self):
         """Convert struct to func and back, and check we get the same thing."""
@@ -58,13 +62,9 @@ class FuncstructTests(unittest.TestCase):
     def test_len(self):
         """Test Funcstruct properly overrides Multiset.__len__"""
         self.assertEqual(15, len(self.s))
-        self.assertEqual(30, len(Funcstruct(functions.randfunc(30))))
+        self.assertEqual(30, len(Funcstruct(randfunc(30))))
 
     def test_repr(self):
         """Ensure an endofunction structure evaluates to itself"""
-        eval_map = {
-            'DominantSequence': rootedtrees.DominantSequence,
-            'Necklace': necklaces.Necklace
-        }
-        struct = Funcstruct(functions.randfunc(30))
-        self.assertEqual(struct, eval(repr(struct), globals(), eval_map))
+        struct = Funcstruct(randfunc(30))
+        self.assertEqual(struct, eval(repr(struct)))
