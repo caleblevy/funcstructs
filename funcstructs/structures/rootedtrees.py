@@ -183,20 +183,20 @@ class LevelSequence(bases.Tuple):
 def _dominant_keys(height_groups, func, sort=True):
     """Assign to each node a key for sorting"""
     node_keys = [0]*len(func)  # node_keys[node] <-> sort key for node
-    attachments = [[] for _ in func]  # attachments[x] <-> nodes attached to x
+    child_keys = [[] for _ in func]  # child_keys[x] <-> keys of x's children
     previous_level = []
     sort_value = len(func)
     for level in reversed(height_groups):
         # enumerate for connections from previous level to current
         for x in previous_level:
-            attachments[func[x]].append(node_keys[x])
-        # Sort nodes of current level lexicographically by the keys of their
-        # children. Since nodes of the previous level are already sorted, we
-        # need not sort the attachments themselves.
+            child_keys[func[x]].append(node_keys[x])
+        # Sort nodes of current level lexicographically by the list of
+        # their children's keys. Since nodes of the previous level are
+        # already sorted, we need not sort the child_keys themselves.
         if sort is True:
-            level.sort(key=attachments.__getitem__, reverse=True)
+            level.sort(key=child_keys.__getitem__, reverse=True)
         # Assign int keys to current level to prevent accumulating nested lists
-        for _, run in groupby(level, attachments.__getitem__):
+        for _, run in groupby(level, child_keys.__getitem__):
             sort_value -= 1
             for x in run:
                 node_keys[x] = sort_value
