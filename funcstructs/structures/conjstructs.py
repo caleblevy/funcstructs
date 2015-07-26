@@ -215,10 +215,10 @@ def integer_funcstructs(n):
 # allocations of tree nodes will have different structure. (TODO: find
 # which step in the twelve-fold path this is).
 #
-# Let n be the total number of nodes and k be the number of cyclic nodes.
-# If we impose an (arbitrary) ordering on the components, these
-# allocations will correspond to weak compositions of n into k parts
-# (components).
+# Let n be the total number of tree nodes and k be the number of
+# distinct cycle lengths. If we impose an (arbitrary) ordering on the
+# components, these allocations will correspond to weak compositions of n
+# into k parts (components).
 #
 # A "component group" is a component with rooted trees attached to it.
 # Once we have a mechanism to enumerate component groups formable from a
@@ -228,11 +228,13 @@ def integer_funcstructs(n):
 #
 # The next section describes such a mechanism.
 
-def cycle_type_funcstructs(n, cycle_type):
+
+def cycle_type_funcstructs(node_count, cycle_type):
     """Enumerate all Funcstructs with the given node count and cycle type."""
-    treenodes = n - sum(cycle_type)
+    n = node_count - sum(cycle_type)
+    k = cycle_type.num_unique_elements()
     lengths, mults = zip(*cycle_type.items()) if cycle_type else ((), ())
-    for composition in compositions.weak_compositions(treenodes, len(lengths)):
+    for composition in compositions.weak_compositions(n, k):
         cycle_groups = []
         for c, l, m in zip(composition, lengths, mults):
             cycle_groups.append(component_groups(c, l, m))
