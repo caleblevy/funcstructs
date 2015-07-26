@@ -5,4 +5,4 @@ Caleb Levy, 2015.
 
 from .frozendict import frozendict
 from ._tuple import Tuple
-from .parametrizedmeta import Enumerable
+from .parametrized import Enumerable

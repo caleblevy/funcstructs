@@ -2,7 +2,6 @@
 
 Caleb Levy, 2015.
 """
-# TODO: rename this file to param.py
 
 from abc import abstractmethod, ABCMeta
 from inspect import getargspec

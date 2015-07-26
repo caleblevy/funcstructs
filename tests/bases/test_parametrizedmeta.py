@@ -4,7 +4,7 @@ from abc import ABCMeta
 from collections import Iterable
 from itertools import chain, product
 
-from funcstructs.bases.parametrizedmeta import (
+from funcstructs.bases.parametrized import (
     hascustominit,
     ParamMeta,
     ImmutableStruct
