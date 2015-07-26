@@ -227,6 +227,8 @@ class DominantSequence(LevelSequence):
         containing the rooted trees."""
         # TODO: A writeup of this with diagrams will be in the notes.
         deg = 1
+        # TODO: intuitive explanation of how these two things give
+        # different aspects of tree structure: connections and height.
         parents = list(self.parents())
         groups = self.height_groups()
         keys = _dominant_keys(groups, parents, sort=False)
@@ -302,6 +304,7 @@ class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, n):
+        # ::TODO:: Add isinstance check and time it.
         if n < 1:
             raise ValueError("Cannot define a rooted tree with %s nodes" % n)
         self.n = n

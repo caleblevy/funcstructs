@@ -247,6 +247,7 @@ class Endofunction(Function):
     def __pow__(self, n):
         """f**n <==> the nth iterate of f (n > 0)"""
         f = self
+        # TODO: Fix inefficiency
         f_iter = identity(self.domain)
         # Decompose f**n into the composition of power-of-2 iterates, akin to
         # exponentiation by squaring.
@@ -256,6 +257,8 @@ class Endofunction(Function):
             f *= f
         return f_iter
 
+    # TODO: eliminate this method, or use it only for testing
+    # Funcstruct.imagepath
     def imagepath(self):
         """f.imagepath()[n] <==> len((f**n).image)"""
         cardinalities = [len(self.image)]
@@ -275,6 +278,7 @@ class Endofunction(Function):
     @property
     def cycles(self):
         """Return the set of f's cycles"""
+        # Algorithm runs in O(len(self))
         tried = set()
         cyclic = set()
         remaining = set(self.domain)

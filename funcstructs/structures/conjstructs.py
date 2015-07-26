@@ -98,6 +98,7 @@ class Funcstruct(Multiset):
 
     def func_form(self):
         """Return a representative endofunction defined on range(n)."""
+        # ::TODO:: Comments on process
         func = []
         root_node = end_node = 0
         for cycle in self:

@@ -2,6 +2,7 @@
 
 Caleb Levy, 2015.
 """
+# TODO: rename this file to param.py
 
 from abc import abstractmethod, ABCMeta
 from inspect import getargspec
@@ -177,6 +178,9 @@ class ImmutableStruct(Struct, WriteOnceMixin):
 class Enumerable(with_metaclass(ParametrizedABCMeta, ImmutableStruct)):
     """Abstract enumerators for collections of objects parametrized by a finite
     number of variables."""
+    # TODO: add abstract "__contains__"
+    # TODO: add @typecheck decorator for __contains__
+    # TODO: consider abstract "__len__"
 
     @abstractmethod
     def __iter__(self):

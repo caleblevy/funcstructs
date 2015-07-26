@@ -35,6 +35,10 @@ class FuncstructTests(unittest.TestCase):
         """Convert struct to func and back, and check we get the same thing."""
         self.assertEqual(self.s, Funcstruct(self.s.func_form()))
 
+    def test_cycle_type(self):
+        """Test that the correct multiset of cycle lengths is returned."""
+        # TODO: fill this in with actual tests.
+
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""
         for i in range(1, 8):
