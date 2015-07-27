@@ -7,8 +7,8 @@ from itertools import chain, product
 from funcstructs.bases.parametrized import (
     hascustominit,
     ParamMeta,
-    ImmutableStruct
 )
+from funcstructs.bases.enumerable import ImmutableStruct
 
 
 def newclass(mcls=type, name="newclass", bases=(), **special):
