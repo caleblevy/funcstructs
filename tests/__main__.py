@@ -52,4 +52,7 @@ if matplotlib_dependant:
 
 
 if __name__ == '__main__':
-    unittest.TextTestRunner().run(suite)
+    # "Unit test script returns exit code = 0 even if tests fail" at
+    # http://stackoverflow.com/q/24972098/3349520
+    result = not unittest.TextTestRunner().run(suite).wasSuccessful()
+    sys.exit(result)
