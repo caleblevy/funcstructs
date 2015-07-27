@@ -177,11 +177,29 @@ class ImmutableStruct(Struct, WriteOnceMixin):
 class Enumerable(with_metaclass(ParametrizedABCMeta, ImmutableStruct)):
     """Abstract enumerators for collections of objects parametrized by a finite
     number of variables."""
+    # TODO: describing differences between this and Sequence, Set, Iterable:
+    #   - Should have quick containment testing
+    #   - In general is NOT indexable
+    #   - Are comparable, immutable, reusable
+    #   - In general NOT have fast __len__
     # TODO: add abstract "__contains__"
-    # TODO: add @typecheck decorator for __contains__
     # TODO: consider abstract "__len__"
 
     @abstractmethod
     def __iter__(self):
         return
         yield
+
+
+def typecheck(*types):
+    """Wrap a __contains__ method to check it its input is in types."""
+    def wrapping_decorator(contains):
+        """Wrapper checking for given types."""
+        def __contains__(self, other):
+            if isinstance(other, types):
+                return contains(self, other)
+            else:
+                return False
+        __contains__.__doc__ = contains.__doc__
+        return __contains__
+    return wrapping_decorator
