@@ -2,7 +2,10 @@ import unittest
 
 from collections import Counter  # Avoid using Multiset
 
-from funcstructs.bases.enumerable import ImmutableStruct, Enumerable
+from funcstructs.bases.enumerable import Enumerable
+
+
+# Temporary classes
 
 
 class IntEnum1(Enumerable):
@@ -94,3 +97,18 @@ class EnumerableTests(unittest.TestCase):
         d[PartPartEnum(part2="abcdef", part1=range(-1, 5))] += 27
         self.assertEqual(-7, d[s1])
         self.assertEqual(i2+27, d[s2])
+
+    def test_write_once(self):
+        """Test weather attribute creation and deletion is blocked"""
+        t = IntPartEnum(part=[4, 5, 6], n=7)
+        with self.assertRaises(AttributeError):
+            t.n = "a"
+        with self.assertRaises(AttributeError):
+            t.part = (6, 7)
+        with self.assertRaises(AttributeError):
+            del t.n
+        with self.assertRaises(AttributeError):
+            del t.part
+        with self.assertRaises(AttributeError):
+            t.n += 1
+        self.assertEqual([7, (4, 5, 6)], [t.n, t.part])
