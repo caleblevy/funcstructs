@@ -1,8 +1,9 @@
 import unittest
 
 from collections import Counter  # Avoid using Multiset
+from fractions import Fraction  # for TypeCheck
 
-from funcstructs.bases.enumerable import Enumerable
+from funcstructs.bases.enumerable import Enumerable, typecheck
 
 
 # Temporary classes
@@ -112,3 +113,55 @@ class EnumerableTests(unittest.TestCase):
         with self.assertRaises(AttributeError):
             t.n += 1
         self.assertEqual([7, (4, 5, 6)], [t.n, t.part])
+
+    def test_typecheck(self):
+        """Test type check tests proper types."""
+
+        class IntCutoff(object):
+            def __init__(self, cutoff):
+                self.cutoff = cutoff
+
+            @typecheck(int)
+            def __contains__(self, other):
+                """Test for an int."""
+                return other > self.cutoff
+
+        class NumCutoff(object):
+            def __init__(self, cutoff):
+                self.cutoff = cutoff
+
+            @typecheck(int, float)
+            def __contains__(self, other):
+                """Test for a number."""
+                return other > self.cutoff
+
+        class sint(int):
+            pass  # test instances of subclass
+
+        self.assertEqual(IntCutoff.__contains__.__doc__, "Test for an int.")
+        self.assertEqual(NumCutoff.__contains__.__doc__, "Test for a number.")
+        self.assertEqual(IntCutoff.__contains__.__name__, "__contains__")
+        self.assertEqual(NumCutoff.__contains__.__name__, "__contains__")
+
+        cutoffs = [4, 7]
+        intobjs = list(map(IntCutoff, cutoffs))
+        numobjs = list(map(NumCutoff, cutoffs))
+
+        for i in range(10):
+            for cutoff, intobj, numobj in zip(cutoffs, intobjs, numobjs):
+                self.assertNotIn(Fraction(i), intobj)
+                self.assertNotIn(Fraction(i), numobj)
+                if i > cutoff:
+                    self.assertIn(i, intobj)
+                    self.assertIn(i, numobj)
+                    self.assertIn(sint(i), intobj)
+                    self.assertIn(sint(i), numobj)
+                    self.assertNotIn(1.*i, intobj)
+                    self.assertIn(1.*i, numobj)
+                else:
+                    self.assertNotIn(i, intobj)
+                    self.assertNotIn(i, numobj)
+                    self.assertNotIn(sint(i), intobj)
+                    self.assertNotIn(sint(i), numobj)
+                    self.assertNotIn(1.*i, intobj)
+                    self.assertNotIn(1.*i, numobj)
