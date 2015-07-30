@@ -115,6 +115,85 @@ distributions. These are found in ``funcstructs.structures.funcdists``.
 **Note**: using ``funcdists`` requires ``numpy``.
 
 
+Usage
+=====
+.. code:: python
+
+    >>> from funcstructs.structures import *
+
+    # --------- #
+    # Multisets #
+    # --------- #
+
+    >>> a = Multiset("abra")
+    >>> b = Multiset("cadabra")
+    >>> sorted(a + b)
+    ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'c', 'd', 'r', 'r']
+
+    >>> a & b
+    Multiset({'a': 2, 'r': 1, 'b': 1})
+
+    # ------------ #
+    # Rooted Trees #
+    # ------------ #
+
+    >>> o = LevelSequence([0, 1, 1, 2, 2, 3])
+    >>> d = DominantSequence(o)
+    >>> d == DominantSequence([0, 1, 1, 2, 3, 2])
+    True
+    >>> d
+    DominantSequence([0, 1, 2, 3, 2, 1])
+
+    >>> for t in TreeEnumerator(4):
+    ...   print(list(t), RootedTree(t))
+    ...
+    [0, 1, 2, 3] RootedTree({{{{}}}})
+    [0, 1, 2, 2] RootedTree({{{}^2}})
+    [0, 1, 2, 1] RootedTree({{{}}, {}})
+    [0, 1, 1, 1] RootedTree({{}^3})
+
+    # --------- #
+    # Necklaces #
+    # --------- #
+
+    >>> Necklace("cabcab")
+    'abcabc'
+    >>> Necklace("abc") == Necklace("bca") == Necklace("cab")
+    True
+    >>> periodicity([1, 2, 3, 1, 1, 2, 3, 1])
+    4
+    >>> for n in FixedContentNecklaces(multiplicities=(3, 3)):
+    ...   print(list(n))
+    ...
+    [0, 0, 0, 1, 1, 1]
+    [0, 0, 1, 0, 1, 1]
+    [0, 0, 1, 1, 0, 1]
+    [0, 1, 0, 1, 0, 1]
+
+    # --------- #
+    # Functions #
+    # --------- #
+
+    >>> s = Bijection(a=1, b=2, c=3)
+    >>> s.inverse
+    Bijection({1: 'a', 2: 'b', 3: 'c'})
+    >>> s == s.inverse.inverse
+    True
+
+    >>> f = Endofunction({1: 1, 2: 1, 3: 3})
+    >>> g = s.inverse.conj(f)
+    >>> list(g)
+    [('a', 'a'), ('c', 'c'), ('b', 'a')]
+    >>> Funcstruct(f) == Funcstruct(g)
+    True
+
+    >>> p = Permutation({0: 3, 1: 4, 2: 1, 3: 0, 4: 2})
+    >>> p**-2
+    Permutation({0: 0, 1: 4, 2: 1, 3: 3, 4: 2})
+    >>> p**3 == p * p * p
+    True
+
+
 Additional Modules
 ==================
 
