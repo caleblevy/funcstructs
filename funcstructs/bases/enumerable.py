@@ -48,17 +48,18 @@ class Struct(with_metaclass(ParamMeta)):
 
 
 class ImmutableStruct(Struct, WriteOnceMixin):
-    """A Struct which becomes immutable once initialized. They are hashable,
-    assuming that their parameter values are, and are thus suitable for use as
-    dictionary keys."""
+    """A Struct which becomes immutable once initialized. They are
+    hashable, assuming that their parameter values are, and are thus
+    suitable for use as dictionary keys."""
 
     def __hash__(self):
         return hash(self._param_values())
 
 
 class Enumerable(with_metaclass(ParametrizedABCMeta, ImmutableStruct)):
-    """Abstract enumerators for collections of objects parametrized by a finite
-    number of variables."""
+    """Abstract enumerators for collections of objects parametrized by
+    a finite number of variables.
+    """
     # TODO: describing differences between this and Sequence, Set, Iterable:
     #   - Should have quick containment testing
     #   - In general is NOT indexable
