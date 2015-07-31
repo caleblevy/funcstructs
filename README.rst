@@ -22,10 +22,8 @@ Data Structures
   subtrees.
 - ``LevelSequence``: An unlabelled *ordered* tree represented by listing the
   height of each node above the root in a pre-ordered depth-first traversal.
-- ``DominantSequence``: A canonical level sequence which is lexicographically
-  larger than the level sequences of all other ordered trees with the same
-  unordered structure. Two level sequences correspond to the same unordered
-  rooted tree if and only if they have the same dominant sequence.
+- ``DominantSequence``: The lexicographically maximal level sequence of all
+  orderings of a RootedTree object.
 - ``TreeEnumerator``: Generates the dominant sequence of each unordered rooted
   tree on a fixed number of nodes using the algorithm provided by T. Beyer and
   S. M. Hedetniemi in "Constant time generation of rooted trees."
@@ -44,23 +42,19 @@ Data Structures
 **Functions** (in type/enumerator pairs)
 
 - ``Function``/``Mappings``: A mathematical correspondence between sets
-  represented with an associative array. Supports composition using the
-  multiplication syntax.
+  represented with an associative array.
 - ``Endofunction``/``TransformationMonoid``: A Function whose domain and
-  codomain are equal. These support iteration.
+  codomain are equal.
 - ``Bijection``/``Isomorphisms``: An invertible Function.
-- ``Permutation``/``SymmetricGroup``: A Bijective Endofunction. These form an
-  algebra over the Symmetric Group.
+- ``Permutation``/``SymmetricGroup``: A Bijective Endofunction.
 
 
 **Endofunction Structures**
 
-- ``Funcstruct``: A conjugacy class of a transformation monoid represented by a
-  multiset of necklaces whose elements are dominant sequences. Accepts any
-  Endofunction as input.
+- ``Funcstruct``: Represents a conjugacy class of Endofunctions as a multiset
+  of necklaces whose elements are dominant sequences.
 - ``EndofunctionStructures``: Enumerates endofunction structures on a fixed
-  number of nodes (and those with a fixed cycle type). Algorithm derived by
-  Caleb Levy.
+  number of nodes, optionally restricted to a given cycle type.
 
 
 Usage
