@@ -12,9 +12,8 @@ Data Structures
 
 **Multisets**
 
-- ``Multiset``: A mapping from a set into the positive integers. It is an
-  immutable and hashable ``frozendict`` supporting the same binary operations
-  as ``collections.Counter``.
+- ``Multiset``: A immutable mapping from a set into the positive integers
+  supporting the same binary operations as ``collections.Counter``.
 
 
 **Rooted Trees**
@@ -149,30 +148,17 @@ Additional Modules
 - **bases**: convenience classes used to build the core data structures. These
   include
 
-  * ``frozendict``, an immutable dictionary
-  * ``Tuple``, a convenience wrapper for subclassing the builtin ``tuple``
-  * ``Enumerable``, a custom abstract base class for reusable generators. It is
-    an instance of ``ParamMeta``, a metaclass for adding ``__slots__`` to
-    classes using the parameters of their ``__init__`` methods.
+  * ``frozendict``: An immutable dictionary
+  * ``Tuple``: A convenience wrapper for subclassing the builtin ``tuple``.
+  * ``Enumerable``: A parametrized abstract base class for reusable generators.
 
-  All three account for type when testing equality, thus instances of distinct
-  subclasses will not compare equal, even with the same values.
+- **graphs** (Requires ``numpy`` and ``matplotlib``): Computational geometry
+  primitives. Currently provides ``Point``, ``Coordinates`` and ``Line``
+  objects. Intended to become an automated pretty-plot maker for endofunction
+  structure graphs.
 
-- **graphs**: objects useful for computational geometry. Currently provides a
-  ``Point`` and ``Coordinates`` type for representing isolated and ordered
-  groups of points in the 2D Cartesian coordinate plane, respectively. Also
-  contains ``Line`` class for handling line segments.
-
-  This package will hopefully expand into a small package to automate making
-  pretty plots of functional digraphs.
-
-  Requires ``numpy`` and ``matplotlib``.
-
-- **prototypes**: ideas under development. Prototype modules may graduate to
-  other parts of the project, or can disappear entirely. This package changes
-  regularly, thus its contents are not summarized.
-
-  Currently requires ``numpy`` and ``matplotlib``.
+- **prototypes** (Requires ``numpy`` and ``matplotlib``): dumping ground for
+  unrefined ideas under development.
 
 - **utils**: supporting utilities. Includes basic functions for prime
   factorization, combinatorics and iterating over subsequences.
