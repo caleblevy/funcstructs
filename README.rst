@@ -34,11 +34,9 @@ Data Structures
 
 **Necklaces**
 
-- ``Necklace``: A **necklace** is the lexicographically smallest rotation of a
-  given word. For us a word is any tuple of comparable elements. ``Necklace``
-  accepts an iterable as input, and raises an error when the elements are not
-  orderable, and otherwise returns the tuple of the smallest rotation.
-  ``Necklace`` objects are the canonical representatives of cycles.
+- ``Necklace``: The lexicographically smallest rotation of a sequence of
+  totally ordered elements. They are are the canonical representatives of
+  cycles.
 - ``FixedContentNecklaces``: Enumerator of necklaces with a fixed multiset of
   elements using the `simple fixed content` algorithm described by Joe Sawada
   in "A fast algorithm to generate necklaces with fixed content."
@@ -46,15 +44,14 @@ Data Structures
 
 **Functions**
 
-- ``Function``: Mathematical **functions** are correspondences between sets. A
-  ``Function`` object is an associative array which maps the set of its *keys*
-  to the set of *values*. Function may be composed using the standard
-  multiplication.
-- ``Endofunction``: A ``Function`` whose values are a subset of its keys. They
-  can be iterated to produce functional digraphs consisting of rooted trees
+- ``Function``: A mathematical correspondence between sets represented with an
+  associative array. Supports composition using the multiplication syntax.
+- ``Endofunction``: A Function whose domain and codomain are equal. These
+  support iteration.
   connected in cycles.
-- ``Bijection``: An invertible ``Function``.
-- ``Permutation``: A bijective endofunction. They accept negative exponents.
+- ``Bijection``: An invertible Function.
+- ``Permutation``: A Bijective Endofunction. These form an algebra over the
+  SymmetricGroup.
 
 The functions module also provides enumerators corresponding to each of the
 ``Function`` types above:
@@ -63,6 +60,7 @@ The functions module also provides enumerators corresponding to each of the
 - ``Isomorphisms``
 - ``TransformationMonoid``
 - ``SymmetricGroup``
+
 
 **Endofunction Structures**
 
