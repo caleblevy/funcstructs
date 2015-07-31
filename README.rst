@@ -10,16 +10,14 @@ Tested on Python 2.7 and 3.4, PyPy 2.7 and 3.2, and Jython 2.7.
 Available Data Structures
 =========================
 
-Multisets
----------
+**Multisets**
 
 ``Multiset``
     A mapping from a set into the positive integers. It is an immutable and
     hashable ``frozendict`` supporting the same binary operations as
     ``collections.Counter``.
 
-Rooted Trees
-------------
+**Rooted Trees**
 
 ``RootedTree``
     An unlabelled, unordered tree represented as a multiset of subtrees.
@@ -36,8 +34,7 @@ Rooted Trees
     number of nodes using the algorithm provided by T. Beyer and S. M.
     Hedetniemi in "Constant time generation of rooted trees."
 
-Necklaces
----------
+**Necklaces**
 
 ``Necklace``
     A **necklace** is the lexicographically smallest rotation of a given word.
@@ -50,9 +47,7 @@ Necklaces
     `simple fixed content` algorithm described by Joe Sawada in "A fast
     algorithm to generate necklaces with fixed content."
 
-
-Functions
----------
+**Functions**
 
 ``Function``
     Mathematical **functions** are correspondences between sets. A ``Function``
@@ -75,9 +70,7 @@ The functions module also provides enumerators corresponding to each of the
 - ``TransformationMonoid``
 - ``SymmetricGroup``
 
-
-Endofunction Structures
------------------------
+**Endofunction Structures**
 
 ``Funcstruct``
     A conjugacy class of a transformation monoid represented by a multiset
@@ -87,16 +80,14 @@ Endofunction Structures
     Enumerates endofunction structures on a fixed number of nodes (and
     those with a fixed cycle type). Algorithm derived by Caleb Levy.
 
-Labellings
-----------
+**Labellings**
 
 Functions for enumerating unique labellings of unlabelled structures. Includes
 functions for dealing with set partitions. These are found in
 ``funcstructs.structures.labellings``.
 
 
-Function Distributions
-----------------------
+**Function Distributions**
 
 Functions for computing various statistical properties of endofunction
 distributions. These are found in ``funcstructs.structures.funcdists``.
