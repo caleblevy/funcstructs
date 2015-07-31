@@ -145,22 +145,14 @@ Usage
 Additional Modules
 ==================
 
-- **bases**: convenience classes used to build the core data structures. These
-  include
-
-  * ``frozendict``: An immutable dictionary
-  * ``Tuple``: A convenience wrapper for subclassing the builtin ``tuple``.
-  * ``Enumerable``: A parametrized abstract base class for reusable generators.
-
-- **graphs** (Requires ``numpy`` and ``matplotlib``): Computational geometry
-  primitives. Currently provides ``Point``, ``Coordinates`` and ``Line``
-  objects. Intended to become an automated pretty-plot maker for endofunction
-  structure graphs.
-
-- **prototypes** (Requires ``numpy`` and ``matplotlib``): dumping ground for
-  unrefined ideas under development.
-
-- **utils**: supporting utilities. Includes basic functions for prime
+- **bases**: Convenience classes used to build the core data structures. These
+  include ``frozendict``, and immutable dictionary, and ``Enumerable``, a
+  parametrized abstract base class for reusable generators.
+- **graphs**: Computational geometry primitives. Intended to become an
+  automated pretty-plot maker for endofunction structure graphs. *Requires
+  numpy and matplotlib.*
+- **prototypes**: Dumping ground for unrefined ideas under development.
+- **utils**: Supporting utilities. Includes basic functions for prime
   factorization, combinatorics and iterating over subsequences.
 
 
