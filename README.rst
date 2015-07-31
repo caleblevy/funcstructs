@@ -7,31 +7,27 @@ exploring combinatorial problems involving endofunction structures.
 Tested on Python 2.7 and 3.4, PyPy 2.7 and 3.2, and Jython 2.7.
 
 
-Overview
-========
-The following data structures are available in ``funcstructs.structures``:
-
+Available Data Structures
+=========================
 
 Multisets
 ---------
 
 ``Multiset``
-    A **multiset** is a mapping from a set into the positive integers.
-    ``Multiset`` is an immutable and hashable ``frozendict`` supporting the
-    same binary operations as ``collections.Counter``.
-
+    A mapping from a set into the positive integers. It is an immutable and
+    hashable ``frozendict`` supporting the same binary operations as
+    ``collections.Counter``.
 
 Rooted Trees
 ------------
 
 ``RootedTree``
-    Represents unlabelled, *un*\ ordered trees as a multiset of subtrees.
+    An unlabelled, unordered tree represented as a multiset of subtrees.
 ``LevelSequence``
-    A **level sequence** represents an unlabelled, *ordered* tree by listing
-    the heights of its nodes above the root, in depth-first traversal order.
-    ``LevelSequence`` inherits from ``tuple``.
+    An unlabelled *ordered* tree represented by listing the height of each
+    node above the root in a pre-ordered depth-first traversal.
 ``DominantSequence``
-    A canonicalized level sequence which is lexicographically larger than the
+    A canonical level sequence which is lexicographically larger than the
     level sequences of all other ordered trees with the same unordered
     structure. Two level sequences correspond to the same unordered rooted tree
     if and only if they have the same dominant sequence.
@@ -39,7 +35,6 @@ Rooted Trees
     Generates the dominant sequence of each unordered rooted tree on a fixed
     number of nodes using the algorithm provided by T. Beyer and S. M.
     Hedetniemi in "Constant time generation of rooted trees."
-
 
 Necklaces
 ---------
@@ -85,19 +80,12 @@ Endofunction Structures
 -----------------------
 
 ``Funcstruct``
-    An **endofunction structure** is the result of removing the labels from a
-    functional digraph. They are conjugacy classes of transformation monoids.
-    ``Funcstruct`` objects represent endofunction structures as a multiset of
-    necklaces whose elements are dominant sequences.
-
-    Funcstruct accepts any Endofunction object as input and returns the
-    corresponding structure. Two endofunctions have the same structure if and
-    only if the graph of one can be relabelled to look like the other.
+    A conjugacy class of a transformation monoid represented by a multiset
+    of necklaces whose elements are dominant sequences. Accepts any
+    Endofunction as input.
 ``EndofunctionStructures``
-    Enumerator of endofunction structures using a given number of nodes. Can
-    optionally specify a cycle type. As far as I am aware, this algorithm is
-    original to the ``funcstructs`` library.
-
+    Enumerates endofunction structures on a fixed number of nodes (and
+    those with a fixed cycle type). Algorithm derived by Caleb Levy.
 
 Labellings
 ----------
