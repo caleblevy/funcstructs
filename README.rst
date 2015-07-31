@@ -42,24 +42,16 @@ Data Structures
   in "A fast algorithm to generate necklaces with fixed content."
 
 
-**Functions**
+**Functions** (in type/enumerator pairs)
 
-- ``Function``: A mathematical correspondence between sets represented with an
-  associative array. Supports composition using the multiplication syntax.
-- ``Endofunction``: A Function whose domain and codomain are equal. These
-  support iteration.
-  connected in cycles.
-- ``Bijection``: An invertible Function.
-- ``Permutation``: A Bijective Endofunction. These form an algebra over the
-  SymmetricGroup.
-
-The functions module also provides enumerators corresponding to each of the
-``Function`` types above:
-
-- ``Mappings``
-- ``Isomorphisms``
-- ``TransformationMonoid``
-- ``SymmetricGroup``
+- ``Function``/``Mappings``: A mathematical correspondence between sets
+  represented with an associative array. Supports composition using the
+  multiplication syntax.
+- ``Endofunction``/``TransformationMonoid``: A Function whose domain and
+  codomain are equal. These support iteration.
+- ``Bijection``/``Isomorphisms``: An invertible Function.
+- ``Permutation``/``SymmetricGroup``: A Bijective Endofunction. These form an
+  algebra over the Symmetric Group.
 
 
 **Endofunction Structures**
