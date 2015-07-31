@@ -1,7 +1,9 @@
 Funcstructs
 ###########
 
-A Python library for dealing with endofunction structures.
+A Python library for dealing with endofunction structures and related
+combinatorial objects.
+
 
 Funcstructs has been tested on Python and PyPy versions 2.7 and 3.2+,
 Jython 2.7 and Pythonista for iOS.
