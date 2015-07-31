@@ -1,10 +1,10 @@
 Funcstructs
 ###########
 
-A collection of algorithms and data structures implemented in Python for
-exploring combinatorial problems involving endofunction structures.
+A Python library for dealing with endofunction structures.
 
-Tested on Python 2.7 and 3.4, PyPy 2.7 and 3.2, and Jython 2.7.
+Funcstructs has been tested on Python and PyPy versions 2.7 and 3.2+,
+Jython 2.7 and Pythonista for iOS.
 
 
 Data Structures
