@@ -12,55 +12,49 @@ Available Data Structures
 
 **Multisets**
 
-``Multiset``
-    A mapping from a set into the positive integers. It is an immutable and
-    hashable ``frozendict`` supporting the same binary operations as
-    ``collections.Counter``.
+- ``Multiset``: A mapping from a set into the positive integers. It is an
+  immutable and hashable ``frozendict`` supporting the same binary operations
+  as ``collections.Counter``.
+
 
 **Rooted Trees**
 
-``RootedTree``
-    An unlabelled, unordered tree represented as a multiset of subtrees.
-``LevelSequence``
-    An unlabelled *ordered* tree represented by listing the height of each
-    node above the root in a pre-ordered depth-first traversal.
-``DominantSequence``
-    A canonical level sequence which is lexicographically larger than the
-    level sequences of all other ordered trees with the same unordered
-    structure. Two level sequences correspond to the same unordered rooted tree
-    if and only if they have the same dominant sequence.
-``TreeEnumerator``
-    Generates the dominant sequence of each unordered rooted tree on a fixed
-    number of nodes using the algorithm provided by T. Beyer and S. M.
-    Hedetniemi in "Constant time generation of rooted trees."
+- ``RootedTree``: An unlabelled, unordered tree represented as a multiset of
+  subtrees.
+- ``LevelSequence``: An unlabelled *ordered* tree represented by listing the
+  height of each node above the root in a pre-ordered depth-first traversal.
+- ``DominantSequence``: A canonical level sequence which is lexicographically
+  larger than the level sequences of all other ordered trees with the same
+  unordered structure. Two level sequences correspond to the same unordered
+  rooted tree if and only if they have the same dominant sequence.
+- ``TreeEnumerator``: Generates the dominant sequence of each unordered rooted
+  tree on a fixed number of nodes using the algorithm provided by T. Beyer and
+  S. M. Hedetniemi in "Constant time generation of rooted trees."
+
 
 **Necklaces**
 
-``Necklace``
-    A **necklace** is the lexicographically smallest rotation of a given word.
-    For us a word is any tuple of comparable elements. ``Necklace`` accepts an
-    iterable as input, and raises an error when the elements are not orderable,
-    and otherwise returns the tuple of the smallest rotation. ``Necklace``
-    objects are the canonical representatives of cycles.
-``FixedContentNecklaces``
-    Enumerator of necklaces with a fixed multiset of elements using the 
-    `simple fixed content` algorithm described by Joe Sawada in "A fast
-    algorithm to generate necklaces with fixed content."
+- ``Necklace``: A **necklace** is the lexicographically smallest rotation of a
+  given word. For us a word is any tuple of comparable elements. ``Necklace``
+  accepts an iterable as input, and raises an error when the elements are not
+  orderable, and otherwise returns the tuple of the smallest rotation.
+  ``Necklace`` objects are the canonical representatives of cycles.
+- ``FixedContentNecklaces``: Enumerator of necklaces with a fixed multiset of
+  elements using the `simple fixed content` algorithm described by Joe Sawada
+  in "A fast algorithm to generate necklaces with fixed content."
+
 
 **Functions**
 
-``Function``
-    Mathematical **functions** are correspondences between sets. A ``Function``
-    object is an associative array which maps the set of its *keys* to the set
-    of *values*. Function may be composed using the standard multiplication.
-``Endofunction``
-    A ``Function`` whose values are a subset of its keys. They can be iterated
-    to produce functional digraphs consisting of rooted trees connected in
-    cycles.
-``Bijection``
-    An invertible ``Function``.
-``Permutation``
-    A bijective endofunction. They accept negative exponents.
+- ``Function``: Mathematical **functions** are correspondences between sets. A
+  ``Function`` object is an associative array which maps the set of its *keys*
+  to the set of *values*. Function may be composed using the standard
+  multiplication.
+- ``Endofunction``: A ``Function`` whose values are a subset of its keys. They
+  can be iterated to produce functional digraphs consisting of rooted trees
+  connected in cycles.
+- ``Bijection``: An invertible ``Function``.
+- ``Permutation``: A bijective endofunction. They accept negative exponents.
 
 The functions module also provides enumerators corresponding to each of the
 ``Function`` types above:
@@ -72,13 +66,13 @@ The functions module also provides enumerators corresponding to each of the
 
 **Endofunction Structures**
 
-``Funcstruct``
-    A conjugacy class of a transformation monoid represented by a multiset
-    of necklaces whose elements are dominant sequences. Accepts any
-    Endofunction as input.
-``EndofunctionStructures``
-    Enumerates endofunction structures on a fixed number of nodes (and
-    those with a fixed cycle type). Algorithm derived by Caleb Levy.
+- ``Funcstruct``: A conjugacy class of a transformation monoid represented by a
+  multiset of necklaces whose elements are dominant sequences. Accepts any
+  Endofunction as input.
+- ``EndofunctionStructures``: Enumerates endofunction structures on a fixed
+  number of nodes (and those with a fixed cycle type). Algorithm derived by
+  Caleb Levy.
+
 
 **Labellings**
 
