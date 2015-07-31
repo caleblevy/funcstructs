@@ -64,21 +64,6 @@ Data Structures
   Caleb Levy.
 
 
-**Labellings**
-
-Functions for enumerating unique labellings of unlabelled structures. Includes
-functions for dealing with set partitions. These are found in
-``funcstructs.structures.labellings``.
-
-
-**Function Distributions**
-
-Functions for computing various statistical properties of endofunction
-distributions. These are found in ``funcstructs.structures.funcdists``.
-
-**Note**: using ``funcdists`` requires ``numpy``.
-
-
 Usage
 =====
 .. code:: python
