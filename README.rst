@@ -7,8 +7,8 @@ exploring combinatorial problems involving endofunction structures.
 Tested on Python 2.7 and 3.4, PyPy 2.7 and 3.2, and Jython 2.7.
 
 
-Available Data Structures
-=========================
+Data Structures
+===============
 
 **Multisets**
 
