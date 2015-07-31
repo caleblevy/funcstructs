@@ -4,21 +4,17 @@ FUNCSTRUCTS
 A collection of algorithms and data structures implemented in Python for
 exploring combinatorial problems involving endofunction structures.
 
-
-Features
-========
-- All data structures in ``funcstructs`` are immutable and hashable
-- Code is thoroughly tested: about 1/3 to 1/2 of project is tests
-- Works on many implementations: Python 2.7, 3.4, PyPy 2.7, 3.2 and Jython 2.7.
-- Contains several original algorithms you won't find anywhere else.
+Tested on Python 2.7 and 3.4, PyPy 2.7 and 3.2, and Jython 2.7.
 
 
 Overview
 ========
 The following data structures are available in ``funcstructs.structures``:
 
+
 Multisets
 ---------
+
 ``Multiset``
     A **multiset** is a mapping from a set into the positive integers.
     ``Multiset`` is an immutable and hashable ``frozendict`` supporting the
@@ -27,6 +23,7 @@ Multisets
 
 Rooted Trees
 ------------
+
 ``RootedTree``
     Represents unlabelled, *un*\ ordered trees as a multiset of subtrees.
 ``LevelSequence``
@@ -86,6 +83,7 @@ The functions module also provides enumerators corresponding to each of the
 
 Endofunction Structures
 -----------------------
+
 ``Funcstruct``
     An **endofunction structure** is the result of removing the labels from a
     functional digraph. They are conjugacy classes of transformation monoids.
@@ -103,12 +101,15 @@ Endofunction Structures
 
 Labellings
 ----------
+
 Functions for enumerating unique labellings of unlabelled structures. Includes
 functions for dealing with set partitions. These are found in
 ``funcstructs.structures.labellings``.
 
+
 Function Distributions
 ----------------------
+
 Functions for computing various statistical properties of endofunction
 distributions. These are found in ``funcstructs.structures.funcdists``.
 
@@ -231,7 +232,6 @@ Additional Modules
 
 About
 =====
-
 :Author: Caleb Levy (caleb.levy@berkeley.edu)
 :Copyright: 2012-2015 Caleb Levy
 :License: MIT License
