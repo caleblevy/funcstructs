@@ -151,28 +151,27 @@ def _partitions(n):
 # - Cartesian products of given sets
 # - Combinations with replacement from a given set
 #
-# (TODO: link to their modules) Please note that NONE of the above are
-# trivial to implement, but we do not discuss them further here.
-
+# Please note that while none of the above are trivial to implement, we
+# do not discuss them further here. (TODO: link to their modules).
 #
 #
 # "Groups of Forests" vs "Cycles with Trees"
 # ------------------------------------------
-# Ignoring their mathematical properties, endofunction structures are simply
-# (directed)* pseudoforests (https://en.wikipedia.org/wiki/Pseudoforest).
-# They may be viewed equivalently as either (1) forests grouped together in
+# Viewed strictly as graphs, endofunction structures are simply unlabelled
+# (directed *) pseudoforests (https://en.wikipedia.org/wiki/Pseudoforest).
+# They may be viewed equivalently as either (1) trees grouped together in
 # cycles, or as (2) cycles with rooted trees attached to them. For the
 # purposes of this algorithm we emphasize (2), although this module once
 # featured an enumerator based on (1).
 #
-# In the old algorithm, we simply enumerated all forests on a fixed
-# number of nodes, grouped them together in multiset partitions, and
-# generated unordered cartesian products of the Necklaces whose elements
-# were from the multisets.
+# The old algorithm simply enumerated all forests (a multiset of rooted
+# trees) on a fixed number of nodes, grouped them together in multiset
+# partitions, and generated unordered cartesian products of the Necklaces
+# whose elements were from the multisets.
 #
 # This might have been more straightforward if enumerating multiset
 # partitions were not so difficult. Sympy is the the only library I am
-# aware of with such a function (in python, anyway), and at over 1000
+# aware of with this functionality (in python, anyway), and at over 1000
 # lines, it exceeds the combined complexity of every other part of the
 # algorithm!
 #
@@ -229,7 +228,7 @@ def integer_funcstructs(n):
 # Let n be the total number of tree nodes and k be the number of
 # distinct cycle lengths. If we impose an (arbitrary) ordering on the
 # components, these allocations will correspond to weak compositions of n
-# into k parts (components).
+# into k parts.
 #
 # A "component group" is a component with rooted trees attached to it.
 # Once we have a mechanism to enumerate component groups formable from a
@@ -279,17 +278,17 @@ def direct_unordered_attachments(t, m):
 
 # Unordered Product
 # -----------------
-# We define the unordered product of sets (A_1, A_2, ..., A_m) as the set
-# of all distinct multisets of length m containing precisely one element
-# from each A_i, where i goes between 1 and m.
-#
 # We refer to any way of attaching tree nodes to themselves or a cycle as
 # an "attachment". Supposing we can enumerate attachments of p nodes to a
 # cycle of length l, we can then take an "unordered" cartesian product of
 # the sets of attachments to each cycle to generate the component groups
-# for a given allocation of nodes. For general sets, unordered products
-# are fairly complicated, however we can exploit certain aspects of our
-# situation.
+# for a given allocation of nodes.
+#
+# Here we define the unordered product of sets (A_1, A_2, ..., A_m) as
+# the set of all distinct multisets of length m containing precisely one
+# element from each A_i, where i goes between 1 and m. For general sets,
+# unordered products are fairly complicated, however we can exploit
+# certain aspects of our situation.
 #
 # First note that the unordered product of pair-wise disjoint sets is
 # isomorphic to the ordered product of any fixed ordering of those sets.
@@ -297,7 +296,7 @@ def direct_unordered_attachments(t, m):
 # with itself are simply combinations with replacement from elements of
 # that set.
 #
-# Our attachment groups are "pseudo-orthogonal": if they have the same
+# Our sets of attachment are "pseudo-orthogonal": if they have the same
 # number of free tree nodes, they are equal; otherwise they are disjoint.
 # For a given partition of tree nodes amongst the cycles of the
 # component, we first group by number of attached tree nodes and form
@@ -351,13 +350,13 @@ def component_groups(t, l, m):
 # Attachments
 # -----------
 # At this point we have a cycle of length l, and p tree nodes to attach
-# to it. A "forest" is any multiset of rooted trees. Without ordering,
-# each attachment is simply a forest with l trees and l+p nodes.
+# to it. Without ordering, each attachment is simply a forest with l
+# trees and l+p nodes.
 #
 # We can reuse our allocater of unlabelled balls into unlabelled boxes to
-# enumerate all partitions of p nodes into l bins. We can write the set
-# of forests on each partition of tree sizes as the unordered product of
-# the sets of trees formable from each component of the partition.
+# enumerate all partitions of p nodes into l bins. The set of forests on
+# each partition is the unordered product of the sets of trees formable
+# from each bin of nodes.
 #
 # For any one such forest, the cycles are simply all of the orderings of
 # those trees which are distinct up to rotation. These are given by our
