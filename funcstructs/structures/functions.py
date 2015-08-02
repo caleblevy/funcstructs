@@ -134,7 +134,7 @@ class Function(frozendict):
     # Define composition of Functions
 
     def __mul__(self, other):
-        """(f * g)(x) <==> f[g[x]]"""
+        """(f * g)[x] <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
         return _result_functype(self, other)((x, self[y]) for x, y in other)
 
