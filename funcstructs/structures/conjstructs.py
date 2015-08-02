@@ -12,7 +12,7 @@ from PADS import IntegerPartitions
 
 from funcstructs import compat
 
-from funcstructs.bases import Enumerable
+from funcstructs.bases import Enumerable, typecheck
 from funcstructs.utils import compositions, factorization, subsequences
 
 from .functions import rangefunc
@@ -403,6 +403,14 @@ class EndofunctionStructures(Enumerable):
             return integer_funcstructs(self.n)
         else:
             return cycle_type_funcstructs(self.n, self.cycle_type)
+
+    @typecheck(Funcstruct)
+    def __contains__(self, other):
+        if len(other) == self.n:
+            if self.cycle_type is not None:
+                return other.cycle_type() == self.cycle_type
+            return True
+        return False
 
     def cardinality(self):
         """Count the number of endofunction structures on n nodes.

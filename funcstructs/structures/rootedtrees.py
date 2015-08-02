@@ -370,9 +370,9 @@ class TreeEnumerator(bases.Enumerable):
         )
         return OEIS_A000081[self.n-1] if self.n <= 25 else self.cardinality()
 
+    @bases.typecheck(DominantSequence, RootedTree)
     def __contains__(self, other):
-        return isinstance(other, (DominantSequence, RootedTree)) and \
-               len(other) == self.n
+        return len(other) == self.n
 
     def cardinality(self):
         """Returns the number of rooted tree structures on n nodes. Algorithm

@@ -165,3 +165,7 @@ class FixedContentNecklaces(bases.Enumerable):
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
             yield tuple.__new__(Necklace, (self.elements[i] for i in strand))
+
+    @bases.typecheck(Necklace)
+    def __contains__(self, other):
+        return sorted_counts(other) == (self.elements, self.multiplicities)
