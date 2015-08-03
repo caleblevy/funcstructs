@@ -5,6 +5,7 @@ from funcstructs.structures import (
     randfunc,
     Endofunction,
     DominantSequence,
+    Multiset,
     Necklace
 )
 
@@ -16,7 +17,7 @@ from funcstructs.structures.conjstructs import (
 
 class FuncstructTests(unittest.TestCase):
 
-    s = super(Funcstruct, Funcstruct).__new__(Funcstruct, [
+    s = Multiset.__new__(Funcstruct, [
             Necklace([
                 DominantSequence([0, 1, 2]),
                 DominantSequence([0, 1, 1])
@@ -37,7 +38,11 @@ class FuncstructTests(unittest.TestCase):
 
     def test_cycle_type(self):
         """Test that the correct multiset of cycle lengths is returned."""
-        # TODO: fill this in with actual tests.
+        self.assertEqual(Multiset([1, 2, 3]), self.s.cycle_type())
+        sm = Multiset(self.s)
+        sm += sm + Multiset(Funcstruct(randfunc(1)))
+        s2 = Multiset.__new__(Funcstruct, sm)
+        self.assertEqual(Multiset([1, 1, 1, 2, 2, 3, 3]), s2.cycle_type())
 
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""
