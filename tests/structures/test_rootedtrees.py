@@ -1,9 +1,7 @@
 import unittest
 import math
 
-from PADS import IntegerPartitions
-
-from funcstructs.structures import functions, multiset
+from funcstructs.structures import functions
 
 from funcstructs.structures.rootedtrees import (
     RootedTree,
