@@ -4,8 +4,6 @@ numbers.
 Caleb Levy, 2015.
 """
 
-import numbers
-
 import numpy as np
 
 from funcstructs.structures import Endofunction

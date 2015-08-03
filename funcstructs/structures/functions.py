@@ -8,8 +8,6 @@ import random
 from collections import defaultdict
 from math import factorial
 
-from funcstructs import compat
-
 from funcstructs.bases import frozendict, Enumerable, typecheck
 from platform import python_implementation
 

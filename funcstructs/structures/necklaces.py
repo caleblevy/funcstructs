@@ -12,7 +12,7 @@ from PADS.Lyndon import SmallestRotation
 from funcstructs import bases
 from funcstructs.utils import combinat, factorization
 
-from .multiset import Multiset, sorted_counts
+from .multiset import Multiset
 
 
 def periodicity(strand):

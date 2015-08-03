@@ -7,7 +7,6 @@ from __future__ import print_function
 
 from collections import Counter, Mapping
 from functools import reduce
-from itertools import chain, combinations_with_replacement, product
 from math import factorial
 from operator import mul
 

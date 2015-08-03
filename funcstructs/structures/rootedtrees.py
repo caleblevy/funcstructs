@@ -7,7 +7,7 @@ from itertools import chain, groupby
 from math import factorial
 
 from funcstructs import bases
-from funcstructs.utils import combinat, factorization, subsequences
+from funcstructs.utils import factorization, subsequences
 
 from funcstructs.structures.multiset import Multiset
 
