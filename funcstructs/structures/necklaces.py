@@ -12,7 +12,7 @@ from PADS.Lyndon import SmallestRotation
 from funcstructs import bases
 from funcstructs.utils import combinat, factorization
 
-from .multiset import sorted_counts
+from .multiset import Multiset, sorted_counts
 
 
 def periodicity(strand):
@@ -110,25 +110,26 @@ def _simple_fixed_content(a, content, t, p, k):
 
 
 class FixedContentNecklaces(bases.Enumerable):
-    """Representation of the set of necklaces of fixed content; i.e. a
-    fixed pool of beads from which to form necklaces.
-    """
+    """Enumerator of necklces with a fixed content."""
 
-    def __init__(self, elements=None, multiplicities=None):
-        if multiplicities is None:
-            elements, multiplicities = sorted_counts(elements)
-        elif elements is None:
-            elements, multiplicities = zip(*enumerate(multiplicities))
-        self.elements = elements
-        self.multiplicities = multiplicities
+    def __init__(self, content):
+        content = Multiset(content)
+        if not content:
+            raise TypeError("FixedContentNecklaces requires non-empty content")
+        self.content = content
+
+    @classmethod
+    def from_multiplicities(cls, multiplicities):
+        return cls(dict(enumerate(multiplicities)))
 
     def count_by_period(self):
         """Returns a list whose kth element is the number of necklaces
         corresponding to the input set of beads with k distinct rotations.
         """
-        n = sum(self.multiplicities)
+        multiplicities = list(self.content.values())
+        n = sum(multiplicities)
         # Each period must be a divisor of the gcd of the multiplicities.
-        w = functools.reduce(fractions.gcd, self.multiplicities)
+        w = functools.reduce(fractions.gcd, multiplicities)
         baseperiod = n//w
         factors = factorization.divisors(w)
         mults = [0] * (factors[-1] + 1)
@@ -141,7 +142,7 @@ class FixedContentNecklaces(bases.Enumerable):
             # featuring 1/factor of each kind of the original partiton's
             # elements.
             mults[factor] = combinat.multinomial_coefficient(
-                [(i*factor)//w for i in self.multiplicities]
+                [(i*factor)//w for i in multiplicities]
             )
             # To enusre mults[factor] gives the number of character
             # permutations with period exactly equal to (not subdividing)
@@ -161,13 +162,13 @@ class FixedContentNecklaces(bases.Enumerable):
         return sum(self.count_by_period())
 
     def __iter__(self):
-        if not self.elements:
-            return
-        for strand in _sfc(self.multiplicities):
+        elements, multiplicities = zip(*sorted(self.content.items()))
+        elem_get = elements.__getitem__
+        for strand in _sfc(multiplicities):
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
-            yield tuple.__new__(Necklace, (self.elements[i] for i in strand))
+            yield tuple.__new__(Necklace, map(elem_get, strand))
 
     @bases.typecheck(Necklace)
     def __contains__(self, other):
-        return sorted_counts(other) == (self.elements, self.multiplicities)
+        return Multiset(other) == self.content
