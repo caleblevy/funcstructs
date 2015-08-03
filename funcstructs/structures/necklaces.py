@@ -77,7 +77,17 @@ class Necklace(bases.Tuple):
         return len(self)//self.period()
 
 
-def simple_fixed_content(a, content, t, p, k):
+def _sfc(multiplicities):
+    """Wrapper for partition necklaces, which takes a partition of
+    multiplicities and enumerates canonical necklaces on that partition."""
+    content = list(multiplicities)
+    a = [0]*sum(content)
+    content[0] -= 1
+    k = len(content)
+    return _simple_fixed_content(a, content, 2, 1, k)
+
+
+def _simple_fixed_content(a, content, t, p, k):
     # This function is a result of refactoring of Sage's simple fixed content
     # algorithm, featured in src/sage/combinat/neckalce.py as of December 23,
     # 2014. The original code was written by Mike Hansen <mhansen@gmail.com> in
@@ -94,14 +104,15 @@ def simple_fixed_content(a, content, t, p, k):
                 a[t-1] = j
                 content[j] -= 1
                 tp = p if(j == a[t-p-1]) else t
-                for z in simple_fixed_content(a, content, t+1, tp, k):
+                for z in _simple_fixed_content(a, content, t+1, tp, k):
                     yield z
                 content[j] += 1
 
 
 class FixedContentNecklaces(bases.Enumerable):
-    """ Representation of the set of necklaces of fixed content; i.e. a fixed
-    pool of beads from which to form necklaces. """
+    """Representation of the set of necklaces of fixed content; i.e. a
+    fixed pool of beads from which to form necklaces.
+    """
 
     def __init__(self, elements=None, multiplicities=None):
         if multiplicities is None:
@@ -149,19 +160,10 @@ class FixedContentNecklaces(bases.Enumerable):
     def cardinality(self):
         return sum(self.count_by_period())
 
-    def sfc(self):
-        """Wrapper for partition necklaces, which takes a partition of
-        multiplicities and enumerates canonical necklaces on that partition."""
-        multiplicities = list(self.multiplicities)
-        a = [0]*sum(multiplicities)
-        multiplicities[0] -= 1
-        k = len(multiplicities)
-        return simple_fixed_content(a, multiplicities, 2, 1, k)
-
     def __iter__(self):
         if not self.elements:
             return
-        for strand in self.sfc():
+        for strand in _sfc(self.multiplicities):
             # Explicitly make a tuple, since we must form the list of all
             # necklaces in memory when constructing endofunction structures.
             yield tuple.__new__(Necklace, (self.elements[i] for i in strand))
