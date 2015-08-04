@@ -3,7 +3,7 @@
 Caleb Levy, 2014-2015.
 """
 
-from collections import defaultdict
+from collections import defaultdict, Mapping
 from fractions import Fraction
 from itertools import chain, product, combinations_with_replacement
 from math import factorial
@@ -15,7 +15,7 @@ from funcstructs import compat
 from funcstructs.bases import Enumerable, typecheck
 from funcstructs.utils import compositions, factorization, subsequences
 
-from .functions import rangefunc
+from .functions import rangefunc, Endofunction
 from .multiset import Multiset
 from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import _levels_from_preim, DominantSequence, TreeEnumerator
@@ -51,20 +51,32 @@ class Funcstruct(Multiset):
     __slots__ = ()
 
     def __new__(cls, f):
-        cycles = []
-        treenodes = f.acyclic_ancestors
-        for cycle in f.cycles:
-            trees = []
-            for x in cycle:
-                # Use DominantSequence instead of RootedTree to avoid hitting
-                # python's recursion limit.
-                trees.append(
-                    DominantSequence(_levels_from_preim(treenodes, x)))
-            cycles.append(Necklace(trees))
-        return super(Funcstruct, cls).__new__(cls, cycles)
-
-    def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.func_form())
+        if isinstance(f, Endofunction):
+            cycles = []
+            treenodes = f.acyclic_ancestors
+            for cycle in f.cycles:
+                trees = []
+                for x in cycle:
+                    # Use DominantSequence instead of RootedTree due to
+                    # python's recursion limit, and for speed.
+                    trees.append(
+                        DominantSequence(_levels_from_preim(treenodes, x)))
+                cycles.append(Necklace(trees))
+            return super(Funcstruct, cls).__new__(cls, cycles)
+        else:
+            self = super(Funcstruct, cls).__new__(cls, f)
+            for cycle in self.keys():
+                if not isinstance(cycle, Necklace):
+                    break
+                for tree in cycle:
+                    if not isinstance(tree, DominantSequence):
+                        break
+                else:
+                    continue
+                break
+            else:
+                return self
+            raise TypeError("Funcstructs must have cycles of rooted trees")
 
     def __len__(self):
         """Number of nodes in the structure."""
