@@ -216,14 +216,3 @@ _Mapping.register(frozendict)
 
 del _Mapping, _FrozendictHelper
 # Leave _map_set and _map_get for frozendict subclasses (Multiset).
-
-
-# TODO: Investigate the following:
-# 1) Should I add internal _hash cache?
-# 2) Are there any MI issues I am not aware of? (Jython, inheriting from base)
-# 3) dict(frozendict_subclass) with different __iter__, __copy__, etc...
-# 4) Interaction of (3) with registering frozendict as Mapping
-# 5) Performance on different implementations
-# 6) Inheriting slots with same name?
-# 7) Figure out how to shut pylint up about missing methods (because oh God
-#    there will be so many...).
