@@ -4,6 +4,8 @@ Caleb Levy, 2015.
 """
 
 from collections import Mapping as _Mapping
+from functools import partial as _partial
+from types import FunctionType as _FunctionType
 
 __all__ = ["frozendict"]
 
@@ -48,11 +50,10 @@ class frozendict(object):
 # themselves (method) descriptors, a new wrapper for them is generated
 # each time they are called. Store references to them locally to avoid
 # this step.
-_map_set = frozendict._mapping.__set__
-_map_get = frozendict._mapping.__get__
-
-del frozendict._mapping  # destroy external access to the mapping
-del frozendict.__slots__  # make it look like a builtin type
+@_partial
+def _map_accessors(_map_set=frozendict._mapping.__set__,
+                   _map_get=frozendict._mapping.__get__):
+    return _map_set, _map_get
 
 
 # Define all methods inside _FrozendictHelper so that all references to the
@@ -62,28 +63,35 @@ del frozendict.__slots__  # make it look like a builtin type
 #
 # Can't make this a decorator like _MultisetHelper since we need _map_get and
 # _map_set to already be defined prior to calling.
-def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
+@_FunctionType.__call__
+def _FrozendictHelper():
     """Add wrappers for `dict`'s methods to frozendict."""
+    del frozendict._mapping  # destroy external access to the mapping
+    del frozendict.__slots__  # make it look like a builtin type
 
+    map_set, map_get = _map_accessors()
+
+    @staticmethod
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
         self = object.__new__(args[0])
         # Wrap internal setter inside of __new__
         map_set(self, dict(*args[1:], **kwargs))
         return self
-    fd_cls.__new__ = staticmethod(__new__)
+    frozendict.__new__ = __new__
 
+    @classmethod
     def fromkeys(cls, iterable, v=None):
         """New frozendict with keys from iterable and values set to v."""
         # call cls and copy dict since subclass new might define more
         # conditions (i.e. Multiset)
         return cls(dict.fromkeys(iterable, v))
-    fd_cls.fromkeys = classmethod(fromkeys)
+    frozendict.fromkeys = fromkeys
 
     def add_with_docs(func):
         name = func.__name__
         if func.__doc__ is None:
             func.__doc__ = getattr(dict, name).__doc__
-        setattr(fd_cls, name, func)
+        setattr(frozendict, name, func)
 
     # All of dict's non-mutating methods, EXCEPT:
     #
@@ -209,10 +217,4 @@ def _FrozendictHelper(fd_cls, map_get=_map_get, map_set=_map_set):
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, repr(map_get(self)))
 
-
-_FrozendictHelper(frozendict)
-_Mapping.register(frozendict)
-
-
-del _Mapping, _FrozendictHelper
-# Leave _map_set and _map_get for frozendict subclasses (Multiset).
+    _Mapping.register(frozendict)

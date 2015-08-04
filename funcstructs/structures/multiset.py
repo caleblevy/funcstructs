@@ -10,7 +10,7 @@ from functools import reduce
 from math import factorial
 from operator import mul
 
-from funcstructs.bases.frozendict import frozendict, _map_get, _map_set
+from funcstructs.bases.frozendict import frozendict, _map_accessors
 
 __all__ = ["Multiset", "counts", "sorted_counts"]
 
@@ -42,8 +42,10 @@ def _rop_template(name, map_get, map_set):
     return rop
 
 
-def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
+def _MultisetHelper(ms_cls):
     """Add Counter wrappers to Multiset."""
+
+    map_set, map_get = _map_accessors()
 
     @staticmethod
     def __new__(*args, **kwargs):  # signature allows using `cls` keyword arg
@@ -89,6 +91,9 @@ def _MultisetHelper(ms_cls, map_get=_map_get, map_set=_map_set):
 
     for rop in ['__radd__', '__rsub__', '__rand__', '__ror__']:
         setattr(ms_cls, rop, _rop_template(rop, map_get, map_set))
+
+    global _MultisetHelper
+    del _MultisetHelper
 
     return ms_cls
 
