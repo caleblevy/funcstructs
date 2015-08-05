@@ -5,10 +5,12 @@ Caleb Levy, 2015.
 
 from __future__ import print_function
 
+import heapq
 from collections import Counter, Mapping
 from functools import reduce
+from itertools import chain, starmap, repeat
 from math import factorial
-from operator import mul
+from operator import itemgetter, mul
 
 from funcstructs.bases.frozendict import frozendict, _map_accessors
 
@@ -128,15 +130,20 @@ class Multiset(frozendict):
     def fromkeys(cls, iterable, v=None):
         raise NotImplementedError("%s.fromkeys() is undefined." % cls.__name__)
 
-    __repr__ = Counter.__dict__['__repr__']
+    def __repr__(self):
+        # Taken from Counter.__repr__ in python3
+        try:
+            items = ', '.join(map('%r: %r'.__mod__, self.most_common()))
+            return '%s({%s})' % (self.__class__.__name__, items)
+        except TypeError:
+            # handle case where values are not orderable
+            return '{0}({1!r})'.format(self.__class__.__name__, dict(self))
 
     def __len__(self):
         """Length of a multiset, including multiplicities."""
         return sum(self.values())
 
-    __iter__ = Counter.__dict__['elements']
-    __iter__.__name__ = '__iter__'
-    __iter__.__doc__ = \
+    def __iter__(self):
         """Iterate over elements repeating each as many times as its count.
 
         >>> m = Mulitset('ABCABC')
@@ -151,6 +158,7 @@ class Multiset(frozendict):
         >>> product
         1836
         """
+        return chain.from_iterable(starmap(repeat, self.items()))
 
     def elements(self):
         """Underlying set of unique elements.
@@ -159,7 +167,7 @@ class Multiset(frozendict):
         >>> sorted(m.elements())
         ['a', 'b', 'c', 'd', 'r']
         """
-        return frozenset(self.keys())
+        return self.keys()
 
     def num_unique_elements(self):
         """Number of unique elements in the Multiset.
@@ -167,10 +175,19 @@ class Multiset(frozendict):
         >>> m = Multiset("abracadabra").num_unique_elements()
         5
         """
-        return frozendict.__len__(self)
+        return len(self.elements())
 
-    most_common = Counter.__dict__['most_common']
-    most_common.__doc__ = most_common.__doc__.replace("Counter", "Multiset")
+    def most_common(self, n=None):
+        """List the n most common elements and their counts from the most
+        common to the least.  If n is None, then list all element counts.
+
+        >>> Multiset('abcdeabcdabcaba').most_common(3)
+        [('a', 5), ('b', 4), ('c', 3)]
+        """
+        # Emulate Bag.sortedByCount from Smalltalk
+        if n is None:
+            return sorted(self.items(), key=itemgetter(1), reverse=True)
+        return heapq.nlargest(n, self.items(), key=itemgetter(1))
 
     def degeneracy(self):
         """Number of different representations of the same multiset."""
