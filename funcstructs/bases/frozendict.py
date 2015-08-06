@@ -213,4 +213,8 @@ def _FrozendictHelper():
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, repr(map_get(self)))
 
+    @add_with_docs
+    def __reduce__(self):
+        return (self.__class__, (map_get(self), ))
+
     _Mapping.register(frozendict)

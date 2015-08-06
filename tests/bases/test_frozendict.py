@@ -4,6 +4,8 @@ Caleb Levy, 2015.
 """
 
 import unittest
+
+import pickle
 from collections import Counter, Mapping, MutableMapping
 
 from funcstructs.bases import frozendict
@@ -32,10 +34,11 @@ class FrozendictClassTests(unittest.TestCase):
         self.assertNotIn('_mapping', dir(frozendict()))
 
 
-class FrozendictTests(unittest.TestCase):
+class F(frozendict):
+    pass
 
-    class F(frozendict):
-        pass
+
+class FrozendictTests(unittest.TestCase):
 
     a = {'a': 1, 'b': 2, 'c': 3}
     b = frozendict({'a': 1, 'b': 2, 'c': 3})
@@ -47,7 +50,7 @@ class FrozendictTests(unittest.TestCase):
     def test_constructors(self):
         """Test frozendict works with usual constructors"""
         kwargs = {'c': 3, 'd': 4, 'e': 5}
-        for fdclass in [frozendict, self.F]:
+        for fdclass in [frozendict, F]:
             self.assertEqual(
                 {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5},
                 dict(fdclass(a=1, b=2, **kwargs))
@@ -70,7 +73,7 @@ class FrozendictTests(unittest.TestCase):
                 else:
                     self.assertNotEqual(d1, d2)
         t = {'d': 1, 'e': 2, 'a': 3}
-        dtypes = [t, frozendict(t), self.F(t)]
+        dtypes = [t, frozendict(t), F(t)]
         for d1 in dtypes:
             for d2 in dtypes:
                 self.assertEqual(d1, d2)
@@ -206,3 +209,10 @@ class FrozendictTests(unittest.TestCase):
         self.assertIs(False, A() == frozendict())
         self.assertIs(False, A() == dict())
         self.assertIs(False, dict() == A())
+
+    def test_pickling(self):
+        """Test that loads(dumps(frozendict(obj))) == frozendict(obj)"""
+        for d in self.dicts:
+            loaded = pickle.loads(pickle.dumps(d))
+            self.assertEqual(d, loaded)
+            self.assertIs(type(d), type(loaded))
