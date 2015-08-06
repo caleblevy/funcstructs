@@ -172,7 +172,7 @@ class Multiset(frozendict):
     def num_unique_elements(self):
         """Number of unique elements in the Multiset.
 
-        >>> m = Multiset("abracadabra").num_unique_elements()
+        >>> Multiset("abracadabra").num_unique_elements()
         5
         """
         return len(self.elements())
