@@ -179,7 +179,6 @@ class LevelSequence(bases.Tuple):
 # using the list of their children as keys (the lists are sorted
 # lexicographically).
 
-
 def _dominant_keys(height_groups, func, sort=True):
     """Assign to each node a key for sorting"""
     node_keys = [0]*len(func)  # node_keys[node] <-> sort key for node
@@ -221,10 +220,8 @@ class DominantSequence(LevelSequence):
         return super(LevelSequence, cls).__new__(cls, level_sequence)
 
     def degeneracy(self):
-        """The number of representations of each labelling of the unordered
-        tree corresponding to self is found by multiplying the product of the
-        degeneracies of all the subtrees by the degeneracy of the multiset
-        containing the rooted trees."""
+        """Number of equivalent representations for each labelling of the
+        unordered tree."""
         # TODO: A writeup of this with diagrams will be in the notes.
         deg = 1
         # TODO: intuitive explanation of how these two things give
