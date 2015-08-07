@@ -161,31 +161,13 @@ def cycle_index(partition, n=None):
     return count
 
 
-def translation_keys(tree):
-    """Given a combination of nodes from label groups, output keys with which
-    to translate each combination into an endofunction."""
-    ind_groups = list(map(list, tree._interchangeable_nodes()))
-    bin_widths = list(map(len, ind_groups))
-    translation_sequence = rangeperm(chain(*ind_groups)).inverse.conj(
-        rangefunc(tree.parents()))
-    return bin_widths, translation_sequence
-
-
 def tree_labellings(tree):
-    """ Constant amortized time enumeration of every endofunction whose
-    structure is described by the given tree. In many cases it may be much more
-    efficient to use itertools.permutations (since they are at C speed) and may
-    even be true in the amortized sense (since there are provably on average
-    O(n!) labellings of a tree).
-
-    Still, it is constant time per tree (really per node per tree), and it's
-    here for completeness sake.
-
-    Note that order of the elements in a given combination bin does not matter
-    per se, as long as it is consistent for any suffix starting with that
-    combination."""
+    """Enumerate endofunctions whose structure is equivalent to the tree."""
+    node_groups = list(map(list, tree._interchangeable_nodes()))
+    bin_widths = list(map(len, node_groups))
+    translation_sequence = rangeperm(chain(*node_groups)).inverse.conj(
+        rangefunc(tree.parents()))
     n = len(tree)
-    bin_widths, translation_sequence = translation_keys(tree)
     func = [0] * n
     for combo in _ordered_divisions(set(range(n)), bin_widths):
         c = list(chain(*combo))
