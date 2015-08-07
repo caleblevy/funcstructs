@@ -182,16 +182,15 @@ class LevelSequence(bases.Tuple):
     # each level by using the list of their children as keys (the lists
     # are sorted lexicographically).
 
-    def _node_keys(self, parents=None, height_groups=None, sort=True):
+    def _node_keys(self, sort=True):
         """Assign to each node a key for sorting"""
         # Leave option to input these to without computing for caching
-        parent = parents or list(self.parents())
-        height_groups = height_groups or self.height_groups()
+        parent = list(self.parents())
         node_keys = [0]*len(self)
         child_keys = [[] for _ in self]
         previous_level = []
         sort_value = len(parent)
-        for level in reversed(height_groups):
+        for level in reversed(self.height_groups()):
             # enumerate for connections from previous level to current
             for x in previous_level:
                 child_keys[parent[x]].append(node_keys[x])
@@ -232,10 +231,10 @@ class DominantSequence(LevelSequence):
         # TODO: Given an intuitive explanation of how these two things give
         # different aspects of tree structure: connections and height.
         parents = list(self.parents())
-        groups = self.height_groups()
-        keys = self._node_keys(parents, groups, sort=False)
+        bft = self.breadth_first_traversal()
+        keys = self._node_keys(sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
-        for _, g in groupby(chain(*groups), lambda x: (parents[x], keys[x])):
+        for _, g in groupby(bft, lambda x: (parents[x], keys[x])):
             yield list(g)
 
     def degeneracy(self):
