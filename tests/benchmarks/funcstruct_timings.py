@@ -8,8 +8,39 @@ to let regressions slip through.
 
 from __future__ import print_function
 
+import numpy as np
+
 from funcstructs.prototypes.timing import Stopwatch
-from funcstructs import *
+from funcstructs.prototypes.floatfuncs import *
+from funcstructs.structures import *
+
+
+with Stopwatch() as u:
+    square = floatfunc(lambda x: x*x, NonNegative)
+    u.lap()
+    sine = floatfunc(np.sin)
+    u.lap()
+
+print("Making floating point Endofunctions:", u.laps)
+
+
+with Stopwatch() as v:
+    Square = Funcstruct(square)
+    v.lap()
+    Sine = Funcstruct(sine)
+    v.lap()
+
+print("Floating point Funcstructs:", v.laps)
+
+
+with Stopwatch() as w:
+    d = Square.degeneracy()
+    w.lap()
+    e = Sine.degeneracy()
+    w.lap()
+
+print("Floating point degeneracy:", w.laps)
+
 
 with Stopwatch() as r:
     f = randfunc(10**6)
