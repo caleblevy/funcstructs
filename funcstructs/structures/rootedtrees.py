@@ -3,8 +3,10 @@
 Caleb Levy, 2014-2015.
 """
 
+from functools import reduce
 from itertools import chain, groupby
 from math import factorial
+from operator import mul
 
 from funcstructs import bases
 from funcstructs.utils import factorization, subsequences
@@ -219,20 +221,23 @@ class DominantSequence(LevelSequence):
         # treefunc_properties will serve as an effective check due to indexing.
         return super(LevelSequence, cls).__new__(cls, level_sequence)
 
-    def degeneracy(self):
-        """Number of equivalent representations for each labelling of the
-        unordered tree."""
+    def _interchangeable_nodes(self):
+        """Groups of interchangeable nodes in BFS order."""
         # TODO: A writeup of this with diagrams will be in the notes.
-        deg = 1
-        # TODO: intuitive explanation of how these two things give
+        # TODO: Given an intuitive explanation of how these two things give
         # different aspects of tree structure: connections and height.
         parents = list(self.parents())
         groups = self.height_groups()
         keys = _dominant_keys(groups, parents, sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
         for _, g in groupby(chain(*groups), lambda x: (parents[x], keys[x])):
-            deg *= factorial(len(list(g)))
-        return deg
+            yield g
+
+    def degeneracy(self):
+        """Number of equivalent representations for each labelling of the
+        unordered tree."""
+        return reduce(mul, (factorial(len(list(g)))
+                            for g in self._interchangeable_nodes()))
 
 
 class RootedTree(Multiset):
