@@ -20,7 +20,6 @@ __all__ = [
     "ordered_divisions", "ordered_division_count",
     "set_partitions", "set_partition_count",
     "cycle_labellings", "cycle_index",
-    "tree_labellings"
 ]
 
 
@@ -159,18 +158,3 @@ def cycle_index(partition, n=None):
     for l, m in partition.items():
         count //= l**m * factorial(m)
     return count
-
-
-def tree_labellings(tree):
-    """Enumerate endofunctions whose structure is equivalent to the tree."""
-    node_groups = list(tree._interchangeable_nodes())
-    bin_widths = list(map(len, node_groups))
-    translation_sequence = rangeperm(chain(*node_groups)).inverse.conj(
-        rangefunc(tree.parents()))
-    n = len(tree)
-    func = [0] * n
-    for combo in _ordered_divisions(set(range(n)), bin_widths):
-        c = list(chain(*combo))
-        for i in range(n):
-            func[c[i]] = c[translation_sequence[i]]
-        yield rangefunc(func)

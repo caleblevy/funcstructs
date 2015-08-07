@@ -8,8 +8,7 @@ from funcstructs.structures.labellings import (
     equipartitions, equipartition_count,
     ordered_divisions, ordered_division_count,
     set_partitions, set_partition_count,
-    cycle_labellings, cycle_index,
-    tree_labellings
+    cycle_labellings, cycle_index
 )
 
 
@@ -89,25 +88,3 @@ class LabellingTests(unittest.TestCase):
             len(frozenset(cycle_labellings([2, 2], 5))),
             len(frozenset(cycle_labellings([2, 2, 1])))
         )
-
-    trees = [
-        rootedtrees.DominantSequence([0, 1, 2, 2, 1, 2, 2, 1]),
-        rootedtrees.DominantSequence([0, 1, 2, 2, 1, 2, 2, 3, 4])
-    ]
-
-    def test_tree_label_count(self):
-        """Ensure each tree has the correct number of representations"""
-        for tree in self.trees:
-            self.assertEqual(
-                math.factorial(len(tree))//tree.degeneracy(),
-                len(set(tree_labellings(tree)))
-            )
-
-    def test_trees_are_equivalent(self):
-        """Ensure each endofunction is a representation of the original."""
-        for tree in self.trees:
-            for f in itertools.islice(tree_labellings(tree), 5040):
-                self.assertEqual(
-                    tree,
-                    rootedtrees.DominantSequence.from_func(f)
-                )
