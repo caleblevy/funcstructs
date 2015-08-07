@@ -161,50 +161,10 @@ def cycle_index(partition, n=None):
     return count
 
 
-def branch_inds(tree):
-    """Return the grafting points of tree's main sub branches in order."""
-    inds = []
-    for i, node in enumerate(tree):
-        if node == tree[0]+1:
-            inds.append(i)
-    return inds
-
-
-def _chop(tree):
-    """Chop a tree into its branches."""
-    for branch in startswith(tree[1:], tree[0]+1):
-        yield tuple(branch)
-
-
-def branch_groups(tree):
-    """Yield, in order, tree's unique branches, and all nodes to which an
-    instance of that branch is attached."""
-    branches, mults = sorted_counts(_chop(tree))
-    branches = iter(branches[::-1])
-    mults = reversed(mults)
-    indset = branch_inds(tree)[::-1]
-    for m in mults:
-        inds = []
-        for _ in range(m):
-            inds.append(indset.pop())
-        yield next(branches), inds
-
-
-def label_groups(tree):
-    """ Order in which we label and group the nodes of the rooted tree. """
-    if tree[0] == 0:
-        yield [0]
-    for subtree, inds in branch_groups(tree):
-        yield inds
-        for ind in inds:
-            for indseq in label_groups(subtree):
-                yield [i + ind for i in indseq]
-
-
 def translation_keys(tree):
     """Given a combination of nodes from label groups, output keys with which
     to translate each combination into an endofunction."""
-    ind_groups = list(label_groups(tree))
+    ind_groups = list(map(list, tree._interchangeable_nodes()))
     bin_widths = list(map(len, ind_groups))
     translation_sequence = rangeperm(chain(*ind_groups)).inverse.conj(
         rangefunc(tree.parents()))
