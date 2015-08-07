@@ -8,6 +8,8 @@ import numpy as np
 
 from funcstructs.structures import Endofunction
 
+np.seterr(all='ignore')
+
 
 class NanType(np.float16):
     __slots__ = ()
