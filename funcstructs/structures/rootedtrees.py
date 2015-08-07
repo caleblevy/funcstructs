@@ -168,43 +168,46 @@ class LevelSequence(bases.Tuple):
         # the equivalent mapping(iter(())).
         return mapping(tree.traverse_map(mapping) for tree in self.subtrees())
 
+    # The following method for converting a rooted tree into canonical form
+    # was independently rediscovered by Caleb Levy in Spring 2015. It is
+    # featured in
+    #
+    #   "Canonical forms for labelled trees and their applications in
+    #   frequent subtree mining" by UCLA researchers Yun Chi, Yirong Yang and
+    #   Richard R. Muntz, published in Knowledge and Infromation Systems in
+    #   2005. DOI 10.1007/s10115-004-0180-7.
+    #
+    # The method runs in O(k*log(k)), with k being the number of nodes in
+    # the tree. Essentially, starting at the top, we sort the nodes at
+    # each level by using the list of their children as keys (the lists
+    # are sorted lexicographically).
 
-# The following method for converting a rooted tree into canonical form
-# was independently rediscovered by Caleb Levy in Spring 2015. It is
-# featured in
-#
-#   "Canonical forms for labelled trees and their applications in
-#   frequent subtree mining" by UCLA researchers Yun Chi, Yirong Yang and
-#   Richard R. Muntz, published in Knowledge and Infromation Systems in 2005.
-#   DOI 10.1007/s10115-004-0180-7.
-#
-# The method runs in O(k*log(k)), with k being the number of nodes in the tree.
-# Essentially, starting at the top, we sort the nodes at each level by
-# using the list of their children as keys (the lists are sorted
-# lexicographically).
-
-def _dominant_keys(height_groups, func, sort=True):
-    """Assign to each node a key for sorting"""
-    node_keys = [0]*len(func)  # node_keys[node] <-> sort key for node
-    child_keys = [[] for _ in func]  # child_keys[x] <-> keys of x's children
-    previous_level = []
-    sort_value = len(func)
-    for level in reversed(height_groups):
-        # enumerate for connections from previous level to current
-        for x in previous_level:
-            child_keys[func[x]].append(node_keys[x])
-        # Sort nodes of current level lexicographically by the list of
-        # their children's keys. Since nodes of the previous level are
-        # already sorted, we need not sort the child_keys themselves.
-        if sort is True:
-            level.sort(key=child_keys.__getitem__, reverse=True)
-        # Assign int keys to current level to prevent accumulating nested lists
-        for _, run in groupby(level, child_keys.__getitem__):
-            sort_value -= 1
-            for x in run:
-                node_keys[x] = sort_value
-        previous_level = level
-    return node_keys
+    def _node_keys(self, parents=None, height_groups=None, sort=True):
+        """Assign to each node a key for sorting"""
+        # Leave option to input these to without computing for caching
+        parent = parents or list(self.parents())
+        height_groups = height_groups or self.height_groups()
+        node_keys = [0]*len(self)
+        child_keys = [[] for _ in self]
+        previous_level = []
+        sort_value = len(parent)
+        for level in reversed(height_groups):
+            # enumerate for connections from previous level to current
+            for x in previous_level:
+                child_keys[parent[x]].append(node_keys[x])
+            # Sort nodes of current level lexicographically by the list of
+            # their children's keys. Since nodes of the previous level are
+            # already sorted, we need not sort the child_keys themselves.
+            if sort is True:
+                level.sort(key=child_keys.__getitem__, reverse=True)
+            # Assign int keys to current level to prevent accumulating nested
+            # lists
+            for _, run in groupby(level, child_keys.__getitem__):
+                sort_value -= 1
+                for x in run:
+                    node_keys[x] = sort_value
+            previous_level = level
+        return node_keys
 
 
 class DominantSequence(LevelSequence):
@@ -217,7 +220,7 @@ class DominantSequence(LevelSequence):
 
     def __new__(cls, level_sequence):
         ot = LevelSequence(level_sequence)
-        keys = _dominant_keys(ot.height_groups(), list(ot.parents()))
+        keys = ot._node_keys()
         level_sequence = _levels_from_preim(ot.children(), 0, keys)
         # No need to run LevelSequence checks; it's either been preordered or
         # treefunc_properties will serve as an effective check due to indexing.
@@ -230,7 +233,7 @@ class DominantSequence(LevelSequence):
         # different aspects of tree structure: connections and height.
         parents = list(self.parents())
         groups = self.height_groups()
-        keys = _dominant_keys(groups, parents, sort=False)
+        keys = self._node_keys(parents, groups, sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
         for _, g in groupby(chain(*groups), lambda x: (parents[x], keys[x])):
             yield list(g)
