@@ -1,5 +1,6 @@
 import unittest
 import math
+from itertools import islice
 
 from funcstructs.structures import functions
 
@@ -182,3 +183,19 @@ class LevelSequenceTests(unittest.TestCase):
             self.assertEqual(reference, computed)
             self.assertGreaterEqual(T[computed], T[lp])
             lp = computed
+
+    label_trees = [
+        DominantSequence([0, 1, 2, 2, 1, 2, 2, 1]),
+        DominantSequence([0, 1, 2, 2, 1, 2, 2, 3, 4])
+    ]
+
+    def test_tree_label_count(self):
+        """Ensure each tree has the correct number of representations, and
+        that each one correctly represents the tree."""
+        for tree in self.label_trees:
+            labels = list(tree.labellings())
+            label_count = math.factorial(len(tree))//tree.degeneracy()
+            self.assertEqual(label_count, len(labels))
+            self.assertEqual(label_count, len(set(labels)))
+            for f in islice(labels, 5040):
+                self.assertEqual(tree, DominantSequence.from_func(f))

@@ -11,7 +11,9 @@ from operator import mul
 from funcstructs import bases
 from funcstructs.utils import factorization, subsequences
 
+from funcstructs.structures.functions import rangefunc, rangeperm
 from funcstructs.structures.multiset import Multiset
+from funcstructs.structures.labellings import _ordered_divisions
 
 __all__ = [
     "LevelSequence", "DominantSequence", "RootedTree",
@@ -238,6 +240,20 @@ class DominantSequence(LevelSequence):
         unordered tree."""
         return reduce(mul, (factorial(len(g))
                             for g in self._interchangeable_nodes()))
+
+    def labellings(self):
+        """Enumerate endofunctions with the same tree structure."""
+        node_groups = list(self._interchangeable_nodes())
+        bin_widths = list(map(len, node_groups))
+        translation_sequence = rangeperm(chain(*node_groups)).inverse.conj(
+            rangefunc(self.parents()))
+        n = len(self)
+        func = [0] * n
+        for combo in _ordered_divisions(set(range(n)), bin_widths):
+            c = list(chain(*combo))
+            for i in range(n):
+                func[c[i]] = c[translation_sequence[i]]
+            yield rangefunc(func)
 
 
 class RootedTree(Multiset):
