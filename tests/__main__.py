@@ -19,7 +19,7 @@ suite = unittest.TestSuite()
 # "Is there a standard way to list names of Python modules in a package?" at
 # http://stackoverflow.com/a/1310912/3349520
 for _, mod, _ in pkgutil.walk_packages([test_dir]):
-    if mod == '__main__':
+    if mod == '__main__' or "benchmarks" in mod:
         continue  # pypy tests __main__ without this
     try:
         # "import module from string variable" at
@@ -37,6 +37,7 @@ for _, mod, _ in pkgutil.walk_packages([test_dir]):
         # "how to run all Python unit tests in a directory" at
         # http://stackoverflow.com/a/1732477/3349520
         suite.addTest(unittest.defaultTestLoader.loadTestsFromName(mod))
+
 
 if numpy_dependant:
     print("\nThe following tests require numpy, and will be skipped:\n")
