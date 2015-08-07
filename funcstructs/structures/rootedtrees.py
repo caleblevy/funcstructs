@@ -231,12 +231,12 @@ class DominantSequence(LevelSequence):
         keys = _dominant_keys(groups, parents, sort=False)
         # Two nodes are interchangeable iff they have the same key and parent
         for _, g in groupby(chain(*groups), lambda x: (parents[x], keys[x])):
-            yield g
+            yield list(g)
 
     def degeneracy(self):
         """Number of equivalent representations for each labelling of the
         unordered tree."""
-        return reduce(mul, (factorial(len(list(g)))
+        return reduce(mul, (factorial(len(g))
                             for g in self._interchangeable_nodes()))
 
 

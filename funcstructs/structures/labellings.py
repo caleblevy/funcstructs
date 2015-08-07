@@ -163,7 +163,7 @@ def cycle_index(partition, n=None):
 
 def tree_labellings(tree):
     """Enumerate endofunctions whose structure is equivalent to the tree."""
-    node_groups = list(map(list, tree._interchangeable_nodes()))
+    node_groups = list(tree._interchangeable_nodes())
     bin_widths = list(map(len, node_groups))
     translation_sequence = rangeperm(chain(*node_groups)).inverse.conj(
         rangefunc(tree.parents()))
