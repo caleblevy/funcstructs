@@ -8,9 +8,7 @@ from math import factorial
 
 from funcstructs.utils.combinat import (
     multinomial_coefficient as ordered_division_count)
-from funcstructs.utils.subsequences import startswith
 
-from .functions import rangefunc, rangeperm
 from .multiset import Multiset, sorted_counts
 from .necklaces import Necklace
 

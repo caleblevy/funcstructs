@@ -3,7 +3,7 @@
 Caleb Levy, 2014-2015.
 """
 
-from collections import defaultdict, Mapping
+from collections import defaultdict
 from fractions import Fraction
 from itertools import chain, product, combinations_with_replacement
 from math import factorial

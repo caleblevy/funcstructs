@@ -21,7 +21,7 @@ except ImportError:
             yield total
 
 try:  # prefer maintained version when available
-    from six import with_metaclass, viewitems
+    from six import with_metaclass
 except ImportError:
     def with_metaclass(meta, *bases):
         """Create a base class with a metaclass."""
@@ -32,5 +32,3 @@ except ImportError:
             def __new__(cls, name, this_bases, d):
                 return meta(name, bases, d)
         return type.__new__(metaclass, 'temporary_class', (), {})
-
-    viewitems = getattr(dict, "viewitems", dict.items)
