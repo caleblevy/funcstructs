@@ -50,7 +50,7 @@ class Funcstruct(Multiset):
 
     __slots__ = ()
 
-    def __new__(cls, f):
+    def __new__(cls, f=()):
         if isinstance(f, Endofunction):
             cycles = []
             treenodes = f.acyclic_ancestors
