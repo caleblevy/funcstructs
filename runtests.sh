@@ -1,10 +1,14 @@
 set -e
 
-./clearpycache.sh
+./clearpycache.sh >/dev/null
+
+# pep8 checks go at the beginning because they are nice, quick, easy
+# and often I won't want to run the full tests (esp. Jython) so I'd
+# rather catch these errors at the beginning
 
 echo ""
 echo "Checking PEP8 Compliance:"
-echo "-----------------------------"
+echo "-------------------------"
 echo ""
 pep8 funcstructs/
 pep8 tests/
@@ -38,7 +42,7 @@ echo "Jython 2.7"
 echo "----------"
 jython tests/
 
-./clearpycache.sh
+./clearpycache.sh >/dev/null
 echo ""
 echo "All Good!"
 echo ""
