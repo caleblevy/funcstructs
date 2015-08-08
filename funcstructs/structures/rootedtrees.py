@@ -324,8 +324,7 @@ class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, n):
-        # ::TODO:: Add isinstance check and time it.
-        if n < 1:
+        if n < 1 or not isinstance(n, int):
             raise ValueError("Cannot define a rooted tree with %s nodes" % n)
         self.n = n
 
