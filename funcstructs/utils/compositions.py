@@ -27,7 +27,7 @@ from funcstructs.utils import productrange
 
 def binary_compositions(n):
     """The division marker representation of each composition."""
-    return productrange.productrange([2]*(n-1))
+    return productrange.productrange(*[2]*(n-1))
 
 
 def compositions(n):

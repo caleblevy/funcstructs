@@ -53,7 +53,7 @@ def monomial_symmetric_polynomial(x, powers):
 
     # The powers use up sum(multiplcities) of the original x.
     for k in range(n-sum(mults)+1):
-        for ind in productrange(1, shape):
+        for ind in productrange(*[(1, s) for s in shape]):
             fac = x[k+sum(ind)-l-1]
             for j in range(l):
                 ind_prev = list(ind)

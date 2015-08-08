@@ -38,7 +38,7 @@ def _divisor_gen(n):
         return
     primes, multiplicities = zip(*prime_factorization(n).items())
     # Since factors are prime, each partition of powers is a different divisor.
-    for exponents in productrange([m+1 for m in multiplicities]):
+    for exponents in productrange(*[m+1 for m in multiplicities]):
         yield prod(p**e for p, e in zip(primes, exponents))
 
 
