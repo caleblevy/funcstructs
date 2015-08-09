@@ -13,7 +13,7 @@ Data Structures
 
 **Multisets**
 
-- ``Multiset``: A immutable mapping from a set into the positive integers
+- ``Multiset``: An immutable mapping from a set into the positive integers
   supporting the same binary operations as ``collections.Counter``.
 
 
@@ -33,8 +33,7 @@ Data Structures
 **Necklaces**
 
 - ``Necklace``: The lexicographically smallest rotation of a sequence of
-  totally ordered elements. They are are the canonical representatives of
-  cycles.
+  totally ordered elements. They are the canonical representatives of cycles.
 - ``FixedContentNecklaces``: Enumerator of necklaces with a fixed multiset of
   elements using the `simple fixed content` algorithm described by Joe Sawada
   in "A fast algorithm to generate necklaces with fixed content."
