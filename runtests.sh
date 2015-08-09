@@ -1,10 +1,18 @@
 set -e
 
+echo ""
+echo "Testing Funcstructs"
+echo "==================="
+
+# Clear pre-existing pyc files. These can hide broken import paths, since
+# python can directly use pyc files when a .py file is unavailable.
+# It is best for missing modules to cause errors, so we remove the pyc.
 ./clearpycache.sh >/dev/null
 
 # pep8 checks go at the beginning because they are nice, quick, easy
-# and often I won't want to run the full tests (esp. Jython) so I'd
-# rather catch these errors at the beginning
+# and often I won't want to run the full tests (esp. Jython).
+# Style is very important to me, so it must be correct before running
+# further tests.
 
 echo ""
 echo "Checking PEP8 Compliance:"
@@ -15,7 +23,10 @@ pep8 tests/
 echo "OK"
 echo ""
 
+# We don't want to require pylint since its so finicky.
+
 echo "Running tests with the following implementations:"
+echo "-------------------------------------------------"
 
 echo ""
 echo "Python"
