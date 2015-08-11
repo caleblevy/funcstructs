@@ -46,6 +46,9 @@ class Struct(with_metaclass(ParamMeta)):
             param_strings.append('%s=%s' % (name, repr(val)))
         return '%s(%s)' % (self.__class__.__name__, ', '.join(param_strings))
 
+    def __reduce__(self):
+        return (self.__class__, self._param_values())
+
 
 class ImmutableStruct(Struct, WriteOnceMixin):
     """A Struct which becomes immutable once initialized. They are
