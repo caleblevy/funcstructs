@@ -10,9 +10,10 @@ from __future__ import print_function
 
 import numpy as np
 
-from funcstructs.prototypes.timing import Stopwatch
-from funcstructs.prototypes.floatfuncs import *
+from .timing import Stopwatch
+
 from funcstructs.structures import *
+from funcstructs.prototypes.floatfuncs import *
 
 
 with Stopwatch() as u:
