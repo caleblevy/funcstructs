@@ -199,7 +199,7 @@ if __name__ == '__main__':
             h -= 1
             tree *= 2
             tree = [h] + tree
-        return rangefunc(LevelSequence(tree).map_labelling())
+        return rangefunc(LevelSequence(tree).parents())
 
     def scattered_tree(n):
         """Tree with a big cycle and things attached"""
@@ -208,15 +208,14 @@ if __name__ == '__main__':
     iteration_time(fixed_lex_partitions(100, 40))
     iteration_time(EndofunctionStructures(12))
     iteration_time(EndofunctionStructures, 12)
-    iteration_time(productrange, -2, [2, 2, 2, 3, 5], step=2)
 
-    mapbench(range(1, 2000), Endofunction.cycles, flattree)
-    mapbench(range(20, 2000), Endofunction.cycles, randfunc)
+    mapbench(range(1, 2000), Endofunction.cycles.fget, flattree)
+    mapbench(range(20, 2000), Endofunction.cycles.fget, randfunc)
     mapbench(range(20, 2000), periodicity,
              lambda f: list(randfunc(f).values()))
     plt.figure()
     mapbench(
-        range(20, 2500), Endofunction.cycles,
+        range(20, 2500), Endofunction.cycles.fget,
         randfunc,
         identity,
         randperm,
