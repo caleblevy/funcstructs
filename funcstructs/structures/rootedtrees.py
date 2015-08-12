@@ -15,10 +15,7 @@ from funcstructs.structures.functions import rangefunc, rangeperm
 from funcstructs.structures.multiset import Multiset
 from funcstructs.structures.labellings import _ordered_divisions
 
-__all__ = [
-    "LevelSequence", "DominantSequence", "RootedTree",
-    "TreeEnumerator", "forests"
-]
+__all__ = "LevelSequence", "DominantSequence", "RootedTree", "TreeEnumerator"
 
 
 def _levels_from_preim(graph, root=0, keys=None):
@@ -408,14 +405,3 @@ class TreeEnumerator(bases.Enumerable):
                 T[n] += s
             T[n] //= n-1
         return T[-1]
-
-
-def forests(n):
-    """Enumerate every forest on n nodes."""
-    # Any rooted tree on n+1 nodes can be identically described as a
-    # collection of rooted trees on n nodes, grafted together at a single
-    # root. To enumerate all collections of rooted trees on n nodes, we
-    # may enumerate all rooted trees on n+1 nodes, chopping them at the
-    # base.
-    for tree in TreeEnumerator(n+1):
-        yield Multiset(tree.subtrees())

@@ -8,6 +8,5 @@ from .functions import (
 from .multiset import Multiset
 from .necklaces import periodicity, Necklace, FixedContentNecklaces
 from .rootedtrees import (
-    LevelSequence, DominantSequence, RootedTree,
-    TreeEnumerator, forests
+    LevelSequence, DominantSequence, RootedTree, TreeEnumerator
 )
