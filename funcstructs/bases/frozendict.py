@@ -141,12 +141,35 @@ def _FrozendictHelper():
         return len(map_get(self))
 
     @add_with_docs
+    def __eq__(self, other):
+        if isinstance(other, frozendict):
+            other = map_get(other)
+        return map_get(self).__eq__(other)
+
+    @add_with_docs
+    def __ne__(self, other):
+        return not self == other
+
+    @add_with_docs
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, repr(map_get(self)))
+
+    @add_with_docs
+    def __reduce__(self):
+        return (self.__class__, (map_get(self), ))
+
+    @add_with_docs
     def get(self, key, default=None):
         return map_get(self).get(key, default)
 
     @add_with_docs
     def copy(self):
         return map_get(self).copy()
+
+    if hasattr(dict, '__sizeof__'):  # pypy's dict does not define __sizeof__
+        @add_with_docs
+        def __sizeof__(self):
+            return map_get(self).__sizeof__()
 
     # Make two distinct function definitions for speed; we want it to compile
     # to bytecode which explicitly calls the method in question.
@@ -187,28 +210,5 @@ def _FrozendictHelper():
         @add_with_docs
         def __hash__(self):
             return hash(frozenset(map_get(self).items()))
-
-    if hasattr(dict, '__sizeof__'):  # pypy's dict does not define __sizeof__
-        @add_with_docs
-        def __sizeof__(self):
-            return map_get(self).__sizeof__()
-
-    @add_with_docs
-    def __eq__(self, other):
-        if isinstance(other, frozendict):
-            other = map_get(other)
-        return map_get(self).__eq__(other)
-
-    @add_with_docs
-    def __ne__(self, other):
-        return not self == other
-
-    @add_with_docs
-    def __repr__(self):
-        return "%s(%s)" % (self.__class__.__name__, repr(map_get(self)))
-
-    @add_with_docs
-    def __reduce__(self):
-        return (self.__class__, (map_get(self), ))
 
     _Mapping.register(frozendict)
