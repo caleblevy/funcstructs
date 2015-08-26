@@ -18,8 +18,7 @@ echo ""
 echo "Checking PEP8 Compliance:"
 echo "-------------------------"
 echo ""
-pep8 funcstructs/
-pep8 tests/
+pep8 funcstructs/ tests/
 echo "OK"
 echo ""
 
