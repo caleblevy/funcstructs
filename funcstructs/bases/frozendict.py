@@ -12,28 +12,27 @@ __all__ = ["frozendict"]
 # frozendict is essentially a pure-python implementation of a
 # MappingProxyType (python3) or DictProxyType (python2).
 #
-# First we create frozendict with a single slot to hold a mapping
+# First we create skeleton class with a single slot to hold a mapping
 # internally. We then remove the slot's member descriptor from the class
-# dict, and retain a private reference to it in the module body.
+# dict, and retain a private reference to it inside the _map_accessors
+# function via a closure.
 #
-# _FrozendictHelper creates wrappers for the builtin dict's
-# non-mutating methods which acces frozendict's internal mapping using
-# the private descriptor. Since all access is "guarded" by these
-# non-mutating methods, there is no public mechanism to alter the
-# internal dict. (*) frozendict is thus truly immutable.
+# _FrozendictHelper creates wrappers for the builtin dict's non-mutating
+# methods which access frozendict's internal mapping using the private
+# descriptor. Since all access is guarded by these non-mutating methods,
+# there is no public mechanism to alter the internal dict.
 #
-# Using a proxy pattern provides a nice benefit: all methods (with the
+# The proxy pattern provides a nice bemefit: all methods (with the
 # exception of __ne__, which is the negation of __eq__) are guaranteed to
 # be totally independent; i.e. we can override any combination of
 # methods, and the remaining ones will be unaffected. This holds true
 # regardless of any implicit relationships between the builtin dict's
-# methods, giving consistent cross-platform behavior.
+# methods, giving consistent behavior across implementations.
 #
 # The main drawback is the convoluted code; since frozendict reflects
-# MappingProxyType in design, its code ends up looking similar to CPython:
-# define a type struct referencing another object and bolt on methods for it.
-#
-# (*) Under certain circumstances, it may mutate. See comments in __eq__.
+# MappingProxyType in design, its code ends up looking similar to
+# CPython: define a type struct referencing another object and bolt on
+# methods for it.
 
 
 class frozendict(object):
@@ -108,8 +107,8 @@ def _FrozendictHelper():
     # to the internal dict, and just raise AttributeErrors anyway. (TODO:
     # verify this).
     #
-    # Ordering Operations: since (1) in python3 they just
-    # raise TypeErrors, which is equally achievable by not giving them
+    # Ordering Operations: since (1) in python3 they just raise
+    # TypeErrors, which is equally achievable by not giving them
     # comparison operators in the first place, (2) they should probably
     # have done this in python2 anyway, and (3) the presence of these
     # methods annoyingly prevents using functools.total_ordering in case
@@ -124,11 +123,6 @@ def _FrozendictHelper():
     #
     # has_key: This method is so old that even invoking it raises a pep8
     # warning. Adding it in would be arcane.
-    #
-    # __reduce__ and __reduce_ex__: because I am not sure how dict
-    # pickling works, whether the "frozenness" of the dict should impact it,
-    # and how I implement whatever I end up deciding to do.
-    # (TODO: rectify this bout of laziness on my part).
 
     @add_with_docs
     def __contains__(self, key):
