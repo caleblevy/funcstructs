@@ -137,11 +137,6 @@ class Funcstruct(Multiset):
         return tuple(compat.accumulate(cardinalities))[1:]
 
 
-def _ispartition(partition):
-    """Returns True if given a Multiset of positive integers."""
-    return all(isinstance(k, int) and k > 0 for k in partition.keys())
-
-
 def _partitions(n):
     """Wrapper for D Eppstein's partitions returning multisets"""
     for partition in IntegerPartitions.partitions(n):
@@ -407,7 +402,8 @@ class EndofunctionStructures(Enumerable):
             raise ValueError("Cannot defined funcstructs on %s nodes" % n)
         if cycle_type is not None:
             cycle_type = Multiset(cycle_type)
-            if not _ispartition(cycle_type):
+            if not all(isinstance(k, int) and k > 0
+                       for k in cycle_type.keys()):
                 raise TypeError("A cycle type must be an integer partition")
         self.n = n
         self.cycle_type = cycle_type
