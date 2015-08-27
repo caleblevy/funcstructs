@@ -129,7 +129,7 @@ class FixedContentNecklaces(bases.Enumerable):
                 raise TypeError("content and and multiplicities do not match")
             # TODO: Add Multiset.from_items
             m = Multiset(dict(zip(content, multiplicities)))
-            content, multiplicities = split(m, sort=True)
+            content, multiplicities = zip(*sorted(m.items()))
         self.content = content
         self.multiplicities = multiplicities
 
