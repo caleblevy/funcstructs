@@ -61,6 +61,7 @@ def _MultisetHelper(ms_cls):
         >>> m = Multiset(a=4, b=2)              # Multiset from keyword args
         """
         self = object.__new__(args[0])
+        # Store dict instead of Counter internally for speed.
         mset = {}
         check = False
         if len(args) == 2:
@@ -72,9 +73,6 @@ def _MultisetHelper(ms_cls):
                 check = True
             else:
                 for el in iterable:
-                    # Use syntactic sugar for special methods, since these
-                    # short-circuit to the type directly. Call directly on type
-                    # for regular methods.
                     mset[el] = mset.get(el, 0) + 1
         elif kwargs:
             mset.update(kwargs)  # will need in py3.6 with **kwargs OrderedDict
@@ -100,8 +98,6 @@ def _MultisetHelper(ms_cls):
     return ms_cls
 
 
-# Internally store Counter instead of dict, both for speed and for easier
-# interaction with addition methods in python2.
 @_MultisetHelper
 class Multiset(frozendict):
     """frozendict subclass for counting hashable items.  Multiset is the
@@ -117,7 +113,7 @@ class Multiset(frozendict):
     >>> len(m)                           # total of all counts
     11
 
-    >>> ''.join(sorted(c.elements()))    # list unique elements
+    >>> ''.join(sorted(m.elements()))    # list unique elements
     'abcdr'
 
     >>> m['a']                           # count of letter 'a'
