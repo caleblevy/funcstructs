@@ -4,13 +4,14 @@ equivalent under cyclic rotation.
 Caleb Levy, 2014 and 2015.
 """
 
-import fractions
-import functools
+from fractions import gcd
+from functools import reduce
 
 from PADS.Lyndon import SmallestRotation
 
 from funcstructs import bases
-from funcstructs.utils import combinat, factorization
+from funcstructs.utils.combinat import multinomial_coefficient
+from funcstructs.utils.factorization import divisors
 
 from .multiset import Multiset
 
@@ -129,9 +130,9 @@ class FixedContentNecklaces(bases.Enumerable):
         multiplicities = list(self.content.values())
         n = sum(multiplicities)
         # Each period must be a divisor of the gcd of the multiplicities.
-        w = functools.reduce(fractions.gcd, multiplicities)
+        w = reduce(gcd, multiplicities)
         baseperiod = n//w
-        factors = factorization.divisors(w)
+        factors = divisors(w)
         mults = [0] * (factors[-1] + 1)
         # Find the multiplicity of each period.
         for factor in factors:
@@ -141,14 +142,14 @@ class FixedContentNecklaces(bases.Enumerable):
             # corresponding to the subset of the multiplicity partition
             # featuring 1/factor of each kind of the original partiton's
             # elements.
-            mults[factor] = combinat.multinomial_coefficient(
+            mults[factor] = multinomial_coefficient(
                 [(i*factor)//w for i in multiplicities]
             )
             # To enusre mults[factor] gives the number of character
             # permutations with period exactly equal to (not subdividing)
             # factor, subtact off the number of permutations whose period
             # subdivides our factor.
-            subdivisors = factorization.divisors(factor)
+            subdivisors = divisors(factor)
             if subdivisors[-1] != 1:
                 for subfactor in subdivisors[:-1]:
                     mults[factor] -= subfactor * baseperiod * mults[subfactor]
