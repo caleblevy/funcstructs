@@ -3,7 +3,7 @@ import random
 from collections import Counter
 from itertools import product
 
-from funcstructs.structures.multiset import Multiset, counts
+from funcstructs.structures.multiset import Multiset
 
 
 class MultisetTests(unittest.TestCase):
@@ -123,13 +123,6 @@ class MultisetTests(unittest.TestCase):
         self.assertEqual(-7, dic[self.abra])
         dic[7] = 42
         self.assertEqual(5, len(set(dic)))
-
-    def test_counts(self):
-        """Test that the indices of elements and multiplicities correspond."""
-        for mset in self.msets:
-            y, d = counts(mset)
-            for i, el in enumerate(y):
-                self.assertEqual(mset[el], d[i])
 
     def test_degeneracy(self):
         """Test multiset degeneracies reflect multiset permutations"""

@@ -14,7 +14,7 @@ from operator import itemgetter, mul
 
 from funcstructs.bases.frozendict import frozendict, _map_accessors
 
-__all__ = ["Multiset", "counts", "sorted_counts"]
+__all__ = ["Multiset"]
 
 
 def _binop_template(name, map_get, map_set):
@@ -188,22 +188,3 @@ class Multiset(frozendict):
     def degeneracy(self):
         """Number of different representations of the same multiset."""
         return reduce(mul, map(factorial, self.values()), 1)
-
-
-def counts(elements):
-    """Split an iterable (or mapping) into corresponding key-value lists."""
-    if type(elements) is not Multiset:
-        elements = Multiset(elements)
-    # Cast to tuples, due to issues with pypy's viewitems changing order even
-    # if the dict has not been altered.
-    return tuple(elements.keys()), tuple(elements.values())
-
-
-def sorted_counts(elements):
-    """Same as counts with both lists sorted first by key then by count."""
-    if type(elements) is not Multiset:
-        elements = Multiset(elements)
-    if elements:  # "bool({}.viewitems()) is True" in Jython, sadly...
-        return tuple(zip(*sorted(elements.items())))
-    else:
-        return (), ()

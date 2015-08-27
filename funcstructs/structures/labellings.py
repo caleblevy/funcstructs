@@ -6,10 +6,12 @@ Caleb Levy, 2015.
 from itertools import chain, combinations, permutations, product
 from math import factorial
 
+
+from funcstructs.utils import split
 from funcstructs.utils.combinat import (
     multinomial_coefficient as ordered_division_count)
 
-from .multiset import Multiset, sorted_counts
+from .multiset import Multiset
 from .necklaces import Necklace
 
 
@@ -83,7 +85,7 @@ def ordered_divisions(partition, S=None):
 
 
 def _set_partitions(S, partition):
-    lengths, mults = sorted_counts(partition)
+    lengths, mults = split(Multiset(partition), sort=True)
     # clm[i] is the number of nodes situated in some bin of size l[i].
     for odiv in _ordered_divisions(S, [l*m for l, m in zip(lengths, mults)]):
         strand = []
