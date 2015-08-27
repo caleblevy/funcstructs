@@ -316,7 +316,7 @@ def direct_unordered_attachments(t, m):
 # of those sets of combinations.
 
 
-def unordered_product(mset, iterfunc):
+def _unordered_product(mset, iterfunc):
     """Given a multiset of inputs to an iterable, and iterfunc, returns all
     unordered combinations of elements from iterfunc applied to each el. It is
     equivalent to:
@@ -331,7 +331,7 @@ def unordered_product(mset, iterfunc):
     for y, d in mset.items():
         strands.append(combinations_with_replacement(iterfunc(y), d))
     for bundle in product(*strands):
-        yield Multiset(chain(*bundle))
+        yield chain(*bundle)
 
 
 # The "unorderedness" of the product is an important and subtle detail.
@@ -349,14 +349,14 @@ def component_groups(t, l, m):
     them to a group of m cycles of length l.
     """
     for partition in direct_unordered_attachments(t, m):
-        for cycle_group in unordered_product(
+        for cycle_group in _unordered_product(
                 partition,
                 # Each element of the partition corresponds to a cycle.
                 # Due to the way they are enumerated, each bin of the
                 # partition has an extra node, which must be taken
                 # out, hence the "y-1" term
                 lambda y: attachment_forests(y-1, l)):
-            yield cycle_group
+            yield Multiset(cycle_group)
 
 
 # Attachments
@@ -385,7 +385,7 @@ def attachment_forests(t, l):
     them to a a cycle of length l."""
     for partition in direct_unordered_attachments(t, l):
         # TODO: get rid of duplicate Multiset madness here
-        for forest in unordered_product(partition, TreeEnumerator):
+        for forest in _unordered_product(partition, TreeEnumerator):
             for necklace in FixedContentNecklaces(forest):
                 yield necklace
 
