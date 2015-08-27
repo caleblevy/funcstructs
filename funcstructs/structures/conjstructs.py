@@ -356,7 +356,9 @@ def component_groups(t, l, m):
                 # partition has an extra node, which must be taken
                 # out, hence the "y-1" term
                 lambda y: attachment_forests(y-1, l)):
-            yield Multiset(cycle_group)
+            # must expand out into list or else the chain object will
+            # be consumed when taking the product of the component groups
+            yield list(cycle_group)
 
 
 # Attachments
