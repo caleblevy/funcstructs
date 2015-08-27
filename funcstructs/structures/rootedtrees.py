@@ -230,13 +230,18 @@ class DominantSequence(LevelSequence):
         parents = list(self.parents())
         bft = self.breadth_first_traversal()
         keys = self._node_keys(sort=False)
-        # Two nodes are interchangeable iff they have the same key and parent
+        # Two nodes are interchangeable iff they have the same key and parent.
+        # Interchangeable nodes will always be adjacent in the breadth
+        # first traversal of a dominant sequence.
         for _, g in groupby(bft, lambda x: (parents[x], keys[x])):
             yield list(g)
 
     def degeneracy(self):
         """Number of equivalent representations for each labelling of the
         unordered tree."""
+        # Since this degeneracy is a property of *un*-ordered trees, it
+        # only makes sense to define it for their *canonical* ordered
+        # representatives.
         return reduce(mul, (factorial(len(g))
                             for g in self._interchangeable_nodes()))
 
