@@ -13,7 +13,7 @@ from PADS import IntegerPartitions
 from funcstructs import compat
 
 from funcstructs.bases import Enumerable, typecheck
-from funcstructs.utils import compositions, factorization, subsequences
+from funcstructs.utils import compositions, factorization, subsequences, split
 
 from .functions import rangefunc, Endofunction
 from .multiset import Multiset
@@ -255,7 +255,7 @@ def cycle_type_funcstructs(node_count, cycle_type):
     """Enumerate all Funcstructs with the given node count and cycle type."""
     n = node_count - sum(cycle_type)
     k = cycle_type.num_unique_elements()
-    lengths, mults = zip(*cycle_type.items()) if cycle_type else ((), ())
+    lengths, mults = split(cycle_type)
     for composition in compositions.weak_compositions(n, k):
         cycle_groups = []
         for c, l, m in zip(composition, lengths, mults):
