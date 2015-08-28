@@ -5,7 +5,7 @@ Caleb Levy, 2014 and 2015.
 
 from itertools import product
 
-__all__ = ["productrange", "rev_range"]
+__all__ = ["productrange"]
 
 
 def productrange(*ranges):

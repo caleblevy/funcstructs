@@ -51,7 +51,7 @@ class PartPartEnum(Enumerable):
         self.part2 = tuple(part2)
 
     def __iter__(self):
-        return iter(zip(part1, part2))
+        return iter(zip(self.part1, self.part2))
 
 
 class EnumerableTests(unittest.TestCase):
