@@ -17,7 +17,7 @@ from funcstructs.structures.conjstructs import (
 
 class FuncstructTests(unittest.TestCase):
 
-    s = Multiset.__new__(Funcstruct, [
+    s = Funcstruct([
             Necklace([
                 DominantSequence([0, 1, 2]),
                 DominantSequence([0, 1, 1])
