@@ -135,10 +135,6 @@ class FixedContentNecklaces(bases.Enumerable):
         self.content = content
         self.multiplicities = multiplicities
 
-    @classmethod
-    def from_multiplicities(cls, multiplicities):
-        return cls(dict(enumerate(multiplicities)))
-
     def count_by_period(self):
         """Returns a list whose kth element is the number of necklaces
         corresponding to the input set of beads with k distinct rotations.
