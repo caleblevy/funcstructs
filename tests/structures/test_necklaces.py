@@ -100,7 +100,7 @@ class FixedContentNecklaceTests(unittest.TestCase):
         baseperiod = 3
         self.assertEqual(1038, sum(counts_by_period))
         for necklace in necks:
-            counts_by_period[necklace.period()//baseperiod] -= 1
+            counts_by_period[periodicity(necklace)//baseperiod] -= 1
         for count in counts_by_period:
             self.assertEqual(0, count)
 

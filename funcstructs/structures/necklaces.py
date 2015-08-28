@@ -75,12 +75,9 @@ class Necklace(bases.Tuple):
             word = list(word)
         return super(Necklace, cls).__new__(cls, SmallestRotation(word))
 
-    def period(self):
-        return periodicity(self)
-
     def degeneracy(self):
         """Number of distinct representations of the same necklace."""
-        return len(self)//self.period()
+        return len(self)//periodicity(self)
 
 
 def _sfc(multiplicities):
