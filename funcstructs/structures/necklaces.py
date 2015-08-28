@@ -4,6 +4,7 @@ equivalent under cyclic rotation.
 Caleb Levy, 2014 and 2015.
 """
 
+from collections import Sequence
 from fractions import gcd
 from functools import reduce
 
@@ -68,6 +69,10 @@ class Necklace(bases.Tuple):
         Input content is normalized to smallest rotation unless preordered is
         set to true. Only use this option if you can (mathematically) prove
         that your input is in lexicographically smallest form."""
+        # Explicitly check for tuple and list first for speed, since ABC
+        # instancechecks are expensive.
+        if not isinstance(word, (tuple, list, Sequence)):
+            word = list(word)
         return super(Necklace, cls).__new__(cls, SmallestRotation(word))
 
     def period(self):
