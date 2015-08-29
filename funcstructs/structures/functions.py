@@ -7,9 +7,9 @@ import itertools
 import random
 from collections import defaultdict
 from math import factorial
+from platform import python_implementation
 
 from funcstructs.bases import frozendict, Enumerable, typecheck
-from platform import python_implementation
 
 
 def _result_functype(f, g):
