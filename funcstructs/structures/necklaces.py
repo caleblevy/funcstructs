@@ -72,8 +72,13 @@ class Necklace(bases.Tuple):
         # Explicitly check for tuple and list first for speed, since ABC
         # instancechecks are expensive.
         if not isinstance(word, (tuple, list, Sequence)):
-            word = list(word)
-        return super(Necklace, cls).__new__(cls, SmallestRotation(word))
+            word = tuple(word)
+        self = super(Necklace, cls).__new__(cls, SmallestRotation(word))
+        try:
+            hash(self)
+        except TypeError:
+            raise TypeError("Necklace content must be hashable and immutable")
+        return self
 
     def degeneracy(self):
         """Number of distinct representations of the same necklace."""
@@ -130,8 +135,12 @@ class FixedContentNecklaces(bases.Enumerable):
             if len(content) != len(multiplicities):
                 raise TypeError("content and and multiplicities do not match")
             # TODO: Add Multiset.from_items
-            m = Multiset(dict(zip(content, multiplicities)))
+            m = Multiset.fromitems(zip(content, multiplicities))
             content, multiplicities = zip(*sorted(m.items()))
+        try:
+            hash(content)
+        except TypeError:
+            raise TypeError("Necklace content must be hashable and immutable")
         self.content = content
         self.multiplicities = multiplicities
 
