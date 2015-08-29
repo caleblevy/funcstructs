@@ -126,6 +126,12 @@ class Multiset(frozendict):
     def fromkeys(cls, iterable, v=None):
         raise NotImplementedError("%s.fromkeys() is undefined." % cls.__name__)
 
+    @classmethod
+    def fromitems(cls, items):
+        """Return a Multiset from an iterable of element-multiplicity
+        pairs."""
+        return cls(dict(items))
+
     def __repr__(self):
         # Taken from Counter.__repr__ in python3
         try:
