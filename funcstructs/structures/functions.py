@@ -10,6 +10,7 @@ from math import factorial
 from platform import python_implementation
 
 from funcstructs.bases import frozendict, Enumerable, typecheck
+from funcstructs.bases.frozendict import _map_accessors
 
 
 def _result_functype(f, g):
@@ -49,6 +50,37 @@ def identity(domain=None):
     return Permutation(zip(S, S))
 
 
+def _FunctionHelper(fcls):
+    """Helper for making the Functional mapping type."""
+
+    map_set, map_get = _map_accessors()
+
+    @staticmethod
+    def __new__(*args, **kwargs):
+        mapping = dict(*args[1:], **kwargs)
+        im = frozenset(mapping.values())
+        invertible = len(im) == len(mapping)
+        endomorphic = im.issubset(mapping.keys())
+        if invertible and endomorphic:
+            functype = Permutation
+        elif invertible:
+            functype = Bijection
+        elif endomorphic:
+            functype = Endofunction
+        else:
+            functype = Function
+        self = object.__new__(functype)
+        map_set(self, mapping)
+        return self
+    fcls.__new__ = __new__
+
+    global _FunctionHelper
+    del _FunctionHelper
+
+    return fcls
+
+
+@_FunctionHelper
 class Function(frozendict):
     """An immutable mapping between sets.
 
@@ -91,9 +123,6 @@ class Function(frozendict):
         # class inheritance tree. Related to http://bugs.jython.org/issue2101
         # and http://bugs.jython.org/issue1996.
         __slots__ += '__dict__',
-
-    def __init__(*args, **kwargs):
-        _ = args[0].image  # make sure that codomain is hashable
 
     # "domain" and "image" used to be attributes computed in the constructor
     # and cached for speed, with corresponding __slots__ and a WriteOnceMixin
@@ -187,12 +216,11 @@ class Bijection(Function):
 
     __slots__ = ()
 
-    def __init__(*args, **kwargs):
-        self = args[0]
-        super(Bijection, self).__init__(*args, **kwargs)
-        # Check cardinality of domain and codomain are identical
-        if len(self) != len(self.image):
-            raise ValueError("This function is not invertible.")
+    def __new__(*args, **kwargs):
+        self = Function(*args[1:], **kwargs)
+        if not isinstance(self, Bijection):
+            raise TypeError("Function not invertible")
+        return self
 
     @property
     def inverse(self):
@@ -236,11 +264,11 @@ class Endofunction(Function):
 
     __slots__ = ()
 
-    def __init__(*args, **kwargs):
-        self = args[0]
-        super(Endofunction, self).__init__(*args, **kwargs)
-        if not self.domain.issuperset(self.image):
-            raise ValueError("image must be a subset of the domain")
+    def __new__(*args, **kwargs):
+        self = Function(*args[1:], **kwargs)
+        if not isinstance(self, Endofunction):
+            raise TypeError("image must be a subset of the domain")
+        return self
 
     def __pow__(self, n):
         """f**n <==> the nth iterate of f (n > 0)"""
@@ -332,6 +360,12 @@ class Permutation(Endofunction, Bijection):
     """
 
     __slots__ = ()
+
+    def __new__(*args, **kwargs):
+        self = Function(*args[1:], **kwargs)
+        if not isinstance(self, Permutation):
+            raise TypeError("Function is not a permutation")
+        return self
 
     def __pow__(self, n):
         """f**n <==> the nth iterate of f"""

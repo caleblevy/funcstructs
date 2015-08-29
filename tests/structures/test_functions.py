@@ -69,9 +69,9 @@ class BijectionTests(unittest.TestCase):
 
     def test_init(self):
         """Test that Bijection rejects maps that are not relabellings"""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             Bijection({0: "a", 1: "a", 2: "b"})
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             Bijection({"a": 0, "b": 2, "c": 2})
 
     def test_inverse(self):
@@ -122,9 +122,9 @@ class EndofunctionTests(unittest.TestCase):
 
     def test_init(self):
         """Test that Endofunction images are subsets of their domains."""
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             Endofunction({0: 0, 1: 1, 2: "c"})
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             Endofunction({"a": "a", "b": "a", "c": "d"})
 
     def test_pow(self):
@@ -209,7 +209,7 @@ class PermutationTests(unittest.TestCase):
         b = Bijection(zip("123", "abc"))
         e = Endofunction(zip([1, 2, 3], [2, 2, 3]))
         for s in [f, b, e]:
-            with self.assertRaises(ValueError):
+            with self.assertRaises(TypeError):
                 Permutation(s)
 
     def test_negative_powers(self):
