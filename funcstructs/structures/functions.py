@@ -198,7 +198,7 @@ class Bijection(Function):
     __slots__ = ()
 
     def __new__(*args, **kwargs):
-        self = Function(*args[1:], **kwargs)
+        self = super(Bijection, args[0]).__new__(*args, **kwargs)
         if not isinstance(self, Bijection):
             raise TypeError("Function not invertible")
         return self
@@ -246,7 +246,7 @@ class Endofunction(Function):
     __slots__ = ()
 
     def __new__(*args, **kwargs):
-        self = Function(*args[1:], **kwargs)
+        self = super(Endofunction, args[0]).__new__(*args, **kwargs)
         if not isinstance(self, Endofunction):
             raise TypeError("image must be a subset of the domain")
         return self
@@ -340,12 +340,6 @@ class Permutation(Endofunction, Bijection):
     """
 
     __slots__ = ()
-
-    def __new__(*args, **kwargs):
-        self = Function(*args[1:], **kwargs)
-        if not isinstance(self, Permutation):
-            raise TypeError("Function is not a permutation")
-        return self
 
     def __pow__(self, n):
         """f**n <==> the nth iterate of f"""
