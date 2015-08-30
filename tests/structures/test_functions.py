@@ -5,7 +5,7 @@ from funcstructs.structures.conjstructs import Funcstruct
 
 from funcstructs.structures.functions import (
     Function, Bijection, Endofunction, Permutation,
-    identity, rangefunc, rangeperm, randfunc, randperm, randconj,
+    identity, rangefunc, randfunc, randperm, randconj,
     Mappings, Isomorphisms, TransformationMonoid, SymmetricGroup
 )
 
@@ -82,7 +82,7 @@ class BijectionTests(unittest.TestCase):
                 permlist.append(randperm(n))
 
         for perm in permlist:
-            e = rangeperm(range(len(perm)))
+            e = rangefunc(range(len(perm)))
             self.assertSequenceEqual(e, perm * perm.inverse)
             self.assertSequenceEqual(e, perm.inverse * perm)
             self.assertSequenceEqual(perm, perm.inverse.inverse)
@@ -95,7 +95,7 @@ class BijectionTests(unittest.TestCase):
         #  / \
         # 3<-4
         f = rangefunc([2, 2, 4, 2, 3])
-        s = rangeperm([0, 1, 3, 4, 2])
+        s = rangefunc([0, 1, 3, 4, 2])
         g = rangefunc([3, 3, 4, 2, 3])  # g = s*f*s**-1
         self.assertEqual(g, s.conj(f))
         self.assertNotEqual(g, s.inverse.conj(f))
@@ -103,10 +103,10 @@ class BijectionTests(unittest.TestCase):
         #    t=(a1, a2, ..., an)
         # then
         #    s.conj(t) = (s[a1], s[a2], ..., s[an])
-        sigma = rangeperm([1, 2, 0, 4, 3])  # s = (0, 1, 2)(3, 4)
-        tau = rangeperm([1, 2, 3, 4, 0])  # t = (0, 1, 2, 3, 4)
-        sr = rangeperm([4, 2, 3, 1, 0])  # t*s*t^-1 = (1, 2, 3)(4, 0)
-        sl = rangeperm([1, 4, 3, 2, 0])  # t^-1*s*t = (0, 1, 4)(2, 3)
+        sigma = rangefunc([1, 2, 0, 4, 3])  # s = (0, 1, 2)(3, 4)
+        tau = rangefunc([1, 2, 3, 4, 0])  # t = (0, 1, 2, 3, 4)
+        sr = rangefunc([4, 2, 3, 1, 0])  # t*s*t^-1 = (1, 2, 3)(4, 0)
+        sl = rangefunc([1, 4, 3, 2, 0])  # t^-1*s*t = (0, 1, 4)(2, 3)
         self.assertEqual(sr, tau.conj(sigma))
         self.assertEqual(sl, tau.inverse.conj(sigma))
 
@@ -214,9 +214,9 @@ class PermutationTests(unittest.TestCase):
 
     def test_negative_powers(self):
         """Test that permutations work with negative powers."""
-        s = rangeperm([1, 2, 3, 0, 5, 6, 4])  # s.cycles() <-> (0,1,2,3)(4,5,6)
+        s = rangefunc([1, 2, 3, 0, 5, 6, 4])  # s.cycles() <-> (0,1,2,3)(4,5,6)
         a = Bijection(zip(range(7), "abcdefg")).conj(s)
-        ii = rangeperm(range(7))
+        ii = rangefunc(range(7))
         ia = Permutation(zip(*(["abcdefg"]*2)))
         for i in range(13):
             self.assertEqual(ii, (s**i) * (s**-i))

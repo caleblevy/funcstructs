@@ -189,7 +189,7 @@ if __name__ == '__main__':
     def talltree(n): return rangefunc([0] + list(range(n)))
 
     # Cyclic permutation of range(n)
-    def bigcycle(n): return rangeperm(list(range(1, n)) + [0])
+    def bigcycle(n): return rangefunc(list(range(1, n)) + [0])
 
     def balanced_binary_tree(n):
         """Produce a balanced binary tree of height n."""

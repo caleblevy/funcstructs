@@ -11,7 +11,7 @@ from operator import mul
 from funcstructs import bases
 from funcstructs.utils import factorization, subsequences
 
-from funcstructs.structures.functions import rangefunc, rangeperm
+from funcstructs.structures.functions import rangefunc
 from funcstructs.structures.multiset import Multiset
 from funcstructs.structures.labellings import _ordered_divisions
 
@@ -249,7 +249,7 @@ class DominantSequence(LevelSequence):
         """Enumerate endofunctions with the same tree structure."""
         node_groups = list(self._interchangeable_nodes())
         bin_widths = list(map(len, node_groups))
-        translation_sequence = rangeperm(chain(*node_groups)).inverse.conj(
+        translation_sequence = rangefunc(chain(*node_groups)).inverse.conj(
             rangefunc(self.parents()))
         n = len(self)
         func = [0] * n

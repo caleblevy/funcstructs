@@ -383,11 +383,6 @@ def rangefunc(seq):
     return Function(enumerate(seq))
 
 
-def rangeperm(seq):
-    """Return a symmetric function defined on range(len(seq))."""
-    return Permutation(enumerate(seq))
-
-
 # Convenience functions for returning random Functions
 
 
