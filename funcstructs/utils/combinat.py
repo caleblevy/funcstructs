@@ -21,10 +21,14 @@ def nCk(n, k):
 def multinomial_coefficient(partition, n=None):
     """The multinomial coefficient of n corresponding to partition [p1, ...,
     pk] is given by n!/(p1! *...* pk!)/(n-sum(partition))!"""
-    p = sum(partition)
+    tot = 0
+    deg = 1
+    for p in partition:
+        tot += p
+        deg *= factorial(p)
     if n is None:
-        n = p
-    return factorial(n)//factorial_prod(partition)//factorial(n-p)
+        n = tot
+    return factorial(n)//deg//factorial(n-tot)
 
 
 def nCWRk(n, r):
