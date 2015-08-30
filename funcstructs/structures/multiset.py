@@ -5,7 +5,7 @@ Caleb Levy, 2015.
 
 from __future__ import print_function
 
-import heapq
+from heapq import nlargest
 from collections import Counter, Mapping
 from functools import reduce
 from itertools import chain, starmap, repeat
@@ -15,6 +15,16 @@ from operator import itemgetter, mul
 from funcstructs.bases.frozendict import frozendict, _map_accessors
 
 __all__ = ["Multiset"]
+
+
+def _prod(iterable):
+    """Product of all items in an iterable."""
+    return reduce(mul, iterable, 1)
+
+
+def _factorial_prod(iterable):
+    """Product of factorial of elements in an iterable."""
+    return _prod(map(factorial, iterable))
 
 
 def _binop_template(name, map_get, map_set):
@@ -189,8 +199,8 @@ class Multiset(frozendict):
         # Emulate Bag.sortedByCount from Smalltalk
         if n is None:
             return sorted(self.items(), key=itemgetter(1), reverse=True)
-        return heapq.nlargest(n, self.items(), key=itemgetter(1))
+        return nlargest(n, self.items(), key=itemgetter(1))
 
     def degeneracy(self):
         """Number of different representations of the same multiset."""
-        return reduce(mul, map(factorial, self.values()), 1)
+        return _factorial_prod(self.values())

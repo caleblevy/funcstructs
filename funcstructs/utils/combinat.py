@@ -7,15 +7,10 @@ from functools import reduce
 from math import factorial
 from operator import mul
 
-
-def prod(iterable):
-    """Product of all items in an iterable."""
-    return reduce(mul, iterable, 1)
-
-
-def factorial_prod(iterable):
-    """Product of factorial of elements in an iterable."""
-    return prod(factorial(i) for i in iterable)
+from funcstructs.structures.multiset import (
+    _prod as prod,
+    _factorial_prod as factorial_prod
+)
 
 
 def nCk(n, k):
