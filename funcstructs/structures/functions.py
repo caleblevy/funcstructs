@@ -391,16 +391,18 @@ def rangeperm(seq):
 # Convenience functions for returning random Functions
 
 
-def randfunc(domain, codomain=None):
-    """Return a random endofunction on a domain."""
+def randfunc(domain, codomain=None, invertible=False):
+    """Return a random Function from domain to codomain."""
     S = list(_parsed_domain(domain))
-    if codomain is not None:
-        T = list(_parsed_domain(codomain))
-        result_type = Function
+    T = S if codomain is None else list(_parsed_domain(codomain))
+    if invertible and len(S) != len(T):
+        raise TypeError("Cannot make isomorphism between %s and %s" % (S, T))
+    if not invertible:
+        return Function((x, random.choice(T)) for x in S)
     else:
-        T = S
-        result_type = Endofunction
-    return result_type((x, random.choice(T)) for x in S)
+        T = T[:]
+        random.shuffle(T)
+        return Function(zip(S, T))
 
 
 def randperm(domain, codomain=None):
@@ -476,7 +478,8 @@ class Mappings(Enumerable):
     def __len__(self):
         if self.invertible:
             return factorial(len(self.domain))
-        return len(self.codomain) ** len(self.domain)
+        else:
+            return len(self.codomain) ** len(self.domain)
 
 
 class Isomorphisms(Enumerable):
