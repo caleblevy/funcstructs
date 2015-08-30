@@ -14,26 +14,6 @@ from funcstructs.bases import frozendict, Enumerable, typecheck
 from funcstructs.bases.frozendict import _map_accessors
 
 
-def _result_functype(f, g):
-    """Determine the appropriate output type for f * g.
-
-    Rules are:
-    ----------
-    1) If both types are the same, so is their result
-    2) Function has highest priority
-    3) Permutation has lowest priority
-    4) Bijection and Endofunction result in Function
-    """
-    functypes = {type(f), type(g)}
-    if len(functypes) == 1:
-        return functypes.pop()
-    elif Function in functypes:
-        return Function
-    elif Permutation in functypes:
-        return (functypes - {Permutation}).pop()
-    return Function
-
-
 def _parsed_domain(domain):
     """Change domain to a frozenset. If domain is int, set to range(domain)."""
     if domain is None:
@@ -164,7 +144,7 @@ class Function(frozendict):
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
         # f * g becomes a function on g's domain, so it inherits class of g
-        return _result_functype(self, other)((x, self[y]) for x, y in other)
+        return Function((x, self[y]) for x, y in other)
 
     # Design Note: Function objects used to be callable; their __call__ method
     # was set to dict.__getitem__ and __getitem__ itself was disabled.
