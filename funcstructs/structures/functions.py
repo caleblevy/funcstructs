@@ -254,8 +254,7 @@ class Endofunction(Function):
     def __pow__(self, n):
         """f**n <==> the nth iterate of f (n > 0)"""
         f = self
-        # TODO: Fix inefficiency
-        f_iter = identity(self.domain)
+        f_iter = Permutation(zip(self.domain, self.domain))
         # Decompose f**n into the composition of power-of-2 iterates, akin to
         # exponentiation by squaring.
         for it in bin(n)[-1:1:-1]:
