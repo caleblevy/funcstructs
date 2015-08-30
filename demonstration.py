@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pylab
 
+from funcstructs.utils import split
 from funcstructs.structures import randconj, Funcstruct
 from funcstructs.prototypes.floatfuncs import UnitInterval, floatfunc
 
@@ -21,7 +22,7 @@ HalfOpenInterval = UnitInterval - {1}
 f = floatfunc(lambda x: x*x, HalfOpenInterval)  # Float approx. to x**2
 
 plt.figure()
-plt.plot(*f.sort_split())
+plt.plot(*split(f, sort=True))
 plt.title(r"Plot of $x^2$ on $[0, 1)$")
 plt.show()
 
@@ -47,7 +48,7 @@ print(arr)
 #' We can also plot the values of f discretely.
 
 plt.figure()
-x, y = f.split()
+x, y = split(f)
 plt.plot(x, y, 'ro', rasterized=True)
 plt.title(r"Plot of $x^2$ as a discrete function of 16-bit floats.")
 plt.show()
@@ -85,7 +86,7 @@ print(f * f == quartic)
 g = randconj(f)
 
 plt.figure()
-x, y = g.split()
+x, y = split(g)
 plt.plot(x, y, 'o', markerfacecolor='orange', rasterized=True)
 plt.title(r"Plot of a random conjugate of $x^2$ defined on 16-bit floats.")
 plt.show()
@@ -104,7 +105,7 @@ print(Funcstruct(f) == Funcstruct(g))
 def treeiterates(func):
     """Return a list of all of f's iterates with tree-like structure."""
     f_orig = func
-    lim = func.limitset()
+    lim = func.limitset
     while func.image != lim:
         yield func
         func *= f_orig
@@ -120,7 +121,7 @@ def treeiterate_plot(func, show=True, legend_loc=0, title=None):
     ax = plt.gca()
     ax.set_color_cycle([cm(1.*i/n) for i in range(n)])
     for i, f in enumerate(iterates):
-        x, y = f.split()
+        x, y = split(f)
         ax.plot(x, y, 'o', markerfacecolor=cm(1.*i/n), label=i, rasterized=1)
     ax.legend(numpoints=1, loc=legend_loc)
     if title is not None:
