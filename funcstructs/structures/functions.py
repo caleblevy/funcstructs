@@ -6,6 +6,7 @@ Caleb Levy, 2015.
 import itertools
 import random
 from collections import defaultdict
+from functools import partial
 from math import factorial
 from platform import python_implementation
 
@@ -375,15 +376,9 @@ class Permutation(Endofunction, Bijection):
             return super(Permutation, self.inverse).__pow__(-n)
 
 
-# Convenience functions for defining Endofunctions from a sequence in range(n)
-
-
 def rangefunc(seq):
     """Return an Endofunction defined on range(len(seq))."""
     return Function(enumerate(seq))
-
-
-# Convenience functions for returning random Functions
 
 
 def randfunc(domain, codomain=None, invertible=False):
@@ -400,25 +395,12 @@ def randfunc(domain, codomain=None, invertible=False):
         return Function(zip(S, T))
 
 
-def randperm(domain, codomain=None):
-    """Return a random permutation of range(n)."""
-    S = list(_parsed_domain(domain))
-    if codomain is not None:
-        T = list(_parsed_domain(codomain))
-        result_type = Bijection
-    else:
-        T = S[:]
-        result_type = Permutation
-    random.shuffle(T)
-    return result_type(zip(S, T))
+randperm = partial(randfunc, invertible=True)
 
 
 def randconj(f, newdomain=None):
     """Return a random conjugate of f."""
-    if newdomain is None:
-        return randperm(f.domain).conj(f)
-    else:
-        return randperm(f.domain, _parsed_domain(newdomain)).conj(f)
+    return randperm(f.domain, newdomain).conj(f)
 
 
 # Function enumerators
