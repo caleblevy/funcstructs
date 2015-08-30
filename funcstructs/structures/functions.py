@@ -442,21 +442,40 @@ class Mappings(Enumerable):
     9
     """
 
-    def __init__(self, domain, codomain):
-        self.domain = _parsed_domain(domain)
-        self.codomain = _parsed_domain(codomain)
+    def __init__(self, domain, codomain=None, invertible=False):
+        domain = _parsed_domain(domain)
+        codomain = domain if codomain is None else _parsed_domain(codomain)
+        if invertible and len(domain) != len(codomain):
+            raise TypeError("No isomorphisms between %s and %s" % (
+                            domain, codomain))
+        self.domain = domain
+        self.codomain = codomain
+        self.invertible = bool(invertible)
 
     def __iter__(self):
-        domain, codomain = map(sorted, [self.domain, self.codomain])
-        for f in itertools.product(codomain, repeat=len(domain)):
-            yield Function(zip(domain, f))
+        try:
+            domain, codomain = map(sorted, [self.domain, self.codomain])
+        except TypeError:
+            domain, codomain = map(tuple, [self.domain, self.codomain])
+        if not self.invertible:
+            for f in itertools.product(codomain, repeat=len(domain)):
+                yield Function(zip(domain, f))
+        else:
+            for f in itertools.permutations(codomain):
+                yield Bijection(zip(domain, f))
 
     @typecheck(Function)
     def __contains__(self, other):
-        return other.domain == self.domain and \
-            other.image.issubset(self.codomain)
+        if self.domain == other.domain:
+            if self.invertible:
+                return self.codomain == other.codomain
+            else:
+                return self.codomain.issuperset(other.codomain)
+        return False
 
     def __len__(self):
+        if self.invertible:
+            return factorial(len(self.domain))
         return len(self.codomain) ** len(self.domain)
 
 
