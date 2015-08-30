@@ -380,7 +380,7 @@ class Permutation(Endofunction, Bijection):
 
 def rangefunc(seq):
     """Return an Endofunction defined on range(len(seq))."""
-    return Endofunction(enumerate(seq))
+    return Function(enumerate(seq))
 
 
 def rangeperm(seq):
