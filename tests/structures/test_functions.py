@@ -375,7 +375,7 @@ class FunctionEnumeratorTests(unittest.TestCase):
                 self.assertFuncCountsEqual(factorial(i), SymmetricGroup(d))
             else:
                 # ensure there are no bijections between non-isomorphic sets
-                with self.assertRaises(ValueError):
+                with self.assertRaises(TypeError):
                     Isomorphisms(d, c)
 
     def test_function_domains(self):
