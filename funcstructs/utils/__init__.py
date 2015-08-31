@@ -33,6 +33,6 @@ class SplittingTests(unittest.TestCase):
     def test_iterable_splitting(self):
         """Test that split is the reverse of zip"""
         self.assertEqual(
-            ((1, 4, 7), (2, 5, 8), (3, 5, 9)),
+            ((1, 4, 7), (2, 5, 8), (3, 6, 9)),
             split(((1, 2, 3), (4, 5, 6), (7, 8, 9)))
         )
