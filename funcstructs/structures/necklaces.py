@@ -163,7 +163,7 @@ class FixedContentNecklaces(bases.Enumerable):
             # featuring 1/factor of each kind of the original partiton's
             # elements.
             mults[factor] = multinomial_coefficient(
-                [(i*factor)//w for i in self.multiplicities]
+                (i*factor)//w for i in self.multiplicities
             )
             # To enusre mults[factor] gives the number of character
             # permutations with period exactly equal to (not subdividing)
