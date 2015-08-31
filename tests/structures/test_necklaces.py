@@ -2,7 +2,7 @@ import unittest
 
 from PADS import Lyndon
 
-from funcstructs.utils import factorization
+from funcstructs.combinat import divisors
 
 from funcstructs.structures.necklaces import (
     periodicity,
@@ -19,7 +19,7 @@ class PeriodicityTest(unittest.TestCase):
         lists = []
         N = 20
         for n in range(1, N+1):
-            for d in factorization.divisors(n):
+            for d in divisors(n):
                 periods.append(d)
                 lists.append(([0]+[1]*(d-1))*(n//d))
         t1 = [(1, 2), ]*3+[(1, 1)]

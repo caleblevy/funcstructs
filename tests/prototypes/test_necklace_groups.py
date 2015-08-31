@@ -1,6 +1,6 @@
 import unittest
 
-from funcstructs.utils import combinat
+from funcstructs import combinat
 from funcstructs.prototypes.necklace_groups import (
     count_by_period,
     necklace_groups_by_period_combo

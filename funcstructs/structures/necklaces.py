@@ -11,8 +11,7 @@ from functools import reduce
 from PADS.Lyndon import SmallestRotation
 
 from funcstructs import bases
-from funcstructs.utils.combinat import multinomial_coefficient
-from funcstructs.utils.factorization import divisors
+from funcstructs.combinat import divisors, multinomial_coefficient
 
 from .multiset import Multiset
 

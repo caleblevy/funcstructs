@@ -2,7 +2,7 @@ import unittest
 import itertools
 import math
 
-from funcstructs.utils.combinat import multinomial_coefficient
+from funcstructs.combinat import multinomial_coefficient
 
 from funcstructs.structures.labellings import (
     equipartitions, equipartition_count, ordered_divisions,

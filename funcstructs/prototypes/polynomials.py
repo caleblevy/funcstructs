@@ -9,8 +9,8 @@ from itertools import repeat
 
 import numpy as np
 
+from funcstructs.combinat import productrange
 from funcstructs.utils import split
-from funcstructs.utils.productrange import productrange
 from funcstructs.structures.multiset import Multiset
 
 

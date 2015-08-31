@@ -1,8 +1,8 @@
 import unittest
 
-from funcstructs.utils.combinat import prod
+from funcstructs.combinat import prod
 
-from funcstructs.utils.factorization import prime_factorization, divisors
+from funcstructs.combinat import prime_factorization, divisors
 
 
 class FactorizationTests(unittest.TestCase):
@@ -10,7 +10,7 @@ class FactorizationTests(unittest.TestCase):
     def test_prime_factorization_counts(self):
         """Check number of prime divisors with multiplicity."""
         for n in range(1, 30):
-            self.assertEqual(n, prod(prime_factorization(n).elements()))
+            self.assertEqual(n, prod(prime_factorization(n)))
 
     def test_divisor_count(self):
         """Check number of divisors."""

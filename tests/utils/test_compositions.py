@@ -1,8 +1,8 @@
 import unittest
 
-from funcstructs.utils import combinat
+from funcstructs import combinat
 
-from funcstructs.utils.compositions import compositions, weak_compositions
+from funcstructs.combinat import compositions, weak_compositions
 
 
 class CompositionTests(unittest.TestCase):

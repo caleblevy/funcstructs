@@ -13,7 +13,8 @@ from PADS import IntegerPartitions
 from funcstructs import compat
 
 from funcstructs.bases import Enumerable, typecheck
-from funcstructs.utils import compositions, factorization, subsequences, split
+from funcstructs.combinat import weak_compositions, divisors
+from funcstructs.utils import split, subsequences
 
 from .functions import rangefunc, Endofunction
 from .multiset import Multiset
@@ -251,7 +252,7 @@ def cycle_type_funcstructs(node_count, cycle_type):
     n = node_count - sum(cycle_type)
     k = cycle_type.num_unique_elements()
     lengths, mults = split(cycle_type)
-    for composition in compositions.weak_compositions(n, k):
+    for composition in weak_compositions(n, k):
         cycle_groups = []
         for c, l, m in zip(composition, lengths, mults):
             cycle_groups.append(component_groups(c, l, m))
@@ -432,7 +433,7 @@ class EndofunctionStructures(Enumerable):
         for part in _partitions(self.n):
             p = 1
             for i in range(1, self.n+1):
-                s = sum(j*part.get(j, 0) for j in factorization.divisors(i))
+                s = sum(j*part.get(j, 0) for j in divisors(i))
                 b = part.get(i, 0)
                 p *= s**b * Fraction(i, 1)**(-b)/factorial(b)
             tot += p

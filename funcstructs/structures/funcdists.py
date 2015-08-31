@@ -28,7 +28,7 @@ from math import factorial
 
 import numpy as np
 
-from funcstructs.utils import combinat, compositions
+from funcstructs import combinat
 
 from . import conjstructs, functions
 
@@ -69,7 +69,7 @@ def imagedist_composition(n):
     if n == 1:
         return tuple([1])
     dist = [0]*n
-    for comp in compositions.binary_compositions(n):
+    for comp in combinat.binary_compositions(n):
         val = n
         rep = 1
         for i in comp:
@@ -140,7 +140,7 @@ def limitdist_composition(n):
     # Memoize these lookups; saves a lot of time.
     exponentials = powergrid(n)
     binomial_coefficients = nCk_grid(n)
-    for comp in compositions.compositions(n):
+    for comp in combinat.compositions(n):
         count = 1
         for i in range(1, len(comp)):
             count *= exponentials[comp[i-1], comp[i]]

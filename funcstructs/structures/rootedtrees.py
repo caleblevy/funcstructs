@@ -9,7 +9,8 @@ from math import factorial
 from operator import mul
 
 from funcstructs import bases
-from funcstructs.utils import factorization, subsequences
+from funcstructs.combinat import divisors
+from funcstructs.utils.subsequences import startswith
 
 from funcstructs.structures.functions import rangefunc
 from funcstructs.structures.multiset import Multiset
@@ -153,7 +154,7 @@ class LevelSequence(bases.Tuple):
 
     def subtrees(self):
         """Return the subtrees attached to the root."""
-        for branch in subsequences.startswith(self[1:], self[0]+1):
+        for branch in startswith(self[1:], self[0]+1):
             # Bypass any constructor checks; since the tree is verified,
             # all of its subtrees must be as well.
             yield tuple.__new__(self.__class__, (node-1 for node in branch))
@@ -404,7 +405,7 @@ class TreeEnumerator(bases.Enumerable):
         for n in range(2, self.n + 1):
             for i in range(1, self.n):
                 s = 0
-                for d in factorization.divisors(i):
+                for d in divisors(i):
                     s += T[d]*d
                 s *= T[n-i]
                 T[n] += s
