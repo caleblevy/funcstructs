@@ -134,7 +134,6 @@ class FixedContentNecklaces(bases.Enumerable):
             multiplicities = tuple(multiplicities)
             if len(content) != len(multiplicities):
                 raise TypeError("content and and multiplicities do not match")
-            # TODO: Add Multiset.from_items
             m = Multiset.fromitems(zip(content, multiplicities))
             content, multiplicities = zip(*sorted(m.items()))
         try:
