@@ -3,9 +3,7 @@
 Caleb Levy, 2015.
 """
 
-from functools import reduce
 from math import factorial
-from operator import mul
 
 from funcstructs.structures.multiset import (
     _prod as prod,

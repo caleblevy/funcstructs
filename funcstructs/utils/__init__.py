@@ -20,7 +20,7 @@ class SplittingTests(unittest.TestCase):
 
     def test_dict_splitting(self):
         """Test that dicts are split in key-value lists."""
-        from funcstructs import frozendict, Multiset, Bijection
+        from funcstructs import Multiset, Bijection
         d1 = {'a': 1, 1: (), (1, 2): 'b', None: None, frozenset(): Multiset()}
         d2 = Bijection(d1)
         d3 = d2.inverse
