@@ -2,13 +2,12 @@ import unittest
 import itertools
 import math
 
-from funcstructs.structures import rootedtrees
+from funcstructs.utils.combinat import multinomial_coefficient
 
 from funcstructs.structures.labellings import (
-    equipartitions, equipartition_count,
-    ordered_divisions, ordered_division_count,
-    set_partitions, set_partition_count,
-    cycle_labellings, cycle_index
+    equipartitions, equipartition_count, ordered_divisions,
+    set_partitions, set_partition_count, cycle_labellings,
+    cycle_index
 )
 
 
@@ -37,7 +36,7 @@ class LabellingTests(unittest.TestCase):
         """Check we produce the correct number of ordered partitions."""
         for partition in self.partitions:
             self.assertEqual(
-                ordered_division_count(partition),
+                multinomial_coefficient(partition),
                 len(set(ordered_divisions(partition)))
             )
 

@@ -8,18 +8,15 @@ from math import factorial
 
 
 from funcstructs.utils import split
-from funcstructs.utils.combinat import (
-    multinomial_coefficient as ordered_division_count)
 
 from .multiset import Multiset
 from .necklaces import Necklace
 
 
 __all__ = [
-    "equipartitions", "equipartition_count",
-    "ordered_divisions", "ordered_division_count",
-    "set_partitions", "set_partition_count",
-    "cycle_labellings", "cycle_index",
+    "equipartitions", "equipartition_count", "ordered_divisions",
+    "set_partitions", "set_partition_count", "cycle_labellings",
+    "cycle_index",
 ]
 
 
