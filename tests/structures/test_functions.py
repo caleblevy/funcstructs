@@ -1,7 +1,7 @@
 import unittest
 from math import factorial
 
-from funcstructs.structures.conjstructs import Funcstruct
+from funcstructs.structures.conjstructs import ConjugacyClass
 
 from funcstructs.structures.functions import (
     Function, Bijection, Endofunction, Permutation,
@@ -115,7 +115,7 @@ class BijectionTests(unittest.TestCase):
         f = Endofunction.fromkeys("abc", "a")
         b = Bijection(zip("abc", range(3)))
         self.assertEqual(f, b.inverse.conj(b.conj(f)))
-        self.assertEqual(Funcstruct(f), Funcstruct(b.conj(f)))
+        self.assertEqual(ConjugacyClass(f), ConjugacyClass(b.conj(f)))
 
 
 class EndofunctionTests(unittest.TestCase):
@@ -278,12 +278,12 @@ class RandfuncTests(unittest.TestCase):
         cg = randconj(g)
         cdf = randconj(f, g.domain)
         cdg = randconj(g, f.domain)
-        self.assertEqual(Funcstruct(f), Funcstruct(cf))
-        self.assertEqual(Funcstruct(f), Funcstruct(cdf))
+        self.assertEqual(ConjugacyClass(f), ConjugacyClass(cf))
+        self.assertEqual(ConjugacyClass(f), ConjugacyClass(cdf))
         self.assertEqual(f.domain, cf.domain)
         self.assertEqual(g.domain, cdf.domain)
-        self.assertEqual(Funcstruct(g), Funcstruct(cg))
-        self.assertEqual(Funcstruct(g), Funcstruct(cdg))
+        self.assertEqual(ConjugacyClass(g), ConjugacyClass(cg))
+        self.assertEqual(ConjugacyClass(g), ConjugacyClass(cdg))
         self.assertEqual(g.domain, cg.domain)
         self.assertEqual(f.domain, cdg.domain)
 

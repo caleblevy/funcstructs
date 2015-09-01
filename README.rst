@@ -51,8 +51,8 @@ Data Structures
 
 **Endofunction Structures**
 
-- ``Funcstruct``: Represents a conjugacy class of Endofunctions as a multiset
-  of necklaces whose elements are dominant sequences.
+- ``ConjugacyClass``: Represents a conjugacy class of Endofunctions as a
+  multiset of necklaces whose elements are dominant sequences.
 - ``EndofunctionStructures``: Enumerates endofunction structures on a fixed
   number of nodes, optionally restricted to a given cycle type.
 
@@ -126,7 +126,7 @@ Usage
     >>> g = s.inverse.conj(f)
     >>> list(g)
     [('a', 'a'), ('c', 'c'), ('b', 'a')]
-    >>> Funcstruct(f) == Funcstruct(g)
+    >>> ConjugacyClass(f) == ConjugacyClass(g)
     True
 
     >>> p = Permutation({0: 3, 1: 4, 2: 1, 3: 0, 4: 2})

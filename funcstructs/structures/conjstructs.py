@@ -22,10 +22,10 @@ from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import _levels_from_preim, DominantSequence, TreeEnumerator
 
 
-__all__ = ("Funcstruct", "EndofunctionStructures")
+__all__ = ("ConjugacyClass", "EndofunctionStructures")
 
 
-class Funcstruct(Multiset):
+class ConjugacyClass(Multiset):
     """An endofunction structure.
 
     Intuitively, endofunction structures result from removing the
@@ -41,10 +41,10 @@ class Funcstruct(Multiset):
 
     In mathematical parlance, they are conjugacy classes of
     transformation monoids. Given any two Endofunction objects f and g,
-    it follows that Funcstruct(f) == Funcstruct(g) if and only if there
+    it follows that ConjugacyClass(f) == ConjugacyClass(g) if and only if there
     exists a Bijection b such that f == b.conj(g).
 
-    Funcstruct graphs are directed pseudoforests: Multisets of cycles
+    ConjugacyClass graphs are directed pseudoforests: Multisets of cycles
     (represented by Necklace objects) whose elements are unlabelled and
     unordered rooted trees (represented by DominantSequence objects).
     """
@@ -63,9 +63,9 @@ class Funcstruct(Multiset):
                     trees.append(
                         DominantSequence(_levels_from_preim(treenodes, x)))
                 cycles.append(Necklace(trees))
-            return super(Funcstruct, cls).__new__(cls, cycles)
+            return super(ConjugacyClass, cls).__new__(cls, cycles)
         else:
-            self = super(Funcstruct, cls).__new__(cls, f)
+            self = super(ConjugacyClass, cls).__new__(cls, f)
             for cycle in self.keys():
                 if not isinstance(cycle, Necklace):
                     break
@@ -77,7 +77,7 @@ class Funcstruct(Multiset):
                 break
             else:
                 return self
-            raise TypeError("Funcstructs must have cycles of rooted trees")
+            raise TypeError("ConjugacyClasss must have cycles of rooted trees")
 
     def __len__(self):
         """Number of nodes in the structure."""
@@ -99,7 +99,7 @@ class Funcstruct(Multiset):
         """The number of ways to label a graph representing a particular
         endofunction with the given structure."""
         # First the degeneracy from the permutations of arrangements of cycles
-        deg = super(Funcstruct, self).degeneracy()
+        deg = super(ConjugacyClass, self).degeneracy()
         # Then account for the periodcity of each cycle
         for cycle, mult in self.items():
             cycledeg = cycle.degeneracy()
@@ -248,7 +248,8 @@ def integer_funcstructs(n):
 
 
 def cycle_type_funcstructs(node_count, cycle_type):
-    """Enumerate all Funcstructs with the given node count and cycle type."""
+    """Enumerate all conjugacy classes with the given node count and cycle
+    type."""
     n = node_count - sum(cycle_type)
     k = cycle_type.num_unique_elements()
     lengths, mults = split(cycle_type)
@@ -257,7 +258,7 @@ def cycle_type_funcstructs(node_count, cycle_type):
         for c, l, m in zip(composition, lengths, mults):
             cycle_groups.append(component_groups(c, l, m))
         for bundle in product(*cycle_groups):
-            yield Multiset.__new__(Funcstruct, chain(*bundle))
+            yield Multiset.__new__(ConjugacyClass, chain(*bundle))
 
 
 # Twelve-Fold Path: Item #10
@@ -393,7 +394,7 @@ class EndofunctionStructures(Enumerable):
     optionally restricted to a given cycle type. The following invariant
     holds for any n:
 
-    >>> mapping_types = set(map(Funcstruct, TransformationMonoid(n)))
+    >>> mapping_types = set(map(ConjugacyClass, TransformationMonoid(n)))
     >>> set(EndofunctionStructures(n)) == mapping_types
     True
     """
@@ -415,7 +416,7 @@ class EndofunctionStructures(Enumerable):
         else:
             return cycle_type_funcstructs(self.n, self.cycle_type)
 
-    @typecheck(Funcstruct)
+    @typecheck(ConjugacyClass)
     def __contains__(self, other):
         if len(other) == self.n:
             if self.cycle_type is not None:

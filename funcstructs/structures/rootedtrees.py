@@ -25,7 +25,7 @@ def _levels_from_preim(graph, root=0, keys=None):
 
     Note: The graph must be acyclic, or the function may not terminate.
     """
-    # Algorithm for turning an Endofunction into a Funcstruct, taking
+    # Algorithm for finding an Endofunction's ConjuConjugacyClass taking
     # inspiration from the idea that the preimage of an endofunction
     # is literally the standard representation of a graph as a mapping
     # of its vertices to the set of its edges.

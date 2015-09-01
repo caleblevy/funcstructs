@@ -264,7 +264,7 @@ class Endofunction(Function):
         return f_iter
 
     # TODO: eliminate this method, or use it only for testing
-    # Funcstruct.imagepath
+    # ConjugacyClass.imagepath
     def imagepath(self):
         """f.imagepath()[n] <==> len((f**n).image)"""
         cardinalities = [len(self.image)]

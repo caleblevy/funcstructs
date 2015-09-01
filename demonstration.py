@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import pylab
 
 from funcstructs.utils import split
-from funcstructs.structures import randconj, Funcstruct
+from funcstructs.structures import randconj, ConjugacyClass
 from funcstructs.prototypes.floatfuncs import UnitInterval, floatfunc
 
 
@@ -94,7 +94,7 @@ plt.show()
 #' Despite having no apparent relation with the familiar parabola, $f$ and $g$
 #' have identical structure:
 
-print(Funcstruct(f) == Funcstruct(g))
+print(ConjugacyClass(f) == ConjugacyClass(g))
 
 #' It may seem that such different functions sharing the same structure would
 #' make this relationship useless. However, under iteration, we can much more

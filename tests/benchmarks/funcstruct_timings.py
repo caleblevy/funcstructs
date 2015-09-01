@@ -1,6 +1,6 @@
-"""Benchmarking Funcstruct methods on large Endofunctions.
+"""Benchmarking ConjugacyClass methods on large Endofunctions.
 
-When Funcstruct was naively implemented using O(n^2) methods, inputs
+When ConjugacyClass was naively implemented using O(n^2) methods, inputs
 with >2000 nodes were infeasible to work with. Right now we can handle
 ~10**6 nodes in seconds. These gains were hard won, and we don't want
 to let regressions slip through.
@@ -26,12 +26,12 @@ print("Making floating point Endofunctions:", u.laps)
 
 
 with Stopwatch() as v:
-    Square = Funcstruct(square)
+    Square = ConjugacyClass(square)
     v.lap()
-    Sine = Funcstruct(sine)
+    Sine = ConjugacyClass(sine)
     v.lap()
 
-print("Floating point Funcstructs:", v.laps)
+print("Floating point ConjugacyClasss:", v.laps)
 
 
 with Stopwatch() as w:
@@ -55,14 +55,14 @@ print("Endofunction creation:", r.laps)
 
 
 with Stopwatch() as s:
-    F = Funcstruct(f)
+    F = ConjugacyClass(f)
     s.lap()
-    G = Funcstruct(g)
+    G = ConjugacyClass(g)
     s.lap()
-    H = Funcstruct(h)
+    H = ConjugacyClass(h)
     s.lap()
 
-print("Funcstruct creation:", s.laps)
+print("ConjugacyClass creation:", s.laps)
 
 
 with Stopwatch() as t:
@@ -73,4 +73,4 @@ with Stopwatch() as t:
     c = H.degeneracy()
     t.lap()
 
-print("Funcstruct degeneracies:", t.laps)
+print("ConjugacyClass degeneracies:", t.laps)

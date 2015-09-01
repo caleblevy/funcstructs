@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from numpy import log2
 
 from funcstructs.structures import *
-from funcstructs.utils.productrange import productrange
+from funcstructs.combinat import productrange
 from funcstructs.prototypes.integer_partitions import fixed_lex_partitions
 
 
