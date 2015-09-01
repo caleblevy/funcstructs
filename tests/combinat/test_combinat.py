@@ -1,8 +1,8 @@
 import unittest
 
-from funcstructs import combinat
-
-from funcstructs.combinat import compositions, weak_compositions
+from funcstructs.combinat import (
+    nCk, prod, compositions, weak_compositions, prime_factorization, divisors
+)
 
 
 class CompositionTests(unittest.TestCase):
@@ -25,7 +25,7 @@ class CompositionTests(unittest.TestCase):
         for n in range(1, 5):
             for k in range(1, 10):
                 self.assertEqual(
-                    combinat.nCk(n+k-1, k-1),
+                    nCk(n+k-1, k-1),
                     len(list(weak_compositions(n, k)))
                 )
 
@@ -35,3 +35,18 @@ class CompositionTests(unittest.TestCase):
             for k in range(1, 10):
                 for comp in weak_compositions(n, k):
                     self.assertEqual(n, sum(comp))
+
+
+class FactorizationTests(unittest.TestCase):
+
+    def test_prime_factorization_counts(self):
+        """Check number of prime divisors with multiplicity."""
+        for n in range(1, 30):
+            self.assertEqual(n, prod(prime_factorization(n)))
+
+    def test_divisor_count(self):
+        """Check number of divisors."""
+        A000005 = [1, 2, 2, 3, 2, 4, 2, 4, 3, 4, 2, 6, 2, 4, 4, 5, 2, 6, 2, 6,
+                   4, 4, 2, 8, 3, 4, 4, 6, 2, 8]
+        for i, count in enumerate(A000005, start=1):
+            self.assertEqual(count, len(divisors(i)))
