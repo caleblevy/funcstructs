@@ -206,8 +206,8 @@ if __name__ == '__main__':
         return Endofunction(list(bigcycle(n//2))+list(talltree(n-n//2)))
 
     iteration_time(fixed_lex_partitions(100, 40))
-    iteration_time(EndofunctionStructures(12))
-    iteration_time(EndofunctionStructures, 12)
+    iteration_time(Funcstructs(12))
+    iteration_time(Funcstructs, 12)
 
     mapbench(range(1, 2000), Endofunction.cycles.fget, flattree)
     mapbench(range(20, 2000), Endofunction.cycles.fget, randfunc)

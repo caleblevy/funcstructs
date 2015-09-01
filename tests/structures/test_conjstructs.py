@@ -11,7 +11,7 @@ from funcstructs.structures import (
 
 from funcstructs.structures.conjstructs import (
     ConjugacyClass,
-    EndofunctionStructures
+    Funcstructs
 )
 
 
@@ -47,7 +47,7 @@ class ConjugacyClassTests(unittest.TestCase):
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""
         for i in range(1, 8):
-            for struct in EndofunctionStructures(i):
+            for struct in Funcstructs(i):
                 sim = struct.func_form().imagepath()
                 fim = struct.imagepath()
                 self.assertSequenceEqual(sim, fim)
@@ -56,15 +56,15 @@ class ConjugacyClassTests(unittest.TestCase):
         """OEIS A001372: Number of self-mapping patterns."""
         A001372 = [1, 3, 7, 19, 47, 130, 343, 951, 2615, 7318, 20491, 57903]
         for n, count in enumerate(A001372, start=1):
-            self.assertEqual(count, len(set(EndofunctionStructures(n))))
-            self.assertEqual(count, EndofunctionStructures(n).cardinality())
+            self.assertEqual(count, len(set(Funcstructs(n))))
+            self.assertEqual(count, Funcstructs(n).cardinality())
 
     def test_degeneracy(self):
         """OEIS A000312: Number of labeled maps from n points to themselves."""
         for i in range(1, 8):
             fac = factorial(i)
             func_count = 0
-            for struct in EndofunctionStructures(i):
+            for struct in Funcstructs(i):
                 func_count += fac//struct.degeneracy()
             self.assertEqual(i**i, func_count)
 

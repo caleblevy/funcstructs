@@ -1,5 +1,5 @@
 # Main data structures
-from .conjstructs import ConjugacyClass, EndofunctionStructures
+from .conjstructs import ConjugacyClass, Funcstructs
 from .functions import (
     Function, Bijection, Endofunction, Permutation,
     identity, rangefunc, randfunc, randperm, randconj,

@@ -53,7 +53,7 @@ Data Structures
 
 - ``ConjugacyClass``: Represents a conjugacy class of Endofunctions as a
   multiset of necklaces whose elements are dominant sequences.
-- ``EndofunctionStructures``: Enumerates endofunction structures on a fixed
+- ``Funcstructs``: Enumerates endofunction structures on a fixed
   number of nodes, optionally restricted to a given cycle type.
 
 

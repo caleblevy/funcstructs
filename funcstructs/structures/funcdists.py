@@ -46,14 +46,14 @@ def iterdist_funcstruct(n, cycle_type=None):
     """Every labelling of a function structure shares the same image path, thus
     we may calculate iteration distributions by enumerating all endofunction
     structure image paths and scaling them by their multiplicities."""
-    # TODO: Finalize proof that len(EndofunctionStructures(n)) is O(a^n),
+    # TODO: Finalize proof that len(Funcstructs(n)) is O(a^n),
     # investigate possibility that a<=4, and add writeup to the repository.
     if n == 1:
         c = 0 if(cycle_type or sum(cycle_type) != 1) else 1
         return np.array([c], dtype=object)
     dist = np.zeros((n, n-1), dtype=object)
     nfac = factorial(n)
-    for struct in conjstructs.EndofunctionStructures(n, cycle_type):
+    for struct in conjstructs.Funcstructs(n, cycle_type):
         mult = nfac//struct.degeneracy()
         for it, card in enumerate(struct.imagepath()):
             dist[card-1, it] += mult

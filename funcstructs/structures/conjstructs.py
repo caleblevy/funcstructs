@@ -22,7 +22,7 @@ from .necklaces import Necklace, FixedContentNecklaces
 from .rootedtrees import _levels_from_preim, DominantSequence, TreeEnumerator
 
 
-__all__ = ("ConjugacyClass", "EndofunctionStructures")
+__all__ = ("ConjugacyClass", "Funcstructs")
 
 
 class ConjugacyClass(Multiset):
@@ -389,14 +389,13 @@ def attachment_forests(t, l):
                 yield necklace
 
 
-class EndofunctionStructures(Enumerable):
+class Funcstructs(Enumerable):
     """Enumerator of endofunction structures consisting of n nodes,
     optionally restricted to a given cycle type. The following invariant
     holds for any n:
 
-    >>> mapping_types = set(map(ConjugacyClass, TransformationMonoid(n)))
-    >>> set(EndofunctionStructures(n)) == mapping_types
-    True
+    set(Funcstructs(n)) == set(map(ConjugacyClass, TransformationMonoid(n)))
+    for any non-negative integer n.
     """
 
     def __init__(self, n, cycle_type=None):
