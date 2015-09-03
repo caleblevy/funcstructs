@@ -38,6 +38,7 @@ def _FunctionHelper(fcls):
 
     @staticmethod
     def __new__(*args, **kwargs):
+        cls = args[0]
         mapping = dict(*args[1:], **kwargs)
         im = frozenset(mapping.values())
         invertible = len(im) == len(mapping)
@@ -50,6 +51,56 @@ def _FunctionHelper(fcls):
             functype = Endofunction
         else:
             functype = Function
+        # Function, Bijection, Endofunction and Permutation should
+        # collectively be thought of as "Function". Inputs are promoted
+        # to the most derived type automatically, since ultimately,
+        # (i.e.) any Function with image the size of its domain is a
+        # Bijection, whether that is its type or not, so we may as well
+        # instantiate it as such and endow it with the usual methods.
+        #
+        # The only purpose in calling Endofunction / Bijection /
+        # Permutation directly is imposing a check for what you believe
+        # they should be, in the same spirit as (i.e.) a list vs tuple
+        # makes no difference if you never change the list (and don't
+        # need to hash it), but if you expect it to be immutable, you
+        # should use a tuple.
+        #
+        # None of these four are meant to be subclassed. Although there
+        # are many types of Function (for example, group and ring
+        # operations), the "Function" data type is fundamentally designed
+        # to reflect simple correspondences between finite sets in
+        # memory. (This is why Multiset is not a Function subtype;
+        # Multisets have a different structure and semantic meaning from
+        # regular Functions).
+        #
+        # TODO: Incorporate the above comments into some form of
+        # documentation.
+        #
+        # TODO: Unittest that none of these four classes can have
+        # instantiable subclasses.
+        #
+        # TODO: I remain undecided on whether Function and its subclasses
+        # should receive their own metaclass. The current structure
+        # should not allow for *instantiating* subclasses, in which case
+        # there is little sense in allowing such subclasses at all.
+        #
+        # Since the purpose of this metaclass would be disallowing (new)
+        # Function subclasses, we need not consider the (usual) metaclass
+        # conflict problems. My main concern is that there is
+        # no "is-a" relationship here; a Function isn't a different
+        # kind of class (unlike, i.e. ParamMeta, which characterizes
+        # object types with a very particular structure).
+        #
+        # Ultimately, I think a class rename ("Correspondence") along
+        # with a small "SemiFinal" metaclass will be the appropriate answer,
+        # or just eliminate the various Function subclasses all together.
+        # Even sympy hasn't achieved the lofty goal of placing all of math's
+        # important kinds of function into a tidy framework, and my goals
+        # are (for now) much more limited, so YAGNI will apply, and from
+        # an API consistency standpoint a small metaclass will get the job
+        # done.
+        if not issubclass(functype, cls):
+            raise TypeError("Input mapping is not %s" % cls.__name__)
         self = object.__new__(functype)
         map_set(self, mapping)
         return self
@@ -197,12 +248,6 @@ class Bijection(Function):
 
     __slots__ = ()
 
-    def __new__(*args, **kwargs):
-        self = super(Bijection, args[0]).__new__(*args, **kwargs)
-        if not isinstance(self, Bijection):
-            raise TypeError("Function not invertible")
-        return self
-
     @property
     def inverse(self):
         """s.inverse * s <==> identity(s.domain)"""
@@ -244,12 +289,6 @@ class Endofunction(Function):
     """
 
     __slots__ = ()
-
-    def __new__(*args, **kwargs):
-        self = super(Endofunction, args[0]).__new__(*args, **kwargs)
-        if not isinstance(self, Endofunction):
-            raise TypeError("image must be a subset of the domain")
-        return self
 
     def __pow__(self, n):
         """f**n <==> the nth iterate of f (n > 0)"""
@@ -397,12 +436,13 @@ class Mappings(Enumerable):
     def __init__(self, domain, codomain=None, invertible=False):
         domain = _parsed_domain(domain)
         codomain = domain if codomain is None else _parsed_domain(codomain)
+        invertible = bool(invertible)
         if invertible and len(domain) != len(codomain):
             raise TypeError("No isomorphisms between %s and %s" % (
                             domain, codomain))
         self.domain = domain
         self.codomain = codomain
-        self.invertible = bool(invertible)
+        self.invertible = invertible
 
     def __iter__(self):
         try:
