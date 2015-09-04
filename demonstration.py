@@ -106,7 +106,7 @@ def treeiterates(func):
     """Return a list of all of f's iterates with tree-like structure."""
     f_orig = func
     lim = func.limitset
-    while func.image != lim:
+    while func.image() != lim:
         yield func
         func *= f_orig
     yield func
