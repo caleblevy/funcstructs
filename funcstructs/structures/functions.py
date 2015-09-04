@@ -457,11 +457,13 @@ class Mappings(Enumerable):
 
     @typecheck(Function)
     def __contains__(self, other):
-        if self.domain == other.domain:
+        # Cannot use self.domain == other.domain since Jython cannot
+        # compare sets and key_views for some reason (sigh...)
+        if not self.domain.symmetric_difference(other.domain):
             if self.invertible:
-                return self.codomain == other.codomain
+                return self.codomain == other.image()
             else:
-                return self.codomain.issuperset(other.codomain)
+                return self.codomain.issuperset(other.image())
         return False
 
     def __len__(self):
