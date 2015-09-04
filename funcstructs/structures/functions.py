@@ -171,7 +171,7 @@ class Function(frozendict):
     @property
     def domain(self):
         """f.domain <==> {x for (x, y) in f}"""
-        return frozenset(self.keys())
+        return self.keys()
 
     def image(self):
         """f.image() <==> {y for (x, y) if f}"""

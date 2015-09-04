@@ -53,7 +53,9 @@ class FunctionTests(unittest.TestCase):
     def test_fibers(self):
         """Test that elements of fibers are returned correctly."""
         for c, f in self.constants:
-            self.assertEqual(dict(f.fibers), {c: f.domain})
+            # TODO: Submit bug report to Jython; equality checks between sets
+            # and key views return False in Jython even with same content
+            self.assertEqual(dict(f.fibers), {c: set(f.domain)})
 
     def test_containment(self):
         """Test that function containment tests for key-value pairs."""
@@ -355,7 +357,7 @@ class FunctionEnumeratorTests(unittest.TestCase):
     def assertDomainsCorrect(self, mspace):
         """Assert that enumerated functions have correct domains and ranges."""
         for f in mspace:
-            self.assertTrue(f.domain.issubset(mspace.domain))
+            self.assertTrue(mspace.domain.issuperset(f.domain))
             if hasattr(mspace, "codomain"):
                 self.assertTrue(f.image().issubset(mspace.codomain))
             else:
