@@ -173,9 +173,8 @@ class Function(frozendict):
         """f.domain <==> {x for (x, y) in f}"""
         return frozenset(self.keys())
 
-    @property
     def image(self):
-        """f.image <==> {y for (x, y) if f}"""
+        """f.image() <==> {y for (x, y) if f}"""
         return frozenset(self.values())
 
     # Mathematical functions describe a set of pairings of points; returning
@@ -231,7 +230,7 @@ class Function(frozendict):
         preim = defaultdict(list)
         for x, y in self:
             preim[y].append(x)
-        return frozendict((y, frozenset(preim[y])) for y in self.image)
+        return frozendict((y, frozenset(preim[y])) for y in self.image())
 
 
 class Bijection(Function):
@@ -306,12 +305,12 @@ class Endofunction(Function):
     # ConjugacyClass.imagepath
     def imagepath(self):
         """f.imagepath()[n] <==> len((f**n).image)"""
-        cardinalities = [len(self.image)]
+        cardinalities = [len(self.image())]
         f = self
         card_prev = len(self)
         for it in range(1, len(self)-1):
             f *= self
-            card = len(f.image)
+            card = len(f.image())
             cardinalities.append(card)
             # Save some time; if we have reached the fixed set, return.
             if card == card_prev:

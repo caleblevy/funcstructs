@@ -48,7 +48,7 @@ class FunctionTests(unittest.TestCase):
     def test_image(self):
         """Test that the image is set of values."""
         for c, f in self.constants:
-            self.assertEqual(f.image, {c})
+            self.assertEqual(f.image(), {c})
 
     def test_fibers(self):
         """Test that elements of fibers are returned correctly."""
@@ -246,7 +246,7 @@ class RandfuncTests(unittest.TestCase):
                 else:
                     c = set(cod)
                 self.assertEqual(g.domain, d)
-                self.assertTrue(g.image.issubset(c))
+                self.assertTrue(g.image().issubset(c))
 
     def test_randperm(self):
         """Verify type & invertibility of random bijections and permutatioms"""
@@ -259,7 +259,7 @@ class RandfuncTests(unittest.TestCase):
             else:
                 d = set(dom)
             self.assertEqual(s.domain, d)
-            self.assertEqual(s.domain, s.image)
+            self.assertEqual(s.domain, s.image())
             for cod in domains:
                 b = randperm(dom, cod)
                 self.assertIsInstance(b, Bijection)
@@ -268,7 +268,7 @@ class RandfuncTests(unittest.TestCase):
                 else:
                     c = set(cod)
                 self.assertEqual(b.domain, d)
-                self.assertEqual(b.image, c)
+                self.assertEqual(b.image(), c)
 
     def test_randconj(self):
         """Verify randconj returns a conjugate of f."""
@@ -357,9 +357,9 @@ class FunctionEnumeratorTests(unittest.TestCase):
         for f in mspace:
             self.assertTrue(f.domain.issubset(mspace.domain))
             if hasattr(mspace, "codomain"):
-                self.assertTrue(f.image.issubset(mspace.codomain))
+                self.assertTrue(f.image().issubset(mspace.codomain))
             else:
-                self.assertTrue(f.image.issubset(mspace.domain))
+                self.assertTrue(f.image().issubset(mspace.domain))
 
     def test_function_counts(self):
         """Check the number of mappings produced by function enumerators."""
