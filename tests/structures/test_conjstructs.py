@@ -38,11 +38,11 @@ class ConjugacyClassTests(unittest.TestCase):
 
     def test_cycle_type(self):
         """Test that the correct multiset of cycle lengths is returned."""
-        self.assertEqual(Multiset([1, 2, 3]), self.s.cycle_type())
+        self.assertEqual(Multiset([1, 2, 3]), self.s.cycle_type)
         sm = Multiset(self.s)
         sm += sm + Multiset(ConjugacyClass(randfunc(1)))
         s2 = ConjugacyClass(sm)
-        self.assertEqual(Multiset([1, 1, 1, 2, 2, 3, 3]), s2.cycle_type())
+        self.assertEqual(Multiset([1, 1, 1, 2, 2, 3, 3]), s2.cycle_type)
 
     def test_imagepath(self):
         """Check methods for computing structure image paths are equivalent."""

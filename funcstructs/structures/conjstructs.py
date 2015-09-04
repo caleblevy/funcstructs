@@ -86,6 +86,10 @@ class ConjugacyClass(Multiset):
             node_count += mult * sum(map(len, cycle))
         return node_count
 
+    # Function.cycle_type is a property for
+    # 1) Semantic similarity with Funcstructs.cycle_type
+    # 2) In the VAST majority of cases, it is sublinear (< sqrt(n)) to compute.
+    @property
     def cycle_type(self):
         """Return the type of a structure's cycle decomposition."""
         # Equivalent to Multiset(map(len, self)), but more efficient
@@ -399,7 +403,7 @@ class Funcstructs(Enumerable):
     """
 
     def __init__(self, n, cycle_type=None):
-        if n < 0:
+        if n < 0 or not isinstance(n, int):
             raise ValueError("Cannot defined funcstructs on %s nodes" % n)
         if cycle_type is not None:
             cycle_type = Multiset(cycle_type)
@@ -419,7 +423,7 @@ class Funcstructs(Enumerable):
     def __contains__(self, other):
         if len(other) == self.n:
             if self.cycle_type is not None:
-                return other.cycle_type() == self.cycle_type
+                return self.cycle_type == other.cycle_type
             return True
         return False
 
