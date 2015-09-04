@@ -136,9 +136,9 @@ class EndofunctionTests(unittest.TestCase):
         ii = rangefunc(range(7))
         ia = Endofunction(zip(*(["abcdefg"]*2)))
         for i in range(1, 12):  # Order of cycle is 12
-            self.assertNotEqual(ii.cycles, (s**i).cycles)
-            self.assertNotEqual(ia.cycles, (a**i).cycles)
-        self.assertEqual(ii.cycles, (s**12).cycles)
+            self.assertNotEqual(ii.cycles(), (s**i).cycles())
+            self.assertNotEqual(ia.cycles(), (a**i).cycles())
+        self.assertEqual(ii.cycles(), (s**12).cycles())
 
         n = 10
         f = rangefunc([0]+list(range(10)))
@@ -175,7 +175,7 @@ class EndofunctionTests(unittest.TestCase):
     funcs += list(TransformationMonoid(1))
     funcs += list(TransformationMonoid("abc"))
     funcs += list(TransformationMonoid([("a", ), ("b", ), ("c", ), ("d", )]))
-    cyclesets = [f.cycles for f in funcs]
+    cyclesets = [f.cycles() for f in funcs]
     limitsets = [f.limitset for f in funcs]
 
     def test_cycles_are_cyclic(self):

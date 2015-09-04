@@ -55,7 +55,7 @@ class ConjugacyClass(Multiset):
         if isinstance(f, Endofunction):
             cycles = []
             treenodes = f.acyclic_ancestors
-            for cycle in f.cycles:
+            for cycle in f.cycles():
                 trees = []
                 for x in cycle:
                     # Use DominantSequence instead of RootedTree due to

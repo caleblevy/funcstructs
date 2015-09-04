@@ -209,13 +209,13 @@ if __name__ == '__main__':
     iteration_time(Funcstructs(12))
     iteration_time(Funcstructs, 12)
 
-    mapbench(range(1, 2000), Endofunction.cycles.fget, flattree)
-    mapbench(range(20, 2000), Endofunction.cycles.fget, randfunc)
+    mapbench(range(1, 2000), Endofunction.cycles, flattree)
+    mapbench(range(20, 2000), Endofunction.cycles, randfunc)
     mapbench(range(20, 2000), periodicity,
              lambda f: list(randfunc(f).values()))
     plt.figure()
     mapbench(
-        range(20, 2500), Endofunction.cycles.fget,
+        range(20, 2500), Endofunction.cycles,
         randfunc,
         identity,
         randperm,

@@ -319,7 +319,6 @@ class Endofunction(Function):
             card_prev = card
         return tuple(cardinalities)
 
-    @property
     def cycles(self):
         """Return the set of f's cycles"""
         # Algorithm runs in O(len(self))
@@ -345,7 +344,7 @@ class Endofunction(Function):
     @property
     def limitset(self):
         """x in f.limitset <==> any(x in cycle for cycle in f.cycles)"""
-        return frozenset(itertools.chain(*self.cycles))
+        return frozenset(itertools.chain(*self.cycles()))
 
     @property
     def acyclic_ancestors(self):
