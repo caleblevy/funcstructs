@@ -11,6 +11,8 @@ test_dir = os.path.dirname(os.path.abspath(__file__))
 # sys.path hackery which seems to make this run in python and python3
 sys.path.insert(0, os.path.dirname(os.path.abspath(test_dir)))
 
+not_for_testing = ["__main__", "benchmarks", "testcases"]
+
 numpy_dependant = []
 matplotlib_dependant = []
 
@@ -19,8 +21,8 @@ suite = unittest.TestSuite()
 # "Is there a standard way to list names of Python modules in a package?" at
 # http://stackoverflow.com/a/1310912/3349520
 for _, mod, _ in pkgutil.walk_packages([test_dir]):
-    if mod == '__main__' or "benchmarks" in mod or "testcases" in mod:
-        continue  # pypy tests __main__ without this
+    if any(name in mod for name in not_for_testing):
+        continue
     try:
         # "import module from string variable" at
         # http://stackoverflow.com/a/8719100/3349520
