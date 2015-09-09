@@ -7,16 +7,15 @@ import pkgutil
 import sys
 import unittest
 
+not_for_testing = ["__main__", "benchmarks", "testcases"]
+optional_requirements = ["numpy", "matplotlib"]
+
 test_dir = os.path.dirname(os.path.abspath(__file__))
 # sys.path hackery which seems to make this run in python and python3
 sys.path.insert(0, os.path.dirname(os.path.abspath(test_dir)))
 
-not_for_testing = ["__main__", "benchmarks", "testcases"]
-
-numpy_dependant = []
-matplotlib_dependant = []
-
 suite = unittest.TestSuite()
+_missing_dependents = {m: [] for m in optional_requirements}
 
 # "Is there a standard way to list names of Python modules in a package?" at
 # http://stackoverflow.com/a/1310912/3349520
@@ -29,10 +28,10 @@ for _, mod, _ in pkgutil.walk_packages([test_dir]):
         importlib.import_module(mod)
     except ImportError as e:
         error_message = str(e)
-        if 'numpy' in error_message:
-            numpy_dependant.append(mod)
-        elif 'matplotlib' in error_message:
-            matplotlib_dependant.append(mod)
+        for r in optional_requirements:
+            if r in error_message:
+                _missing_dependents[r].append(mod)
+                break
         else:
             raise
     else:
@@ -40,18 +39,12 @@ for _, mod, _ in pkgutil.walk_packages([test_dir]):
         # http://stackoverflow.com/a/1732477/3349520
         suite.addTest(unittest.defaultTestLoader.loadTestsFromName(mod))
 
-
-if numpy_dependant:
-    print("\nThe following tests require numpy, and will be skipped:\n")
-    for test in numpy_dependant:
-        print('\t%s' % test)
-    print()
-
-if matplotlib_dependant:
-    print("\nThe following tests require matplotlib, and will be skipped:\n")
-    for test in matplotlib_dependant:
-        print('\t%s' % test)
-    print()
+for r in optional_requirements:
+    if _missing_dependents[r]:
+        print("\nThe following tests require %s, and will be skipped:\n" % r)
+        for test in _missing_dependents[r]:
+            print('\t%s' % test)
+        print()
 
 
 if __name__ == '__main__':
