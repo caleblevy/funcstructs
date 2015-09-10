@@ -16,7 +16,7 @@ class StrongTestCase(TestCase):
         """Assert that an expression evaluates identically to 'False'."""
         self.assertIs(False, expr, msg)
 
-    def assertFullyEqual(self, first, second, msg=None):
+    def assertFullyEqual(self, first, second, check_type=False, msg=None):
         """Enhanced version of the assertEqual method for checking custom
         equality operations. Tests both that a == b and b == a, and
         that a != b and b != a evaluate 'False'.
@@ -25,26 +25,30 @@ class StrongTestCase(TestCase):
         self.assertIsTrue(second == first, msg)
         self.assertIsFalse(first != second, msg)
         self.assertIsFalse(second != first, msg)
+        if check_type:
+            self.assertIs(first.__class__, second.__class__, msg)
 
-    def assertFullyUnequal(self, first, second, msg=None):
+    def assertFullyUnequal(self, first, second, check_type=False, msg=None):
         """Enhanced version of the assertNotEqual method for checking custom
         equality operations. Tests both that a != b and b != a, and that
         a == b and b == a evaluate 'False'.
         """
+        if check_type and(first.__class__ is not second.__class__):
+            return
         self.assertIsFalse(first == second, msg)
         self.assertIsFalse(second == first, msg)
         self.assertIsTrue(first != second, msg)
         self.assertIsTrue(second != first, msg)
 
-    def assertAllEqual(self, *objects):
+    def assertAllEqual(self, *objects, **kwargs):
         """Assert all the objects are fully equal."""
         for obj1, obj2 in combinations_with_replacement(objects, 2):
-            self.assertFullyEqual(obj1, obj2, msg)
+            self.assertFullyEqual(obj1, obj2, **kwargs)
 
-    def assertAllUnique(self, *objects):
+    def assertAllUnique(self, *objects, **kwargs):
         """Assert that all of the given objects are unique."""
         for obj1, obj2 in combinations(objects, 2):
-            self.assertFullyUnequal(obj1, obj2)
+            self.assertFullyUnequal(obj1, obj2, **kwargs)
 
     def assertReprEvaluatesEqual(self, obj, msg=None):
         # assertReprEvaluatesEqual(self, obj, locals=locals, globals=globals)
