@@ -77,7 +77,7 @@ class ConjugacyClass(Multiset):
                 break
             else:
                 return self
-            raise TypeError("ConjugacyClasss must have cycles of rooted trees")
+            raise TypeError("ConjugacyClass must have cycles of rooted trees")
 
     def __len__(self):
         """Number of nodes in the structure."""
