@@ -88,7 +88,7 @@ def _MultisetHelper(ms_cls):
             mset.update(kwargs)  # will need in py3.6 with **kwargs OrderedDict
             check = True
         elif len(args) > 2:
-            raise TypeError("expected at most 2 arguments, got %d" % len(args))
+            raise TypeError("expected at most 1 argument, got %d" % len(args))
         if check:
             if not all((isinstance(v, int) and v > 0) for v in mset.values()):
                 raise TypeError("multiplicities must be positive integers")
@@ -143,13 +143,13 @@ class Multiset(frozendict):
         return cls(dict(items))
 
     def __repr__(self):
-        # Taken from Counter.__repr__ in python3
         try:
-            items = ', '.join(map('%r: %r'.__mod__, self.most_common()))
-            return '%s({%s})' % (self.__class__.__name__, items)
+            items = sorted(self.items())
         except TypeError:
-            # handle case where values are not orderable
-            return '{0}({1!r})'.format(self.__class__.__name__, dict(self))
+            # handle case where elements are not orderable
+            items = self.most_common()
+        item_string = ', '.join(map('%r: %r'.__mod__, items))
+        return '%s({%s})' % (self.__class__.__name__, item_string)
 
     def __len__(self):
         """Length of a multiset, including multiplicities."""
