@@ -60,6 +60,22 @@ class MultisetTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             Multiset({1: 2}, a=3)
 
+    def test_unpacking(self):
+        """Test that *mset and **mset expands Multiset correctly."""
+        def tupleize(*args): return args
+
+        def dictize(**kwargs): return kwargs
+
+        t = tupleize(*self.abra)
+        d = dictize(**self.abra)
+        self.assertIs(tuple, type(t))
+        self.assertIs(dict, type(d))
+        self.assertEqual(len(t), len(self.abra))
+        self.assertEqual(len(d), len(self.abra.elements()))
+        for k, v in self.abra.items():
+            self.assertEqual(t.count(k), v)
+            self.assertEqual(d[k], v)
+
     def test_repr(self):
         """Test that eval(repr(self)) == self"""
         # Need to test outside frozendict due to overridden __repr__
