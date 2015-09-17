@@ -2,6 +2,7 @@ import unittest
 import random
 from collections import Counter
 from itertools import product
+import platform
 
 from funcstructs.structures.multiset import Multiset
 
@@ -60,6 +61,8 @@ class MultisetTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             Multiset({1: 2}, a=3)
 
+    @unittest.skipIf(platform.python_implementation() == 'Jython',
+                     "Jython expects len(d) == len(d.keys()) to unpack kwargs")
     def test_unpacking(self):
         """Test that *mset and **mset expands Multiset correctly."""
         def tupleize(*args): return args
