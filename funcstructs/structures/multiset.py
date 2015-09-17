@@ -144,7 +144,7 @@ class Multiset(frozendict):
 
     def __repr__(self):
         try:
-            items = sorted(self.items())
+            items = sorted(self._items())
         except TypeError:
             # handle case where elements are not orderable
             items = self.most_common()
@@ -153,7 +153,7 @@ class Multiset(frozendict):
 
     def __len__(self):
         """Length of a multiset, including multiplicities."""
-        return sum(self.values())
+        return sum(self._values())
 
     def __iter__(self):
         """Iterate over elements repeating each as many times as its count.
@@ -170,7 +170,7 @@ class Multiset(frozendict):
         >>> product
         1836
         """
-        return chain.from_iterable(starmap(repeat, self.items()))
+        return chain.from_iterable(starmap(repeat, self._items()))
 
     def elements(self):
         """Underlying set of unique elements.
@@ -179,7 +179,7 @@ class Multiset(frozendict):
         >>> sorted(m.elements())
         ['a', 'b', 'c', 'd', 'r']
         """
-        return self.keys()
+        return self._keys()
 
     def num_unique_elements(self):
         """Number of unique elements in the Multiset.
@@ -198,9 +198,9 @@ class Multiset(frozendict):
         """
         # Emulate Bag.sortedByCount from Smalltalk
         if n is None:
-            return sorted(self.items(), key=itemgetter(1), reverse=True)
-        return nlargest(n, self.items(), key=itemgetter(1))
+            return sorted(self._items(), key=itemgetter(1), reverse=True)
+        return nlargest(n, self._items(), key=itemgetter(1))
 
     def degeneracy(self):
         """Number of different representations of the same multiset."""
-        return _factorial_prod(self.values())
+        return _factorial_prod(self._values())

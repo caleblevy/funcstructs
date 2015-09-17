@@ -66,7 +66,7 @@ class ConjugacyClass(Multiset):
             return super(ConjugacyClass, cls).__new__(cls, cycles)
         else:
             self = super(ConjugacyClass, cls).__new__(cls, f)
-            for cycle in self.keys():
+            for cycle in self._keys():
                 if not isinstance(cycle, Necklace):
                     break
                 for tree in cycle:
@@ -82,7 +82,7 @@ class ConjugacyClass(Multiset):
     def __len__(self):
         """Number of nodes in the structure."""
         node_count = 0
-        for cycle, mult in self.items():
+        for cycle, mult in self._items():
             node_count += mult * sum(map(len, cycle))
         return node_count
 
@@ -95,7 +95,7 @@ class ConjugacyClass(Multiset):
         # Equivalent to Multiset(map(len, self)), but more efficient
         # in the case of highly degeneracy cycles.
         m = defaultdict(int)
-        for cycle, mult in self.items():
+        for cycle, mult in self._items():
             m[len(cycle)] += mult
         return Multiset(m)
 
@@ -105,7 +105,7 @@ class ConjugacyClass(Multiset):
         # First the degeneracy from the permutations of arrangements of cycles
         deg = super(ConjugacyClass, self).degeneracy()
         # Then account for the periodcity of each cycle
-        for cycle, mult in self.items():
+        for cycle, mult in self._items():
             cycledeg = cycle.degeneracy()
             # Finally the degeneracy of each rooted tree.
             for tree in cycle:
@@ -133,7 +133,7 @@ class ConjugacyClass(Multiset):
     def imagepath(self):
         """Image path of an endofunction with the same structure."""
         cardinalities = [len(self), 0] + [0]*(len(self)-2)
-        for cycle, mult in self.items():
+        for cycle, mult in self._items():
             for tree in cycle:
                 for subseq in subsequences.increasing(tree[1:]):
                     for it in subseq[:-1]:
@@ -329,7 +329,7 @@ def _unordered_product(mset, iterfunc):
     el1 != el2 then iterfunc(el1) and iterfunc(el2) are mutually disjoint."""
     mset = Multiset(mset)
     strands = []
-    for y, d in mset.items():
+    for y, d in mset._items():
         strands.append(combinations_with_replacement(iterfunc(y), d))
     for bundle in product(*strands):
         yield chain(*bundle)
@@ -408,7 +408,7 @@ class Funcstructs(Enumerable):
         if cycle_type is not None:
             cycle_type = Multiset(cycle_type)
             if not all(isinstance(k, int) and k > 0
-                       for k in cycle_type.keys()):
+                       for k in cycle_type._keys()):
                 raise TypeError("A cycle type must be an integer partition")
         self.n = n
         self.cycle_type = cycle_type

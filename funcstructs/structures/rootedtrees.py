@@ -275,7 +275,7 @@ class RootedTree(Multiset):
         if isinstance(subtrees, LevelSequence):
             return subtrees.traverse_map(cls)
         self = super(RootedTree, cls).__new__(cls, subtrees)
-        if not all(isinstance(tree, cls) for tree in self.keys()):
+        if not all(isinstance(tree, cls) for tree in self._keys()):
             raise TypeError(
                 "input must be list of RootedTrees or a LevelSequence")
         return self
@@ -287,7 +287,7 @@ class RootedTree(Multiset):
 
     def _str(self):
         strings = []
-        for subtree in sorted(self.keys(),
+        for subtree in sorted(self._keys(),
                               key=self.__class__.ordered_form,
                               reverse=True):
             # Print tree with multiplicity exponents.
@@ -304,13 +304,13 @@ class RootedTree(Multiset):
     def degeneracy(self):
         """Return #(nodes)!/#(labellings)"""
         deg = super(RootedTree, self).degeneracy()
-        for subtree, mult in self.items():
+        for subtree, mult in self._items():
             deg *= subtree.degeneracy()**mult
         return deg
 
     def _ordered_level_sequence(self, level=0):
         level_sequence = [level]
-        for tree, mult in self.items():
+        for tree, mult in self._items():
             level_sequence.extend(tree._ordered_level_sequence(level+1) * mult)
         return level_sequence
 

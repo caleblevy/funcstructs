@@ -121,7 +121,7 @@ class FixedContentNecklaces(bases.Enumerable):
 
     def __init__(self, content=None, multiplicities=None):
         if multiplicities is None:
-            content, multiplicities = zip(*sorted(Multiset(content).items()))
+            content, multiplicities = zip(*sorted(Multiset(content)._items()))
         elif content is None:
             # already sorted by construction if just multiplicites
             content, multiplicities = zip(*enumerate(multiplicities))
@@ -134,7 +134,7 @@ class FixedContentNecklaces(bases.Enumerable):
             if len(content) != len(multiplicities):
                 raise TypeError("content and and multiplicities do not match")
             m = Multiset.fromitems(zip(content, multiplicities))
-            content, multiplicities = zip(*sorted(m.items()))
+            content, multiplicities = zip(*sorted(m._items()))
         try:
             hash(content)
         except TypeError:

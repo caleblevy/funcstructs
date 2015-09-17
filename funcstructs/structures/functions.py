@@ -171,11 +171,11 @@ class Function(frozendict):
     @property
     def domain(self):
         """f.domain <==> {x for (x, y) in f}"""
-        return self.keys()
+        return self._keys()
 
     def image(self):
         """f.image() <==> {y for (x, y) if f}"""
-        return frozenset(self.values())
+        return frozenset(self._values())
 
     # Mathematical functions describe a set of pairings of points; returning
     # elements of the domain does not provide useful information; only the
@@ -183,11 +183,11 @@ class Function(frozendict):
 
     def __iter__(self):
         """iter(f) <==> (x, f[x]) for x in f.domain"""
-        return iter(self.items())
+        return iter(self._items())
 
     def __contains__(self, item):
         """(x, y) in f <==> f[x] == y"""
-        return item in self.items()
+        return item in self._items()
 
     # Define composition of Functions
 
@@ -351,7 +351,7 @@ class Endofunction(Function):
         """f.acyclic_ancestors[y] <==> f.fibers[y] - f.limitset"""
         descendants = defaultdict(list)
         lim = self.limitset  # make local copy for speed
-        for y, inv_image in self.fibers.items():
+        for y, inv_image in self.fibers._items():
             for x in inv_image:
                 if x not in lim:
                     descendants[y].append(x)

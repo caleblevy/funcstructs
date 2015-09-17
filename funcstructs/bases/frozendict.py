@@ -166,49 +166,96 @@ def _FrozendictHelper():
     def copy(self):
         return map_get(self).copy()
 
+    @add_with_docs
+    def items(self):
+        return map_get(self).items()
+
+    @add_with_docs
+    def keys(self):
+        return map_get(self).keys()
+
+    @add_with_docs
+    def values(self):
+        return map_get(self).values()
+
+    # Add (view,iter)keys/values/items methods back to
+    # python2/pypy2/jython implementations of frozendict; the bare
+    # items/values/keys methods now return lists in these versions.
+    #
+    # This change was originally kicked off due to a bug in Jython's
+    # keyword argument unpacking. When calling dict(**frozendict()),
+    # Jython first calls frozendict.keys(). It expects a list here, and
+    # it relies on the fact that lists are indexable. When
+    # frozendict.keys() returned a dict_keys view object, it raised a
+    # TypeError instead.
+    #
+    # Although this particular problem an implementation detail of
+    # Jython, there is a deeper issue. frozendict is to dict as set is to
+    # frozenset: in every situation that does not involve hashing or
+    # mutation, they are totally interchangeable. This means that, until
+    # the user performs one of those two actions, they should neither
+    # need to know nor care whether the dict at hand is frozen or not.
+    #
+    # Sadly, this schizm in behavior is PART OF THE DICT INTERFACE
+    # ITSELF. When the user calls six.viewitems(frozendict()), they
+    # expect a view on its items, not a TypeError, both in Python2 and
+    # Python3. It should satisfy the collections.Mapping ABC contract in
+    # both versions. To do this requires adding back the headache
+    # inducing methods.
+    #
+    # As a compromise, frozendict provides _(items/keys/values) methods
+    # which return views in both 2 and 3.
+
+    frozendict._items = frozendict.items
+    frozendict._keys = frozendict.keys
+    frozendict._values = frozendict.values
+
+    @add_with_docs
+    def __hash__(self):
+        # default hash independent of overridden items
+        return hash(frozenset(map_get(self).items()))
+
+    if hasattr(dict, 'itervalues'):
+        @add_with_docs
+        def viewitems(self):
+            return map_get(self).viewitems()
+
+        @add_with_docs
+        def viewkeys(self):
+            return map_get(self).viewkeys()
+
+        @add_with_docs
+        def viewvalues(self):
+            return map_get(self).viewvalues()
+
+        @add_with_docs
+        def iteritems(self):
+            return map_get(self).iteritems()
+
+        @add_with_docs
+        def iterkeys(self):
+            return map_get(self).iterkeys()
+
+        @add_with_docs
+        def itervalues(self):
+            return map_get(self).itervalues()
+
+        # Make hash use the lazy version of items in both versions.
+
+        @add_with_docs
+        def __hash__(self):
+            return hash(frozenset(map_get(self).viewitems()))
+
+        # Calling frozendict.method in python2 returns an "unbound method type"
+        # instead of a function, so access class __dict__ directly.
+
+        frozendict._items = frozendict.__dict__['viewitems']
+        frozendict._keys = frozendict.__dict__['viewkeys']
+        frozendict._values = frozendict.__dict__['viewvalues']
+
     if hasattr(dict, '__sizeof__'):  # pypy's dict does not define __sizeof__
         @add_with_docs
         def __sizeof__(self):
             return map_get(self).__sizeof__()
-
-    # Make two distinct function definitions for speed; we want it to compile
-    # to bytecode which explicitly calls the method in question.
-    if hasattr(dict, 'itervalues'):
-        @add_with_docs
-        def items(self):
-            """D.items() -> a set-like object providing a view on D's items"""
-            return map_get(self).viewitems()
-
-        @add_with_docs
-        def keys(self):
-            """D.keys() -> a set-like object providing a view on D's keys"""
-            return map_get(self).viewkeys()
-
-        @add_with_docs
-        def values(self):
-            """D.values() -> an object providing a view on D's values"""
-            return map_get(self).viewvalues()
-
-        @add_with_docs
-        def __hash__(self):
-            # default hash independent of overridden items
-            return hash(frozenset(map_get(self).viewitems()))
-
-    else:
-        @add_with_docs
-        def items(self):
-            return map_get(self).items()
-
-        @add_with_docs
-        def keys(self):
-            return map_get(self).keys()
-
-        @add_with_docs
-        def values(self):
-            return map_get(self).values()
-
-        @add_with_docs
-        def __hash__(self):
-            return hash(frozenset(map_get(self).items()))
 
     _Mapping.register(frozendict)
