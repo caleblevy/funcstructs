@@ -3,13 +3,11 @@
 Caleb Levy, 2014-2015.
 """
 
-from functools import reduce
 from itertools import chain, groupby
 from math import factorial
-from operator import mul
 
 from funcstructs import bases
-from funcstructs.combinat import divisors
+from funcstructs.combinat import divisors, factorial_prod
 from funcstructs.utils.subsequences import startswith
 
 from funcstructs.structures.functions import rangefunc
@@ -243,8 +241,7 @@ class DominantSequence(LevelSequence):
         # Since this degeneracy is a property of *un*-ordered trees, it
         # only makes sense to define it for their *canonical* ordered
         # representatives.
-        return reduce(mul, (factorial(len(g))
-                            for g in self._interchangeable_nodes()))
+        return factorial_prod(map(len, self._interchangeable_nodes()))
 
     def labellings(self):
         """Enumerate endofunctions with the same tree structure."""
