@@ -5,7 +5,7 @@ Caleb Levy, 2015.
 
 import itertools
 import random
-from collections import defaultdict
+from collections import defaultdict, Iterable
 from functools import partial
 from math import factorial
 from platform import python_implementation
@@ -18,10 +18,10 @@ def _parsed_domain(domain):
     """Change domain to a frozenset. If domain is int, set to range(domain)."""
     if domain is None:
         domain = ()
-    elif isinstance(domain, int):
-        if domain < 0:
-            raise ValueError("Cannot define domain on %s elements" % domain)
+    if not isinstance(domain, Iterable):  # Assume integer case
         domain = range(domain)
+        if len(domain) < 0:
+            raise ValueError("Cannot define domain on %s elements" % domain)
     return frozenset(domain)
 
 
