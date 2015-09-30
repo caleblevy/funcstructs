@@ -12,6 +12,8 @@ from itertools import chain, starmap, repeat
 from math import factorial
 from operator import itemgetter, mul
 
+from funcstructs.compat import is_natural
+
 from funcstructs.bases.frozendict import frozendict, _map_accessors
 
 __all__ = ["Multiset"]
@@ -90,7 +92,7 @@ def _MultisetHelper(ms_cls):
         elif len(args) > 2:
             raise TypeError("expected at most 1 argument, got %d" % len(args))
         if check:
-            if not all((isinstance(v, int) and v > 0) for v in mset.values()):
+            if not all((is_natural(v) and v > 0) for v in mset.values()):
                 raise TypeError("multiplicities must be positive integers")
         map_set(self, mset)
         return self

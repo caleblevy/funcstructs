@@ -8,6 +8,7 @@ from math import factorial
 
 from funcstructs import bases
 from funcstructs.combinat import divisors, factorial_prod
+from funcstructs.compat import is_index, is_natural
 from funcstructs.utils.subsequences import startswith
 
 from funcstructs.structures.functions import rangefunc
@@ -92,15 +93,22 @@ class LevelSequence(bases.Tuple):
         # 1) self[0] == 0
         # 2) all(self[n+1] in range(1, self[n]+2) for n in range(len(self)-1))
         # Note that all nodes must be integers to use them as indices.
-        if not self:  # Rule 0
+        # ------
+        # Rule 0
+        if not self:
             raise TypeError("a tree must have a root")
-        root = previous_node = self[0]
-        if not (root == 0 and isinstance(root, int)):  # Rule 1
-            raise TypeError("root must have height 0, received %s" % root)
-        for node in self[1:]:  # Rule 2
-            if not ((1 <= node <= previous_node+1) and isinstance(node, int)):
-                raise ValueError("invalid level sequence: %s" % list(self))
-            previous_node = node
+        root = previous_level = self[0]
+        # Rule 1
+        if not(root == 0 and is_index(root)):
+            raise TypeError("root must have height 0, received %r" % root)
+        # Rule 2
+        for level in self[1:]:
+            # Check both that level is in correct range and that it is
+            # indexable. If it lies in the required range, no index error
+            # will be raised anyway, so don't catch ValueError.
+            if not (1 <= level <= previous_level+1 and is_index(level)):
+                raise ValueError("invalid LevelSequence: %s" % list(self))
+            previous_level = level
         return self
 
     @classmethod
@@ -324,7 +332,7 @@ class TreeEnumerator(bases.Enumerable):
     """Represents the class of unlabelled rooted trees on n nodes."""
 
     def __init__(self, n):
-        if n < 1 or not isinstance(n, int):
+        if not is_natural(n):
             raise ValueError("Cannot define a rooted tree with %s nodes" % n)
         self.n = n
 

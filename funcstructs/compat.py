@@ -31,3 +31,27 @@ def with_metaclass(meta, *bases):
         def __new__(cls, name, this_bases, d):
             return meta(name, bases, d)
     return type.__new__(metaclass, 'temporary_class', (), {})
+
+
+def is_index(x):
+    """Return whether the object x can be used as an index."""
+    # Can't use isinstance(x, numbers.Integral) since sympy.Integer and
+    # sage.Integer are not registered under that ABC.
+    #
+    # Can't check hasattr(x, '__index__') since sage uses some insane
+    # metaclass/dynamic attribute weirdness weirdness and this test fails on
+    # its integers.
+    #
+    # Also tried testing the result of range(x) for an error; this fails since
+    # sympy and sage floats that are integer valued seem to work here for
+    # whatever reason.
+    #
+    # Can't check tuple()[x] for an IndexError (as opposed to TypeError) since
+    # slices would pass silently. We could combine tests 2 and 3, but this is
+    # way easier.
+    return hasattr(type(x), '__index__')
+
+
+def is_natural(x):
+    """Return whether the object x is a positive integer."""
+    return is_index(x) and x > 0

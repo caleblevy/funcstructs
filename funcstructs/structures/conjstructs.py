@@ -403,12 +403,11 @@ class Funcstructs(Enumerable):
     """
 
     def __init__(self, n, cycle_type=None):
-        if n < 0 or not isinstance(n, int):
-            raise ValueError("Cannot defined funcstructs on %s nodes" % n)
+        if not(compat.is_index(n) and n >= 0):
+            raise ValueError("Cannot define funcstructs on %s nodes" % n)
         if cycle_type is not None:
             cycle_type = Multiset(cycle_type)
-            if not all(isinstance(k, int) and k > 0
-                       for k in cycle_type._keys()):
+            if not all(map(compat.is_natural, cycle_type._keys())):
                 raise TypeError("A cycle type must be an integer partition")
         self.n = n
         self.cycle_type = cycle_type
