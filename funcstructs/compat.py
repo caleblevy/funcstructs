@@ -38,18 +38,25 @@ def is_index(x):
     # Can't use isinstance(x, numbers.Integral) since sympy.Integer and
     # sage.Integer are not registered under that ABC.
     #
-    # Can't check hasattr(x, '__index__') since sage uses some insane
-    # metaclass/dynamic attribute weirdness weirdness and this test fails on
-    # its integers.
+    # Can't check hasattr(x, '__index__') since then type objects
+    # would also be considered ints.
+    #
+    # Can't use hasattr(type(x), '__index__') since old style classes can still
+    # implement the __index__ interface, and their type is "instance" which has
+    # all of these attributes.
+    #
+    # Can't use hasattr(x.__class__, '__index__') since old style class objects
+    # do not have a '__class__' attribute, and they are still objects, so we
+    # want to return either True or False for all inputs.
     #
     # Also tried testing the result of range(x) for an error; this fails since
-    # sympy and sage floats that are integer valued seem to work here for
-    # whatever reason.
+    # sympy and sage Float objects implement a "__trunc__" interface which
+    # range accepts.
     #
     # Can't check tuple()[x] for an IndexError (as opposed to TypeError) since
     # slices would pass silently. We could combine tests 2 and 3, but this is
     # way easier.
-    return hasattr(type(x), '__index__')
+    return hasattr(getattr(x, '__class__', None), '__index__')
 
 
 def is_natural(x):
