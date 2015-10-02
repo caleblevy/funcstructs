@@ -1,10 +1,12 @@
 import os
 import time
+import unittest
 from collections import defaultdict
 
 import sage.all as sage
 
 from funcstructs import *
+from funcstructs.structures.functions import _parsed_domain
 
 
 def fgraph(f):
@@ -37,16 +39,7 @@ def scriptplot(G):
     os.system("open -a Preview " + plot_name)
 
 
-def iterate(G):
-    """Compose a DiGraph with itself."""
-    d = defaultdict(set)
-    for v in G:
-        for e in G.neighbors_out(v):
-            d[v].update(G.neighbors_out(e))
-    return sage.DiGraph(d)
-
-
-def compose(F, G):
+def _compose(F, G):
     """Compose graphs by edge substitution"""
     d = {}
     for v in G:
@@ -56,29 +49,66 @@ def compose(F, G):
     return sage.DiGraph(d)
 
 
-def fold(*digraphs):
+def compose(*digraphs):
     """Compose a list of digraphs associatively."""
-    return reduce(compose, digraphs)
+    return reduce(_compose, digraphs)
 
 
-f = Function({4: 8, 8: 3, 3: 0, 0: 2, 2: 0, 6: 0, 9: 0, 7: 5, 5: 7, 1: 5})
-g = fgraph(f)
-scriptplot(g)
-scriptplot(iterate(g))
-scriptplot(fgraph(f**2))
+def identity(vertices):
+    """Return the identity graph on vertex set V."""
+    return sage.DiGraph({v: [v] for v in _parsed_domain(vertices)})
 
-F = sage.digraphs.RandomDirectedGNC(10)
-G = sage.digraphs.RandomDirectedGNC(10)
-H = sage.digraphs.RandomDirectedGNC(10)
-print(iterate(G) == compose(G, G))
-print(compose(F, G) == compose(G, F))
-print(compose(F, G) == compose(G, H))
-print(compose(compose(F, G), H) == compose(F, compose(G, H)) == fold(F, G, H))
-scriptplot(F)
-scriptplot(G)
-scriptplot(H)
-scriptplot(compose(F, G))
-scriptplot(compose(G, H))
-scriptplot(compose(compose(F, G), H))
-scriptplot(compose(F, compose(G, H)))
-scriptplot(fold(F, G, H))
+
+def iterate(G, n):
+    """Iterate a general graph to n compositions with itself."""
+    G_iter = identity(G)
+    for it in bin(n)[-1:1:-1]:
+        if it == '1':
+            G_iter = compose(G, G_iter)
+        G = compose(G, G)
+    return G_iter
+
+
+class GraphCompositionTests(unittest.TestCase):
+
+    def test_iteration(self):
+        """Test graph composition generalizes function composition and
+        preserves associativity."""
+        f = rangefunc([2, 5, 0, 0, 8, 7, 0, 5, 3, 0])
+        g = fgraph(f)
+        self.assertEqual(compose(g, g), fgraph(f*f))
+        for i in range(20):
+            self.assertEqual(iterate(g, i), fgraph(f**i))
+        # test special case associativity
+        self.assertEqual(compose(iterate(g, 4), iterate(g, 3)), fgraph(f**7))
+
+    def test_composition(self):
+        """Test composition is associative and not commutative with know
+        graphs."""
+        F = sage.digraphs.RandomDirectedGNC(10)
+        G = sage.digraphs.RandomDirectedGNC(10)
+        H = sage.digraphs.RandomDirectedGNC(10)
+        self.assertEqual(compose(iterate(G, 3), iterate(G, 4)), iterate(G, 7))
+        self.assertEqual(compose(F, compose(G, H)), compose(compose(F, G), H))
+        self.assertEqual(compose(F, compose(G, H)), compose(F, G, H))
+
+
+G = sage.DiGraph({
+    1: [2, 8],
+    2: [3],
+    3: [4],
+    4: [5, 1],
+    5: [6],
+    6: [7],
+    7: [5, 8],
+    8: [9],
+    9: [10],
+    10: [11],
+    11: [8]
+})
+
+print(G.strongly_connected_components())
+print(iterate(G, 2).strongly_connected_components())
+
+if __name__ == '__main__':
+    unittest.main()
