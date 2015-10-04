@@ -335,7 +335,7 @@ class Endofunction(Function):
                 x = self[x]
                 path.append(x)
             if x not in cyclic:
-                cycle = path[path.index(x)+1:]
+                cycle = path[path.index(x):-1]
                 if cycle:
                     cycles.append(cycle)
                     cyclic.update(cycle)
