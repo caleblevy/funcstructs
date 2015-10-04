@@ -329,13 +329,19 @@ class Endofunction(Function):
         while remaining:
             x = remaining.pop()
             path = [x]
+            i = 0
+            index = {x: i}
             while x not in tried:
                 remaining.discard(x)
                 tried.add(x)
                 x = self[x]
                 path.append(x)
+                if x in index:
+                    break
+                i += 1
+                index[x] = i
             if x not in cyclic:
-                cycle = path[path.index(x):-1]
+                cycle = path[index[x]:-1]
                 if cycle:
                     cycles.append(cycle)
                     cyclic.update(cycle)
