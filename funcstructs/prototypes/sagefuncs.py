@@ -14,7 +14,7 @@ def fgraph(f):
     return sage.DiGraph({x: [y] for x, y in f})
 
 
-def randf(*args, **kwargs):
+def random_functional_digraph(*args, **kwargs):
     """Return the DiGraph of a random function on a domain."""
     return fgraph(randfunc(*args, **kwargs))
 
@@ -69,6 +69,19 @@ def iterate(G, n):
     return G_iter
 
 
+def conjugate(G, b):
+    """Returns the graph G conjugated by the bijection b."""
+    bi = b.inverse
+    b = fgraph(b)
+    bi = fgraph(bi)
+    return compose(b, G, bi)
+
+
+def random_relabelling(G):
+    """Relabel G in a random fashion."""
+    return conjugate(G, randperm(G))
+
+
 class GraphCompositionTests(unittest.TestCase):
 
     def test_iteration(self):
@@ -92,6 +105,18 @@ class GraphCompositionTests(unittest.TestCase):
         self.assertEqual(compose(F, compose(G, H)), compose(compose(F, G), H))
         self.assertEqual(compose(F, compose(G, H)), compose(F, G, H))
 
+    def test_conjugation(self):
+        """Test that conjugation works when generalized to graphs."""
+        # Test special case of functions
+        f = rangefunc([2, 5, 0, 0, 8, 7, 0, 5, 3, 0])
+        g = fgraph(f)
+        b = randperm(f.domain)
+        self.assertEqual(fgraph(b.conj(f)), conjugate(g, b))
+        # Test on arbitrary directed graph
+        G = sage.digraphs.RandomDirectedGNC(10)
+        self.assertTrue(G.is_isomorphic(conjugate(G, b)))
+        self.assertTrue(G.is_isomorphic(random_relabelling(G)))
+
 
 G = sage.DiGraph({
     1: [2, 8],
@@ -107,8 +132,22 @@ G = sage.DiGraph({
     11: [8]
 })
 
-print(G.strongly_connected_components())
+scriptplot(G)
+scriptplot(random_relabelling(G))
+
+
+def selfmark(G):
+    """Return digraph G with each vertex mapping to itself."""
+    d = {v: G.neighbors_out(v) for v in G}
+    for v in G:
+        d[v].append(v)
+    return sage.DiGraph(d)
+
+
+G = selfmark(G)
 print(iterate(G, 2).strongly_connected_components())
+scriptplot(iterate(G, 2))
+scriptplot(iterate(G, 3))
 
 if __name__ == '__main__':
     unittest.main()
