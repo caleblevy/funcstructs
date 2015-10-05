@@ -323,7 +323,6 @@ class Endofunction(Function):
         """Return the set of f's cycles"""
         # Algorithm runs in O(len(self))
         tried = set()
-        cyclic = set()
         remaining = set(self.domain)
         cycles = []
         while remaining:
@@ -339,11 +338,8 @@ class Endofunction(Function):
                     path.append(x)
                     i += 1
                     index[x] = i
-                elif x not in cyclic:
-                    cycle = path[index[x]:]
-                    if cycle:
-                        cycles.append(cycle)
-                        cyclic.update(cycle)
+                else:
+                    cycles.append(path[index[x]:])
                     break
         return frozenset(map(tuple, cycles))
 
