@@ -335,16 +335,16 @@ class Endofunction(Function):
                 remaining.discard(x)
                 tried.add(x)
                 x = self[x]
-                path.append(x)
-                if x in index:
-                    break
-                i += 1
-                index[x] = i
-            if x not in cyclic:
-                cycle = path[index[x]:-1]
-                if cycle:
-                    cycles.append(cycle)
-                    cyclic.update(cycle)
+                if x not in index:
+                    path.append(x)
+                    i += 1
+                    index[x] = i
+                elif x not in cyclic:
+                    cycle = path[index[x]:]
+                    if cycle:
+                        cycles.append(cycle)
+                        cyclic.update(cycle)
+                break
         return frozenset(map(tuple, cycles))
 
     @property
