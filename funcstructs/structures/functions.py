@@ -157,22 +157,16 @@ class Function(frozendict):
         # and http://bugs.jython.org/issue1996.
         __slots__ += '__dict__',
 
-    # "domain" and "image" used to be attributes computed in the constructor
-    # and cached for speed, with corresponding __slots__ and a WriteOnceMixin
-    # to prevent altering them. There are two reasons for using properties:
-    #
-    # 1) Multiply inheriting from classes with nonempty __slots__ leads to
-    #    instance layout conflicts in jython, *even with identical base slots*
-    #    (instance layout conflicts are *expected* when multiple bases have
-    #    *different* slots).
-    #
-    # 2) It turned out that after testing in CPython that computing on the fly
-    #    was faster anyway, presumably due to decreased memory overhead.
+    # In mathematics, the domain is an inherent property of a function.
 
     @property
     def domain(self):
         """f.domain <==> {x for (x, y) in f}"""
         return self._keys()
+
+    # Images, on the other hand, must be computed by evaluating f either
+    # on the whole domain or the given subset, thus Function.image() is a
+    # method.
 
     def image(self):
         """f.image() <==> {y for (x, y) if f}"""
@@ -194,7 +188,6 @@ class Function(frozendict):
 
     def __mul__(self, other):
         """(f * g)[x] <==> f[g[x]]"""
-        # f * g becomes a function on g's domain, so it inherits class of g
         return Function((x, self[y]) for x, y in other)
 
     # Design Note: Function objects used to be callable; their __call__ method
