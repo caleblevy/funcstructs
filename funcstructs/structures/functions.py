@@ -5,11 +5,12 @@ Caleb Levy, 2015.
 
 import itertools
 import random
-from collections import defaultdict, Iterable
+from collections import defaultdict
 from functools import partial
 from math import factorial
 from platform import python_implementation
 
+from funcstructs.compat import is_index
 from funcstructs.bases import frozendict, Enumerable, typecheck
 from funcstructs.bases.frozendict import _map_accessors
 
@@ -18,10 +19,10 @@ def _parsed_domain(domain):
     """Change domain to a frozenset. If domain is int, set to range(domain)."""
     if domain is None:
         domain = ()
-    if not isinstance(domain, Iterable):  # Assume integer case
-        domain = range(domain)
-        if len(domain) < 0:
+    if is_index(domain):
+        if domain < 0:
             raise ValueError("Cannot define domain on %s elements" % domain)
+        domain = range(domain)
     return frozenset(domain)
 
 
