@@ -344,7 +344,7 @@ class Endofunction(Function):
                     if cycle:
                         cycles.append(cycle)
                         cyclic.update(cycle)
-                break
+                    break
         return frozenset(map(tuple, cycles))
 
     @property
