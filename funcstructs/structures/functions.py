@@ -168,9 +168,12 @@ class Function(frozendict):
     # on the whole domain or the given subset, thus Function.image() is a
     # method.
 
-    def image(self):
+    def image(self, subset=None):
         """f.image() <==> {y for (x, y) if f}"""
-        return frozenset(self._values())
+        if subset is None:
+            return frozenset(self._values())
+        else:
+            return frozenset(self[x] for x in subset)
 
     # Mathematical functions describe a set of pairings of points; returning
     # elements of the domain does not provide useful information; only the
