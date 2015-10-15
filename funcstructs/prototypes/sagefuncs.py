@@ -2,6 +2,8 @@ import os
 import time
 import unittest
 from collections import defaultdict
+from itertools import product
+from random import choice
 
 import sage.all as sage
 
@@ -82,6 +84,20 @@ def random_relabelling(G):
     return conjugate(G, randperm(G))
 
 
+def random_digraph(V):
+    """Return a random directed graph on the vertices V."""
+    # Note: here "random" is in the sense that if we consider the set of all
+    # edge-sets E of ordered tuples VxV, each edge set has equal probability of
+    # occuring.
+    V = _parsed_domain(V)
+    G = {v: set() for v in V}
+    flip = (0, 1)
+    for v, w in product(V, repeat=2):
+        if choice(flip):
+            G[v].add(w)
+    return sage.DiGraph(G)
+
+
 class GraphCompositionTests(unittest.TestCase):
 
     def test_iteration(self):
@@ -148,6 +164,9 @@ G = selfmark(G)
 print(iterate(G, 2).strongly_connected_components())
 scriptplot(iterate(G, 2))
 scriptplot(iterate(G, 3))
+GR = random_digraph(20)
+print(len(GR.edges()))
+scriptplot(GR)
 
 if __name__ == '__main__':
     unittest.main()
