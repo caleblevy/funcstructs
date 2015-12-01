@@ -1,9 +1,9 @@
 import os
 import time
+import random
 import unittest
 from collections import defaultdict
 from itertools import product
-from random import choice
 
 import sage.all as sage
 
@@ -84,17 +84,20 @@ def random_relabelling(G):
     return conjugate(G, randperm(G))
 
 
-def random_digraph(V):
+def random_digraph(V, density=0.5):
     """Return a random directed graph on the vertices V."""
     # Note: here "random" is in the sense that if we consider the set of all
     # edge-sets E of ordered tuples VxV, each edge set has equal probability of
     # occuring.
     V = _parsed_domain(V)
     G = {v: set() for v in V}
-    flip = (0, 1)
     for v, w in product(V, repeat=2):
-        if choice(flip):
+        r = random.uniform(0, 1)
+        if r < density:
             G[v].add(w)
+        elif r == density:
+            if random.choice({0, 1}):
+                G[v].add(w)  # Even the odds in rare case of tie
     return sage.DiGraph(G)
 
 
@@ -167,6 +170,11 @@ scriptplot(iterate(G, 3))
 GR = random_digraph(20)
 print(len(GR.edges()))
 scriptplot(GR)
+print(GR.strongly_connected_components())
+GR_Sparse = random_digraph(100, .01)
+print(len(GR_Sparse.edges()))
+print(GR_Sparse.strongly_connected_components())
+scriptplot(GR_Sparse)
 
 if __name__ == '__main__':
     unittest.main()
